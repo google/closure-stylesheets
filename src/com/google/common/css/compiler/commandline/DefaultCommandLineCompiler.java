@@ -1,0 +1,199 @@
+/*
+ * Copyright 2008 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.common.css.compiler.commandline;
+
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.css.AbstractCommandLineCompiler;
+import com.google.common.css.ExitCodeHandler;
+import com.google.common.css.JobDescription;
+import com.google.common.css.JobDescription.OutputFormat;
+import com.google.common.css.RecordingSubstitutionMap;
+import com.google.common.css.SourceCode;
+import com.google.common.css.compiler.ast.BasicErrorManager;
+import com.google.common.css.compiler.ast.CssTree;
+import com.google.common.css.compiler.ast.ErrorManager;
+import com.google.common.css.compiler.ast.GssParser;
+import com.google.common.css.compiler.ast.GssParserException;
+import com.google.common.css.compiler.passes.CompactPrinter;
+import com.google.common.css.compiler.passes.PassRunner;
+import com.google.common.css.compiler.passes.PrettyPrinter;
+import com.google.common.io.Files;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+/**
+ * {@link DefaultCommandLineCompiler} provides the CSS parser from command line interface to users.
+ *
+ */
+public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
+
+  /**
+   * The compiler will limit the number of error messages it outputs to this
+   * number.
+   */
+  protected static final int MAXIMUM_ERRORS_TO_OUTPUT = 100;
+
+  private CssTree cssTree;
+  private final ErrorManager errorManager;
+  private final PassRunner passRunner;
+
+  /**
+   * Constructs a {@code NewCommandLineCompiler}.
+   *
+   * @param job the inputs the compiler should process and the options to use
+   * @param errorManager the error manager to use for error reporting
+   */
+  protected DefaultCommandLineCompiler(JobDescription job,
+      ExitCodeHandler exitCodeHandler, ErrorManager errorManager) {
+    super(job, exitCodeHandler);
+    this.errorManager = errorManager;
+    this.passRunner = new PassRunner(job, errorManager);
+  }
+
+  /**
+   * Parses all the inputs, reports error messages and combines the parsed
+   * inputs into one stylesheet.
+   *
+   * @return the resulting stylesheet in string format
+   */
+  public String compile() throws GssParserException {
+    Preconditions.checkState(!compilerWasUsed);
+    compilerWasUsed = true;
+
+    // Reserving the input length might not be enough for pretty printed output,
+    // but it will certainly save resizing the buffers for compressed output.
+    // The length of the copyright notice is also included in the total length.
+    int copyrightNoticeSize = job.copyrightNotice != null
+        ? job.copyrightNotice.length() : 0;
+    StringBuilder result = new StringBuilder(job.getAllInputsLength()
+        + copyrightNoticeSize);
+    if (job.copyrightNotice != null) {
+      result.append(job.copyrightNotice);
+    }
+
+      for (SourceCode source : job.inputs) {
+        GssParser parser = new GssParser(source);
+        parseAndPrint(result, parser);
+      }
+
+    return result.toString();
+  }
+
+  /**
+   * Helper method for parsing and outputing the result.
+   */
+  private void parseAndPrint(StringBuilder result, GssParser parser)
+      throws GssParserException {
+    cssTree = parser.parse();
+    if (job.outputFormat != OutputFormat.DEBUG) {
+      passRunner.runPasses(cssTree);
+    }
+
+    if (job.outputFormat == OutputFormat.COMPRESSED) {
+      CompactPrinter compactPrinterPass = new CompactPrinter(cssTree);
+      compactPrinterPass.runPass();
+      result.append(compactPrinterPass.getCompactPrintedString());
+    } else {
+      PrettyPrinter prettyPrinterPass = new PrettyPrinter(cssTree
+          .getVisitController());
+      prettyPrinterPass.runPass();
+      result.append(prettyPrinterPass.getPrettyPrintedString());
+    }
+  }
+
+  /**
+   * Executes the job associated with this compiler and returns the compiled CSS
+   * as a string. If {@code renameFile} is specified along with a
+   * {@link RecordingSubstitutionMap}, then the renaming file will be written,
+   * as well.
+   */
+  protected String execute(@Nullable File renameFile) {
+    try {
+      String compilerOutput = compile();
+
+      // If there were errors, show them and fail.
+      if (errorManager.hasErrors()) {
+        errorManager.generateReport();
+        exitCodeHandler.processExitCode(
+            AbstractCommandLineCompiler.ERROR_MESSAGE_EXIT_CODE);
+      }
+
+      // Write the class substitution map to file, using same format as
+      // VariableMap in jscomp.
+      RecordingSubstitutionMap recordingSubstitutionMap = passRunner
+          .getRecordingSubstitutionMap();
+      if (recordingSubstitutionMap != null && renameFile != null) {
+        PrintWriter renamingMapWriter = new PrintWriter(
+            Files.newWriter(renameFile, Charsets.UTF_8));
+        Map<String, String> renamingMap = recordingSubstitutionMap
+            .getMappings();
+        writeRenamingMap(renamingMap, renamingMapWriter);
+        renamingMapWriter.close();
+      }
+
+      return compilerOutput;
+    } catch (IOException e) {
+      AbstractCommandLineCompiler.exitOnUnhandledException(e, exitCodeHandler);
+    } catch (GssParserException e) {
+      System.err.println("Compiler parsing error: " + e.getMessage());
+      e.printStackTrace();
+      exitCodeHandler.processExitCode(
+          AbstractCommandLineCompiler.ERROR_MESSAGE_EXIT_CODE);
+    } catch (RuntimeException e) {
+      System.err.println("Compiler internal error: " + e.getMessage());
+      e.printStackTrace();
+      exitCodeHandler.processExitCode(
+          AbstractCommandLineCompiler.INTERNAL_ERROR_EXIT_CODE);
+    }
+
+    // This line is unreachable because all paths through the above code block
+    // result in calling System.exit().
+    return null;
+  }
+
+  /**
+   * Writes the mappings to the specified writer. By default, mappings are
+   * written (one per line) as:
+   * <pre>
+   * key:value
+   * </pre>
+   * Subclasses may override this method to provide alternate output formats.
+   * Subclasses <em>must not</em> close the writer.
+   */
+  protected void writeRenamingMap(Map<String, String> renamingMap,
+      PrintWriter renamingMapWriter) {
+    for (Map.Entry<String, String> entry : renamingMap.entrySet()) {
+      renamingMapWriter.format("%s:%s\n", entry.getKey(), entry.getValue());
+    }
+  }
+
+  /**
+   * An error message handler.
+   */
+  protected static class CompilerErrorManager extends BasicErrorManager {
+    @Override
+    public void print(String msg) {
+      System.err.println(msg);
+    }
+  }
+}

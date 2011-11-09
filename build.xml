@@ -1,0 +1,119 @@
+<project name="closure-stylesheets" default="jar">
+
+  <property name="src.dir"           value="${basedir}/src" />
+  <property name="tests.dir"         value="${basedir}/tests" />
+  <property name="lib.dir"           value="${basedir}/lib" />
+  <property name="build.dir"         value="${basedir}/build" />
+  <property name="genfiles.dir"      value="${build.dir}/genfiles" />
+  <property name="java-genfiles.dir" value="${genfiles.dir}/java" />
+  <property name="classes.dir"       value="${build.dir}/classes" />
+  <property name="compiler-jarfile"
+            value="${build.dir}/${ant.project.name}.jar" />
+  <property name="testClasses.dir"   value="${build.dir}/test" />
+  <property name="includeDebugInfo"  value="true" />
+
+  <path id="classpath.path">
+    <fileset dir="${lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+
+  <target name="clean"
+          description="removes all generated files">
+    <delete dir="${build.dir}" />
+  </target>
+
+  <target name="compile"
+          description="compiles Java files for the CSS compiler library">
+    <mkdir dir="${java-genfiles.dir}/com/google/common/css/compiler/ast" />
+    <javacc target="${src.dir}/com/google/common/css/compiler/ast/GssParserCC.jj"
+            javacchome="${lib.dir}"
+            outputdirectory="${java-genfiles.dir}/com/google/common/css/compiler/ast" />
+
+    <mkdir dir="${classes.dir}" />
+    <javac srcdir="${src.dir}:${java-genfiles.dir}"
+           destdir="${classes.dir}"
+           includeAntRuntime="false"
+           debug="${includeDebugInfo}">
+      <classpath refid="classpath.path" />
+    </javac>
+  </target>
+
+  <target name="jar"
+          depends="compile"
+          description="packages the class files as a jar">
+    <jar destfile="${compiler-jarfile}" update="true">
+      <fileset dir="${classes.dir}" />
+      <!--
+      Include all dependent jars so this can be run using:
+      java -jar build/closure-stylesheets.jar -o output.css input.css...
+      -->
+      <zipfileset src="${lib.dir}/args4j-2.0.17.jar" />
+      <zipfileset src="${lib.dir}/gson-1.7.1.jar" />
+      <zipfileset src="${lib.dir}/guava-r09.jar" />
+      <zipfileset src="${lib.dir}/jsr305.jar" />
+      <manifest>
+        <attribute name="Main-Class"
+                   value="com.google.common.css.compiler.commandline.ClosureCommandLineCompiler" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="compile-tests"
+          depends="compile"
+          description="compile the JUnit tests">
+    <mkdir dir="${testClasses.dir}" />
+    <javac srcdir="${tests.dir}"
+           destdir="${testClasses.dir}"
+           includeAntRuntime="false"
+           debug="${includeDebugInfo}">
+      <classpath refid="classpath.path" />
+      <classpath>
+        <pathelement location="${classes.dir}" />
+      </classpath>
+    </javac>
+  </target>
+
+  <macrodef name="testing">
+    <attribute name="printsummary" default="off" />
+    <attribute name="fork" default="off" />
+    <attribute name="forkmode" default="perTest" />
+    <sequential>
+      <antcall target="compile-tests" />
+      <junit printsummary="@{printsummary}"
+             fork="@{fork}"
+             forkmode="@{forkmode}"
+             showoutput="true">
+        <classpath refid="classpath.path" />
+        <classpath>
+          <pathelement location="${classes.dir}" />
+          <pathelement location="${testClasses.dir}" />
+        </classpath>
+        <formatter type="plain" usefile="false" />
+        <batchtest haltonfailure="true">
+          <fileset dir="${testClasses.dir}">
+            <include name="**/*Test.class" />
+            <!-- Unfortunately, JUnit does not ignore abstract classes on its own. -->
+            <exclude name="com/google/common/css/compiler/passes/AbstractCompactPrinterTest.class" />
+          </fileset>
+        </batchtest>
+      </junit>
+    </sequential>
+  </macrodef>
+
+  <target name="test"
+          description="runs all of the tests">
+    <testing printsummary="on" fork="on" forkmode="once" />
+  </target>
+
+  <target name="test-forkless"
+          description="runs all of the tests without forking the process">
+    <testing />
+  </target>
+
+  <target name="all"
+          depends="compile,jar,compile-tests,test"
+          description="build all deliverables for the project"
+          />
+
+</project>

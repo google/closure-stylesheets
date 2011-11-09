@@ -1,0 +1,1837 @@
+// Copyright 2009 Google Inc. All Rights Reserved.
+
+/**
+ * GssParserCC.jj : parses gss files, produces the new AST.
+ *
+ */
+
+options {
+  STATIC = false ;
+  //the next two are just for testing
+  //DEBUG_TOKEN_MANAGER = true;
+  //DEBUG_PARSER = true;
+  // Suppress ambiguity warnings:
+  SANITY_CHECK = false;
+  UNICODE_INPUT = true;
+  USER_CHAR_STREAM = true;
+}
+
+PARSER_BEGIN(GssParserCC)
+
+package com.google.common.css.compiler.ast;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.css.*;
+
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+/**
+ * A parser that recognizes GSS files and builds the new AST.
+ */
+public class GssParserCC {
+
+  /**
+   * Pattern for functions that are allowed to be separated by spaces.
+   *
+   * <p>The non-standard {@code rect(0 0 0 0)} is sometimes used for IE instead
+   * of the standard {@code rect(0,0,0,0)}.
+   *
+   * <p>The legacy {@code -webkit-gradient} function takes its arguments in the
+   * form:
+   * {@code (linear, left center, right center, from(color1), to(color2))}.
+   *
+   * <p>The gradient proposals for CSS 3 are:
+   * <ul>
+   * <li>linear-gradient
+   * <li>radial-gradient
+   * <li>repeating-linear-gradient
+   * <li>repeating-radial-gradient
+   * </ul>
+   * As CSS 3 is in draft stage they come in current browsers with a vendor
+   * prefix but leaving out the vendor prefix already works.
+   */
+  private static final Pattern FUNCTIONS_WITH_SPACE_SEP_OK = Pattern.compile(
+        "(?:-(?:O|MOZ|WEBKIT|MS)-)?(?:REPEATING-)?(?:LINEAR|RADIAL)-GRADIENT"
+        + "|RECT|-WEBKIT-GRADIENT",
+        Pattern.CASE_INSENSITIVE);
+
+  private static final Set<String> URL_FUNCTIONS = ImmutableSet.of(
+      "domain", "url", "url-prefix");
+
+  private static final CharMatcher CSS_WHITESPACE =
+      CharMatcher.anyOf(" \t\r\n\f");
+
+  private CssBlockNode globalBlock;
+  private SourceCode sourceCode;
+  private CssNodeBuilder nodeBuilder = new CssNodeBuilder();
+  private StringCharStream charStream;
+
+  public GssParserCC(CssBlockNode globalBlock, SourceCode sourceCode) {
+    this(new StringCharStream(sourceCode.getFileContents()),
+        globalBlock, sourceCode);
+  }
+
+  public GssParserCC(StringCharStream charStream,
+      CssBlockNode globalBlock, SourceCode sourceCode) {
+    this((CharStream) charStream);
+    this.charStream = charStream;
+    this.sourceCode = sourceCode;
+    this.globalBlock = globalBlock;
+  }
+
+  private SourceCodeLocation getLocation() {
+    return getLocation(token);
+  }
+
+  private SourceCodeLocation getLocation(Token t) {
+    int lineNumber1 = t.beginLine;
+    int indexInLine1 = t.beginColumn;
+    int charIndex1 = charStream.convertToCharacterIndex(lineNumber1,
+        indexInLine1);
+    int lineNumber2 = t.endLine;
+    int indexInLine2 = t.endColumn;
+    int charIndex2 = charStream.convertToCharacterIndex(lineNumber2,
+        indexInLine2);
+    return new SourceCodeLocation(sourceCode, charIndex1, lineNumber1,
+      indexInLine1, charIndex2, lineNumber2, indexInLine2);
+  }
+
+  /**
+   * Returns a new SourceCodeLocation which covers everything between the
+   * beginning of the first location and the end of the second location.
+   */
+  private SourceCodeLocation mergeLocations(SourceCodeLocation beginLocation,
+      SourceCodeLocation endLocation) {
+    return new SourceCodeLocation(sourceCode,
+                                  beginLocation.getBeginCharacterIndex(),
+                                  beginLocation.getBeginLineNumber(),
+                                  beginLocation.getBeginIndexInLine(),
+                                  endLocation.getEndCharacterIndex(),
+                                  endLocation.getEndLineNumber(),
+                                  endLocation.getEndIndexInLine());
+  }
+
+  private CssFunctionNode createUrlFunction(Token t) {
+    SourceCodeLocation loc = this.getLocation(t);
+    int pi = t.image.indexOf('(');
+    String funName = t.image.substring(0, pi);
+    Preconditions.checkState(URL_FUNCTIONS.contains(funName));
+    CssFunctionNode.Function funType = CssFunctionNode.Function.byName(funName);
+    CssFunctionNode fun = new CssFunctionNode(funType, loc);
+    CssValueNode arg = new CssLiteralNode(
+        t.image.substring(pi + 1, t.image.length() - 1), loc);
+    fun.setArguments(new CssFunctionArgumentsNode(ImmutableList.of(arg)));
+    return fun;
+  }
+
+  /**
+   * Adds the given arguments explicitly separated by the given
+   * separator to the given node. If an argument is a composite node
+   * separated by commas, this method adds its children explicitly
+   * separated by commas instead of the composite node, in order to
+   * flatten out the argument list.
+   *
+   * <p>Separators such as commas in function calls have to be added
+   * explicitly, in order to match the output from the old tree
+   * converter.
+   *
+   * @param node The function arguments node to add to
+   * @param args The real arguments to add
+   * @param numArgs The number of real arguments
+   * @param sep The separator to add between real arguments
+   */
+  private void addArgumentsWithSeparator(
+      CssFunctionArgumentsNode node,
+      Iterable<CssValueNode> args,
+      int numArgs,
+      String sep) {
+    int current = 0;
+    for (CssValueNode arg : args) {
+      if (arg instanceof CssCompositeValueNode &&
+          ((CssCompositeValueNode) arg).getOperator() == CssCompositeValueNode.Operator.COMMA) {
+        CssCompositeValueNode composite = (CssCompositeValueNode) arg;
+        addArgumentsWithSeparator(node, composite.getValues(), composite.getValues().size(), ",");
+      } else {
+        node.addChildToBack(arg);
+      }
+      current++;
+      if (current < numArgs) {
+        // Note that the source location for the separator is not entirely
+        // accurate, but adding the separators as values is a hack anyways.
+        node.addChildToBack(
+            new CssLiteralNode(sep, arg.getSourceCodeLocation()));
+      }
+    }
+  }
+
+  private static String trim(String input) {
+    return CSS_WHITESPACE.trimFrom(input);
+  }
+
+  public void parse() throws GssParserException {
+    try {
+      start();
+    } catch (ParseException e) {
+      throw new GssParserException(this.getLocation(token.next));
+    }
+  }
+
+  /**
+   * This helper class takes care of the creation of nodes of the AST, and
+   * attaching comments to them.
+   */
+  private class CssNodeBuilder {
+
+    protected CssNode attachComments(List<Token> tokens, CssNode node) {
+      for (Token t : tokens) {
+        node = attachComment(t, node);
+      }
+      return node;
+    }
+
+    public CssNode attachComment(Token t, CssNode node) {
+      if (t.specialToken == null) {
+        return node;
+      }
+      Token special = t.specialToken;
+      // Walking back the special token chain until we reach the first special token
+      // which is after the previous regular (non-comment) token.
+      while (special.specialToken != null) {
+        special = special.specialToken;
+      }
+      // Visiting comments in their normal appearing order.
+      while (special != null) {
+        node.appendComment(new CssCommentNode(trim(special.image), getLocation(special)));
+        special = special.next;
+      }
+      return node;
+    }
+
+    public CssHexColorNode buildHexColorNode(String image,
+        SourceCodeLocation location, List<Token> tokens) {
+      CssHexColorNode node = new CssHexColorNode(image, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssRulesetNode buildRulesetNode(CssDeclarationBlockNode declarations,
+        CssSelectorListNode selectors, SourceCodeLocation location,
+        List<Token> tokens) {
+      CssRulesetNode node = new CssRulesetNode(declarations);
+      node.setSelectors(selectors);
+      node.setSourceCodeLocation(location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssKeyframeRulesetNode buildKeyframeRulesetNode(CssDeclarationBlockNode declarations,
+        CssKeyListNode keys, List<Token> tokens) {
+      CssKeyframeRulesetNode node = new CssKeyframeRulesetNode(declarations);
+      node.setKeys(keys);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssKeyNode buildKeyNode(Token token, String value, SourceCodeLocation location) {
+      CssKeyNode node = new CssKeyNode(value, location);
+      if (token != null) {
+        attachComment(token, node);
+      }
+      return node;
+    }
+
+    public CssClassSelectorNode buildClassSelectorNode(String name,
+        SourceCodeLocation location, List<Token> tokens) {
+      CssClassSelectorNode node = new CssClassSelectorNode(name, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssIdSelectorNode buildIdSelectorNode(String id,
+        SourceCodeLocation location, List<Token> tokens) {
+      CssIdSelectorNode node = new CssIdSelectorNode(id, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssPseudoClassNode buildPseudoClassNode(String name,
+        SourceCodeLocation location, List<Token> tokens) {
+      CssPseudoClassNode node = new CssPseudoClassNode(name, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssPseudoClassNode buildPseudoClassNode(
+        CssPseudoClassNode.FunctionType functionType, String name,
+        String argument, SourceCodeLocation location, List<Token> tokens) {
+      CssPseudoClassNode node = new CssPseudoClassNode(functionType, name,
+          argument, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssPseudoClassNode buildPseudoClassNode(String name,
+        CssSelectorNode notSelector, SourceCodeLocation location,
+        List<Token> tokens) {
+      CssPseudoClassNode node = new CssPseudoClassNode(name, notSelector,
+          location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssPseudoElementNode buildPseudoElementNode(String name,
+        SourceCodeLocation location, List<Token> tokens) {
+      CssPseudoElementNode node = new CssPseudoElementNode(name, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssAttributeSelectorNode buildAttributeSelectorNode(
+        CssAttributeSelectorNode.MatchType matchType, String attribute,
+        String value, SourceCodeLocation location, List<Token> tokens) {
+      CssAttributeSelectorNode node = new CssAttributeSelectorNode(matchType,
+          attribute, value, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssSelectorNode buildSelectorNode(Token token, SourceCodeLocation location,
+        CssRefinerListNode refiners) {
+      String name = "";
+      if (token != null) {
+        name = token.image;
+      }
+      CssSelectorNode node = new CssSelectorNode(name, location);
+      if (token != null) {
+        attachComment(token, node);
+      }
+      node.setRefiners(refiners);
+      return node;
+    }
+
+    public CssCombinatorNode buildCombinatorNode(CssCombinatorNode.Combinator combinator,
+        SourceCodeLocation location, List<Token> tokens) {
+      CssCombinatorNode node = new CssCombinatorNode(combinator, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssDeclarationNode buildDeclarationNode(CssPropertyNode property,
+        CssPropertyValueNode value, List<Token> tokens) {
+      CssDeclarationNode node = new CssDeclarationNode(property, value);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssCompositeValueNode buildCompositeValueNode(List<CssValueNode> list,
+        CssCompositeValueNode.Operator op, SourceCodeLocation location, List<Token> tokens) {
+      CssCompositeValueNode node =  new CssCompositeValueNode(list, op, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+
+    public CssBooleanExpressionNode buildBoolExpressionNode(CssBooleanExpressionNode.Type type,
+        String value, CssBooleanExpressionNode left, CssBooleanExpressionNode right,
+            SourceCodeLocation loc, List<Token> tokens) {
+      CssBooleanExpressionNode node = new CssBooleanExpressionNode(type, value, left, right, loc);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssLiteralNode buildLiteralNode(String value, SourceCodeLocation location,
+        List<Token> tokens) {
+      CssLiteralNode node = new CssLiteralNode(value, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssNumericNode buildNumericNode(String num, String unit, SourceCodeLocation location,
+        List<Token> tokens) {
+      CssNumericNode node = new CssNumericNode(num, unit, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssFunctionNode buildFunctionNode(String name, SourceCodeLocation location,
+        CssFunctionArgumentsNode args, List<Token> tokens) {
+      CssFunctionNode.Function functionType = CssFunctionNode.Function.byName(name);
+      if (functionType == null) {
+        functionType = CssFunctionNode.Function.CUSTOM;
+      }
+      CssFunctionNode functionNode = (functionType != CssFunctionNode.Function.CUSTOM) ?
+          new CssFunctionNode(functionType, location) :
+          new CssCustomFunctionNode(name, location);
+      functionNode.setArguments(args);
+      attachComments(tokens, functionNode);
+      return functionNode;
+    }
+
+    public CssPriorityNode buildPriorityNode(SourceCodeLocation location, List<Token> tokens) {
+      CssPriorityNode node = new CssPriorityNode(CssPriorityNode.PriorityType.IMPORTANT, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
+    public CssUnknownAtRuleNode buildUnknownAtRuleNode(CssLiteralNode name,
+        CssAbstractBlockNode block, SourceCodeLocation location,
+        List<CssValueNode> parameters, List<Token> tokens) {
+      boolean hasBlock = (block != null);
+      CssUnknownAtRuleNode at = new CssUnknownAtRuleNode(name, hasBlock);
+      at.setSourceCodeLocation(location);
+      if (hasBlock) {
+        at.setBlock(block);
+      }
+      at.setParameters(parameters);
+      attachComments(tokens, at);
+      return at;
+    }
+
+    public CssWebkitKeyframesNode buildWebkitKeyframesNode(CssLiteralNode name,
+        CssBlockNode block, SourceCodeLocation location,
+        List<CssValueNode> parameters, List<Token> tokens) {
+      CssWebkitKeyframesNode at = new CssWebkitKeyframesNode(name);
+      at.setSourceCodeLocation(location);
+      at.setBlock(block);
+      at.setParameters(parameters);
+      attachComments(tokens, at);
+      return at;
+    }
+  }
+}
+
+
+PARSER_END(GssParserCC)
+
+<DEFAULT> MORE :
+{
+  // switch to comment lexical state
+  < "/*" > : COMMENT
+}
+
+// pass comments to the parser as special token
+<COMMENT> SPECIAL_TOKEN :
+{
+  //return to default state - consume whitespace chars after itself !
+  < "*/" ("\r\n"| "\n" | "\r" | "\f" |" " |"\t")* > : DEFAULT
+}
+
+<COMMENT> MORE :
+{
+  // collect text from the comment (match any characters)
+  < ~[] > : COMMENT
+}
+
+
+// Some ideas taken from:
+//  http://cssparser.cvs.sourceforge.net/viewvc/*checkout*/cssparser/cssparser/
+//  src/main/javacc/SACParserCSS21.jj
+// Our grammar follows - not so strictly - the CSS grammar specification at:
+//  http://www.w3.org/TR/CSS2/grammar.html
+// Original CSS grammar is case-insensitive, but this grammar is case-sensitive
+// to speed up parsing. Both upper-case and lower-case characters are accepted.
+<DEFAULT> TOKEN :
+{
+    < SEMICOLON: ";" >
+  | < COLON: ":" >
+  | < DOT: "." >
+  | < ASTERISK: "*" >
+  | < SLASH: "/" >
+  | < MINUS: "-" >
+  | < EQUALS: "=" >
+  | < LEFTSQUARE: "[" >
+  | < RIGHTSQUARE: "]" >
+  | < LEFTROUND: "(" >
+  | < RIGHTROUND: ")" >
+  | < LEFTBRACE: "{" >
+  | < RIGHTBRACE: "}" >
+  | < COMMA: "," >
+  | < EXCL_MARK: "!" >
+  | < PERCENT: "%" >
+  | < #PLUS: "+" >
+  | < #GREATER: ">" >
+  | < #TILDE: "~" >
+  | < #DOUBLE_QUOTE: "\"" >
+  | < #SINGLE_QUOTE: "\'" >
+  | < #AT: "@" >
+  | < #HASH: "#" >
+  | < #UNDERSCORE: "_" >
+  | < #AMPERSAND: "&" >
+  | < #CARET: "^" >
+  | < #DOLLAR: "$" >
+  | < #PIPE: "|" >
+  | < AND: <AMPERSAND> <AMPERSAND> >
+  | < OR: <PIPE> <PIPE> >
+  | < TILDE_EQUALS: <TILDE> <EQUALS> >
+  | < CARET_EQUALS: <CARET> <EQUALS> >
+  | < DOLLAR_EQUALS: <DOLLAR> <EQUALS> >
+  | < ASTERISK_EQUALS: <ASTERISK> <EQUALS> >
+  | < PIPE_EQUALS: <PIPE> <EQUALS> >
+
+  // CSS2 grammar allows up to 6-digit hex strings for unicode
+  // hex        [0-9a-f]
+  | < #HEX: ["0"-"9","a"-"f"] >
+  // hexnum    between 1 and 6 hex digits
+  | < #HEXNUM: (<HEX>){1,6} >
+
+  // unicode      \\{h}{1,6}(\r\n|[ \t\r\n\f])?
+  | < #UNICODE: "\\" <HEXNUM> ("\r\n" | [" ","\t","\r","\n","\f"])? >
+
+  // escape       {unicode}|\\[^\r\n\f0-9a-f]
+  | < #ESCAPE: <UNICODE> | ("\\" ~["\r","\n","\f","0"-"9","a"-"f"]) >
+
+  | < #DIGIT: ["0"-"9"] >
+
+  | < #NL1: "\n" | "\r" | "\f" >
+
+  // s        [ \t\r\n\f]+
+  // {s}          {return S;}
+  | < S: ( " " | "\t" | <NL1> )+ >
+  | < #W: ( <S> )* >
+
+  | < #NL: "\r\n" | <NL1> >
+
+  | < WPLUS: <W> <PLUS> >
+  | < WGREATER: <W> <GREATER> >
+  | < WTILDE: <W> <TILDE> >
+
+  | < #ALPHA: ["a"-"z","A"-"Z"] >
+
+  // nonascii [\200-\377]
+  // The occurrences of "\377" represent the highest character number that
+  // we can deal with (decimal 255). They should be read
+  //  as "\4177777" (decimal 1114111), which is the highest possible code point
+  // in Unicode/ISO-10646.
+  // Limitation: This parser can only handle Unicode characters up to \uFFFF
+  // (decimal 65535).
+  | < #NONASCII: ["\u0080"-"\uFFFF"] >
+
+  // nmstart      [_a-z]|{nonascii}|{escape}
+  | < #NAMESTART: <ALPHA> | <UNDERSCORE> | <NONASCII> >
+
+  // nmchar       [_a-z0-9-]|{nonascii}|{escape}
+  | < #NAMECHAR: <ALPHA> | <DIGIT> | <MINUS> | <UNDERSCORE> | <NONASCII> >
+
+  // name     {nmchar}+
+  | < #NAME: (<NAMECHAR>)+ >
+
+  // num      [0-9]+|[0-9]*"."[0-9]+
+  | < NUMBER: (<DIGIT>)+ | (<DIGIT>)* <DOT> (<DIGIT>)+ >
+
+  // "#"{name}        {return HASH;}
+  | < HASH_NAME: <HASH> <NAME> >
+
+  // Spaces are allowed between ! and "important".
+  // Unlike the specification, no comments are allowed between '!' and
+  // 'important' because comments are special tokens and there is no easy way
+  // to allow them in between if we combine '!' and 'important' to a single
+  // token. We are doing that do allow the identifier 'important' in other
+  // places (e.g. as a class name). We found no file in the Google code base
+  // that had a comment in between.
+  | < IMPORTANT_SYM: <EXCL_MARK> <W> "important" >
+
+  // string1      \"([^\n\r\f\\"]|\\{nl}|{escape})*\"
+  | < STRING1: <DOUBLE_QUOTE>
+       (~["\n","\r","\f","\\","\""] | "\\" <NL> | <ESCAPE>)* <DOUBLE_QUOTE> >
+
+  // string2      \'([^\n\r\f\\']|\\{nl}|{escape})*\'
+  | < STRING2: <SINGLE_QUOTE>
+       (~["\n","\r","\f","\\","\'"] | "\\" <NL> | <ESCAPE>)* <SINGLE_QUOTE> >
+
+  // "url("{w}{string}{w}")"  {return URI;}
+  // "url("{w}{url}{w}")" {return URI;}
+  | < URI: ("url" | "url-prefix" | "domain") "(" <W> (<STRING1> | <STRING2> |
+      (<URL>)*) <W> ")" >
+
+  // url      ([!#$%&*-~]|{nonascii}|{escape})*
+  | < #URL: <EXCL_MARK> | <HASH> | <PERCENT> | <DOLLAR> | <AMPERSAND> |
+      <ASTERISK> | <PLUS> | <COMMA> | <MINUS> | <DOT> | "/" | <DIGIT> |
+      <COLON> | <SEMICOLON> | "<" | <EQUALS> | <GREATER> | "?" | <AT> |
+      <ALPHA> | <LEFTSQUARE> | <RIGHTSQUARE> | <CARET> | <UNDERSCORE> | "`" |
+      <LEFTBRACE> | <PIPE> | <RIGHTBRACE> | <TILDE> | <NONASCII> >
+
+  // ident        -?{nmstart}{nmchar}*
+  // {ident}         {return IDENT;}
+  | < IDENTIFIER: (<MINUS>)? <NAMESTART> (<NAMECHAR>)* >
+
+  // "not("
+  // Special handling needed because ':not' takes simple selectors as
+  // an argument.
+  | < NOTFUNCTION: "not" <LEFTROUND> >
+  | < LANGFUNCTION: "lang" <LEFTROUND> >
+
+  // {ident}"(        {return FUNCTION;}
+  | < FUNCTION: <IDENTIFIER> <LEFTROUND> >
+
+  // "@-webkit-keyframes"
+  // Special handling needed because of the keys instead of the selectors
+  | < WEBKITKEYFRAMES: <AT> ( "-webkit-keyframes" | "-moz-keyframes" ) >
+
+  // Top-level @-rules that contain a declaration block. General top-level
+  // @-rules contain a block with rulesets.
+  | < ATRULESWITHDECLBLOCK: <AT> ( "page" | "defmixin" ) >
+
+  | < ATKEYWORD: <AT> <IDENTIFIER> >
+
+  | < BAD_TOKEN: ~[] >
+}
+
+// The rest of the file contains the production rules of the grammar and to
+// increase readability every rule also has a comment with the rule it
+// implements in Extended Backus–Naur Form (EBNF) that follows this syntax:
+// name_of_rule
+//   : X
+//   ;
+// where X is the actual production consisting of non terminals and terminals.
+// Terminals that exactly represent some characters are not written with their
+// name but the characters are written instead, e.g. '(' instead of LEFTROUND,
+// but IDENTIFIER stays the same.
+
+// string
+//   : STRING1 | STRING2
+//   ;
+Token string() :
+{
+  Token t;
+}
+{
+  ( t = <STRING1> | t = <STRING2> ) { return t; }
+}
+
+// ruleset
+//   : selector_list '{' style_declarations '}'
+//   ;
+CssRulesetNode ruleSet() :
+{
+  CssSelectorListNode selectors;
+  CssDeclarationBlockNode declarations;
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  selectors = selectorList()
+  t = <LEFTBRACE> { tokens.add(t); }
+  declarations = styleDeclaration()
+  t = <RIGHTBRACE> { tokens.add(t); }
+  {
+    CssRulesetNode ruleSet = nodeBuilder.buildRulesetNode(declarations,
+        selectors, this.getLocation(), tokens);
+    return ruleSet;
+  }
+}
+
+// selector_list
+//   : selector [ ',' S* selector ]*
+//   ;
+CssSelectorListNode selectorList() :
+{
+  CssSelectorListNode list = new CssSelectorListNode();
+  CssSelectorNode selector;
+  Token t;
+}
+{
+  selector = selector() { list.addChildToBack(selector); }
+  ( t = <COMMA> { nodeBuilder.attachComment(t, selector); }
+    ( <S> )* selector = selector() { list.addChildToBack(selector); }
+  )*
+  { return list; }
+}
+
+// selector
+//   : simple_selector [ combinator simple_selector ]* S*
+//   ;
+CssSelectorNode selector() :
+{
+  CssSelectorNode first;
+  CssCombinatorNode c;
+  CssSelectorNode next;
+  CssSelectorNode prev;
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  first = simpleSelector() { prev = first; }
+  (
+    // We need a lookahead here to be able to decide if a space is a combinator or just a
+    // space before the opening '{' of the following rule.
+    LOOKAHEAD(2)
+    c = combinator()
+    next = simpleSelector()
+    {
+      c.setSelector(next);
+      prev.setCombinator(c);
+      prev = next;
+    }
+  )*
+  ( t = <S> { tokens.add(t); } )*
+  {
+    nodeBuilder.attachComments(tokens, first);
+    return first;
+  }
+}
+
+// class
+//   : '.' IDENTIFIER
+//   ;
+CssClassSelectorNode className() :
+{
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  t = <DOT> { tokens.add(t); }
+  t = <IDENTIFIER>
+  {
+    tokens.add(t);
+    return nodeBuilder.buildClassSelectorNode(t.image, this.getLocation(),
+        tokens);
+  }
+}
+
+// id
+//   : HASH_NAME
+//   ;
+CssRefinerNode id() :
+{
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  t = <HASH_NAME>
+  {
+    tokens.add(t);
+    String name = t.image.substring(1);
+    return nodeBuilder.buildIdSelectorNode(name, this.getLocation(), tokens);
+  }
+}
+
+// pseudo
+//   : ':' [ IDENT | [ ':' IDENT ] | [ 'not(' S* simple_selector S* ')' ]
+//         | [ 'lang(' S* IDENT S* ')' ] | [ FUNCTION S* nth S* ')' ] ]?
+//   ;
+CssRefinerNode pseudo() :
+{
+  Token t;
+  SourceCodeLocation beginLocation = null;
+  SourceCodeLocation endLocation = null;
+  String pseudo = null;
+  String argument = null;
+  List<Token> tokens = Lists.newArrayList();
+  CssSelectorNode notSelector = null;
+}
+{
+  t = <COLON>  { beginLocation = this.getLocation(); tokens.add(t); }
+  ( ( t = <IDENTIFIER> { pseudo = t.image; tokens.add(t); } )
+    |
+    ( // ::identifier (pseudo-element)
+      t = <COLON>  { tokens.add(t); }
+      t = <IDENTIFIER> { pseudo = t.image; tokens.add(t);
+          endLocation = this.getLocation();
+          return nodeBuilder.buildPseudoElementNode(pseudo,
+              this.mergeLocations(beginLocation, endLocation), tokens); }
+    )
+    |
+    ( // :not( simple_selector )
+      t = <NOTFUNCTION> ( <S> )* { beginLocation = this.getLocation();
+          pseudo = t.image; tokens.add(t); }
+      notSelector = simpleSelector()
+      ( <S> )*
+      t = <RIGHTROUND> { tokens.add(t);
+          endLocation = this.getLocation();
+          return nodeBuilder.buildPseudoClassNode(pseudo, notSelector,
+              this.mergeLocations(beginLocation, endLocation), tokens); }
+    )
+    |
+    ( // :lang( <IDENTIFIER> )
+      t = <LANGFUNCTION> ( <S> )* { beginLocation = this.getLocation();
+          pseudo = t.image; tokens.add(t); }
+      t = <IDENTIFIER> { argument = t.image; tokens.add(t); }
+      ( <S> )*
+      t = <RIGHTROUND> { tokens.add(t);
+          endLocation = this.getLocation();
+          return nodeBuilder.buildPseudoClassNode(
+              CssPseudoClassNode.FunctionType.LANG, pseudo, argument,
+              this.mergeLocations(beginLocation, endLocation), tokens); }
+    )
+    |
+    ( // :nth-function( nth )
+      t = <FUNCTION> ( <S> )* { beginLocation = this.getLocation();
+          pseudo = t.image; tokens.add(t); }
+      argument = nth()
+      ( <S> )*
+      t = <RIGHTROUND> { tokens.add(t);
+          endLocation = this.getLocation();
+          return nodeBuilder.buildPseudoClassNode(
+              CssPseudoClassNode.FunctionType.NTH, pseudo, argument,
+              this.mergeLocations(beginLocation, endLocation), tokens); }
+    )
+  )?
+  {
+    // non-function pseudo-class
+    endLocation = this.getLocation();
+    return nodeBuilder.buildPseudoClassNode(pseudo,
+        this.mergeLocations(beginLocation, endLocation), tokens);
+  }
+}
+
+// nth
+//   : [ [ [ S* '+' ] | '-' | NUMBER | IDENTIFIER ] S* ]+
+//   ;
+String nth() :
+{
+  Token t;
+  StringBuilder argument = new StringBuilder();
+}
+{
+  (
+    (
+      t = <WPLUS> { argument.append(t.image); }
+      |
+      t = <MINUS> { argument.append(t.image); }
+      |
+      t = <NUMBER> { argument.append(t.image); }
+      |
+      t = <IDENTIFIER> { argument.append(t.image); }
+    )
+    ( <S> )*
+  )+
+  {
+    return argument.toString();
+  }
+}
+
+// attribute
+//   : '[' S* IDENT S* [
+//        [ '=' | '~=' | '^=' | '$=' | '*=' | '|=' ] S* [ IDENTIFIER | STRING ]
+//        S*
+//      ]? ']'
+//   ;
+CssAttributeSelectorNode attribute() :
+{
+  Token t;
+  String attribute;
+  String value = "";
+  List<Token> tokens = Lists.newArrayList();
+  SourceCodeLocation beginLocation;
+  CssAttributeSelectorNode.MatchType matchType =
+      CssAttributeSelectorNode.MatchType.ANY;
+}
+{
+  t = <LEFTSQUARE> { beginLocation = this.getLocation(); tokens.add(t); }
+  ( <S> )*
+  t = <IDENTIFIER> { attribute = t.image; tokens.add(t); }
+  ( <S> )*
+  (
+    (   t = <EQUALS>    { tokens.add(t);
+            matchType = CssAttributeSelectorNode.MatchType.EXACT; }
+      | t = <TILDE_EQUALS>  { tokens.add(t);
+            matchType = CssAttributeSelectorNode.MatchType.ONE_WORD; }
+      | t = <CARET_EQUALS> { tokens.add(t);
+            matchType = CssAttributeSelectorNode.MatchType.PREFIX; }
+      | t = <DOLLAR_EQUALS> { tokens.add(t);
+            matchType = CssAttributeSelectorNode.MatchType.SUFFIX; }
+      | t = <ASTERISK_EQUALS> { tokens.add(t);
+            matchType = CssAttributeSelectorNode.MatchType.CONTAINS; }
+      | t = <PIPE_EQUALS> { tokens.add(t);
+            matchType = CssAttributeSelectorNode.MatchType.EXACT_OR_DASH; }
+    )
+    ( <S> )*
+    (
+        t = <IDENTIFIER> { value = t.image; tokens.add(t); }
+      | t = string()     { value = t.image; tokens.add(t); }
+    )
+    ( <S> )*
+  )?
+  t = <RIGHTSQUARE> { tokens.add(t); }
+
+  {
+    SourceCodeLocation endLocation = this.getLocation();
+    return nodeBuilder.buildAttributeSelectorNode(matchType, attribute, value,
+        this.mergeLocations(beginLocation, endLocation), tokens);
+  }
+}
+
+// simple_selector
+//   : [ element_name [ id | class | attribute | pseudo ]* ]
+//     | [ id | class | attribute | pseudo ]+
+//   ;
+CssSelectorNode simpleSelector() :
+{
+  Token t;
+  CssRefinerNode n = null;
+  Token selectorName = null;
+  CssRefinerListNode refiners = new CssRefinerListNode();
+  SourceCodeLocation beginLocation;
+}
+{
+  { beginLocation = this.getLocation(token.next); }
+  (
+    (
+      selectorName = elementName()
+      ( ( n = id()
+        | n = className()
+        | n = attribute()
+        | n = pseudo()) { refiners.addChildToBack(n); }
+      )*
+    )
+    |
+    ( ( n = id()
+      | n = className()
+      | n = attribute()
+      | n = pseudo() )   { refiners.addChildToBack(n); }
+    )+
+  )
+  {
+    SourceCodeLocation endLocation = this.getLocation();
+    CssSelectorNode selectorNode = nodeBuilder.buildSelectorNode(selectorName,
+         this.mergeLocations(beginLocation, endLocation), refiners);
+    return selectorNode;
+  }
+}
+
+// element_name
+//   : IDENTIFIER | '*'
+//   ;
+Token elementName() :
+{
+  Token t;
+}
+{
+  (  t = <IDENTIFIER>
+   | t = <ASTERISK>
+  )
+  { return t; }
+}
+
+// combinator
+//   : [ '+' S* ] | [ '>' S* ] | [ '~' S* ] | S+
+//   ;
+CssCombinatorNode combinator() :
+{
+  Token t;
+  SourceCodeLocation location = null;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  // it doesn't work if the "( <S> )*"are after the { ... } part
+  ( t = <WPLUS> ( <S> )*
+    {
+      location = getLocation(t);
+      tokens.add(t);
+      return nodeBuilder.buildCombinatorNode(
+          CssCombinatorNode.Combinator.ADJACENT_SIBLING, this.getLocation(),
+          tokens);
+    }
+  )
+  |
+  ( t = <WGREATER> ( <S> )*
+    {
+      location = getLocation(t);
+      tokens.add(t);
+      return nodeBuilder.buildCombinatorNode(
+          CssCombinatorNode.Combinator.CHILD, this.getLocation(), tokens);
+    }
+  )
+  |
+  ( t = <WTILDE> ( <S> )*
+    {
+      location = getLocation(t);
+      tokens.add(t);
+      return nodeBuilder.buildCombinatorNode(
+          CssCombinatorNode.Combinator.GENERAL_SIBLING, this.getLocation(),
+          tokens);
+    }
+  )
+  |
+  ( ( t = <S>  {tokens. add(t); } )+
+    {
+      return nodeBuilder.buildCombinatorNode(
+          CssCombinatorNode.Combinator.DESCENDANT, this.getLocation(), tokens);
+    }
+  )
+}
+
+// style_declaration
+//   : S* standard_declaration? S*
+//     [
+//        [ inner_at_rule S* standard_declaration ]
+//      | ';' S* standard_declaration
+//     ]*
+//   ;
+// This production rule returns a block that contains a list of declarations and
+// @-rules. The declarations and rules must be separated by semicolons. If the
+// last thing in the block is a declaration, the trailing semicolon is optional.
+// Note that the trailing semicolon is NOT optional if the last thing is an
+// @-rule. This is a limitation of the current grammar.
+CssDeclarationBlockNode styleDeclaration() :
+{
+  CssDeclarationBlockNode block = new CssDeclarationBlockNode();
+  CssNode decl;
+}
+{
+  ( <S> )*
+  ( decl = standardDeclaration() { block.addChildToBack(decl); } )?
+  ( <S> )*
+  (
+     ( decl = innerAtRule() { block.addChildToBack(decl); }
+       ( <S> )*
+       ( decl = standardDeclaration() { block.addChildToBack(decl); } )?
+     )
+    |
+     ( <SEMICOLON>
+       ( <S> )*
+       // The last declaration within a block not necessarily has a semicolon
+       // at the end.
+       (  decl = standardDeclaration() { block.addChildToBack(decl); } )?
+     )
+  )*
+  { return block; }
+}
+
+// standard_declaration
+//   : '*'? IDENTIFIER S* ':' S* expr S* important?
+//   ;
+CssDeclarationNode standardDeclaration() :
+{
+  Token t;
+  CssPropertyNode property;
+  CssPropertyValueNode valueNode;
+  CssPriorityNode priority = null;
+  List<Token> tokens = Lists.newArrayList();
+  String propertyName = "";
+}
+{
+  ( t = <ASTERISK>  { tokens.add(t); propertyName = "*"; } )? // allows "star hack"
+  t = <IDENTIFIER>
+  {
+    propertyName = propertyName + t.image;
+    property = new CssPropertyNode(propertyName, this.getLocation());
+    tokens.add(t);
+  }
+  ( <S> )*
+   t = <COLON> { tokens.add(t); }
+  ( <S> )*
+  valueNode = expr()
+  ( <S> )*
+  ( priority = important() )?
+  {
+    if (priority != null) {
+      valueNode.addChildToBack(priority);
+    }
+    CssDeclarationNode node = nodeBuilder.buildDeclarationNode(property, valueNode, tokens);
+    return node;
+  }
+}
+
+// expr
+//   : composite_term [ composite_term ]*
+//   ;
+CssPropertyValueNode expr() :
+{
+  List<CssValueNode> lst = Lists.newArrayList();
+  CssValueNode value;
+}
+{
+    value = composite_term() { lst.add(value); }
+  ( value = composite_term() { lst.add(value); } )*
+  { return new CssPropertyValueNode(lst); }
+}
+
+// (non-standard GSS extension)
+// composite_term
+//   : assign_term [ ',' assign_term ]*
+//   ;
+CssValueNode composite_term() :
+{
+  CssValueNode value;
+  List<CssValueNode> lst = Lists.newArrayList();
+  SourceCodeLocation beginLocation;
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  { beginLocation = this.getLocation(token.next); }
+  value = assign_term() { lst.add(value); }
+  ( t = <COMMA> { tokens.add(t); } ( <S> )* value = assign_term() { lst.add(value); } )*
+  {
+    if (lst.size() == 1) {
+      return lst.get(0);
+    } else {
+      return nodeBuilder.buildCompositeValueNode(lst, CssCompositeValueNode.Operator.COMMA,
+          this.mergeLocations(beginLocation, this.getLocation()), tokens);
+    }
+  }
+}
+
+// (non-standard GSS extension)
+// assign_term
+//   : slash_term [ '=' slash_term ]*
+//   ;
+CssValueNode assign_term() :
+{
+  CssValueNode value;
+  List<CssValueNode> lst = Lists.newArrayList();
+  SourceCodeLocation beginLocation;
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  { beginLocation = this.getLocation(token.next); }
+  value = slash_term() { lst.add(value); }
+  ( t = <EQUALS> { tokens.add(t); } ( <S> )* value = slash_term() { lst.add(value); } )*
+  {
+    if (lst.size() == 1) {
+      return lst.get(0);
+    }
+    return nodeBuilder.buildCompositeValueNode(lst, CssCompositeValueNode.Operator.EQUALS,
+        this.mergeLocations(beginLocation, this.getLocation()), tokens);
+  }
+}
+
+// (non-standard GSS extension)
+// slash_term
+//   : term [ '/' term ]*
+//   ;
+CssValueNode slash_term() :
+{
+  CssValueNode value;
+  List<CssValueNode> lst = Lists.newArrayList();
+  SourceCodeLocation beginLocation;
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  { beginLocation = this.getLocation(token.next); }
+  value = term() { lst.add(value); }
+  ( t = <SLASH> { tokens.add(t); } ( <S> )* value = term() { lst.add(value); } )*
+  {
+    if (lst.size() == 1) {
+      return lst.get(0);
+    } else {
+      return nodeBuilder.buildCompositeValueNode(lst, CssCompositeValueNode.Operator.SLASH,
+          this.mergeLocations(beginLocation, this.getLocation()), tokens);
+    }
+  }
+}
+
+// term
+//   : unary_operator?
+//     [ [ NUMBER [ PERCENT | IDENTIFIER ] ] | STRING | IDENT
+//       | '(' S? IDENT ':' S* NUMBER IDENT? ')' | URI | hexcolor | function
+//     ] S*
+//   ;
+CssValueNode term() :
+{
+  Token t = null;
+  Token dim = null;
+  String unit = null;
+  String unop = "";
+  CssFunctionNode function = null;
+  List<Token> tokens = Lists.newArrayList();
+  boolean hexcolor = false;
+}
+{
+  (
+    ( t = unary_operator() { unop = trim(t.image);   tokens.add(t); } )?
+    (  // Number with optional arbitrary dimension or percent.
+      t = <NUMBER>     { unit = CssNumericNode.NO_UNITS; tokens.add(t); }
+          ( (dim = <PERCENT> | dim = <IDENTIFIER>)
+              { unit = dim.image.toLowerCase(); tokens.add(dim);} )?
+    )
+    | t = string() { tokens.add(t); }
+    | // This lookahead is to support function names with . and :.
+      ( LOOKAHEAD({getToken(2).kind != DOT && getToken(2).kind != COLON})
+      t = <IDENTIFIER> { tokens.add(t); } )
+    | // Support for syntax like '(max-height: 300px)' that is needed for
+      // the @media rule.
+      // Without the look ahead the parser can't distinguish between
+      // '@page (not max-height: 300px)' and '@if (COND)'.
+      // The look ahead ensures that the first token is '(' and then there might
+      // be one or two arbitrary tokens followed by a colon.
+      ( LOOKAHEAD({getToken(1).kind == LEFTROUND
+            && (getToken(3).kind == COLON || getToken(4).kind == COLON)})
+        t = <LEFTROUND>  { tokens.add(t); }
+        ( <S> )?
+        t = <IDENTIFIER> { tokens.add(t); }
+        t = <COLON>      { tokens.add(t); }
+        ( <S> )*
+        (  ( t = <NUMBER> { tokens.add(t); }
+             ( (dim = <IDENTIFIER> ) { tokens.add(dim); } )?
+           )
+          |
+           ( t = <IDENTIFIER> { tokens.add(t); } )
+        )
+        ( <S> )*
+        t = <RIGHTROUND> { tokens.add(t); } )
+    | t = <URI>        { function = createUrlFunction(t); tokens.add(t); }
+    | t = hexcolor()   { tokens.add(t); hexcolor = true; }
+    | function = function()
+  ) ( <S> )*
+  {
+    if (unit != null) {
+      return nodeBuilder.buildNumericNode(unop + t.image, unit, this.getLocation(t), tokens);
+    } else if (function != null) {
+      return function;
+    } else if (hexcolor) {
+      return nodeBuilder.buildHexColorNode(t.image, this.getLocation(t), tokens);
+    } else {
+      StringBuilder sb = new StringBuilder();
+      for (Token token : tokens) {
+        sb.append(token.image);
+      }
+      return nodeBuilder.buildLiteralNode(sb.toString(), this.getLocation(t), tokens);
+    }
+  }
+}
+
+// (non-standard GSS extension)
+// extended_term
+//   : boolean_and_term [ '||' S* boolean_and_term ]*
+//   ;
+CssBooleanExpressionNode extended_term() :
+{
+  SourceCodeLocation beginLocation;
+  SourceCodeLocation endLocation;
+  CssBooleanExpressionNode newNode = null;
+  CssBooleanExpressionNode left = null;
+  CssBooleanExpressionNode right = null;
+  String value = "";
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  (
+    { beginLocation = this.getLocation(token.next); }
+    left = boolean_and_term()
+    { value += left.toString(); }
+    ( t = <OR> { tokens.add(t); }
+      ( <S> )*
+      right = boolean_and_term()
+      {
+        value += right.toString();
+        endLocation = this.getLocation();
+        newNode = nodeBuilder.buildBoolExpressionNode(
+            CssBooleanExpressionNode.Type.OR, value, left, right,
+                this.mergeLocations(beginLocation, endLocation), tokens);
+        left = newNode;
+      }
+    )*
+  )
+  { return left; }
+}
+
+// (non-standard GSS extension)
+// boolean_and_term
+//   :  [ boolean_negated_term | basic_term]
+//      [ '&&' S* [ boolean_negated_term | basic_term ] ]*
+//   ;
+CssBooleanExpressionNode boolean_and_term() :
+{
+  SourceCodeLocation beginLocation = null;
+  SourceCodeLocation endLocation;
+  CssBooleanExpressionNode newNode= null;
+  CssBooleanExpressionNode left= null;
+  CssBooleanExpressionNode right = null;
+  String value = "";
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  (
+    { beginLocation = this.getLocation(token.next); }
+    (   left = boolean_negated_term()
+      | left = basic_term()
+    )
+    { value += left.toString(); }
+    ( t = <AND> { tokens.add(t); }
+      ( <S> )*
+      (   right = boolean_negated_term()
+        | right = basic_term()
+      )
+      {
+        value += right.toString();
+        endLocation = this.getLocation();
+        newNode = nodeBuilder.buildBoolExpressionNode(
+            CssBooleanExpressionNode.Type.AND, value, left, right,
+                this.mergeLocations(beginLocation, endLocation), tokens);
+        left = newNode;
+      }
+    )*
+  )
+  { return left; }
+}
+
+// (non-standard GSS extension)
+// boolean_negated_term
+//   : '!' S* basic_term
+//   ;
+CssBooleanExpressionNode boolean_negated_term() :
+{
+  SourceCodeLocation beginLocation;
+  String value = "";
+  CssBooleanExpressionNode boolNode = null;
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  ( t = <EXCL_MARK>
+    {
+      value = "!";
+      beginLocation = this.getLocation();
+      tokens.add(t);
+    }
+    ( <S> )*
+    boolNode = basic_term()
+  )
+  {
+    SourceCodeLocation endLocation = this.getLocation();
+    return nodeBuilder.buildBoolExpressionNode(CssBooleanExpressionNode.Type.NOT,
+        value, boolNode, null, this.mergeLocations(beginLocation, endLocation), tokens);
+  }
+}
+
+// (non-standard GSS extension)
+// basic_term
+//   :  term | parenthesized_term
+//   ;
+CssBooleanExpressionNode basic_term() :
+{
+  SourceCodeLocation beginLocation;
+  String value = "";
+  CssBooleanExpressionNode node = null;
+  CssValueNode termNode = null;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  { beginLocation = this.getLocation(token.next); }
+  (
+      termNode = term()           { value = termNode.toString(); }
+    | node = parenthesized_term() { value = node.toString(); }
+  )
+  {
+    SourceCodeLocation endLocation = this.getLocation();
+    if (node == null) {
+      return nodeBuilder.buildBoolExpressionNode(CssBooleanExpressionNode.Type.CONSTANT,
+          value, null, null, this.mergeLocations(beginLocation, endLocation), tokens);
+    } else {
+      return node;
+    }
+  }
+}
+
+// (non-standard GSS extension)
+// parenthesized_term
+//   : '(' S* extended_term ')' S*
+//   ;
+CssBooleanExpressionNode parenthesized_term() :
+{
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+  CssBooleanExpressionNode node;
+}
+{
+  t = <LEFTROUND> { tokens.add(t); }
+  ( <S> )*
+  node = extended_term()
+  t = <RIGHTROUND> { tokens.add(t); }
+  ( <S> )*
+  {
+    nodeBuilder.attachComments(tokens, node);
+    return node;
+  }
+}
+
+// unary_operator
+//   : '-' | '+'
+//   ;
+Token unary_operator() :
+{
+  Token t;
+}
+{
+  (  t = <MINUS>
+   | t = <WPLUS>
+  )
+  { return t; }
+}
+
+/*
+ * There is a constraint on the color that it must
+ * have either 3 or 6 hex-digits (i.e., [0-9a-fA-F])
+ * after the "#"; e.g., "#000" is OK, but "#abcd" is not.
+ */
+// hexcolor
+//   : HASH_NAME S*
+//   ;
+Token hexcolor() :
+{
+  Token t;
+}
+{
+  t = <HASH_NAME> { return t; }
+}
+
+// function
+//   : [ FUNCTION
+//     | [ IDENTIFIER [ '.' | ':' ] [ IDENTIFIER [ '.' | ':' ] ]* FUNCTION ]
+//     S* expr ')' S*
+//   ;
+// Note: We allow the function name to have : and . to support non-standard IE
+// functions.
+CssFunctionNode function() :
+{
+  Token t;
+  CssPropertyValueNode expr;
+  SourceCodeLocation beginLocation;
+  StringBuilder functionName = new StringBuilder();
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  { beginLocation = this.getLocation(token.next); }
+  (  t = <FUNCTION>       { functionName.append(t.image); functionName.setLength(functionName.length() - 1); tokens.add(t); }
+   | ( t = <IDENTIFIER>   { functionName.append(t.image);  tokens.add(t); }
+         (  <DOT>         { functionName.append("."); }
+          | <COLON>       { functionName.append(":"); } )
+       ( t = <IDENTIFIER> { functionName.append(t.image); }
+           (  <DOT>       { functionName.append("."); }
+            | <COLON>     { functionName.append(":"); } ) )*
+       t = <FUNCTION>     { functionName.append(t.image); functionName.setLength(functionName.length() - 1); } ) )
+  ( <S> )* expr = expr() t = <RIGHTROUND> { tokens.add(t); }
+  {
+    SourceCodeLocation endLocation = this.getLocation();
+    CssFunctionArgumentsNode args = new CssFunctionArgumentsNode();
+    if (expr.numChildren() == 1) {
+      CssValueNode child = expr.getChildAt(0);
+      CssCompositeValueNode composite = null;
+      if (child instanceof CssCompositeValueNode) {
+        composite = (CssCompositeValueNode) child;
+      }
+      addArgumentsWithSeparator(args, ImmutableList.of(child), 1, " ");
+    } else if (FUNCTIONS_WITH_SPACE_SEP_OK.matcher(functionName).matches()) {
+      addArgumentsWithSeparator(args, expr.childIterable(), expr.numChildren(), " ");
+    } else {
+      throw new ParseException("invalid argument list");
+    }
+    CssFunctionNode functionNode = nodeBuilder.buildFunctionNode(
+        functionName.toString(),
+        this.mergeLocations(beginLocation, endLocation), args, tokens);
+    return functionNode;
+  }
+}
+
+// (non-standard GSS extension)
+// at_function
+//   : FUNCTION S* expr? ')' S*
+//   ;
+CssFunctionNode atFunction() :
+{
+  Token t;
+  CssPropertyValueNode expr = null;
+  SourceCodeLocation beginLocation;
+  StringBuilder functionName = new StringBuilder();
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  { beginLocation = this.getLocation(token.next); }
+  t = <FUNCTION> {
+    functionName.append(t.image);
+    functionName.setLength(functionName.length() - 1);
+    tokens.add(t);
+  }
+  ( <S> )*
+  ( expr = expr() )?
+  t = <RIGHTROUND> { tokens.add(t); }
+  ( <S> )*
+  {
+    SourceCodeLocation endLocation = this.getLocation();
+    CssFunctionArgumentsNode args = new CssFunctionArgumentsNode();
+    if (expr != null && expr.numChildren() == 1) {
+      CssValueNode child = expr.getChildAt(0);
+      addArgumentsWithSeparator(args, ImmutableList.of(child), 1, " ");
+    } else if (expr != null) {
+      addArgumentsWithSeparator(args, expr.childIterable(), expr.numChildren(),
+          " ");
+    }
+    CssFunctionNode functionNode = nodeBuilder.buildFunctionNode(
+        functionName.toString(),
+        this.mergeLocations(beginLocation, endLocation), args, tokens);
+    return functionNode;
+  }
+}
+
+// important
+//   : IMPORTANT_SYM S*
+//   ;
+CssPriorityNode important() :
+{
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+  SourceCodeLocation beginLocation, endLocation;
+}
+{
+  t = <IMPORTANT_SYM> {
+    beginLocation = this.getLocation();
+    endLocation = this.getLocation();
+    tokens.add(t);
+  }
+  ( <S> )*
+  {
+    return nodeBuilder.buildPriorityNode(this.mergeLocations(beginLocation, endLocation), tokens);
+  }
+}
+
+// (non-standard GSS extension)
+// at_rule
+//   : ATKEYWORD S* [ [ composite_term | extended_term ] S* ]*
+//     [ [ '{' S* block  '}'  ] | ';' ] S*
+//   ;
+CssAtRuleNode at_rule() :
+{
+  Token t;
+  SourceCodeLocation beginLocation = null;
+  CssLiteralNode name;
+  CssValueNode v;
+  CssBlockNode block = null;
+  List<CssValueNode> parameters = Lists.newArrayList();
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  t = <ATKEYWORD>
+  {
+    beginLocation = this.getLocation(t);
+    name = new CssLiteralNode(t.image.substring(1), beginLocation);
+    tokens.add(t);
+  }
+  ( <S> )*
+  ( ( v = composite_term() | v = extended_term() ) { parameters.add(v); } ( <S> )* )*
+  ( ( t = <LEFTBRACE>  { tokens.add(t); }
+      ( <S> )* block = block(true)
+      t = <RIGHTBRACE> { tokens.add(t);}
+    )
+    |
+    t = <SEMICOLON> { tokens.add(t);} )
+  {
+    SourceCodeLocation endLocation = getLocation(t);
+    CssAtRuleNode at = nodeBuilder.buildUnknownAtRuleNode(name, block,
+        this.mergeLocations(beginLocation, endLocation), parameters, tokens);
+    return at;
+  }
+}
+
+// (non-standard GSS extension)
+// at_rule_with_decl_block
+//   : ATRULESWITHDECLBLOCK S*
+//     [  at_function
+//      | [ IDENT? ':' IDENT S* ]
+//      | [ [ composite_term | extended_term ] S* ]*
+//     ]
+//     [ [ '{' S* style_declaration '}  ] | ';' ] S*
+//   ;
+// TODO(user): Try to reuse selctor parsing instead of [ IDENT? ':' IDENT S* ].
+// The problem is that @-rules take a list of value nodes and selectors are not
+// value nodes.
+CssAtRuleNode atRuleWithDeclBlock() :
+{
+  Token t;
+  SourceCodeLocation beginLocation = null;
+  CssLiteralNode name;
+  CssValueNode v;
+  CssAbstractBlockNode block = null;
+  List<CssValueNode> parameters = Lists.newArrayList();
+  List<Token> tokens = Lists.newArrayList();
+  List<Token> pseudoPageTokens = Lists.newArrayList();
+}
+{
+  t = <ATRULESWITHDECLBLOCK>
+  {
+    beginLocation = this.getLocation(t);
+    name = new CssLiteralNode(t.image.substring(1), beginLocation);
+    tokens.add(t);
+  }
+  ( <S> )*
+  (
+    v = atFunction() { parameters.add(v); }
+  |
+    (
+      // This is needed for @page (e.g. @page :left {} and @page bla:first {}).
+      LOOKAHEAD({getToken(1).kind == COLON || getToken(2).kind == COLON})
+      ( t = <IDENTIFIER> {
+          pseudoPageTokens.add(t);
+          v =  nodeBuilder.buildLiteralNode(t.image, getLocation(t),
+              pseudoPageTokens);
+          parameters.add(v);
+          pseudoPageTokens.clear();
+        }
+      )?
+      t = <COLON>  { pseudoPageTokens.add(t); }
+      t = <IDENTIFIER> {
+        pseudoPageTokens.add(t);
+        v =  nodeBuilder.buildLiteralNode(":" + t.image, getLocation(t),
+            pseudoPageTokens);
+        parameters.add(v);
+      }
+      ( <S> )*
+    )
+  |
+    ( ( v = composite_term() | v = extended_term() ) { parameters.add(v); }
+      ( <S> )*
+    )*
+  )
+  ( ( t = <LEFTBRACE>  { tokens.add(t); }
+      ( <S> )* block = styleDeclaration()
+      t = <RIGHTBRACE> { tokens.add(t);}
+    )
+    |
+    t = <SEMICOLON> { tokens.add(t);} )
+  {
+    SourceCodeLocation endLocation = getLocation(t);
+    CssAtRuleNode at = nodeBuilder.buildUnknownAtRuleNode(name, block,
+        this.mergeLocations(beginLocation, endLocation), parameters, tokens);
+    return at;
+  }
+}
+
+// (non-standard GSS extension)
+// inner_at_rule
+//   : ATKEYWORD S*
+//    [  at_function
+//     | [ IDENT? ':' IDENT S* ]
+//     | [[ composite_term | extended_term ] S* ]*
+//    ]
+//    [ [ '{' S* style_declaration '} ] | ';' ] S*
+//   ;
+CssAtRuleNode innerAtRule() :
+{
+  Token t;
+  SourceCodeLocation beginLocation = null;
+  CssLiteralNode name;
+  CssValueNode v;
+  CssAbstractBlockNode block = null;
+  List<CssValueNode> parameters = Lists.newArrayList();
+  List<Token> tokens = Lists.newArrayList();
+  List<Token> pseudoPageTokens = Lists.newArrayList();
+}
+{
+  t = <ATKEYWORD>
+  {
+    beginLocation = this.getLocation(t);
+    name = new CssLiteralNode(t.image.substring(1), beginLocation);
+    tokens.add(t);
+  }
+  ( <S> )*
+  (
+    v = atFunction() { parameters.add(v); }
+  |
+    (
+      // This is needed for @page (e.g. @page :left {} and @page bla:first {}).
+      LOOKAHEAD({getToken(1).kind == COLON || getToken(2).kind == COLON})
+      ( t = <IDENTIFIER> {
+          pseudoPageTokens.add(t);
+          v =  nodeBuilder.buildLiteralNode(t.image, getLocation(t),
+              pseudoPageTokens);
+          parameters.add(v);
+          pseudoPageTokens.clear();
+        }
+      )?
+      t = <COLON>  { pseudoPageTokens.add(t); }
+      t = <IDENTIFIER> {
+        pseudoPageTokens.add(t);
+        v =  nodeBuilder.buildLiteralNode(":" + t.image, getLocation(t),
+            pseudoPageTokens);
+        parameters.add(v);
+      }
+      ( <S> )*
+    )
+  |
+    ( ( v = composite_term() | v = extended_term() ) { parameters.add(v); }
+      ( <S> )*
+    )*
+  )
+  ( ( t = <LEFTBRACE>  { tokens.add(t); }
+      ( <S> )* block = styleDeclaration()
+      t = <RIGHTBRACE> { tokens.add(t);}
+    )
+    |
+    t = <SEMICOLON> { tokens.add(t);} )
+  {
+    SourceCodeLocation endLocation = getLocation(t);
+    CssAtRuleNode at = nodeBuilder.buildUnknownAtRuleNode(name, block,
+        this.mergeLocations(beginLocation, endLocation), parameters, tokens);
+    return at;
+  }
+}
+
+// (WebKit specific extension. We need a separate rule for the
+//  WebKit keyframes, because they don't follow the standard grammar exactly.)
+// webkit_keyframes_rule
+//   : '@-webkit-keyframes' S* IDENTIFIER S*
+//     '{' S* webkit_keyframes_block  '}'*
+//   ;
+CssAtRuleNode webkit_keyframes_rule() :
+{
+  Token t;
+  SourceCodeLocation beginLocation = null;
+  CssLiteralNode name;
+  CssBlockNode block = null;
+  List<CssValueNode> parameters = Lists.newArrayList();
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  t = <WEBKITKEYFRAMES>
+  {
+    beginLocation = this.getLocation(t);
+    name = new CssLiteralNode(t.image.substring(1), beginLocation);
+    tokens.add(t);
+  }
+  ( <S> )*
+  t = <IDENTIFIER>
+  {
+    List<Token> identifierTokens = Lists.newArrayList();
+    identifierTokens.add(t);
+    CssLiteralNode l =
+      nodeBuilder.buildLiteralNode(t.image, getLocation(t), identifierTokens);
+    parameters.add(l);
+  }
+  ( <S> )*
+  ( t = <LEFTBRACE>  { tokens.add(t); }
+      ( <S> )* block = webkit_keyframes_block()
+      t = <RIGHTBRACE> { tokens.add(t);}
+  )
+  {
+    SourceCodeLocation endLocation = getLocation(t);
+    CssAtRuleNode at = nodeBuilder.buildWebkitKeyframesNode(name, block,
+        this.mergeLocations(beginLocation, endLocation), parameters, tokens);
+    return at;
+  }
+}
+
+// (WebKit specific extension)
+// webkit_keyframes_block
+//   : [ webkit_keyframe_ruleset S* ]*
+//   ;
+CssBlockNode webkit_keyframes_block() :
+{
+  CssBlockNode block;
+  CssNode n;
+}
+{
+  {
+    block = new CssBlockNode(true);
+  }
+  ((n = webkit_keyframe_ruleSet()) { block.addChildToBack(n); }
+   ( <S> )*)*
+  { return block; }
+}
+
+// (WebKit specific extension)
+// webkit_keyframe_ruleset
+//   : key_list '{' style_declarations '}'
+//   ;
+CssKeyframeRulesetNode webkit_keyframe_ruleSet() :
+{
+  CssKeyListNode keys;
+  CssDeclarationBlockNode declarations;
+  Token t;
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  keys = keyList()
+  t = <LEFTBRACE> { tokens.add(t); }
+  declarations = styleDeclaration()
+  t = <RIGHTBRACE> { tokens.add(t); }
+  {
+    CssKeyframeRulesetNode ruleSet = nodeBuilder.buildKeyframeRulesetNode(declarations, keys, tokens);
+    return ruleSet;
+  }
+}
+
+// (WebKit specific extension)
+// key_list
+//   : key [ ',' S* key ]*
+//   ;
+CssKeyListNode keyList() :
+{
+  CssKeyListNode list = new CssKeyListNode();
+  CssKeyNode key;
+  Token t;
+}
+{
+  key = key() { list.addChildToBack(key); }
+  ( t = <COMMA> { nodeBuilder.attachComment(t, key); }
+    ( <S> )* key = key() { list.addChildToBack(key); }
+  )*
+  { return list; }
+}
+
+// (WebKit specific extension)
+// key
+//   : PERCENTAGE | IDENTIFIER
+//   ;
+CssKeyNode key() :
+{
+  CssKeyNode n;
+  Token key, t, dim;
+  String value;
+  List<Token> tokens = Lists.newArrayList();
+  SourceCodeLocation beginLocation;
+}
+{
+  { beginLocation = this.getLocation(token.next); }
+  (
+   (key = <NUMBER>) { tokens.add(key); }
+   (dim = <PERCENT>) { tokens.add(dim); value = key.image + dim.image; }
+   | key = <IDENTIFIER> { tokens.add(key); value = key.image; }
+  )
+  ( t = <S> { tokens.add(t); } )*
+  {
+    SourceCodeLocation endLocation = this.getLocation();
+    CssKeyNode keyNode = nodeBuilder.buildKeyNode(key, value,
+         this.mergeLocations(beginLocation, endLocation));
+    nodeBuilder.attachComments(tokens, keyNode);
+    return keyNode;
+  }
+}
+
+// (non-standard GSS extension)
+// block
+//   : [ [  ruleset | at_rule | webkit_keyframes_rule
+//        | at_rule_with_decl_block
+//       ] S*
+//     ]*
+//   ;
+CssBlockNode block(boolean isEnclosedWithBraces) :
+{
+  CssBlockNode block;
+  CssNode n;
+}
+{
+  {
+    if (isEnclosedWithBraces) {
+      block = new CssBlockNode(isEnclosedWithBraces);
+    } else {
+      block = globalBlock;
+    }
+  }
+  ((  n = ruleSet()
+    | n = at_rule()
+    | n = webkit_keyframes_rule()
+    | n = atRuleWithDeclBlock()
+   ) { block.addChildToBack(n); }
+   ( <S> )*)*
+  { return block; }
+}
+
+
+void start() :
+{}
+{
+  ( <S> )*
+  block(false)
+  <EOF>
+}
