@@ -23,7 +23,8 @@ import com.google.common.css.compiler.ast.GssFunction;
 import java.util.Map;
 
 /**
- * Provides a map of the arithmetic GSS functions for use in tests.
+ * Provides the default set of functions that are bundled with Closure
+ * Stylesheets.
  *
  */
 public class DefaultGssFunctionMapProvider implements GssFunctionMapProvider {
