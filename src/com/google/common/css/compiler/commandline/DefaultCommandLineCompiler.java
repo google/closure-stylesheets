@@ -23,7 +23,6 @@ import com.google.common.css.ExitCodeHandler;
 import com.google.common.css.JobDescription;
 import com.google.common.css.JobDescription.OutputFormat;
 import com.google.common.css.RecordingSubstitutionMap;
-import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.BasicErrorManager;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.ErrorManager;
@@ -91,10 +90,8 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
       result.append(job.copyrightNotice);
     }
 
-      for (SourceCode source : job.inputs) {
-        GssParser parser = new GssParser(source);
-        parseAndPrint(result, parser);
-      }
+      GssParser parser = new GssParser(job.inputs);
+      parseAndPrint(result, parser);
 
     return result.toString();
   }
