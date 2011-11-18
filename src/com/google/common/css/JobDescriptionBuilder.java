@@ -50,6 +50,7 @@ public class JobDescriptionBuilder {
   private boolean allowUnrecognizedFunctions;
   private Set<String> allowedNonStandardFunctions;
   private boolean allowWebkitKeyframes;
+  private boolean processDependencies;
   private String cssRenamingPrefix;
   private List<String> excludedClassesFromRenaming;
   private GssFunctionMapProvider gssFunctionMapProvider;
@@ -73,6 +74,7 @@ public class JobDescriptionBuilder {
     this.allowUnrecognizedFunctions = false;
     this.allowedNonStandardFunctions = Sets.newHashSet();
     this.allowWebkitKeyframes = false;
+    this.processDependencies = false;
     this.cssRenamingPrefix = "";
     this.excludedClassesFromRenaming = Lists.newArrayList();
     this.gssFunctionMapProvider = null;
@@ -292,6 +294,12 @@ public class JobDescriptionBuilder {
     return setAllowWebkitKeyframes(true);
   }
 
+  public JobDescriptionBuilder setProcessDependencies(boolean process) {
+    checkJobIsNotAlreadyCreated();
+    this.processDependencies = process;
+    return this;
+  }
+
 
   public JobDescription getJobDescription() {
     if (job != null) {
@@ -305,8 +313,8 @@ public class JobDescriptionBuilder {
         optimize, trueConditionNames, useInternalBidiFlipper, swapLtrRtlInUrl,
         swapLeftRightInUrl, simplifyCss, eliminateDeadStyles,
         allowUnrecognizedFunctions, allowedNonStandardFunctions,
-        allowWebkitKeyframes, allowedAtRules, cssRenamingPrefix,
-        excludedClassesFromRenaming, gssFunctionMapProvider,
+        allowWebkitKeyframes, processDependencies, allowedAtRules,
+        cssRenamingPrefix, excludedClassesFromRenaming, gssFunctionMapProvider,
         cssSubstitutionMapProvider);
     return job;
   }

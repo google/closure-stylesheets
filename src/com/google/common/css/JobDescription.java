@@ -46,6 +46,7 @@ public class JobDescription {
   public final boolean allowUnrecognizedFunctions;
   public final Set<String> allowedNonStandardFunctions;
   public final boolean allowWebkitKeyframes;
+  public final boolean processDependencies;
   public final ImmutableSet<String> allowedAtRules;
   public final String cssRenamingPrefix;
   public final List<String> excludedClassesFromRenaming;
@@ -103,7 +104,8 @@ public class JobDescription {
       boolean swapLeftRightInUrl, boolean simplifyCss,
       boolean eliminateDeadStyles, boolean allowUnrecognizedFunctions,
       Set<String> allowedNonStandardFunctions,
-      boolean allowWebkitKeyframes, Set<String> allowedAtRules,
+      boolean allowWebkitKeyframes, boolean processDependencies,
+      Set<String> allowedAtRules,
       String cssRenamingPrefix, List<String> excludedClassesFromRenaming,
       GssFunctionMapProvider gssFunctionMapProvider,
       SubstitutionMapProvider cssSubstitutionMapProvider) {
@@ -131,6 +133,7 @@ public class JobDescription {
     this.allowedNonStandardFunctions = ImmutableSet.copyOf(
         allowedNonStandardFunctions);
     this.allowWebkitKeyframes = allowWebkitKeyframes;
+    this.processDependencies = processDependencies;
     this.allowedAtRules = ImmutableSet.copyOf(allowedAtRules);
     this.cssRenamingPrefix = cssRenamingPrefix;
     this.excludedClassesFromRenaming =

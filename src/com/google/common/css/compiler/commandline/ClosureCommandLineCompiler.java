@@ -178,6 +178,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setAllowUnrecognizedFunctions(allowUnrecognizedFunctions);
       builder.setAllowedNonStandardFunctions(allowedNonStandardFunctions);
       builder.setAllowWebkitKeyframes(true);
+      builder.setProcessDependencies(true);
       builder.setExcludedClassesFromRenaming(excludedClassesFromRenaming);
       builder.setSimplifyCss(true);
       builder.setEliminateDeadStyles(true);

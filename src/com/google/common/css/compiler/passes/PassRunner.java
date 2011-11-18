@@ -64,6 +64,11 @@ public class PassRunner {
    * per input file.
    */
   public void runPasses(CssTree cssTree) {
+    if (job.processDependencies) {
+      new CheckDependencyNodes(cssTree.getMutatingVisitController(),
+          errorManager).runPass();
+    }
+
     new CreateMixins(cssTree.getMutatingVisitController(),
         errorManager).runPass();
     new CreateDefinitionNodes(cssTree.getMutatingVisitController(),

@@ -86,6 +86,10 @@ public abstract class CssAtRuleNode extends CssNodesListNode<CssValueNode> {
     DEFMIXIN("defmixin"),
     MIXIN("mixin", false /* hasBlock */),
 
+    // GSS dependency management
+    PROVIDE("provide", false /* hasBlock */),
+    REQUIRE("require", false /* hasBlock */),
+
     // An at rule of which we know nothing about. We can safely assume its
     // canonical name is its "name" literal converted to lower case and with no
     // escapes.
