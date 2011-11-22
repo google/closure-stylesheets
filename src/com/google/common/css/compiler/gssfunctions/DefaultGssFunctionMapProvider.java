@@ -31,8 +31,8 @@ public class DefaultGssFunctionMapProvider implements GssFunctionMapProvider {
 
   public Map<String, GssFunction> get() {
     return new ImmutableMap.Builder<String, GssFunction>()
-        .put("add", new ArithmeticGssFunctions.Plus())
-        .put("sub", new ArithmeticGssFunctions.Minus())
+        .put("add", new GssFunctions.AddToNumericValue())
+        .put("sub", new GssFunctions.SubtractFromNumericValue())
         .put("mult", new ArithmeticGssFunctions.Mult())
         .put("div", new ArithmeticGssFunctions.Div())
         .put("min", new ArithmeticGssFunctions.Min())

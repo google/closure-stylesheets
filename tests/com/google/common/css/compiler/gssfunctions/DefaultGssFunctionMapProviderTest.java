@@ -90,26 +90,29 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         allowUnknownFunctions, allowedNonStandardFunctions).runPass();
   }
 
-  public void testAddPercentagesDoubleQuotedUnit() throws GssParserException {
-    test("A { width: add(5, 10, \"%\"); }",
+  public void testAddPercentagesMissingUnit() throws GssParserException {
+    parseAndRun("A { width: add(5%, 10); }",
+        "Size must be 0 or have a unit; was: 10");
+  }
+
+  public void testAddPercentagesZeroSize() throws GssParserException {
+    test("A { width: add(5%, 0, 10%); }",
+        " A { width: 15%; }");
+    test("A { width: add(5%, 0%, 10%); }",
+        " A { width: 15%; }");
+    test("A { width: add(5%, -0, 10%); }",
+        " A { width: 15%; }");
+    test("A { width: add(5%, -0%, 10%); }",
         " A { width: 15%; }");
   }
 
-  // TODO(bolinfest): When single quoted arguments are handled correctly, modify
-  // this test to use the test() method.
-  public void testAddPercentagesSingleQuotedUnit() throws GssParserException {
-    parseAndRun("A { width: add(5, 10, '%'); }");
-    // This output is not desirable, but it documents what currently happens.
-    assertEquals(linesToString(
-        "A {",
-        "  width: 15'%';",
-        "}",
-        ""), getCompiledCss());
+  public void testAddPercentagesImplicitUnit() throws GssParserException {
+    test("A { width: add(5%, 10%); }",
+        " A { width: 15%; }");
   }
 
-  public void testAddPercentagesImplicitUnit() throws GssParserException {
-    // TODO(bolinfest): Supplying arguments in this way should be supported.
-    parseAndRun("A { width: add(5%, 10%); }",
-          "Incorrect number of arguments: must have at least three");
+  public void testAddNegativeValues() throws GssParserException {
+    test("A { width: add(5%, 10%, -25%, 50%); }",
+        " A { width: 40%; }");
   }
 }
