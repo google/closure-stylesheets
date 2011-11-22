@@ -61,9 +61,11 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           // CSS 3
           "calc",
           "cubic-bezier",
+          "format", // used with @font-face
           "from",
           "hsl",
           "hsla",
+          "local", // used with @font-face
           "rgba",
           "rotate",
           "rotateX",

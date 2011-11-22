@@ -27,6 +27,7 @@ import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
 import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
+import com.google.common.css.compiler.ast.CssFontFaceNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssImportRuleNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
@@ -75,6 +76,10 @@ public class CreateStandardAtRuleNodes extends DefaultTreeVisitor implements Css
   static final String PAGE_SELECTOR_PARAMETERS_ERROR_MESSAGE =
     "Page selectors are not allowed to have parameters";
 
+  @VisibleForTesting
+  static final String FONT_FACE_PARAMETERS_ERROR_MESSAGE =
+    "@font-face is not allowed to have parameters";
+
   private static final List<Type> PAGE_SELECTORS =
     ImmutableList.of(Type.TOP_LEFT_CORNER,
         Type.TOP_LEFT, Type.TOP_CENTER, Type.TOP_RIGHT, Type.TOP_RIGHT_CORNER,
@@ -106,6 +111,7 @@ public class CreateStandardAtRuleNodes extends DefaultTreeVisitor implements Css
     String importName = CssAtRuleNode.Type.IMPORT.getCanonicalName();
     String mediaName = CssAtRuleNode.Type.MEDIA.getCanonicalName();
     String pageName = CssAtRuleNode.Type.PAGE.getCanonicalName();
+    String fontFaceName = CssAtRuleNode.Type.FONT_FACE.getCanonicalName();
 
     List<CssValueNode> params = node.getParameters();
 
@@ -149,6 +155,8 @@ public class CreateStandardAtRuleNodes extends DefaultTreeVisitor implements Css
       createMediaRule(node);
     } else if (node.getName().getValue().equals(pageName)) {
       createPageRule(node);
+    } else if (node.getName().getValue().equals(fontFaceName)) {
+      createFontFaceRule(node);
     } else {
       for (Type type : PAGE_SELECTORS) {
         if (node.getName().getValue().equals(type.getCanonicalName())) {
@@ -356,6 +364,36 @@ public class CreateStandardAtRuleNodes extends DefaultTreeVisitor implements Css
     pageSelector.setSourceCodeLocation(node.getSourceCodeLocation());
     visitController.replaceCurrentBlockChildWith(
         Lists.newArrayList(pageSelector), true /* visitTheReplacementNodes */);
+  }
+
+  /**
+   * See the
+   * <a href="http://www.w3.org/TR/css3-fonts/#font-face-rule">
+   * font-face grammar</a> for more information.
+   */
+  private void createFontFaceRule(CssUnknownAtRuleNode node) {
+    if (node.getBlock() == null) {
+      reportError(NO_BLOCK_ERROR_MESSAGE, node);
+      return;
+    }
+    if (!(node.getBlock() instanceof CssDeclarationBlockNode)) {
+      reportError(ONLY_DECLARATION_BLOCK_ERROR_MESSAGE, node);
+      return;
+    }
+    if (!node.getParameters().isEmpty()) {
+      reportError(FONT_FACE_PARAMETERS_ERROR_MESSAGE, node);
+      return;
+    }
+
+    // TODO(bolinfest): Verify that all declarations in the block are valid
+    // font-descriptions: font-family, src, font-style, etc. See
+    // http://www.w3.org/TR/css3-fonts/#font-resources for a complete list.
+
+    CssDeclarationBlockNode block = (CssDeclarationBlockNode) node.getBlock();
+    CssFontFaceNode fontFace = new CssFontFaceNode(node.getComments(), block);
+    fontFace.setSourceCodeLocation(node.getSourceCodeLocation());
+    visitController.replaceCurrentBlockChildWith(
+        Lists.newArrayList(fontFace), true /* visitTheReplacementNodes */);
   }
 
   private boolean checkIfString(CssValueNode node) {

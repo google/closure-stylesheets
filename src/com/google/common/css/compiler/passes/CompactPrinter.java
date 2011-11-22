@@ -27,6 +27,7 @@ import com.google.common.css.compiler.ast.CssConditionalBlockNode;
 import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
+import com.google.common.css.compiler.ast.CssFontFaceNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssIdSelectorNode;
 import com.google.common.css.compiler.ast.CssImportRuleNode;
@@ -155,6 +156,12 @@ public class CompactPrinter extends DefaultTreeVisitor
       sb.append(' ');
       sb.append(param.getValue());
     }
+    return true;
+  }
+
+  @Override
+  public boolean enterFontFace(CssFontFaceNode node) {
+    sb.append(node.getType().toString());
     return true;
   }
 

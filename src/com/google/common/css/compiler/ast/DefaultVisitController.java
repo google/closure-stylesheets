@@ -623,6 +623,39 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   @VisibleForTesting
+  class VisitFontFaceState extends VisitChildrenOptionalState<CssNode> {
+
+    private final CssFontFaceNode node;
+
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
+
+    VisitFontFaceState(CssFontFaceNode node) {
+      this.node = node;
+    }
+
+    @Override
+    public void doVisit() {
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterFontFace(node);
+      } else {
+        visitor.leaveFontFace(node);
+      }
+    }
+
+    @Override
+    public void transitionToNextState() {
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
+      }
+    }
+  }
+
+  @VisibleForTesting
   class VisitConditionalBlockState extends BaseVisitState<CssNode> {
 
     private final CssConditionalBlockNode block;
@@ -1775,6 +1808,11 @@ class DefaultVisitController implements MutatingVisitController {
     // VisitUnknownAtRuleBlockState
     if (child instanceof CssPageSelectorNode) {
       return new VisitPageSelectorState((CssPageSelectorNode) child);
+    }
+
+    // VisitUnknownAtRuleBlockState
+    if (child instanceof CssFontFaceNode) {
+      return new VisitFontFaceState((CssFontFaceNode) child);
     }
 
     if (child instanceof CssComponentNode) {

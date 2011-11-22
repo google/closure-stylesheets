@@ -249,6 +249,14 @@ public class DefaultTreeVisitor implements CssTreeVisitor {
   @Override
   public void leavePageSelector(CssPageSelectorNode node) {}
 
+  @Override
+  public boolean enterFontFace(CssFontFaceNode node) {
+    return true;
+  }
+
+  @Override
+  public void leaveFontFace(CssFontFaceNode node) {}
+
   public boolean enterAttributeSelector(
       CssAttributeSelectorNode attributeSelector) {
     return true;

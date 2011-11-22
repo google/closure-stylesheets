@@ -28,6 +28,7 @@ import com.google.common.css.compiler.ast.CssConditionalRuleNode;
 import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
+import com.google.common.css.compiler.ast.CssFontFaceNode;
 import com.google.common.css.compiler.ast.CssFunctionArgumentsNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssIdSelectorNode;
@@ -150,6 +151,12 @@ public class PrettyPrinter extends DefaultTreeVisitor
       sb.append(" ");
       sb.append(param.getValue());
     }
+    return true;
+  }
+
+  @Override
+  public boolean enterFontFace(CssFontFaceNode node) {
+    sb.append(node.getType().toString());
     return true;
   }
 

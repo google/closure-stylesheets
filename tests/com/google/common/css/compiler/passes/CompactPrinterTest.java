@@ -301,6 +301,32 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
         "@media print { @page { @bottom-right-corner { a:b } } }");
   }
 
+  public void testFontFace1() {
+    // Example taken from http://www.w3.org/TR/css3-fonts/#src-desc.
+    assertNewCompactPrintedResult(
+        "@font-face{font-family:MyGentium;"
+        + "src:local(Gentium),url(Gentium.ttf)}",
+        lines(
+            "@font-face {",
+            "  font-family: MyGentium;",
+            "  src: local(Gentium), url(Gentium.ttf);",
+            "}"));
+  }
+
+  public void testFontFace2() {
+    // Example taken from http://www.w3.org/TR/css3-fonts/#src-desc.
+    assertNewCompactPrintedResult(
+        "@font-face{font-family:Headline;"
+        + "src:local(Futura-Medium),"
+        + "url(fonts.svg#MyGeometricModern) format(\"svg\")}",
+        lines(
+            "@font-face {",
+            "  font-family: Headline;",
+            "  src: local(Futura-Medium),",
+            "       url(fonts.svg#MyGeometricModern) format(\"svg\");",
+            "}"));
+  }
+
   public void testAlphaImageLoader() throws Exception {
     assertNewCompactPrintedResult(
         ".CSS_CW_MUC_BUBBLE_BOTTOM_LEFT_ANCHOR{filter:"

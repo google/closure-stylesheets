@@ -16,6 +16,7 @@
 
 package com.google.common.css.compiler.passes;
 
+import com.google.common.css.compiler.ast.CssFontFaceNode;
 import com.google.common.css.compiler.ast.CssImportRuleNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssPageRuleNode;
@@ -283,5 +284,23 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
   public void testPageSelectorWithParametersError() throws Exception {
     parseAndRun("@page { @top-left param { } }",
         CreateStandardAtRuleNodes.PAGE_SELECTOR_PARAMETERS_ERROR_MESSAGE);
+  }
+
+  public void testCreateFontNode() throws GssParserException {
+    parseAndRun("@font-face { font-family: Gentium }");
+    assertTrue(getFirstActualNode() instanceof CssFontFaceNode);
+    CssFontFaceNode fontFace = (CssFontFaceNode) getFirstActualNode();
+    assertEquals("font-face", fontFace.getName().getValue());
+    assertEquals(0, fontFace.getParametersCount());
+  }
+
+  public void testCreateFontNodeWithoutBlockError() throws GssParserException {
+    parseAndRun("@font-face;",
+        CreateStandardAtRuleNodes.NO_BLOCK_ERROR_MESSAGE);
+  }
+
+  public void testCreateFontNodeWithParametersError() throws Exception {
+    parseAndRun("@font-face param { font-family: Gentium }",
+        CreateStandardAtRuleNodes.FONT_FACE_PARAMETERS_ERROR_MESSAGE);
   }
 }

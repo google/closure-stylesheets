@@ -575,7 +575,7 @@ PARSER_END(GssParserCC)
 
   // Top-level @-rules that contain a declaration block. General top-level
   // @-rules contain a block with rulesets.
-  | < ATRULESWITHDECLBLOCK: <AT> ( "page" | "defmixin" ) >
+  | < ATRULESWITHDECLBLOCK: <AT> ( "page" | "defmixin" | "font-face" ) >
 
   | < ATKEYWORD: <AT> <IDENTIFIER> >
 
