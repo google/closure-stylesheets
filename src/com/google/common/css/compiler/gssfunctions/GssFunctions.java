@@ -816,7 +816,7 @@ public class GssFunctions {
      */
     @Override
     public Integer getNumExpectedArguments() {
-      // Takes a varible number of arguments.
+      // Takes a variable number of arguments.
       return null;
     }
 
@@ -831,7 +831,8 @@ public class GssFunctions {
         ErrorManager errorManager) throws GssFunctionException {
       List<CssNumericNode> numericList = Lists.newArrayList();
       for (CssValueNode arg : args) {
-        numericList.add(getSizeNode(arg, errorManager));
+        numericList.add(getSizeNode(arg, errorManager,
+            true /* isUnitOptional */));
       }
       return ImmutableList.<CssValueNode>of(
           calculate(numericList, errorManager));
@@ -844,14 +845,18 @@ public class GssFunctions {
       for (String arg : args) {
         Size sizeWithUnits = parseSize(arg);
         numericList.add(
-            new CssNumericNode(sizeWithUnits.size, sizeWithUnits.units, null));
+            new CssNumericNode(sizeWithUnits.size, sizeWithUnits.units));
       }
-
       CssNumericNode result = calculate(numericList, null);
       return result.getNumericPart() + result.getUnit();
     }
 
-    private CssNumericNode calculate(List<CssNumericNode> args,
+    // Note: Keep an eye on the performance of these functions, as creating
+    // intermediate CssNumericNodes may be wasteful. Instead, the values in the
+    // nodes could be used directly for computation, though that may make
+    // accurate error reporting more difficult.
+
+    protected CssNumericNode calculate(List<CssNumericNode> args,
         ErrorManager errorManager) throws GssFunctionException {
       if (args.size() < 2) {
         throw error("Not enough arguments",
@@ -871,8 +876,8 @@ public class GssFunctions {
           overallUnit = node.getUnit();
         } else if (!overallUnit.equals(node.getUnit())) {
           throw error(
-              "Units don't match (" + overallUnit + " vs " + node.getUnit()
-              + ")",
+              "Parameters' units don't match (\""
+              + overallUnit + "\" vs \"" + node.getUnit() + "\")",
               errorManager, node.getSourceCodeLocation());
         }
         total = performOperation(total, value);
@@ -884,25 +889,32 @@ public class GssFunctions {
           args.get(0).getSourceCodeLocation());
     }
 
-    // Perform the mathematical operation (addition or subtraction).
+    // Perform the mathematical operation.
     protected abstract double performOperation(double left, double right);
 
-    // The identity element (0) has no effect on the output. Any units
-    // (px, pt, etc.) will be  ignored.
+    /**
+     * By default, this method returns {@code false}.
+     * @return whether the identity value has no effect on the output. In this
+     *     case, any units (px, pt, etc.) will be ignored.
+     */
     protected boolean isIdentityValue(double value) {
-      return value == 0;
+      return false;
     }
   }
 
 
   /**
    * The "addToNumericValue" function adds a list of numeric values.
-   * </ul></p>
    */
   public static class AddToNumericValue extends LeftAssociativeOperator {
     @Override
     protected double performOperation(double left, double right) {
       return left + right;
+    }
+
+    @Override
+    protected boolean isIdentityValue(double value) {
+      return value == 0.0;
     }
   }
 
@@ -911,10 +923,107 @@ public class GssFunctions {
    * SubtractFromNumericValue(a, b, c) evaluates to ((a - b) - c).
    */
   public static class SubtractFromNumericValue extends LeftAssociativeOperator {
-
     @Override
     protected double performOperation(double left, double right) {
       return left - right;
+    }
+
+    @Override
+    protected boolean isIdentityValue(double value) {
+      return value == 0.0;
+    }
+  }
+
+  /**
+   * A {@link GssFunction} that returns the max value from its list of
+   * arguments.
+   */
+  public static class MaxValue extends LeftAssociativeOperator {
+    @Override
+    protected double performOperation(double left, double right) {
+      return Math.max(left, right);
+    }
+  }
+
+  /**
+   * A {@link GssFunction} that returns the min value from its list of
+   * arguments.
+   */
+  public static class MinValue extends LeftAssociativeOperator {
+    @Override
+    protected double performOperation(double left, double right) {
+      return Math.min(left, right);
+    }
+  }
+
+  /**
+   * A {@link ScalarLeftAssociativeOperator} is a left associative operator
+   * whose arguments are all scalars, with the possible exception of the first
+   * argument, which may be a {@link Size} rather than a scalar.
+   */
+  private static abstract class ScalarLeftAssociativeOperator extends
+      LeftAssociativeOperator {
+
+    @Override
+    protected CssNumericNode calculate(List<CssNumericNode> args,
+        ErrorManager errorManager) throws GssFunctionException {
+      if (args.size() == 0) {
+        throw error("Not enough arguments",
+                    errorManager, args.get(0).getSourceCodeLocation());
+      }
+
+      double total = Double.valueOf(args.get(0).getNumericPart());
+      String overallUnit = args.get(0).getUnit();
+
+      for (CssNumericNode node : args.subList(1, args.size())) {
+        if (node.getUnit() != null
+            && !node.getUnit().equals(CssNumericNode.NO_UNITS)) {
+          throw error(
+              "Only the first argument may have a unit associated with it, "
+              + " but has unit: " + node.getUnit(),
+              errorManager, node.getSourceCodeLocation());
+        }
+
+        double value = Double.valueOf(node.getNumericPart());
+        total = performOperation(total, value);
+      }
+      String resultString = new DecimalFormat("#.##").format(total);
+
+      return new CssNumericNode(resultString,
+          overallUnit != null ? overallUnit : CssNumericNode.NO_UNITS,
+          args.get(0).getSourceCodeLocation());
+    }
+  }
+
+  /**
+   * A {@link GssFunction} that returns the product of its arguments. Only the
+   * first argument may have a unit.
+   */
+  public static class Mult extends ScalarLeftAssociativeOperator {
+    @Override
+    protected double performOperation(double left, double right) {
+      return left * right;
+    }
+
+    @Override
+    protected boolean isIdentityValue(double value) {
+      return value == 1.0;
+    }
+  }
+
+  /**
+   * A {@link GssFunction} that returns the product of its arguments. Only the
+   * first argument may have a unit.
+   */
+  public static class Div extends ScalarLeftAssociativeOperator {
+    @Override
+    protected double performOperation(double left, double right) {
+      return left / right;
+    }
+
+    @Override
+    protected boolean isIdentityValue(double value) {
+      return value == 1.0;
     }
   }
 
@@ -1204,24 +1313,37 @@ public class GssFunctions {
 
   private static CssNumericNode getSizeNode(CssValueNode valueNode,
       ErrorManager errorManager) throws GssFunctionException {
+    return getSizeNode(valueNode, errorManager, false /* isUnitOptional */);
+  }
+
+  private static CssNumericNode getSizeNode(CssValueNode valueNode,
+      ErrorManager errorManager, boolean isUnitOptional)
+      throws GssFunctionException {
     SourceCodeLocation location = valueNode.getSourceCodeLocation();
     if (valueNode instanceof CssNumericNode) {
       CssNumericNode node = (CssNumericNode)valueNode;
-      checkSize(node.getNumericPart(), node.getUnit(), errorManager, location);
+      checkSize(node.getNumericPart(), node.getUnit(), errorManager, location,
+          isUnitOptional);
       return node;
     }
-    String message = "Size (second argument) must be a CssnumericNode with "
-      + "pixels or 0; was: " + valueNode.toString();
+    String message = "Size must be a CssNumericNode with a unit or 0; "
+        + "was: " + valueNode.toString();
     throw error(message, errorManager, location);
   }
 
   private static void checkSize(String valueString, String unit,
       ErrorManager errorManager, SourceCodeLocation location)
       throws GssFunctionException {
+    checkSize(valueString, unit, errorManager, location,
+        false /* isUnitOptional */);
+  }
 
+  private static void checkSize(String valueString, String unit,
+      ErrorManager errorManager, SourceCodeLocation location,
+      boolean isUnitOptional) throws GssFunctionException {
     if (unit.equals(CssNumericNode.NO_UNITS)) {
       Double value = Double.parseDouble(valueString);
-      if (value != 0) {
+      if (value != 0.0 && !isUnitOptional) {
         String message = "Size must be 0 or have a unit; was: "
             + valueString + unit;
         throw error(message, errorManager, location);

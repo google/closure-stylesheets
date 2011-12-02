@@ -72,8 +72,8 @@ public class ResolveCustomFunctionNodesForChunksTest
 
   public void testFunctionWithNoDefInFunction() {
     assertConstants(
-        "@def A 1; .A { width: plus(A, plus(0, 2, \"\"), px);}",
-        "plus(A,2,px)");
+        "@def A 1px; .A { width: plus(A, plus(0, 2px));}",
+        "plus(A,2px)");
   }
 
   public void testFunctionWithDefInFunction() {

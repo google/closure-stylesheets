@@ -85,7 +85,7 @@ public class CssNumericNode extends CssValueNode {
     this.unit = unit;
   }
 
-  public String getNumericPart(){
+  public String getNumericPart() {
     return numericPart;
   }
 

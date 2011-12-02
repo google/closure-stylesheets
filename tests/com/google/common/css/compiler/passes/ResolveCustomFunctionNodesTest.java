@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
-import com.google.common.css.compiler.gssfunctions.ArithmeticGssFunctions;
+import com.google.common.css.compiler.gssfunctions.GssFunctions;
 
 import java.util.Map;
 
@@ -34,12 +34,12 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
 
   protected Map<String, GssFunction> createTestFunctionMap() {
     return new ImmutableMap.Builder<String, GssFunction>()
-        .put("plus", new ArithmeticGssFunctions.Plus())
-        .put("minus", new ArithmeticGssFunctions.Minus())
-        .put("mult", new ArithmeticGssFunctions.Mult())
-        .put("div", new ArithmeticGssFunctions.Div())
-        .put("min", new ArithmeticGssFunctions.Min())
-        .put("max", new ArithmeticGssFunctions.Max())
+        .put("plus", new GssFunctions.AddToNumericValue())
+        .put("minus", new GssFunctions.SubtractFromNumericValue())
+        .put("mult", new GssFunctions.Mult())
+        .put("div", new GssFunctions.Div())
+        .put("min", new GssFunctions.MinValue())
+        .put("max", new GssFunctions.MaxValue())
         .build();
   }
 
@@ -66,42 +66,37 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
   }
 
   public void testWrongNumberOfArgsError() throws Exception {
-    parseAndRun("A { width: max(2,3) }",
-        "Incorrect number of arguments: must have at least three");
+    parseAndRun("A { width: plus(2px); }",
+        "Not enough arguments");
   }
 
   public void testWrongArgumentError1() throws Exception {
     parseAndRun("A { width: max(2,bar,foo) }",
-        "Incorrect argument #2 in function");
-  }
-
-  public void testWrongArgumentError2() throws Exception {
-    parseAndRun("A { width: max(2,3,4); }",
-        "Incorrect last argument in function -- should be a unit.");
+        "Size must be a CssNumericNode with a unit or 0; was: bar");
   }
 
   public void testPlus() throws Exception {
-    parseAndRun("A { width: plus(2,3,px) }");
+    parseAndRun("A { width: plus(2px, 3px) }");
     assertEquals("[5px]", getFirstPropertyValue().toString());
   }
 
   public void testMinus() throws Exception {
-    parseAndRun("A { width: minus(2,5.5,em) }");
+    parseAndRun("A { width: minus(2em, 5.5em) }");
     assertEquals("[-3.5em]", getFirstPropertyValue().toString());
   }
 
   public void testMax() throws Exception {
-    parseAndRun("A { width: max(-2,-5,\"%\") }");
+    parseAndRun("A { width: max(-2%, -5%) }");
     assertEquals("[-2%]", getFirstPropertyValue().toString());
   }
 
   public void testMultiply() throws Exception {
-    parseAndRun("A { width: mult(-2,-5,\"\") }");
+    parseAndRun("A { width: mult(-2, -5) }");
     assertEquals("[10]", getFirstPropertyValue().toString());
   }
 
   public void testFunctionWithinFunction() throws Exception {
-    parseAndRun("A { width: max(10, max(2,30,\"\"), px) }");
+    parseAndRun("A { width: max(10px, max(2px, 30px)) }");
     assertEquals("[30px]", getFirstPropertyValue().toString());
   }
 }
