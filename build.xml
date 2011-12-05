@@ -1,8 +1,11 @@
-<project name="closure-stylesheets" default="jar">
+<project name="closure-stylesheets"
+         default="jar"
+         xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
   <property name="src.dir"           value="${basedir}/src" />
   <property name="tests.dir"         value="${basedir}/tests" />
   <property name="lib.dir"           value="${basedir}/lib" />
+  <property name="tools.dir"         value="${basedir}/tools" />
   <property name="build.dir"         value="${basedir}/build" />
   <property name="genfiles.dir"      value="${build.dir}/genfiles" />
   <property name="java-genfiles.dir" value="${genfiles.dir}/java" />
@@ -10,6 +13,7 @@
   <property name="compiler-jarfile"
             value="${build.dir}/${ant.project.name}.jar" />
   <property name="testClasses.dir"   value="${build.dir}/test" />
+  <property name="javadoc.dir"       value="${build.dir}/javadoc" />
   <property name="includeDebugInfo"  value="true" />
 
   <path id="classpath.path">
@@ -39,8 +43,18 @@
     </javac>
   </target>
 
+  <target name="yyyymmdd">
+    <exec outputproperty="build.yyyymmdd"
+          executable="date"
+          failonerror="true"
+          failifexecutionfails="true"
+          dir="${basedir}">
+      <arg value="+%Y%m%d" />
+    </exec>
+  </target>
+
   <target name="jar"
-          depends="compile"
+          depends="compile, yyyymmdd"
           description="packages the class files as a jar">
     <jar destfile="${compiler-jarfile}" update="true">
       <fileset dir="${classes.dir}" />
@@ -57,6 +71,13 @@
                    value="com.google.common.css.compiler.commandline.ClosureCommandLineCompiler" />
       </manifest>
     </jar>
+  </target>
+
+  <target name="release-jar"
+          depends="jar, yyyymmdd"
+          description="Builds a release that should be uploaded to http://code.google.com/p/closure-stylesheets/downloads/list">
+    <copy file="${compiler-jarfile}"
+          tofile="${build.dir}/closure-stylesheets-${build.yyyymmdd}.jar" />
   </target>
 
   <target name="compile-tests"
@@ -111,9 +132,136 @@
     <testing />
   </target>
 
+  <target name="javadoc"
+          description="Generates Javadoc for the project's source code.">
+    <mkdir dir="${javadoc.dir}" />
+    <javadoc destdir="${javadoc.dir}"
+             author="false"
+             protected="true"
+             windowtitle="Closure Stylesheets"
+             additionalparam=" -notimestamp"
+             >
+      <sourcepath>
+        <pathelement location="${src.dir}" />
+        <pathelement location="${java-genfiles.dir}" />
+      </sourcepath>
+      <classpath refid="classpath.path" />
+      <link href="http://java.sun.com/javase/6/docs/api/" />
+    </javadoc>
+  </target>
+
   <target name="all"
-          depends="compile,jar,compile-tests,test"
+          depends="compile,jar,compile-tests,test,javadoc"
           description="build all deliverables for the project"
           />
+
+  <!-- MAVEN -->
+
+  <!-- Ant tasks -->
+  <path id="maven-ant-tasks.classpath"
+        path="${tools.dir}/maven-ant-tasks-2.1.3.jar" />
+  <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+           uri="antlib:org.apache.maven.artifact.ant"
+           classpathref="maven-ant-tasks.classpath" />
+
+  <property name="mvn.build.dir" value="${build.dir}/maven" />
+
+  <!-- Generated pom.xml -->
+  <property name="pom.xml" value="${mvn.build.dir}/pom.xml" />
+
+
+  <!-- The following server is used to deploy releases to maven central via
+       Sonatypes publishing service which runs on oss.sonatype.org.
+
+       You will need to have an account on sonatype.org to push releases. You
+       can override these values if you want to deploy to a different
+       repository.
+  -->
+  <property name="maven-repository-url"
+            value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+  <property name="maven-repository-id" value="sonatype-nexus-staging" />
+
+  <target name="pom" depends="yyyymmdd">
+    <dirname property="pom.xml.dir" file="${pom.xml}" />
+    <mkdir dir="${pom.xml.dir}" />
+    <copy file="${basedir}/pom.template.xml"
+          tofile="${pom.xml}">
+      <filterset>
+        <filter token="build.yyyymmdd" value="${build.yyyymmdd}" />
+      </filterset>
+    </copy>
+
+    <artifact:pom id="project" file="${pom.xml}" />
+  </target>
+
+  <target name="mvn-install"
+          depends="pom, compile, javadoc">
+    <mkdir dir="${mvn.build.dir}" />
+
+    <property name="mvn-nodeps.jar"
+              value="${mvn.build.dir}/${ant.project.name}-${build.yyyymmdd}.jar"
+              />
+    <jar destfile="${mvn-nodeps.jar}" update="true">
+      <fileset dir="${classes.dir}" />
+    </jar>
+
+    <property name="mvn-sources.jar"
+              value="${mvn.build.dir}/${ant.project.name}-${build.yyyymmdd}-sources.jar"
+              />
+    <jar destfile="${mvn-sources.jar}" update="true">
+      <fileset dir="${src.dir}" />
+      <fileset dir="${java-genfiles.dir}" />
+    </jar>
+
+    <property name="mvn-javadoc.jar"
+              value="${mvn.build.dir}/${ant.project.name}-${build.yyyymmdd}-javadoc.jar"
+              />
+    <jar destfile="${mvn-javadoc.jar}" update="true">
+      <fileset dir="${javadoc.dir}" />
+    </jar>
+
+    <artifact:install file="${mvn-nodeps.jar}">
+      <pom refid="project" />
+      <attach file="${mvn-sources.jar}" classifier="sources" />
+      <attach file="${mvn-javadoc.jar}" classifier="javadoc" />
+    </artifact:install>
+  </target>
+
+  <target name="mvn-deploy"
+    depends="mvn-install"
+    description="Signs and deploys Closure Stylesheets artifacts to the central Maven repository.">
+
+    <!-- Sign and deploy the main artifact. -->
+    <artifact:mvn>
+      <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.1:sign-and-deploy-file" />
+      <arg value="-Durl=${maven-repository-url}" />
+      <arg value="-DrepositoryId=${maven-repository-id}" />
+      <arg value="-DpomFile=${pom.xml}" />
+      <arg value="-Dfile=${mvn-nodeps.jar}" />
+      <arg value="-Pgpg" />
+    </artifact:mvn>
+
+    <!-- Sign and deploy the sources artifact. -->
+    <artifact:mvn>
+      <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.1:sign-and-deploy-file" />
+      <arg value="-Durl=${maven-repository-url}" />
+      <arg value="-DrepositoryId=${maven-repository-id}" />
+      <arg value="-DpomFile=${pom.xml}" />
+      <arg value="-Dfile=${mvn-sources.jar}" />
+      <arg value="-Dclassifier=sources" />
+      <arg value="-Pgpg" />
+    </artifact:mvn>
+
+    <!-- Sign and deploy the javadoc artifact. -->
+    <artifact:mvn>
+      <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.1:sign-and-deploy-file" />
+      <arg value="-Durl=${maven-repository-url}" />
+      <arg value="-DrepositoryId=${maven-repository-id}" />
+      <arg value="-DpomFile=${pom.xml}" />
+      <arg value="-Dfile=${mvn-javadoc.jar}" />
+      <arg value="-Dclassifier=javadoc" />
+      <arg value="-Pgpg" />
+    </artifact:mvn>
+  </target>
 
 </project>
