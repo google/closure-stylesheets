@@ -17,7 +17,7 @@
     "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.google.common.css</groupId>
+  <groupId>com.google.closure-stylesheets</groupId>
   <artifactId>closure-stylesheets</artifactId>
   <packaging>jar</packaging>
 
