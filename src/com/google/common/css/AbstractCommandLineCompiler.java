@@ -20,8 +20,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 /**
- * {@AbstractCommandLineCompiler} is designed to be extended by classes that
- * provide a command line interface to the CSS parser.
+ * An abstract class that is designed to be extended by classes that provide a
+ * command line interface to the CSS parser.
  *
  */
 public class AbstractCommandLineCompiler {

@@ -27,13 +27,16 @@
     <delete dir="${build.dir}" />
   </target>
 
-  <target name="compile"
-          description="compiles Java files for the CSS compiler library">
+  <target name="javacc">
     <mkdir dir="${java-genfiles.dir}/com/google/common/css/compiler/ast" />
     <javacc target="${src.dir}/com/google/common/css/compiler/ast/GssParserCC.jj"
             javacchome="${lib.dir}"
             outputdirectory="${java-genfiles.dir}/com/google/common/css/compiler/ast" />
+  </target>
 
+  <target name="compile"
+          depends="javacc"
+          description="compiles Java files for the CSS compiler library">
     <mkdir dir="${classes.dir}" />
     <javac srcdir="${src.dir}:${java-genfiles.dir}"
            destdir="${classes.dir}"
@@ -133,6 +136,7 @@
   </target>
 
   <target name="javadoc"
+          depends="javacc"
           description="Generates Javadoc for the project's source code.">
     <mkdir dir="${javadoc.dir}" />
     <javadoc destdir="${javadoc.dir}"

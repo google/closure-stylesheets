@@ -1268,15 +1268,22 @@ public class GssFunctions {
   }
 
   /**
-   * Allows the equivalent of the ternary operator in GSS, using 3 @defs as
-   * inputs. This GSS:
-   *   @def MYDEF selectFrom(FOO, BAR, BAZ);
+   * Allows the equivalent of the ternary operator in GSS, using three
+   * {@code @def}s as inputs. This GSS:
+   * <p>
+   * {@code @def MYDEF selectFrom(FOO, BAR, BAZ);}
+   * <p>
    * implies:
-   *   MYDEF = FOO ? BAR : BAZ;
+   * <p>
+   * {@code MYDEF = FOO ? BAR : BAZ;}
+   * <p>
    * So this gss:
-   *   @def FOO true;
+   * <p>
+   * {@code @def FOO true;}
+   * <p>
    * then implies:
-   *   MYDEF = BAR;
+   * <p>
+   * {@code MYDEF = BAR;}
    */
   public static class SelectFrom implements GssFunction {
     @Override

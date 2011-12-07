@@ -23,13 +23,13 @@ import com.google.common.css.SourceCodeLocation;
  *
  * <p>A mixin definition defines parameterized declarations that can be
  * inserted with a mixin. For example:
- * <code>
- * @defmixin gradient(POS, HSL1, HSL2, HSL3, COLOR) {
+ * <pre>
+ * {@code @defmixin} gradient(POS, HSL1, HSL2, HSL3, COLOR) {
  *   background-color: COLOR;
  *   background-image:
  *       -webkit-linear-gradient(POS, hsl(HSL1, HSL2, HSL3), COLOR);
  * }
- * </code>
+ * </pre>
  *
  */
 public class CssMixinDefinitionNode extends CssAtRuleNode {

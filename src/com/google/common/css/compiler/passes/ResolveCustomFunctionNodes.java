@@ -197,8 +197,8 @@ public class ResolveCustomFunctionNodes extends DefaultTreeVisitor
    * @param arguments the arguments of this node
    * @param errorManager the error manager passed into the GSS function call
    * @return the result of the evaluation as a list of value nodes
-   * @throw GssFunctionException if the function call is invalid
-   * @throw RuntimeException if the function call fails to complete
+   * @throws GssFunctionException if the function call is invalid
+   * @throws RuntimeException if the function call fails to complete
    */
   protected List<CssValueNode> evaluateFunction(
       CssCustomFunctionNode node,

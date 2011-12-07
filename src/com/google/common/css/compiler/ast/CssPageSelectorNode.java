@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * A node representing a page selector @-rule that can be used inside an
- * @page rule.
+ * {@code @page} rule.
  *
  * <p>For example: {@code @bottom-left-corner { ... } }
  *

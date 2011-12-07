@@ -37,7 +37,7 @@ public final class SourceCode {
    *
    * @param fileName the name of the source code file or {@code null} if the
    *     input does not come from a file
-   * @param fileContents the contents of the source code file or {@ode null} if
+   * @param fileContents the contents of the source code file or {@code null} if
    *     the file contents is not yet known (the file has not yet been read)
    */
   public SourceCode(@Nullable String fileName, @Nullable String fileContents) {
