@@ -132,6 +132,13 @@ public class JobDescriptionBuilder {
     return this;
   }
 
+  public JobDescriptionBuilder setOptimizeStrategy(OptimizeStrategy optimize) {
+    checkJobIsNotAlreadyCreated();
+    Preconditions.checkNotNull(optimize);
+    this.optimize = optimize;
+    return this;
+  }
+
   public JobDescriptionBuilder clearTrueConditionNames() {
     checkJobIsNotAlreadyCreated();
     this.trueConditionNames.clear();
