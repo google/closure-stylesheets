@@ -153,7 +153,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     @Option(name = "--gss-function-map-provider",
         usage = "The fully qualified class name of a map provider of custom GSS"
         + " functions to resolve.")
-    private static final String gssFunctionMapProviderClassName =
+    private String gssFunctionMapProviderClassName =
         "com.google.common.css.compiler.gssfunctions."
         + "DefaultGssFunctionMapProvider";
 
