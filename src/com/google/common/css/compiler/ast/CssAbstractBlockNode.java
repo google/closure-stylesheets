@@ -105,7 +105,8 @@ public abstract class CssAbstractBlockNode
       }
     }
     Preconditions.checkState(false,
-        "Instances of the class %1b are not valid childs of the block %2b.",
-        node.getClass().getName(), this.getClass().getName());
+        "Trying to add an instance of the class %s (\"%s\"), which is not a "
+        + "valid child for a block of class %s.",
+        node.getClass().getName(), node.toString(), this.getClass().getName());
   }
 }

@@ -435,12 +435,12 @@ public class BiDiFlipper extends DefaultTreeVisitor
     String newUrlValue = flipUrlValue(oldUrlValue);
 
     // Make a new FunctionNode out of flipped url argument.
-    CssValueNode newArgument = new CssLiteralNode((CssLiteralNode) oldArgument);
+    CssValueNode newArgument = oldArgument.deepCopy();
     newArgument.setValue(newUrlValue);
     List<CssValueNode> newArgumentsList = new ArrayList<CssValueNode>();
     newArgumentsList.add(newArgument);
 
-    CssFunctionNode newFunctionNode =  oldFunctionNode.deepCopy();
+    CssFunctionNode newFunctionNode = oldFunctionNode.deepCopy();
     newFunctionNode.setArguments(new CssFunctionArgumentsNode(newArgumentsList));
     return newFunctionNode;
   }

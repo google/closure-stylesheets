@@ -73,17 +73,17 @@ public class StrictCss2Test extends NewFunctionalTestBase {
     assertEquals("div :before{}", compactPrintedResult);
   }
 
-  public void testAtrributeSelector1() throws Exception {
+  public void testAttributeSelector1() throws Exception {
     parseAndRun("span[class=example]{}");
     assertEquals("span[class=example]{}", compactPrintedResult);
   }
 
-  public void testAtrributeSelector2() throws Exception {
+  public void testAttributeSelector2() throws Exception {
     parseAndRun("a[rel~='copyright']{}");
     assertEquals("a[rel~='copyright']{}", compactPrintedResult);
   }
 
-  public void testAtrributeSelector3() throws Exception {
+  public void testAttributeSelector3() throws Exception {
     parseAndRun("*[lang|=\"en\"]{}");
     assertEquals("*[lang|=\"en\"]{}", compactPrintedResult);
   }

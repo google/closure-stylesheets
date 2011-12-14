@@ -109,7 +109,7 @@ public class CompactPrinter extends DefaultTreeVisitor
     for (CssValueNode param : node.getParameters()) {
       sb.append(" ");
       if (param instanceof CssBooleanExpressionNode) {
-        appendMediaParamterWithParentheses(param);
+        appendMediaParameterWithParentheses(param);
       } else {
         sb.append(param.getValue());
       }
@@ -123,7 +123,7 @@ public class CompactPrinter extends DefaultTreeVisitor
    * boolean expression node and only stores the identifier itself.
    * For example: {@code @media all and (color)}
    */
-  private void appendMediaParamterWithParentheses(CssValueNode node) {
+  private void appendMediaParameterWithParentheses(CssValueNode node) {
     // TODO(user): Try to avoid the special handling of this case.
     sb.append("(");
     sb.append(node.getValue());
@@ -420,6 +420,9 @@ public class CompactPrinter extends DefaultTreeVisitor
    * @param ch the character to delete
    */
   protected void deleteLastCharIfCharIs(char ch) {
+    if (sb.length() == 0) {
+      return;
+    }
     if (sb.charAt(sb.length() - 1) == ch) {
       sb.deleteCharAt(sb.length() - 1);
     }
