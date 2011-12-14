@@ -45,6 +45,7 @@ public class GssParserCC {
    * <p>The legacy {@code -webkit-gradient} function takes its arguments in the
    * form:
    * {@code (linear, left center, right center, from(color1), to(color2))}.
+   * As does {@code -khtml-gradient}.
    *
    * <p>The gradient proposals for CSS 3 are:
    * <ul>
@@ -58,7 +59,7 @@ public class GssParserCC {
    */
   private static final Pattern FUNCTIONS_WITH_SPACE_SEP_OK = Pattern.compile(
         "(?:-(?:O|MOZ|WEBKIT|MS)-)?(?:REPEATING-)?(?:LINEAR|RADIAL)-GRADIENT"
-        + "|RECT|-WEBKIT-GRADIENT",
+        + "|RECT|-KHTML-GRADIENT|-WEBKIT-GRADIENT",
         Pattern.CASE_INSENSITIVE);
 
   private static final Set<String> URL_FUNCTIONS = ImmutableSet.of(

@@ -494,6 +494,14 @@ public class GssParserTest extends TestCase {
         + "}");
   }
 
+  public void testKonquererGradients() throws Exception {
+    // Taken from http://twitter.github.com/bootstrap/1.4.0/bootstrap.css
+    testValid("div {"
+        + "background-image: -khtml-gradient(linear, left top, left bottom, "
+        + "    from(#333333), to(#222222));"
+        + "}");
+  }
+
   public void testWebkitMinDevicePixelRatio() throws Exception {
     testValid("@media screen and (-webkit-min-device-pixel-ratio:0) {}");
   }
