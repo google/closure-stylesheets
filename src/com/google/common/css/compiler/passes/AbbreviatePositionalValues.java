@@ -29,6 +29,7 @@ import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.MutatingVisitController;
+import com.google.common.css.compiler.ast.Property;
 
 import java.util.List;
 
@@ -39,6 +40,7 @@ import java.util.List;
  * "margin: 1px 2px 3px", since the final 2px is redundant.
  *
  * Note: At present, this pass applies to border-width, but not border.
+ * @see Property#hasPositionalParameters()
  */
 public class AbbreviatePositionalValues extends DefaultTreeVisitor
     implements CssCompilerPass {
