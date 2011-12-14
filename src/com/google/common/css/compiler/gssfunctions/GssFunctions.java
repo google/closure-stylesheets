@@ -55,15 +55,27 @@ public class GssFunctions {
   public static Map<String, GssFunction> getFunctionMap() {
     // TODO(dgajda): Add getName() to the function interface.
     return ImmutableMap.<String, GssFunction>builder()
-        .put("blendColors", new BlendColors())
-        .put("blendColorsRGB", new BlendColorsRGB())
+
+        // Arithmetic functions.
+        .put("add", new GssFunctions.AddToNumericValue())
+        .put("sub", new GssFunctions.SubtractFromNumericValue())
+        .put("mult", new GssFunctions.Mult())
+        // Not named "div" so it will not be confused with the HTML element.
+        .put("divide", new GssFunctions.Div())
+        .put("min", new GssFunctions.MinValue())
+        .put("max", new GssFunctions.MaxValue())
+
+        // Color functions.
+        .put("blendColorsHsb", new BlendColorsHsb())
+        .put("blendColorsRgb", new BlendColorsRgb())
         .put("makeMutedColor", new MakeMutedColor())
         .put("addHsbToCssColor", new AddHsbToCssColor())
         .put("makeContrastingColor", new MakeContrastingColor())
-        .put("addToNumericValue", new AddToNumericValue())
-        .put("subtractFromNumericValue", new SubtractFromNumericValue())
         .put("adjustBrightness", new AdjustBrightness())
+
+        // Logic functions.
         .put("selectFrom", new SelectFrom())
+
         .build();
   }
 
@@ -386,10 +398,10 @@ public class GssFunctions {
   }
 
   /**
-   * Implementation of the blendColors GSS function. Returns a color half way
+   * Implementation of the blendColorsHsb GSS function. Returns a color half way
    * between the two colors supplied as arguments.
    */
-  public static class BlendColors extends BaseBlendColors {
+  public static class BlendColorsHsb extends BaseBlendColors {
 
     @Override
     // TODO(dgajda): Hide it, this function is only visible because
@@ -422,10 +434,10 @@ public class GssFunctions {
   }
 
   /**
-   * Implementation of the blendColorsRGB GSS function. Returns a color half way
+   * Implementation of the blendColorsRgb GSS function. Returns a color half way
    * between the two colors by averaging each of red, green & blue.
    */
-  public static class BlendColorsRGB extends BaseBlendColors {
+  public static class BlendColorsRgb extends BaseBlendColors {
 
     /**
      * Returns the string representation in hex format for a color half way in
@@ -804,8 +816,7 @@ public class GssFunctions {
 
 
   /**
-   * Abstract class implementing the shared logic for AddToNumericValue and
-   * SubtractFromNumericValue.
+   * Abstract class implementing the shared logic for the arithmetic functions.
    */
   private static abstract class LeftAssociativeOperator implements GssFunction {
 
@@ -904,7 +915,7 @@ public class GssFunctions {
 
 
   /**
-   * The "addToNumericValue" function adds a list of numeric values.
+   * The "add()" function adds a list of numeric values.
    */
   public static class AddToNumericValue extends LeftAssociativeOperator {
     @Override
@@ -919,7 +930,7 @@ public class GssFunctions {
   }
 
   /**
-   * The "subtractFromNumericValue" function subtracts a list of numeric values.
+   * The "sub()" function subtracts a list of numeric values.
    * SubtractFromNumericValue(a, b, c) evaluates to ((a - b) - c).
    */
   public static class SubtractFromNumericValue extends LeftAssociativeOperator {
