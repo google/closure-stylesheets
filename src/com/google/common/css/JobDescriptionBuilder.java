@@ -49,6 +49,8 @@ public class JobDescriptionBuilder {
   private boolean eliminateDeadStyles;
   private boolean allowUnrecognizedFunctions;
   private Set<String> allowedNonStandardFunctions;
+  private boolean checkUnrecognizedProperties;
+  private Set<String> allowedUnrecognizedProperties;
   private boolean allowWebkitKeyframes;
   private boolean processDependencies;
   private String cssRenamingPrefix;
@@ -73,6 +75,8 @@ public class JobDescriptionBuilder {
     this.eliminateDeadStyles = false;
     this.allowUnrecognizedFunctions = false;
     this.allowedNonStandardFunctions = Sets.newHashSet();
+    this.checkUnrecognizedProperties = false;
+    this.allowedUnrecognizedProperties = Sets.newHashSet();
     this.allowWebkitKeyframes = false;
     this.processDependencies = false;
     this.cssRenamingPrefix = "";
@@ -97,6 +101,9 @@ public class JobDescriptionBuilder {
     this.allowUnrecognizedFunctions = jobToCopy.allowUnrecognizedFunctions;
     this.allowedNonStandardFunctions =
         ImmutableSet.copyOf(jobToCopy.allowedNonStandardFunctions);
+    this.checkUnrecognizedProperties = jobToCopy.checkUnrecognizedProperties;
+    this.allowedUnrecognizedProperties =
+        ImmutableSet.copyOf(jobToCopy.allowedUnrecognizedProperties);
     this.allowWebkitKeyframes = jobToCopy.allowWebkitKeyframes;
     this.cssRenamingPrefix = jobToCopy.cssRenamingPrefix;
     setExcludedClassesFromRenaming(
@@ -291,6 +298,23 @@ public class JobDescriptionBuilder {
     return this;
   }
 
+  public JobDescriptionBuilder setCheckUnrecognizedProperties(boolean check) {
+    checkJobIsNotAlreadyCreated();
+    this.checkUnrecognizedProperties = check;
+    return this;
+  }
+
+  public JobDescriptionBuilder checkUnrecognizedProperties() {
+    return setCheckUnrecognizedProperties(true);
+  }
+
+  public JobDescriptionBuilder setAllowedUnrecognizedProperties(
+      List<String> propertyNames) {
+    checkJobIsNotAlreadyCreated();
+    this.allowedUnrecognizedProperties.addAll(propertyNames);
+    return this;
+  }
+
   public JobDescriptionBuilder setAllowWebkitKeyframes(boolean allow) {
     checkJobIsNotAlreadyCreated();
     this.allowWebkitKeyframes = allow;
@@ -320,6 +344,7 @@ public class JobDescriptionBuilder {
         optimize, trueConditionNames, useInternalBidiFlipper, swapLtrRtlInUrl,
         swapLeftRightInUrl, simplifyCss, eliminateDeadStyles,
         allowUnrecognizedFunctions, allowedNonStandardFunctions,
+        checkUnrecognizedProperties, allowedUnrecognizedProperties,
         allowWebkitKeyframes, processDependencies, allowedAtRules,
         cssRenamingPrefix, excludedClassesFromRenaming, gssFunctionMapProvider,
         cssSubstitutionMapProvider);

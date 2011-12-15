@@ -159,6 +159,11 @@ public class PassRunner {
       new BiDiFlipper(cssTree.getMutatingVisitController(),
                         job.swapLtrRtlInUrl, job.swapLeftRightInUrl).runPass();
     }
+    // If specified, check for unrecognized properties.
+    if (job.checkUnrecognizedProperties) {
+      new VerifyRecognizedProperties(job.allowedUnrecognizedProperties,
+          cssTree.getVisitController(), errorManager).runPass();
+    }
     // Rename class names
     if (recordingSubstitutionMap != null) {
       new CssClassRenaming(

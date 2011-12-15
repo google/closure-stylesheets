@@ -83,7 +83,7 @@ public class DisallowDuplicateDeclarations extends DefaultTreeVisitor
   void processDeclaration(CssDeclarationNode declaration,
       SourceCodeLocation location) {
 
-    String propertyName = declaration.getPropertyName().getProperty();
+    String propertyName = declaration.getPropertyName().getPropertyName();
 
     // The MarkRemovableRulesetNodes pass special cases these so there's no
     // reason to check them here.

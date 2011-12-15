@@ -52,7 +52,7 @@ public class RemoveDefaultDeclarations extends DefaultTreeVisitor
   public boolean enterDeclaration(CssDeclarationNode node) {
     boolean removeDeclaration = true;
     canRemoveDefaultValue =
-        !node.getPropertyName().hasPositionDependentValues();
+        !node.getPropertyName().getProperty().hasPositionalParameters();
     // If any of the DeclarationNode's values is a priority node (marked with 
     // "!important" in the css) then none of the values should be 
     // removed. Otherwise remove the default values.

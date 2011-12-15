@@ -24,7 +24,6 @@ import com.google.common.css.compiler.ast.CssHexColorNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssNumericNode;
-import com.google.common.css.compiler.ast.CssPropertyNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
@@ -54,8 +53,8 @@ public class AbbreviatePositionalValues extends DefaultTreeVisitor
 
   @Override
   public boolean enterDeclaration(CssDeclarationNode declaration) {
-    CssPropertyNode property = declaration.getPropertyName();
-    if (property.hasPositionDependentValues()) {
+    Property property = declaration.getPropertyName().getProperty();
+    if (property.hasPositionalParameters()) {
       CssPropertyValueNode valueNode = declaration.getPropertyValue();
       List<CssValueNode> newValues = abbreviateValues(valueNode.getChildren());
       if (newValues != null) {

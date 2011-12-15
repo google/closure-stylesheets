@@ -35,7 +35,7 @@ public class CssPropertyNodeTest extends TestCase {
     assertNull(property.getParent());
     assertNull(property.getSourceCodeLocation());
     assertEquals("color", property.toString());
-    assertFalse(property.hasPositionDependentValues());
+    assertFalse(property.getProperty().hasPositionalParameters());
   }
 
   public void testPropertyNodeCreation2() {
@@ -44,7 +44,7 @@ public class CssPropertyNodeTest extends TestCase {
     assertNull(property.getParent());
     assertNull(property.getSourceCodeLocation());
     assertEquals("color", property.toString());
-    assertFalse(property.hasPositionDependentValues());
+    assertFalse(property.getProperty().hasPositionalParameters());
  }
 
   public void testPropertyNodeCreation3() {
@@ -55,7 +55,7 @@ public class CssPropertyNodeTest extends TestCase {
     assertNull(property.getParent());
     assertEquals(codeLoc, property.getSourceCodeLocation());
     assertEquals("color", property.toString());
-    assertFalse(property.hasPositionDependentValues());
+    assertFalse(property.getProperty().hasPositionalParameters());
   }
 
   public void testPropertyNodePositionDependentValues() {
@@ -66,45 +66,45 @@ public class CssPropertyNodeTest extends TestCase {
     CssPropertyNode padding = new CssPropertyNode("padding", null);
 
     assertEquals("border-color", borderColor.toString());
-    assertTrue(borderColor.hasPositionDependentValues());
+    assertTrue(borderColor.getProperty().hasPositionalParameters());
 
     assertEquals("border-style", borderStyle.toString());
-    assertTrue(borderStyle.hasPositionDependentValues());
+    assertTrue(borderStyle.getProperty().hasPositionalParameters());
 
     assertEquals("border-width", borderWidth.toString());
-    assertTrue(borderWidth.hasPositionDependentValues());
+    assertTrue(borderWidth.getProperty().hasPositionalParameters());
 
     assertEquals("margin", margin.toString());
-    assertTrue(margin.hasPositionDependentValues());
+    assertTrue(margin.getProperty().hasPositionalParameters());
 
     assertEquals("padding", padding.toString());
-    assertTrue(padding.hasPositionDependentValues());
+    assertTrue(padding.getProperty().hasPositionalParameters());
   }
 
   public void testPropertyNodeShorthands() {
     assertEquals(ImmutableSet.<String>of(),
-            new CssPropertyNode("foo").getShorthands());
+            new CssPropertyNode("foo").getProperty().getShorthands());
 
     assertEquals(ImmutableSet.<String>of(),
-        new CssPropertyNode("color").getShorthands());
+        new CssPropertyNode("color").getProperty().getShorthands());
 
     assertEquals(ImmutableSet.<String>of(),
-        new CssPropertyNode("caption-side").getShorthands());
+        new CssPropertyNode("caption-side").getProperty().getShorthands());
 
     assertEquals(ImmutableSet.<String>of(),
-        new CssPropertyNode("border-collapse").getShorthands());
+        new CssPropertyNode("border-collapse").getProperty().getShorthands());
 
     assertEquals(ImmutableSet.of("background"),
-        new CssPropertyNode("background-color").getShorthands());
+        new CssPropertyNode("background-color").getProperty().getShorthands());
 
     assertEquals(ImmutableSet.of("border"),
-        new CssPropertyNode("border-color").getShorthands());
+        new CssPropertyNode("border-color").getProperty().getShorthands());
 
     assertEquals(ImmutableSet.of("list-style"),
-        new CssPropertyNode("list-style-type").getShorthands());
+        new CssPropertyNode("list-style-type").getProperty().getShorthands());
 
     assertEquals(ImmutableSet.of("border", "border-left", "border-style"),
-        new CssPropertyNode("border-left-style").getShorthands());       
+        new CssPropertyNode("border-left-style").getProperty().getShorthands());       
   }
 
   public void testPropertyNodePartition() {
@@ -151,15 +151,15 @@ public class CssPropertyNodeTest extends TestCase {
     assertEquals("border-color", property1.toString());
     assertEquals("border-color", property1Copy.toString());
 
-    assertTrue(property.isStandardProperty());
-    assertTrue(propertyCopy.isStandardProperty());
-    assertTrue(property1.isStandardProperty());
-    assertTrue(property1Copy.isStandardProperty());
+    assertTrue(property.getProperty().isRecognizedProperty());
+    assertTrue(propertyCopy.getProperty().isRecognizedProperty());
+    assertTrue(property1.getProperty().isRecognizedProperty());
+    assertTrue(property1Copy.getProperty().isRecognizedProperty());
 
-    assertFalse(property.hasPositionDependentValues());
-    assertFalse(propertyCopy.hasPositionDependentValues());
-    assertTrue(property1.hasPositionDependentValues());
-    assertTrue(property1Copy.hasPositionDependentValues());
+    assertFalse(property.getProperty().hasPositionalParameters());
+    assertFalse(propertyCopy.getProperty().hasPositionalParameters());
+    assertTrue(property1.getProperty().hasPositionalParameters());
+    assertTrue(property1Copy.getProperty().hasPositionalParameters());
   }
 
 }

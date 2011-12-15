@@ -491,11 +491,11 @@ public class UnsafeMergeRulesetNodes implements CssCompilerPass {
       new Comparator<CssDeclarationNode>() {
     @Override
     public int compare(CssDeclarationNode o1, CssDeclarationNode o2) {
-      CssPropertyNode property1 = o1.getPropertyName();
-      CssPropertyNode property2 = o2.getPropertyName();
-      if (property1.getShorthands().contains(property2.getProperty())) {
+      Property property1 = o1.getPropertyName().getProperty();
+      Property property2 = o2.getPropertyName().getProperty();
+      if (property1.getShorthands().contains(property2.getName())) {
         return 1;
-      } else if (property2.getShorthands().contains(property1.getProperty())) {
+      } else if (property2.getShorthands().contains(property1.getName())) {
         return -1;
       } else {
         return TO_STRING_COMPARATOR.compare(o1, o2);

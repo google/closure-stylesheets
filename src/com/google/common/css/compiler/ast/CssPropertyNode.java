@@ -18,8 +18,6 @@ package com.google.common.css.compiler.ast;
 
 import com.google.common.css.SourceCodeLocation;
 
-import java.util.Set;
-
 import javax.annotation.Nullable;
 
 /**
@@ -60,27 +58,12 @@ public class CssPropertyNode extends CssValueNode {
     return new CssPropertyNode(this);
   }
 
-  public String getProperty() {
+  public Property getProperty() {
+    return property;
+  }
+
+  public String getPropertyName() {
     return property.getName();
-  }
-
-  public boolean isStandardProperty() {
-    return property.isRecognizedProperty();
-  }
-
-  public boolean hasPositionDependentValues() {
-    return property.hasPositionalParameters();
-  }
-
-  /**
-   * Returns the set of shorthand properties related to this property, or the
-   * empty set if this property is not standard.
-   *
-   * <p>For example, {@code border-left-style} has {@code border},
-   * {@code border-left} and {@code border-style} as shorthands.
-   */
-  public Set<String> getShorthands() {
-    return property.getShorthands();
   }
 
   /**

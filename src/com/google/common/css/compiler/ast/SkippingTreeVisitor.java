@@ -61,7 +61,7 @@ public class SkippingTreeVisitor extends DefaultTreeVisitor {
             continue;
           }
           CssDeclarationNode decl = (CssDeclarationNode) child;
-          if (decl.getPropertyName().getProperty().equals(propNameToSkip)) {
+          if (decl.getPropertyName().getPropertyName().equals(propNameToSkip)) {
             return false;
           }
         }

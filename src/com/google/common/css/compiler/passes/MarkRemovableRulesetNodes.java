@@ -177,7 +177,7 @@ public class MarkRemovableRulesetNodes extends SkippingTreeVisitor
     CssDeclarationNode declaration =
       (CssDeclarationNode) ruleset.getDeclarations().getChildAt(0);
     CssPropertyNode propertyNode = declaration.getPropertyName();
-    String propertyName = propertyNode.getProperty();
+    String propertyName = propertyNode.getPropertyName();
     if (PROPERTIES_NOT_TO_BE_CHECKED.contains(propertyName)) {
       return;
     }
@@ -298,7 +298,7 @@ public class MarkRemovableRulesetNodes extends SkippingTreeVisitor
           }
         });
 
-    for (String shorthand : propertyNode.getShorthands()) {
+    for (String shorthand : propertyNode.getProperty().getShorthands()) {
       CssRulesetNode shorthandRuleset = rules.get(selector, shorthand);
       if ((shorthandRuleset != null)
           && (!rulesetIsImportant.get() || isImportantRule(shorthandRuleset))) {

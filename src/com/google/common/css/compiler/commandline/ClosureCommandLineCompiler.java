@@ -136,8 +136,17 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     private boolean allowUnrecognizedFunctions = false;
 
     @Option(name = "--allowed-non-standard-function", usage =
-        "Pass the compiler a whitelist of non-standard functions, like alpha()")
+        "Specify a non-standard function to whitelist, like alpha()")
     private List<String> allowedNonStandardFunctions = Lists.newArrayList();
+
+    @Option(name = "--allowed-unrecognized-property", usage =
+        "Specify an unrecognized property to whitelist")
+    private List<String> allowedUnrecognizedProperties = Lists.newArrayList();
+
+    @Option(name = "--check-unrecognized-properties", usage =
+        "Reject CSS properties not recognized by Closure Stylesheets, "
+        + "or not specified by --allowed-unrecognized-property ")
+    private boolean checkUnrecognizedProperties = false;
 
     @Option(name = "--excluded-classes-from-renaming", usage =
         "Pass the compiler a list of CSS class names that shoudn't be renamed.")
@@ -177,6 +186,8 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setTrueConditionNames(trueConditions);
       builder.setAllowUnrecognizedFunctions(allowUnrecognizedFunctions);
       builder.setAllowedNonStandardFunctions(allowedNonStandardFunctions);
+      builder.setAllowedUnrecognizedProperties(allowedUnrecognizedProperties);
+      builder.setCheckUnrecognizedProperties(checkUnrecognizedProperties);
       builder.setAllowWebkitKeyframes(true);
       builder.setProcessDependencies(true);
       builder.setExcludedClassesFromRenaming(excludedClassesFromRenaming);

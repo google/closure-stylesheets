@@ -237,7 +237,7 @@ public class BiDiFlipper extends DefaultTreeVisitor
       CssPropertyNode propertyNode) {
     boolean flippable = false;
     for (String flippableProperty : PROPERTIES_WITH_FLIPPABLE_PERCENTAGE) {
-      if (propertyNode.getProperty().startsWith(flippableProperty)) {
+      if (propertyNode.getPropertyName().startsWith(flippableProperty)) {
         flippable = true;
         break;
       }
@@ -363,7 +363,7 @@ public class BiDiFlipper extends DefaultTreeVisitor
       return flippedLiteralNode;
     } else if (tNode instanceof CssPropertyNode) {
       CssPropertyNode propertyNode = (CssPropertyNode) tNode;
-      String oldValue = propertyNode.getProperty();
+      String oldValue = propertyNode.getPropertyName();
       if (null == oldValue) {
         return tNode;
       }

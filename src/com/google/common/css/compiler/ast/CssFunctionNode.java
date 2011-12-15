@@ -73,6 +73,7 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "rotateZ",
           "scale",
           "to",
+          "translate",
           "translate3d",
 
           // These take the type of gradient (linear or radial) as a parameter.
