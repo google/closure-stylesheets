@@ -16,14 +16,17 @@
 
 package com.google.common.css.compiler.ast;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -78,6 +81,21 @@ public final class Property {
         builder("border-bottom-width"),
         builder("border-left-width"),
         builder("border-width").setHasPositionalParameters(true),
+        // None of border-radius, -webkit-border-radius, and -moz-border-radius
+        // have setHasPositionalParameters(true) because each can take up to 8
+        // values according to the spec, as it is possible to specify the length
+        // of the horizontal and vertical radii independently for each corner:
+        //
+        // http://www.w3.org/TR/css3-background/#the-border-radius
+        //
+        // TODO(bolinfest): This is going to require special handling when it
+        // comes to RTL flipping, which the current
+        // "setHasPositionalParameters()" does not take into account.
+        builder("border-radius"),
+        builder("border-top-left-radius"),
+        builder("border-top-right-radius"),
+        builder("border-bottom-right-radius"),
+        builder("border-bottom-left-radius"),
         builder("border"),
         builder("bottom"),
         builder("caption-side"),
@@ -119,6 +137,11 @@ public final class Property {
         builder("max-width"),
         builder("min-height"),
         builder("min-width"),
+        builder("-moz-border-radius"),
+        builder("-moz-border-radius-topleft"),
+        builder("-moz-border-radius-topright"),
+        builder("-moz-border-radius-bottomright"),
+        builder("-moz-border-radius-bottomleft"),
         builder("orphans"),
         builder("outline-color"),
         builder("outline-style"),
@@ -160,6 +183,11 @@ public final class Property {
         builder("visibility"),
         builder("voice-family"),
         builder("volume"),
+        builder("-webkit-border-radius"),
+        builder("-webkit-border-top-left-radius"),
+        builder("-webkit-border-top-right-radius"),
+        builder("-webkit-border-bottom-right-radius"),
+        builder("-webkit-border-bottom-left-radius"),
         builder("white-space"),
         builder("windows"),
         builder("width"),
@@ -313,7 +341,8 @@ public final class Property {
    * by {@link Property#byName(String)}), then this class should be changed so
    * that it is public.
    */
-  private static final class Builder {
+  @VisibleForTesting
+  static final class Builder {
     private final String name;
     private final Set<String> shorthands;
     private final String partition;
@@ -371,6 +400,25 @@ public final class Property {
         "border-collapse",
         "border-spacing");
 
+    private static final Map<String, String> BORDER_RADIUS_PROPERTIES =
+        ImmutableMap.<String, String>builder()
+        .put("border-radius", "border-radius")
+        .put("border-top-left-radius", "border-radius")
+        .put("border-top-right-radius", "border-radius")
+        .put("border-bottom-right-radius", "border-radius")
+        .put("border-bottom-left-radius", "border-radius")
+        .put("-webkit-border-radius", "-webkit-border-radius")
+        .put("-webkit-border-top-left-radius", "-webkit-border-radius")
+        .put("-webkit-border-top-right-radius", "-webkit-border-radius")
+        .put("-webkit-border-bottom-right-radius", "-webkit-border-radius")
+        .put("-webkit-border-bottom-left-radius", "-webkit-border-radius")
+        .put("-moz-border-radius", "-moz-border-radius")
+        .put("-moz-border-radius-topleft", "-moz-border-radius")
+        .put("-moz-border-radius-topright", "-moz-border-radius")
+        .put("-moz-border-radius-bottomright", "-moz-border-radius")
+        .put("-moz-border-radius-bottomleft", "-moz-border-radius")
+        .build();
+
     /**
      * Computes the set of shorthand properties for a given standard property.
      *
@@ -397,6 +445,12 @@ public final class Property {
       int lastHyphenIndex = property.lastIndexOf('-');
       if (lastHyphenIndex == -1) {
         return ImmutableSet.of();
+      }
+
+      // Special-case border-radius properties because they are particularly
+      // odd.
+      if (BORDER_RADIUS_PROPERTIES.keySet().contains(property)) {
+        return ImmutableSet.of(BORDER_RADIUS_PROPERTIES.get(property));
       }
 
       String possibleShorthand = property.substring(0, lastHyphenIndex);
