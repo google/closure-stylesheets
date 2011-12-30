@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="lib/cglib-nodep-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/easymock-3_0.jar"/>
 	<classpathentry kind="lib" path="lib/gson-1.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/guava-r09.jar"/>
+	<classpathentry kind="lib" path="lib/guava-10.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/javacc.jar"/>
 	<classpathentry kind="lib" path="lib/jsr305.jar"/>
 	<classpathentry kind="lib" path="lib/junit.jar"/>

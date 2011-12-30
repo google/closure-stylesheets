@@ -67,7 +67,7 @@
       -->
       <zipfileset src="${lib.dir}/args4j-2.0.17.jar" />
       <zipfileset src="${lib.dir}/gson-1.7.1.jar" />
-      <zipfileset src="${lib.dir}/guava-r09.jar" />
+      <zipfileset src="${lib.dir}/guava-10.0.1.jar" />
       <zipfileset src="${lib.dir}/jsr305.jar" />
       <manifest>
         <attribute name="Main-Class"
