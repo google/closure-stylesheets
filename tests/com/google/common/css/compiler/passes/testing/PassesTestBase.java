@@ -29,6 +29,7 @@ import java.util.List;
 /**
  * Base class for testing passes where the printed output has to be compared.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class PassesTestBase extends NewFunctionalTestBase {
   /**

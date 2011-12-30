@@ -119,7 +119,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
    * For example: {@code @media all and (color)}
    */
   private void appendMediaParamterWithParentheses(CssValueNode node) {
-    // TODO(user): Try to avoid the special handling of this case.
+    // TODO(fbenz): Try to avoid the special handling of this case.
     sb.append("(");
     sb.append(node.getValue());
     sb.append(")");
@@ -242,7 +242,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
       sb.append(v);
     }
 
-    // NOTE(user): When visiting function arguments, we don't want to add extra
+    // NOTE(flan): When visiting function arguments, we don't want to add extra
     // spaces because they are already in the arguments list if they are
     // required. Yes, this sucks.
     if (!(node.getParent() instanceof CssFunctionArgumentsNode)) {

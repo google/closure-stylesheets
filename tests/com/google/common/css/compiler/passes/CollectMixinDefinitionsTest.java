@@ -26,6 +26,7 @@ import java.util.Map;
 /**
  * Unit tests for the {@link CollectMixinDefinitions} compiler pass.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CollectMixinDefinitionsTest extends PassesTestBase {
   private Map<String, CssMixinDefinitionNode> definitions;

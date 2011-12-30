@@ -35,6 +35,7 @@ import com.google.common.css.compiler.ast.MutatingVisitController;
  * a correct nth-format and can make it compact. In addition, the pass checks
  * the constraints for the :not pseudo-class.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class ProcessRefiners extends DefaultTreeVisitor
     implements CssCompilerPass {

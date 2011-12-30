@@ -39,6 +39,7 @@ import java.util.List;
  * A compiler pass that transforms matching {@link CssUnknownAtRuleNode}s
  * into mixins or mixin definitions.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CreateMixins extends DefaultTreeVisitor
     implements CssCompilerPass {

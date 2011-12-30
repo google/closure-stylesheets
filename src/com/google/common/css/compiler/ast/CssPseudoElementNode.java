@@ -23,6 +23,7 @@ import com.google.common.css.compiler.ast.CssSelectorNode.Specificity;
  * A {@link CssRefinerNode} implementation that represents a pseudo-element.
  * For example: {@code ::after}
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssPseudoElementNode extends CssRefinerNode {
   public CssPseudoElementNode(String refinerName,

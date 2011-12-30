@@ -19,6 +19,7 @@ package com.google.common.css.compiler.ast;
 /**
  * Shim class for the class moved to the passes package.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CreateConditionalNodes extends
     com.google.common.css.compiler.passes.CreateConditionalNodes {

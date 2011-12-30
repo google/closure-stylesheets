@@ -24,6 +24,7 @@ import java.util.List;
  *
  * <p>For example: {@code @bottom-left-corner { ... } }
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssPageSelectorNode extends CssAtRuleNode {
 

@@ -24,6 +24,7 @@ import com.google.common.css.compiler.passes.testing.PassesTestBase;
 /**
  * Unit tests for {@link CreateMixins}.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CreateMixinsTest extends PassesTestBase{
 

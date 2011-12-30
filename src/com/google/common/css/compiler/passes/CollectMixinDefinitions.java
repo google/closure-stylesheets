@@ -42,6 +42,7 @@ import java.util.Set;
  *
  * <p>{@link CreateConstantReferences} has to run before.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CollectMixinDefinitions extends DefaultTreeVisitor
     implements CssCompilerPass {

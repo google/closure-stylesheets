@@ -32,6 +32,7 @@ import javax.annotation.Nullable;
  * because all instances of the provided classes are accepted as valid.
  * If invalid children are added, an {@link IllegalStateException} is thrown.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public abstract class CssAbstractBlockNode
     extends CssNodesListNode<CssNode> {

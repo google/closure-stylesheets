@@ -30,6 +30,7 @@ import java.util.Set;
 /**
  * Base class for compiler passes enforcing a specific CSS level.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public abstract class StrictCssBase extends DefaultTreeVisitor
     implements CssCompilerPass {

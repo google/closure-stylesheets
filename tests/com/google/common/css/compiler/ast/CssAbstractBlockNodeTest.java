@@ -26,6 +26,7 @@ import java.util.List;
 /**
  * Unit tests for {@link CssAbstractBlockNode}.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssAbstractBlockNodeTest extends TestCase {
   private ImmutableList<Class<? extends CssNode>> validSuperclasses =

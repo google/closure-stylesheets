@@ -36,7 +36,7 @@ public abstract class CssRefinerNode extends CssNode {
   /**
    * Contains the list of all possible CSS refiners.
    */
-  // TODO(user): The handling of the pre- and suffixes should be moved to
+  // TODO(fbenz): The handling of the pre- and suffixes should be moved to
   // the corresponding classes.
   protected enum Refiner {
     CLASS(".", ""),

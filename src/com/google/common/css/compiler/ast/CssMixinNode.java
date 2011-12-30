@@ -25,6 +25,7 @@ import com.google.common.css.SourceCodeLocation;
  * replaced by the corresponding mixin definition.
  * For example: {@code @mixin gradient(top, 0%, 80%, 70%, #BADA55)}
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssMixinNode extends CssAtRuleNode {
   private final String definitionName;

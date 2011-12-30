@@ -41,9 +41,10 @@ import java.util.Set;
  * <a href="http://en.wikipedia.org/wiki/Comparison_of_layout_engines_(Cascading_Style_Sheets)#Selectors">
  * Comparison of layout engines (Cascading Style Sheets)</a>
  *
- * <p>TODO(user): The ProcessRefiners and ProcessWebkitKeyframes passes should
+ * <p>TODO(fbenz): The ProcessRefiners and ProcessWebkitKeyframes passes should
  * run before.
  *
+ * @author fbenz@google.com (Florian Benz)
  *
  */
 public class StrictCss3 extends StrictCssBase {

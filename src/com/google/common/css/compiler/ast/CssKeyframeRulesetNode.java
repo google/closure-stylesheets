@@ -24,9 +24,10 @@ import javax.annotation.Nullable;
 
 /**
  * A node representing a keyframe style rule.
- * This is used inside a Webkit keyframes rule to represent the style of
+ * This is used inside a Webkit keyframes rule to represent the style of 
  * one or more points (specified by the keys) in the animation.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssKeyframeRulesetNode extends CssNode {
   /** List of keys. */
@@ -77,7 +78,7 @@ public class CssKeyframeRulesetNode extends CssNode {
 
   /**
    * Copy constructor.
-   *
+   * 
    * @param node
    */
   public CssKeyframeRulesetNode(CssKeyframeRulesetNode node) {
@@ -85,12 +86,12 @@ public class CssKeyframeRulesetNode extends CssNode {
     this.setComments(node.getComments());
     this.keys = node.getKeys().deepCopy();
   }
-
+  
   @Override
   public CssKeyframeRulesetNode deepCopy() {
     return new CssKeyframeRulesetNode(this);
   }
-
+  
   public CssKeyListNode getKeys() {
     return keys;
   }
@@ -109,11 +110,11 @@ public class CssKeyframeRulesetNode extends CssNode {
   public void addDeclaration(CssDeclarationNode declaration) {
     declarations.addChildToBack(declaration);
   }
-
+  
   public void addKey(CssKeyNode key) {
     keys.addChildToBack(key);
   }
-
+  
   /**
    * For debugging only.
    */

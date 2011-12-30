@@ -998,7 +998,7 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      // TODO(user): Actually each of these nodes should have its own state
+      // TODO(fbenz): Actually each of these nodes should have its own state
       // here but this adds a bunch of similar code that is not really
       // necessary. The problem is the design of the visit controller. I'm
       // going to refactor it so that it doesn't make sense to add all the

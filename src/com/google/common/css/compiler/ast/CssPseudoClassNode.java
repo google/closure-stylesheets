@@ -25,6 +25,7 @@ import com.google.common.css.compiler.ast.CssSelectorNode.Specificity;
  * A {@link CssRefinerNode} implementation that represents a pseudo-class.
  * For example: {@code :visited}, {@code :nth-child(2n)}
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssPseudoClassNode extends CssRefinerNode {
   private static final ImmutableSet<String> COMPATIBILITY_PSEUDO_ELEMENTS =
@@ -43,7 +44,7 @@ public class CssPseudoClassNode extends CssRefinerNode {
   public enum FunctionType {
     NONE,
     LANG,
-    // TODO(user): make the arguments for nth-functions real nodes
+    // TODO(fbenz): make the arguments for nth-functions real nodes
     NTH,
     NOT;
     // No support for 'any' at the moment because it is relatively new and
@@ -154,7 +155,7 @@ public class CssPseudoClassNode extends CssRefinerNode {
 
   @Override
   public String toString() {
-    // TODO(user): toString should not be used to print a node. However,
+    // TODO(fbenz): toString should not be used to print a node. However,
     // some tests rely on it. This should be fixed.
     StringBuilder sb = new StringBuilder();
     sb.append(refinerType.getPrefix());

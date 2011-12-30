@@ -200,7 +200,7 @@ public class CreateStandardAtRuleNodes extends DefaultTreeVisitor implements Css
       return;
     }
 
-    // TODO(user): Perform this check depending on the CSS version set in the
+    // TODO(fbenz): Perform this check depending on the CSS version set in the
     // options
     if (!checkMediaParameter(params)) {
       reportError(INVALID_PARAMETERS_ERROR_MESSAGE, node);

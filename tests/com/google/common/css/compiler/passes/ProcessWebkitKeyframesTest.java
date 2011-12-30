@@ -20,6 +20,7 @@ import com.google.common.css.compiler.ast.CssKeyNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 /**
+ * @author fbenz@google.com (Florian Benz)
  *
  */
 public class ProcessWebkitKeyframesTest extends NewFunctionalTestBase {
@@ -82,7 +83,7 @@ public class ProcessWebkitKeyframesTest extends NewFunctionalTestBase {
       "33.33% {}",
       "100.12% {}",
       "}");
-
+  
   private boolean keyframesAllowed;
   private boolean simplifyCss;
   private String compactPrintedResult;
@@ -178,7 +179,7 @@ public class ProcessWebkitKeyframesTest extends NewFunctionalTestBase {
     keyframesAllowed = true;
     simplifyCss = false;
     parseAndRun(TEST_CODE_PERCENTAGE_1);
-    assertEquals("@-webkit-keyframes pulse{0%{}33.33%{}100%{}}",
+    assertEquals("@-webkit-keyframes pulse{0%{}33.33%{}100%{}}", 
         compactPrintedResult);
   }
 
@@ -186,7 +187,7 @@ public class ProcessWebkitKeyframesTest extends NewFunctionalTestBase {
     keyframesAllowed = true;
     simplifyCss = false;
     parseAndRun(TEST_CODE_PERCENTAGE_2);
-    assertEquals("@-webkit-keyframes pulse{0.000000%{}100.0000000%{}}",
+    assertEquals("@-webkit-keyframes pulse{0.000000%{}100.0000000%{}}", 
         compactPrintedResult);
   }
 
@@ -194,7 +195,7 @@ public class ProcessWebkitKeyframesTest extends NewFunctionalTestBase {
     keyframesAllowed = true;
     simplifyCss = true;
     parseAndRun(TEST_CODE_PERCENTAGE_1);
-    assertEquals("@-webkit-keyframes pulse{0%{}33.33%{}to{}}",
+    assertEquals("@-webkit-keyframes pulse{0%{}33.33%{}to{}}", 
         compactPrintedResult);
   }
 
@@ -202,7 +203,7 @@ public class ProcessWebkitKeyframesTest extends NewFunctionalTestBase {
     keyframesAllowed = true;
     simplifyCss = true;
     parseAndRun(TEST_CODE_PERCENTAGE_3);
-    assertEquals("@-webkit-keyframes pulse{.82%{}12.0034%{}98%{}}",
+    assertEquals("@-webkit-keyframes pulse{.82%{}12.0034%{}98%{}}", 
         compactPrintedResult);
   }
 

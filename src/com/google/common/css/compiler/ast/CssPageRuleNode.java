@@ -21,6 +21,7 @@ import java.util.List;
 /**
  * A node representing an @page rule.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssPageRuleNode extends CssAtRuleNode {
 

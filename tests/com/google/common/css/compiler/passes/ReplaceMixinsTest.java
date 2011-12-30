@@ -22,6 +22,7 @@ import com.google.common.css.compiler.passes.testing.PassesTestBase;
 /**
  * Unit tests for the {@link ReplaceMixins} compiler pass.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class ReplaceMixinsTest extends PassesTestBase {
 

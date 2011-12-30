@@ -36,6 +36,7 @@ import java.util.Set;
  * This compiler pass enforces that only correct CSS 2.1 is used.
  * See {@link "http://www.w3.org/TR/CSS21/"} for the specification.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class StrictCss2 extends StrictCssBase {
   private static final ImmutableSet<String> PSEUDO_CLASSES_OR_ELEMENT =

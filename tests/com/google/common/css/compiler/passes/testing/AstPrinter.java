@@ -42,6 +42,7 @@ import com.google.common.css.compiler.passes.CompactPrinter;
  * expected way. Thus, it avoids that simply returning the source code is
  * regarded as valid.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class AstPrinter extends CompactPrinter {
   /**

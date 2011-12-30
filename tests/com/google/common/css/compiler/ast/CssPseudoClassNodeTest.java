@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 /**
  * Unit tests for {@link CssPseudoClassNode}
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssPseudoClassNodeTest extends TestCase {
 

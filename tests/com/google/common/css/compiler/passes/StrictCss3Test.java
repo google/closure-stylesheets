@@ -21,6 +21,7 @@ import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 /**
  * Unit tests for {@link StrictCss3}.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class StrictCss3Test extends NewFunctionalTestBase {
   private String compactPrintedResult;

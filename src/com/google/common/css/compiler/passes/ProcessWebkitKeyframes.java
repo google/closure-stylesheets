@@ -28,19 +28,20 @@ import com.google.common.css.compiler.ast.MutatingVisitController;
 /**
  * Compiler pass which ensures that @-webkit-keframes rules are only allowed if
  * they are enabled. In addition this pass checks if the keys are between
- * 0% and 100%. If CSS simplification is enabled, "from" is replaced by "0%"
+ * 0% and 100%. If CSS simplification is enabled, "from" is replaced by "0%" 
  * and "100%" is replaced by "to".
- *
+ * 
+ * @author fbenz@google.com (Florian Benz)
  */
 public class ProcessWebkitKeyframes extends DefaultTreeVisitor
     implements CssCompilerPass {
   @VisibleForTesting
-  static final String KEYFRAMES_NOT_ALLOWED_ERROR_MESSAGE =
+  static final String KEYFRAMES_NOT_ALLOWED_ERROR_MESSAGE = 
     "a @-webkit-keyframes rule occured but the option for it is disabled";
   @VisibleForTesting
-  static final String WRONG_KEY_VALUE_ERROR_MESSAGE =
+  static final String WRONG_KEY_VALUE_ERROR_MESSAGE = 
     "the value of the key is not between 0% and 100%";
-  static final String INVALID_NUMBER_ERROR_MESSAGE =
+  static final String INVALID_NUMBER_ERROR_MESSAGE = 
     "the value of the key is invalid (not 'from', 'to', or 'XXX.XXX%')";
 
   private final MutatingVisitController visitController;
@@ -102,7 +103,7 @@ public class ProcessWebkitKeyframes extends DefaultTreeVisitor
 
   /**
    * Checks if the percentage is between 0% and 100% inclusive.
-   *
+   * 
    * @param node The {@link CssKeyNode} to get the location in case of an error
    * @param percentage The value represented as a float
    * @return Returns true if there is no error
@@ -119,7 +120,7 @@ public class ProcessWebkitKeyframes extends DefaultTreeVisitor
 
   /**
    * Shortens the representation of the key.
-   *
+   * 
    * @param node The {@link CssKeyNode} where the percentage belongs to.
    * @param percentage The value represented as a float
    */

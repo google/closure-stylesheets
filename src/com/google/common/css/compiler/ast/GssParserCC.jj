@@ -1534,7 +1534,7 @@ CssAtRuleNode at_rule() :
 //     ]
 //     [ [ '{' S* style_declaration '}  ] | ';' ] S*
 //   ;
-// TODO(user): Try to reuse selctor parsing instead of [ IDENT? ':' IDENT S* ].
+// TODO(fbenz): Try to reuse selctor parsing instead of [ IDENT? ':' IDENT S* ].
 // The problem is that @-rules take a list of value nodes and selectors are not
 // value nodes.
 CssAtRuleNode atRuleWithDeclBlock() :

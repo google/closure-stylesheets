@@ -22,6 +22,7 @@ package com.google.common.css.compiler.ast;
  *  animation.
  *  For example: <code>0%, 33.3%</code>
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssKeyListNode extends CssNodesListNode<CssKeyNode> {
 
@@ -32,7 +33,7 @@ public class CssKeyListNode extends CssNodesListNode<CssKeyNode> {
   public CssKeyListNode(CssKeyListNode node) {
     super(node);
   }
-
+  
   @Override
   public CssKeyListNode deepCopy() {
     return new CssKeyListNode(this);

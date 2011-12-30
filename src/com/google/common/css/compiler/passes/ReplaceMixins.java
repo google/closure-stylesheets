@@ -52,6 +52,7 @@ import java.util.Stack;
  * <p>{@link CollectMixinDefinitions} has to run before.
  * {@link ReplaceConstantReferences} has to run afterwards.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class ReplaceMixins extends DefaultTreeVisitor
     implements CssCompilerPass {

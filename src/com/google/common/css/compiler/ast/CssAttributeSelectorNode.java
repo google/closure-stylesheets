@@ -23,6 +23,7 @@ import com.google.common.css.compiler.ast.CssSelectorNode.Specificity;
  * A {@link CssRefinerNode} implementation that represents an attribute
  * selector. For example: {@code [hreflang|="en"]}
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssAttributeSelectorNode extends CssRefinerNode {
   /** Indicates which kind of attribute selector is used. */

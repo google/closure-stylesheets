@@ -124,7 +124,7 @@ public class CompactPrinter extends DefaultTreeVisitor
    * For example: {@code @media all and (color)}
    */
   private void appendMediaParameterWithParentheses(CssValueNode node) {
-    // TODO(user): Try to avoid the special handling of this case.
+    // TODO(fbenz): Try to avoid the special handling of this case.
     sb.append("(");
     sb.append(node.getValue());
     sb.append(")");
@@ -139,7 +139,7 @@ public class CompactPrinter extends DefaultTreeVisitor
   public boolean enterPageRule(CssPageRuleNode node) {
     sb.append(node.getType().toString());
     sb.append(' ');
-    // TODO(user): There are only two parameters possible ('bla:left') that
+    // TODO(fbenz): There are only two parameters possible ('bla:left') that
     // come with no whitespace in between. So it would be better to have a
     // single node (maybe a selector).
     for (CssValueNode param : node.getParameters()) {

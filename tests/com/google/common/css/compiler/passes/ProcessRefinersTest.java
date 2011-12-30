@@ -19,6 +19,7 @@ package com.google.common.css.compiler.passes;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 /**
+ * @author fbenz@google.com (Florian Benz)
  *
  */
 public class ProcessRefinersTest extends NewFunctionalTestBase {

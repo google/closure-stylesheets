@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
  * <code>to</code> (= 100%).
  * For example: <code>0%, 33.3% { ... }</code>
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssKeyNode extends CssNode implements ChunkAware {
   /** Value of the key held by this node. */

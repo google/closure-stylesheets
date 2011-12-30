@@ -19,6 +19,7 @@ package com.google.common.css.compiler.ast;
 /**
  * A node representing an @-webkit-keyframes rule.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssWebkitKeyframesNode extends CssAtRuleNode {
 
@@ -63,3 +64,4 @@ public class CssWebkitKeyframesNode extends CssAtRuleNode {
     return (CssBlockNode) super.getBlock();
   }
 }
+

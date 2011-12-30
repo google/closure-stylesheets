@@ -31,6 +31,7 @@ import com.google.common.css.SourceCodeLocation;
  * }
  * </pre>
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssMixinDefinitionNode extends CssAtRuleNode {
   private final String name;

@@ -33,6 +33,7 @@ import java.util.List;
 /**
  * Utility methods that can be useful for compiler passes.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class PassUtil {
 
