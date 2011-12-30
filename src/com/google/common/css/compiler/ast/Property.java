@@ -50,6 +50,7 @@ public final class Property {
    */
   private static final BiMap<String, Property> NAME_TO_PROPERTY_MAP;
 
+
   static {
     List<Builder> recognizedProperties = ImmutableList.of(
         builder("alignment-baseline").isSvgOnly(),
@@ -113,6 +114,12 @@ public final class Property {
         builder("border-bottom-left-radius"),
         builder("border"),
         builder("bottom"),
+        builder("box-align").warn(
+            "Spec'd but not supported yet."),
+        builder("box-flex"),
+        builder("box-orient"),
+        builder("box-pack").warn(
+            "Spec'd but not supported yet."),
         builder("box-shadow"),
         builder("box-sizing"),
         builder("caption-side"),
@@ -206,6 +213,7 @@ public final class Property {
         builder("-moz-backface-visibility"),
         builder("-moz-background-clip"),
         builder("-moz-background-inline-policy"),
+        builder("-moz-background-origin"),
         builder("-moz-background-size"),
         builder("-moz-binding"),
         builder("-moz-border-bottom-colors"),
@@ -385,6 +393,14 @@ public final class Property {
         builder("resize"),
         builder("richness"),
         builder("right"),
+        builder("scrollbar-3dlight-color"),
+        builder("scrollbar-arrow-color"),
+        builder("scrollbar-base-color"),
+        builder("scrollbar-darkshadow-color"),
+        builder("scrollbar-face-color"),
+        builder("scrollbar-highlight-color"),
+        builder("scrollbar-shadow-color"),
+        builder("scrollbar-track-color"),
         builder("shape-rendering").isSvgOnly(),
         builder("size"),
         builder("speak-header"),
@@ -648,6 +664,8 @@ public final class Property {
       boolean hasPositionDependentValues,
       boolean isSvgOnly,
       @Nullable String warning) {
+    Preconditions.checkArgument(name.equals(name.toLowerCase()),
+        "property name should be all lowercase: %s", name);
     this.name = name;
     this.shorthands = shorthands;
     this.partition = partition;
