@@ -29,6 +29,7 @@ import com.google.common.css.JobDescription.InputOrientation;
 import com.google.common.css.JobDescription.OutputOrientation;
 import com.google.common.css.JobDescriptionBuilder;
 import com.google.common.css.SourceCode;
+import com.google.common.css.Vendor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.gssfunctions.DefaultGssFunctionMapProvider;
 import com.google.common.io.Files;
@@ -148,6 +149,12 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         + "or not specified by --allowed-unrecognized-property ")
     private boolean checkUnrecognizedProperties = false;
 
+    @Option(name = "--vendor", usage =
+        "Creates browser-vendor-specific output by stripping all proprietary "
+        + "browser-vendor properties from the output except for those "
+        + "associated with this vendor.")
+    private Vendor vendor = null;
+
     @Option(name = "--excluded-classes-from-renaming", usage =
         "Pass the compiler a list of CSS class names that shoudn't be renamed.")
     private List<String> excludedClassesFromRenaming = Lists.newArrayList();
@@ -188,6 +195,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setAllowedNonStandardFunctions(allowedNonStandardFunctions);
       builder.setAllowedUnrecognizedProperties(allowedUnrecognizedProperties);
       builder.setCheckUnrecognizedProperties(checkUnrecognizedProperties);
+      builder.setVendor(vendor);
       builder.setAllowWebkitKeyframes(true);
       builder.setProcessDependencies(true);
       builder.setExcludedClassesFromRenaming(excludedClassesFromRenaming);

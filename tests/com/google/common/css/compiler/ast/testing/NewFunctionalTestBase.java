@@ -26,7 +26,9 @@ import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
+import com.google.common.css.compiler.passes.PrettyPrinter;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -154,6 +156,44 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
 
   public CssTree getTree() {
     return tree;
+  }
+
+  /**
+   * Normalizes the compiled CSS to a pretty-printed form that can be compared
+   * with the result of {@link #normalizeExpectedCss(String)}.
+   */
+  private String getCompiledCss() {
+    PrettyPrinter prettyPrinterPass = new PrettyPrinter(tree
+        .getVisitController());
+    prettyPrinterPass.runPass();
+    return prettyPrinterPass.getPrettyPrintedString();
+  }
+
+  /**
+   * Normalizes the expected CSS to a pretty-printed form that can be compared
+   * with the result of {@link #getCompiledCss()}.
+   */
+  private static String normalizeExpectedCss(String expectedCss)
+      throws GssParserException {
+    List<SourceCode> inputs = ImmutableList.of(
+        new SourceCode("expectedCss", expectedCss));
+    CssTree tree = new GssParser(inputs).parse();
+    PrettyPrinter prettyPrinterPass = new PrettyPrinter(tree
+        .getVisitController());
+    prettyPrinterPass.runPass();
+    return prettyPrinterPass.getPrettyPrintedString();
+  }
+
+  /**
+   * Takes a string of GSS to compile and the CSS that should be produced as a
+   * result of compilation. The compiled GSS and expected CSS will be normalized
+   * to a pretty-printed format for comparison, so it is not necessary to format
+   * either by hand.
+   */
+  protected void test(String inputGss, String expectedCss)
+      throws GssParserException {
+    parseAndRun(inputGss);
+    assertEquals(normalizeExpectedCss(expectedCss), getCompiledCss());
   }
 
   /**

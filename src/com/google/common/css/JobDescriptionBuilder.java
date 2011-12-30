@@ -51,6 +51,7 @@ public class JobDescriptionBuilder {
   private Set<String> allowedNonStandardFunctions;
   private boolean checkUnrecognizedProperties;
   private Set<String> allowedUnrecognizedProperties;
+  private Vendor vendor;
   private boolean allowWebkitKeyframes;
   private boolean processDependencies;
   private String cssRenamingPrefix;
@@ -77,6 +78,7 @@ public class JobDescriptionBuilder {
     this.allowedNonStandardFunctions = Sets.newHashSet();
     this.checkUnrecognizedProperties = false;
     this.allowedUnrecognizedProperties = Sets.newHashSet();
+    this.vendor = null;
     this.allowWebkitKeyframes = false;
     this.processDependencies = false;
     this.cssRenamingPrefix = "";
@@ -104,6 +106,7 @@ public class JobDescriptionBuilder {
     this.checkUnrecognizedProperties = jobToCopy.checkUnrecognizedProperties;
     this.allowedUnrecognizedProperties =
         ImmutableSet.copyOf(jobToCopy.allowedUnrecognizedProperties);
+    this.vendor = jobToCopy.vendor;
     this.allowWebkitKeyframes = jobToCopy.allowWebkitKeyframes;
     this.cssRenamingPrefix = jobToCopy.cssRenamingPrefix;
     setExcludedClassesFromRenaming(
@@ -315,6 +318,12 @@ public class JobDescriptionBuilder {
     return this;
   }
 
+  public JobDescriptionBuilder setVendor(Vendor vendor) {
+    checkJobIsNotAlreadyCreated();
+    this.vendor = vendor;
+    return this;
+  }
+
   public JobDescriptionBuilder setAllowWebkitKeyframes(boolean allow) {
     checkJobIsNotAlreadyCreated();
     this.allowWebkitKeyframes = allow;
@@ -344,7 +353,7 @@ public class JobDescriptionBuilder {
         optimize, trueConditionNames, useInternalBidiFlipper, swapLtrRtlInUrl,
         swapLeftRightInUrl, simplifyCss, eliminateDeadStyles,
         allowUnrecognizedFunctions, allowedNonStandardFunctions,
-        checkUnrecognizedProperties, allowedUnrecognizedProperties,
+        checkUnrecognizedProperties, allowedUnrecognizedProperties, vendor,
         allowWebkitKeyframes, processDependencies, allowedAtRules,
         cssRenamingPrefix, excludedClassesFromRenaming, gssFunctionMapProvider,
         cssSubstitutionMapProvider);

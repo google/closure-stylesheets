@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.css.Vendor;
 
 import java.util.List;
 import java.util.Map;
@@ -838,33 +839,6 @@ public final class Property {
 
       return ImmutableSet.of(
           smallestShorthand, possibleShorthand, otherShorthand);
-    }
-  }
-
-  /**
-   * A browser vendor that provides non-standard CSS properties that can be
-   * identified by a special prefix.
-   */
-  public static enum Vendor {
-    WEBKIT("-webkit-"),
-    MOZILLA("-moz-"),
-    MICROSOFT("-ms-"),
-    OPERA("-o-"),
-    ;
-
-    private final String prefix;
-
-    private Vendor(String prefix) {
-      this.prefix = prefix;
-    }
-
-    public static @Nullable Vendor parseProperty(String propertyName) {
-      for (Vendor vendor : values()) {
-        if (propertyName.startsWith(vendor.prefix)) {
-          return vendor;
-        }
-      }
-      return null;
     }
   }
 }

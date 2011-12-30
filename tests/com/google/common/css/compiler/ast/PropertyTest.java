@@ -17,7 +17,7 @@
 package com.google.common.css.compiler.ast;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.css.compiler.ast.Property.Vendor;
+import com.google.common.css.Vendor;
 
 import junit.framework.TestCase;
 

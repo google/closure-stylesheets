@@ -159,6 +159,12 @@ public class PassRunner {
       new BiDiFlipper(cssTree.getMutatingVisitController(),
                         job.swapLtrRtlInUrl, job.swapLeftRightInUrl).runPass();
     }
+    // If specified, remove all vendor-specific properties except for the
+    // whitelisted vendor.
+    if (job.vendor != null) {
+      new RemoveVendorSpecificProperties(job.vendor,
+          cssTree.getMutatingVisitController()).runPass();
+    }
     // If specified, check for unrecognized properties.
     if (job.checkUnrecognizedProperties) {
       new VerifyRecognizedProperties(job.allowedUnrecognizedProperties,
