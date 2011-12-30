@@ -80,6 +80,11 @@ public class VerifyRecognizedProperties extends DefaultTreeVisitor
         !allowedUnrecognizedProperties.contains(property.getName())) {
       reportError(String.format("%s is an unrecognized property",
           property.getName()), propertyNode);
+    } else if (property.hasWarning()) {
+      // TODO(bolinfest): Update ErrorManager to support warnings as well as
+      // errors. This would make it easier to display the SourceCodeLocation.
+      System.err.printf("WARNING for use of CSS property %s: %s\n",
+          property.getName(), property.getWarning());
     }
     return true;
   }

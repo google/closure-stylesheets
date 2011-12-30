@@ -621,18 +621,22 @@ public final class Property {
 
   private final boolean isSvgOnly;
 
+  private final String warning;
+
   private Property(String name,
       Set<String> shorthands,
       String partition,
       @Nullable Vendor vendor,
       boolean hasPositionDependentValues,
-      boolean isSvgOnly) {
+      boolean isSvgOnly,
+      @Nullable String warning) {
     this.name = name;
     this.shorthands = shorthands;
     this.partition = partition;
     this.vendor = vendor;
     this.hasPositionalParameters = hasPositionDependentValues;
     this.isSvgOnly = isSvgOnly;
+    this.warning = warning;
   }
 
   private static Property createUserDefinedProperty(String name) {
@@ -725,7 +729,15 @@ public final class Property {
   }
 
   public boolean isSvgOnly() {
-    return this.isSvgOnly;
+    return isSvgOnly;
+  }
+
+  public boolean hasWarning() {
+    return warning != null;
+  }
+
+  public String getWarning() {
+    return warning;
   }
 
   /**
@@ -762,6 +774,7 @@ public final class Property {
     private Vendor vendor;
     private boolean hasPositionalParameters;
     private boolean isSvgOnly;
+    private String warning;
 
     private Builder(String name) {
       Preconditions.checkNotNull(name);
@@ -771,6 +784,7 @@ public final class Property {
       this.vendor = Vendor.parseProperty(name);
       this.hasPositionalParameters = false;
       this.isSvgOnly = false;
+      this.warning = null;
     }
 
     public Property build() {
@@ -780,7 +794,8 @@ public final class Property {
           this.partition,
           this.vendor,
           this.hasPositionalParameters,
-          this.isSvgOnly);
+          this.isSvgOnly,
+          this.warning);
     }
 
     public Builder setVendor(Vendor vendor) {
@@ -799,6 +814,14 @@ public final class Property {
      */
     public Builder isSvgOnly() {
       this.isSvgOnly = true;
+      return this;
+    }
+
+    /**
+     * @param warning to display when this property is referenced
+     */
+    public Builder warn(String warning) {
+      this.warning = warning;
       return this;
     }
 
