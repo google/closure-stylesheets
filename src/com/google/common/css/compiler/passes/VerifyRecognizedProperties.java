@@ -30,8 +30,9 @@ import com.google.common.css.compiler.ast.VisitController;
 import java.util.Set;
 
 /**
- * CSS Compiler pass that checks whether certain features of CSS, as exercised
- * by the stylesheet, are permitted according to the compilation options.
+ * CSS Compiler pass that checks that all properties in the stylesheet are
+ * either on the built-in recognized property list, or were whitelisted
+ * explicitly.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
@@ -56,8 +57,25 @@ public class VerifyRecognizedProperties extends DefaultTreeVisitor
    */
   @Override
   public boolean enterDeclaration(CssDeclarationNode declarationNode) {
+    // TODO(bolinfest): Associate CSS version with a Property so that this check
+    // can also verify the "compliance level." For example, it may want to
+    // enforce that all properties are CSS 2.1 or earlier.
     CssPropertyNode propertyNode = declarationNode.getPropertyName();
     Property property = propertyNode.getProperty();
+    String propertyName = property.getName();
+
+    // TODO(bolinfest): Have separate options to specify whether the star hack
+    // or underscore hack should be allowed. See:
+    // http://en.wikipedia.org/wiki/CSS_filter#Star_hack
+    // http://en.wikipedia.org/wiki/CSS_filter#Underscore_hack
+    //
+    // If the star or underscore hack is employed, consider the name without the
+    // hack character in determining whether it is a "recognized property."
+    if (propertyName.startsWith("*") || propertyName.startsWith("_")) {
+      propertyName = propertyName.substring(1);
+      property = Property.byName(propertyName);
+    }
+
     if (!property.isRecognizedProperty() &&
         !allowedUnrecognizedProperties.contains(property.getName())) {
       reportError(String.format("%s is an unrecognized property",

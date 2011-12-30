@@ -165,8 +165,9 @@ public class PassRunner {
       new RemoveVendorSpecificProperties(job.vendor,
           cssTree.getMutatingVisitController()).runPass();
     }
-    // If specified, check for unrecognized properties.
-    if (job.checkUnrecognizedProperties) {
+    // Unless all unrecognized properties are allowed, check for unrecognized
+    // properties.
+    if (!job.allowUnrecognizedProperties) {
       new VerifyRecognizedProperties(job.allowedUnrecognizedProperties,
           cssTree.getVisitController(), errorManager).runPass();
     }

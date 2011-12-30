@@ -52,6 +52,7 @@ public final class Property {
 
   static {
     List<Builder> recognizedProperties = ImmutableList.of(
+        builder("alignment-baseline").isSvgOnly(),
         builder("azimuth"),
         builder("background-attachment"),
         builder("background-clip"),
@@ -63,6 +64,7 @@ public final class Property {
         builder("background-repeat"),
         builder("background-size"),
         builder("background"),
+        builder("baseline-shift").isSvgOnly(),
         builder("border-collapse"),
         builder("border-color").setHasPositionalParameters(true),
         builder("border-spacing"),
@@ -106,7 +108,13 @@ public final class Property {
         builder("caption-side"),
         builder("clear"),
         builder("clip"),
+        builder("clip-path").isSvgOnly(),
+        builder("clip-rule").isSvgOnly(),
         builder("color"),
+        builder("color-interpolation").isSvgOnly(),
+        builder("color-interpolation-filters").isSvgOnly(),
+        builder("color-profile").isSvgOnly(),
+        builder("color-rendering").isSvgOnly(),
         builder("content"),
         builder("counter-increment"),
         builder("counter-reset"),
@@ -116,8 +124,10 @@ public final class Property {
         builder("cursor"),
         builder("direction"),
         builder("display"),
+        builder("dominant-baseline").isSvgOnly(),
         builder("elevation"),
         builder("empty-cells"),
+        builder("enable-background").isSvgOnly(),
         builder("-epub-caption-side"),
         builder("-epub-hyphens"),
         builder("-epub-text-combine"),
@@ -128,17 +138,30 @@ public final class Property {
         builder("-epub-text-transform"),
         builder("-epub-word-break"),
         builder("-epub-writing-mode"),
-        builder("filter").setVendor(Vendor.MICROSOFT),
+        builder("fill").isSvgOnly(),
+        builder("fill-opacity").isSvgOnly(),
+        builder("fill-rule").isSvgOnly(),
+        // This is not a MICROSOFT-specific property because it is also an SVG
+        // property: http://www.w3.org/TR/SVG/styling.html
+        builder("filter"),
         builder("float"),
+        builder("flood-color").isSvgOnly(),
+        builder("flood-opacity").isSvgOnly(),
         builder("font-family"),
         builder("font-size"),
         builder("font-style"),
         builder("font-variant"),
         builder("font-weight"),
         builder("font"),
+        builder("glyph-orientation-horizontal").isSvgOnly(),
+        builder("glyph-orientation-vertical").isSvgOnly(),
         builder("height"),
+        builder("image-rendering").isSvgOnly(),
+        builder("kerning").isSvgOnly(),
+        builder("-khtml-user-select"),
         builder("left"),
         builder("letter-spacing"),
+        builder("lighting-color").isSvgOnly(),
         builder("line-height"),
         builder("list-style-image"),
         builder("list-style-position"),
@@ -149,6 +172,11 @@ public final class Property {
         builder("margin-top"),
         builder("margin-bottom"),
         builder("margin").setHasPositionalParameters(true),
+        builder("marker").isSvgOnly(),
+        builder("marker-end").isSvgOnly(),
+        builder("marker-mid").isSvgOnly(),
+        builder("marker-start").isSvgOnly(),
+        builder("mask").isSvgOnly(),
         builder("max-height"),
         builder("max-width"),
         builder("min-height"),
@@ -256,6 +284,8 @@ public final class Property {
         builder("-ms-box-ordinal-group"),
         builder("-ms-box-orient"),
         builder("-ms-box-pack"),
+        builder("-ms-box-shadow"),
+        builder("-ms-box-sizing"),
         builder("-ms-filter"),
         builder("-ms-grid-column"),
         builder("-ms-grid-column-align"),
@@ -301,12 +331,14 @@ public final class Property {
         builder("-ms-writing-mode"),
         builder("-ms-zoom"),
         builder("-o-background-size"),
+        builder("-o-text-overflow"),
         builder("-o-transform"),
         builder("-o-transform-origin"),
         builder("-o-transition"),
         builder("-o-transition-delay"),
         builder("-o-transition-duration"),
         builder("-o-transition-property"),
+        builder("-o-transition-timing-function"),
         builder("opacity"),
         builder("orphans"),
         builder("outline-color"),
@@ -336,21 +368,39 @@ public final class Property {
         builder("resize"),
         builder("richness"),
         builder("right"),
+        builder("shape-rendering").isSvgOnly(),
+        builder("size"),
         builder("speak-header"),
         builder("speak-numeral"),
         builder("speak-punctuation"),
         builder("speak"),
         builder("speech-rate"),
+        builder("stop-color").isSvgOnly(),
+        builder("stop-opacity").isSvgOnly(),
         builder("stress"),
+        builder("stroke").isSvgOnly(),
+        builder("stroke-dasharray").isSvgOnly(),
+        builder("stroke-dashoffset").isSvgOnly(),
+        builder("stroke-linecap").isSvgOnly(),
+        builder("stroke-linejoin").isSvgOnly(),
+        builder("stroke-miterlimit").isSvgOnly(),
+        builder("stroke-opacity").isSvgOnly(),
+        builder("stroke-width").isSvgOnly(),
         builder("table-layout"),
         builder("text-align"),
+        builder("text-anchor").isSvgOnly(),
         builder("text-decoration"),
         builder("text-indent"),
         builder("text-overflow"),
+        builder("text-rendering").isSvgOnly(),
         builder("text-shadow"),
         builder("text-transform"),
         builder("transform"),
         builder("transform-origin"),
+        builder("transition-delay"),
+        builder("transition-duration"),
+        builder("transition-property"),
+        builder("transition-timing-function"),
         builder("top"),
         builder("transition"),
         builder("unicode-bidi"),
@@ -542,10 +592,12 @@ public final class Property {
         builder("white-space"),
         builder("windows"),
         builder("width"),
+        builder("word-break"),
         builder("word-spacing"),
         builder("word-wrap"),
+        builder("writing-mode").isSvgOnly(),
         builder("z-index"),
-        builder("zoom")
+        builder("zoom").setVendor(Vendor.MICROSOFT)
     );
     ImmutableBiMap.Builder<String, Property> allProperies =
         ImmutableBiMap.builder();
@@ -567,16 +619,20 @@ public final class Property {
 
   private final boolean hasPositionalParameters;
 
+  private final boolean isSvgOnly;
+
   private Property(String name,
       Set<String> shorthands,
       String partition,
       @Nullable Vendor vendor,
-      boolean hasPositionDependentValues) {
+      boolean hasPositionDependentValues,
+      boolean isSvgOnly) {
     this.name = name;
     this.shorthands = shorthands;
     this.partition = partition;
     this.vendor = vendor;
     this.hasPositionalParameters = hasPositionDependentValues;
+    this.isSvgOnly = isSvgOnly;
   }
 
   private static Property createUserDefinedProperty(String name) {
@@ -668,6 +724,10 @@ public final class Property {
     return hasPositionalParameters;
   }
 
+  public boolean isSvgOnly() {
+    return this.isSvgOnly;
+  }
+
   /**
    * @return an immutable set of CSS properties recognized by default by the CSS
    *     Compiler
@@ -701,6 +761,7 @@ public final class Property {
     private final String partition;
     private Vendor vendor;
     private boolean hasPositionalParameters;
+    private boolean isSvgOnly;
 
     private Builder(String name) {
       Preconditions.checkNotNull(name);
@@ -709,6 +770,7 @@ public final class Property {
       this.partition = Iterables.getFirst(this.shorthands, name);
       this.vendor = Vendor.parseProperty(name);
       this.hasPositionalParameters = false;
+      this.isSvgOnly = false;
     }
 
     public Property build() {
@@ -717,7 +779,8 @@ public final class Property {
           this.shorthands,
           this.partition,
           this.vendor,
-          this.hasPositionalParameters);
+          this.hasPositionalParameters,
+          this.isSvgOnly);
     }
 
     public Builder setVendor(Vendor vendor) {
@@ -727,6 +790,15 @@ public final class Property {
 
     public Builder setHasPositionalParameters(boolean hasPositionalParameters) {
       this.hasPositionalParameters = hasPositionalParameters;
+      return this;
+    }
+
+    /**
+     * Indicates that the property is relevant only when styling SVG, but not
+     * HTML.
+     */
+    public Builder isSvgOnly() {
+      this.isSvgOnly = true;
       return this;
     }
 

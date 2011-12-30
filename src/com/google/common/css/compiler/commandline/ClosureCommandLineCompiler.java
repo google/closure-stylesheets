@@ -133,7 +133,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     private List<String> trueConditions = Lists.newArrayList();
 
     @Option(name = "--allow-unrecognized-functions", usage =
-        "Whether to allow functions other than url() and rgb().")
+        "Allow unrecognized functions.")
     private boolean allowUnrecognizedFunctions = false;
 
     @Option(name = "--allowed-non-standard-function", usage =
@@ -144,10 +144,9 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         "Specify an unrecognized property to whitelist")
     private List<String> allowedUnrecognizedProperties = Lists.newArrayList();
 
-    @Option(name = "--check-unrecognized-properties", usage =
-        "Reject CSS properties not recognized by Closure Stylesheets, "
-        + "or not specified by --allowed-unrecognized-property ")
-    private boolean checkUnrecognizedProperties = false;
+    @Option(name = "--allow-unrecognized-properties", usage =
+        "Allow unrecognized properties.")
+    private boolean allowUnrecognizedProperties = false;
 
     @Option(name = "--vendor", usage =
         "Creates browser-vendor-specific output by stripping all proprietary "
@@ -194,7 +193,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setAllowUnrecognizedFunctions(allowUnrecognizedFunctions);
       builder.setAllowedNonStandardFunctions(allowedNonStandardFunctions);
       builder.setAllowedUnrecognizedProperties(allowedUnrecognizedProperties);
-      builder.setCheckUnrecognizedProperties(checkUnrecognizedProperties);
+      builder.setAllowUnrecognizedProperties(allowUnrecognizedProperties);
       builder.setVendor(vendor);
       builder.setAllowWebkitKeyframes(true);
       builder.setProcessDependencies(true);

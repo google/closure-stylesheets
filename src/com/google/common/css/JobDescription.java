@@ -45,7 +45,7 @@ public class JobDescription {
   public final boolean eliminateDeadStyles;
   public final boolean allowUnrecognizedFunctions;
   public final Set<String> allowedNonStandardFunctions;
-  public final boolean checkUnrecognizedProperties;
+  public final boolean allowUnrecognizedProperties;
   public final Set<String> allowedUnrecognizedProperties;
   public final Vendor vendor;
   public final boolean allowWebkitKeyframes;
@@ -107,7 +107,7 @@ public class JobDescription {
       boolean swapLeftRightInUrl, boolean simplifyCss,
       boolean eliminateDeadStyles, boolean allowUnrecognizedFunctions,
       Set<String> allowedNonStandardFunctions,
-      boolean checkUnrecognizedProperties,
+      boolean allowUnrecognizedProperties,
       Set<String> allowedUnrecognizedProperties, Vendor vendor,
       boolean allowWebkitKeyframes, boolean processDependencies,
       Set<String> allowedAtRules,
@@ -137,7 +137,7 @@ public class JobDescription {
     this.allowUnrecognizedFunctions = allowUnrecognizedFunctions;
     this.allowedNonStandardFunctions = ImmutableSet.copyOf(
         allowedNonStandardFunctions);
-    this.checkUnrecognizedProperties = checkUnrecognizedProperties;
+    this.allowUnrecognizedProperties = allowUnrecognizedProperties;
     this.allowedUnrecognizedProperties = ImmutableSet.copyOf(
         allowedUnrecognizedProperties);
     this.vendor = vendor;

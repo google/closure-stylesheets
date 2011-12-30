@@ -49,7 +49,7 @@ public class JobDescriptionBuilder {
   private boolean eliminateDeadStyles;
   private boolean allowUnrecognizedFunctions;
   private Set<String> allowedNonStandardFunctions;
-  private boolean checkUnrecognizedProperties;
+  private boolean allowUnrecognizedProperties;
   private Set<String> allowedUnrecognizedProperties;
   private Vendor vendor;
   private boolean allowWebkitKeyframes;
@@ -76,7 +76,7 @@ public class JobDescriptionBuilder {
     this.eliminateDeadStyles = false;
     this.allowUnrecognizedFunctions = false;
     this.allowedNonStandardFunctions = Sets.newHashSet();
-    this.checkUnrecognizedProperties = false;
+    this.allowUnrecognizedProperties = false;
     this.allowedUnrecognizedProperties = Sets.newHashSet();
     this.vendor = null;
     this.allowWebkitKeyframes = false;
@@ -103,7 +103,7 @@ public class JobDescriptionBuilder {
     this.allowUnrecognizedFunctions = jobToCopy.allowUnrecognizedFunctions;
     this.allowedNonStandardFunctions =
         ImmutableSet.copyOf(jobToCopy.allowedNonStandardFunctions);
-    this.checkUnrecognizedProperties = jobToCopy.checkUnrecognizedProperties;
+    this.allowUnrecognizedProperties = jobToCopy.allowUnrecognizedProperties;
     this.allowedUnrecognizedProperties =
         ImmutableSet.copyOf(jobToCopy.allowedUnrecognizedProperties);
     this.vendor = jobToCopy.vendor;
@@ -301,14 +301,14 @@ public class JobDescriptionBuilder {
     return this;
   }
 
-  public JobDescriptionBuilder setCheckUnrecognizedProperties(boolean check) {
+  public JobDescriptionBuilder setAllowUnrecognizedProperties(boolean allow) {
     checkJobIsNotAlreadyCreated();
-    this.checkUnrecognizedProperties = check;
+    this.allowUnrecognizedProperties = allow;
     return this;
   }
 
-  public JobDescriptionBuilder checkUnrecognizedProperties() {
-    return setCheckUnrecognizedProperties(true);
+  public JobDescriptionBuilder allowUnrecognizedProperties() {
+    return setAllowUnrecognizedProperties(true);
   }
 
   public JobDescriptionBuilder setAllowedUnrecognizedProperties(
@@ -353,7 +353,7 @@ public class JobDescriptionBuilder {
         optimize, trueConditionNames, useInternalBidiFlipper, swapLtrRtlInUrl,
         swapLeftRightInUrl, simplifyCss, eliminateDeadStyles,
         allowUnrecognizedFunctions, allowedNonStandardFunctions,
-        checkUnrecognizedProperties, allowedUnrecognizedProperties, vendor,
+        allowUnrecognizedProperties, allowedUnrecognizedProperties, vendor,
         allowWebkitKeyframes, processDependencies, allowedAtRules,
         cssRenamingPrefix, excludedClassesFromRenaming, gssFunctionMapProvider,
         cssSubstitutionMapProvider);

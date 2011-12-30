@@ -29,6 +29,7 @@ public enum Vendor {
   MOZILLA("-moz-"),
   MICROSOFT("-ms-"),
   OPERA("-o-"),
+  KONQUEROR("-khtml-"),
   ;
 
   private final String prefix;
