@@ -23,9 +23,13 @@ public class GssParserException extends Exception {
 
   private GssError gssError;
 
-  public GssParserException(SourceCodeLocation location) {
-    super();
+  public GssParserException(SourceCodeLocation location, Throwable cause) {
+    super("Parse error", cause);
     this.gssError = new GssError("Parse error", location);
+  }
+
+  public GssParserException(SourceCodeLocation location) {
+    this(location, null);
   }
 
   GssError getGssError() {

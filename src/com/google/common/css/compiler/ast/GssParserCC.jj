@@ -179,7 +179,7 @@ public class GssParserCC {
     try {
       start();
     } catch (ParseException e) {
-      throw new GssParserException(this.getLocation(token.next));
+      throw new GssParserException(this.getLocation(token.next), e);
     }
   }
 
