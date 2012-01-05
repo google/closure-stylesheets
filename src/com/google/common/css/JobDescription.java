@@ -53,6 +53,7 @@ public class JobDescription {
   public final ImmutableSet<String> allowedAtRules;
   public final String cssRenamingPrefix;
   public final List<String> excludedClassesFromRenaming;
+  public final List<String> includedClassesInRenaming;
   public final GssFunctionMapProvider gssFunctionMapProvider;
   public final SubstitutionMapProvider cssSubstitutionMapProvider;
   public final OutputRenamingMapFormat outputRenamingMapFormat;
@@ -113,6 +114,7 @@ public class JobDescription {
       boolean allowKeyframes, boolean allowWebkitKeyframes,
       boolean processDependencies, Set<String> allowedAtRules,
       String cssRenamingPrefix, List<String> excludedClassesFromRenaming,
+      List<String> includedClassesInRenaming,
       GssFunctionMapProvider gssFunctionMapProvider,
       SubstitutionMapProvider cssSubstitutionMapProvider,
       OutputRenamingMapFormat outputRenamingMapFormat) {
@@ -124,6 +126,7 @@ public class JobDescription {
     Preconditions.checkNotNull(trueConditionNames);
     Preconditions.checkNotNull(allowedAtRules);
     Preconditions.checkNotNull(excludedClassesFromRenaming);
+    Preconditions.checkNotNull(includedClassesInRenaming);
     this.inputs = ImmutableList.copyOf(inputs);
     this.copyrightNotice = copyrightNotice;
     this.outputFormat = outputFormat;
@@ -150,6 +153,8 @@ public class JobDescription {
     this.cssRenamingPrefix = cssRenamingPrefix;
     this.excludedClassesFromRenaming =
         ImmutableList.copyOf(excludedClassesFromRenaming);
+    this.includedClassesInRenaming =
+        ImmutableList.copyOf(includedClassesInRenaming);
     this.gssFunctionMapProvider = gssFunctionMapProvider;
     this.cssSubstitutionMapProvider = cssSubstitutionMapProvider;
     this.outputRenamingMapFormat = outputRenamingMapFormat;
