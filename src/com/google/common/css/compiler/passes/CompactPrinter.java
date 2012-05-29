@@ -16,7 +16,6 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.ast.CssAttributeSelectorNode;
 import com.google.common.css.compiler.ast.CssBlockNode;
@@ -115,10 +114,6 @@ public class CompactPrinter extends DefaultTreeVisitor
       sb.append(" ");
     }
     return true;
-  }
-
-  private void appendCompositeValueNode(CssCompositeValueNode c) {
-    Joiner.on(c.getOperator().getOperatorName()).appendTo(sb, c.getValues());
   }
 
   /**
