@@ -33,6 +33,7 @@ import com.google.common.css.compiler.ast.CssIdSelectorNode;
 import com.google.common.css.compiler.ast.CssImportRuleNode;
 import com.google.common.css.compiler.ast.CssKeyListNode;
 import com.google.common.css.compiler.ast.CssKeyNode;
+import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssPageRuleNode;
 import com.google.common.css.compiler.ast.CssPageSelectorNode;
@@ -46,7 +47,6 @@ import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
-import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.VisitController;
 

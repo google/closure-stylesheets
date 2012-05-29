@@ -17,9 +17,10 @@
 package com.google.common.css;
 
 import com.google.common.annotations.VisibleForTesting;
-import javax.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
+
+import javax.annotation.Nullable;
 
 /**
  * A location in source code. A location is a sequence of adjacent characters

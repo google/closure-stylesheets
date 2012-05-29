@@ -20,7 +20,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-
 /**
  * {@link CssFontFaceNode} corresponds to a {@code @font-face} declaration in
  * CSS.

@@ -16,8 +16,9 @@
 
 package com.google.common.css;
 
-import javax.annotation.Nullable;
 import com.google.common.base.Preconditions;
+
+import javax.annotation.Nullable;
 
 /**
  * Represents a line of source code, together with an associated "indicator"

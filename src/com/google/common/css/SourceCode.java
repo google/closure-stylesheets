@@ -16,8 +16,9 @@
 
 package com.google.common.css;
 
-import javax.annotation.Nullable;
 import com.google.common.base.Preconditions;
+
+import javax.annotation.Nullable;
 
 /**
  * This is a wrapper for a file that will be compiled. It conveniently stores
