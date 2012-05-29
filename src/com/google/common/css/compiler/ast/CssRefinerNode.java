@@ -91,4 +91,9 @@ public abstract class CssRefinerNode extends CssNode {
   }
 
   public abstract Specificity getSpecificity();
+
+  @Override
+  public String toString() {
+    return refinerType.getPrefix() + refinerName + refinerType.getSuffix();
+  }
 }

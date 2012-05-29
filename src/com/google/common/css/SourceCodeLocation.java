@@ -258,15 +258,25 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
   }
 
   /**
-   * Comparison and ordering of locations is only defined for source code
-   * locations in the same input file. For the semantics of this method, see
+   * Comparison and ordering of locations for source code in different
+   * input files is supported because we don't always preserve
+   * locations during AST mutations and yet we still want to be able
+   * to sort error reports, doing the best job we can for the errors
+   * that have known locations. For the semantics of this method, see
    * {@link Comparable#compareTo(Object)}.
    */
   @Override
   public int compareTo(SourceCodeLocation o) {
     Preconditions.checkNotNull(o);
-    Preconditions.checkArgument(sourceCode == o.sourceCode,
-        "Please do not compare locations in different source files.");
+    if (sourceCode != o.sourceCode) {
+      if (sourceCode == null) {
+        return -1;
+      } else if (o.sourceCode == null) {
+        return 1;
+      } else {
+        return sourceCode.hashCode() - o.sourceCode.hashCode();
+      }
+    }
     int startPointsComparison = begin.compareTo(o.begin);
     if (startPointsComparison != 0) {
       return startPointsComparison;

@@ -57,7 +57,7 @@ public class ReplaceMixins extends DefaultTreeVisitor
     implements CssCompilerPass {
   @VisibleForTesting
   static final String NO_MATCHING_MIXIN_DEFINITION_ERROR_MESSAGE =
-      "The name of the mixin machtes no mixin definition name";
+      "The name of the mixin matches no mixin definition name";
   @VisibleForTesting
   static final String ARGUMENT_MISMATCH_ERROR_MESSAGE =
     "The number of arguments of the mixin and the corresponding definition "

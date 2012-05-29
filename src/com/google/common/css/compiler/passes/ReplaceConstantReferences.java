@@ -129,8 +129,8 @@ public class ReplaceConstantReferences extends DefaultTreeVisitor
       if (inFunArgs && intermediate) {
         // Usually, the parser consumes whitespace and lets tree
         // structure suffice to distinguish elements of the AST. But
-        // functions are different: the parser adds CssLiteralNode("
-        // ") between function args. Here we are looking at a sequence
+        // functions are different: the parser adds CssLiteralNode(" ")
+        // between function args. Here we are looking at a sequence
         // of values parsed from a @def (where we do not represent
         // whitespace explicitly) and a use/reference that occurs in a
         // function (where we do represent whitespace explicitly). So,
@@ -153,7 +153,7 @@ public class ReplaceConstantReferences extends DefaultTreeVisitor
     // will unwrap the value if it can in the current context.
     CssCompositeValueNode tempNode = new CssCompositeValueNode(
         temp, CssCompositeValueNode.Operator.SPACE,
-        constantNode.getSourceCodeLocation());
+        node.getSourceCodeLocation());
     visitController.replaceCurrentBlockChildWith(
         Lists.newArrayList(tempNode), true);
   }

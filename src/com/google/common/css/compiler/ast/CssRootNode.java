@@ -74,8 +74,8 @@ public class CssRootNode extends CssNode {
 
   @Override
   void setParent(CssNode parent) {
-    Preconditions.checkState(false,
-        "You cannot set the parent node of a tree root.");
+    Preconditions.checkState(parent == null,
+        "You cannot set a non-null parent node of a tree root.");
   }
 
   public CssAtRuleNode getCharsetRule() {

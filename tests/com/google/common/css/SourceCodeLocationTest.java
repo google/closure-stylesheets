@@ -133,19 +133,5 @@ public class SourceCodeLocationTest extends TestCase {
       new SourceCodeLocation(sourceCode2, 0, 1, 1, 2, 1, 3);
     assertFalse(loc1.equals(loc2));
     assertFalse(loc2.equals(loc1));
-    try {
-      loc1.compareTo(loc2);
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertEquals("Please do not compare locations in different source files.",
-          expected.getMessage());
-    }
-    try {
-      loc2.compareTo(loc1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertEquals("Please do not compare locations in different source files.",
-          expected.getMessage());
-    }
   }
 }
