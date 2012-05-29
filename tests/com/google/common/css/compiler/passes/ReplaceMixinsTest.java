@@ -319,6 +319,17 @@ public class ReplaceMixinsTest extends PassesTestBase {
         + "bottom left,red 20px,yellow,green,blue 90%)];]}]");
   }
 
+  public void testMixinReplacementOnCompositeValueNodeWithNestedValues() {
+    testTreeConstruction(linesToString(
+        "@defmixin foo(A, B, C) {",
+        "  background: rgba(A, B, C, .2), rgba(A, B, C, .2);",
+        "}",
+        ".a { @mixin foo(255, 255, 255); }",
+        ".b { @mixin foo(0, 0, 0); }"),
+        "[[.a]{[background:[[rgba(255,255,255,.2),rgba(255,255,255,.2)]];]}"
+        + "[.b]{[background:[[rgba(0,0,0,.2),rgba(0,0,0,.2)]];]}]");
+  }
+
   public void testMixinReplacementGradientYouTube() {
     testTreeConstruction(linesToString(
         "@def _VR_MAIN rgba(0, 0, 0, .12), rgba(0, 0, 0, .08) 1px,"

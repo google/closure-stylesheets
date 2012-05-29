@@ -104,7 +104,17 @@ public class CssCompositeValueNode extends CssValueNode {
    * @param node The composite node to copy
    */
   public CssCompositeValueNode(CssCompositeValueNode node) {
-    this(node.getValues(), node.getOperator(), node.getSourceCodeLocation());
+    this(deepCopyCompositeValues(node.getValues()), node.getOperator(),
+        node.getSourceCodeLocation());
+  }
+
+  private static List<CssValueNode> deepCopyCompositeValues(
+      List<CssValueNode> compositeValues) {
+    List<CssValueNode> copy = Lists.newArrayList();
+    for (CssValueNode child : compositeValues) {
+      copy.add(child.deepCopy());
+    }
+    return copy;
   }
 
   @Override
