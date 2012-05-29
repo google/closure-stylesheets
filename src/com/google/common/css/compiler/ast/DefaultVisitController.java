@@ -1815,6 +1815,11 @@ class DefaultVisitController implements MutatingVisitController {
       return new VisitFontFaceState((CssFontFaceNode) child);
     }
 
+    // VisitUnknownAtRuleBlockState
+    if (child instanceof CssImportRuleNode) {
+      return new VisitImportRuleState((CssImportRuleNode) child);
+    }
+
     if (child instanceof CssComponentNode) {
       return new VisitComponentState((CssComponentNode) child);
     }

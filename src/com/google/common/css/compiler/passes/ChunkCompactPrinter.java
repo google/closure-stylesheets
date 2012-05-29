@@ -91,10 +91,10 @@ public class ChunkCompactPrinter<T> extends CompactPrinter {
   @Override
   public boolean enterMediaRule(CssMediaRuleNode media) {
     printSelector = chunk.equals(media.getChunk());
-    if (printSelector) {
-      return super.enterMediaRule(media);
+    if (!printSelector) {
+      return false;
     }
-    return true;
+    return super.enterMediaRule(media);
   }
 
   @Override

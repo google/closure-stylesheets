@@ -43,7 +43,7 @@ public abstract class AbstractCompactPrinterTest extends FunctionalTestBase {
 
   protected CssTree parseStyleSheet(String sourceCode) {
     parseAndBuildTree(sourceCode);
-    return tree;
+    return newTree;
   }
 
   protected String lines(String... lines) {
@@ -52,8 +52,6 @@ public abstract class AbstractCompactPrinterTest extends FunctionalTestBase {
 
   private void assertCompactPrintedResult(String expected,
       CssTree treeToCheck) {
-    new CreateStandardAtRuleNodes(treeToCheck.getMutatingVisitController(),
-        null).runPass();
     CompactPrinter pass = new CompactPrinter(treeToCheck);
     pass.runPass();
     assertEquals(expected, pass.getCompactPrintedString());

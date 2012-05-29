@@ -155,7 +155,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
 
   public void testImport() {
     assertNewCompactPrintedResult(
-        ".CSS_RULE{foo:bar}",
+        "@import 'a.css';.CSS_RULE{foo:bar}",
         lines(
             "@import 'a.css';",
             ".CSS_RULE {",

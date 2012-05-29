@@ -21,6 +21,7 @@ import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.css.compiler.passes.CreateComponentNodes;
 import com.google.common.css.compiler.passes.CreateConditionalNodes;
 import com.google.common.css.compiler.passes.CreateDefinitionNodes;
+import com.google.common.css.compiler.passes.CreateStandardAtRuleNodes;
 import com.google.common.css.compiler.passes.PrettyPrinter;
 
 /**
@@ -46,15 +47,15 @@ public class FunctionalTestBase extends FunctionalTestCommonBase {
   }
 
   protected void runPassesOnNewTree() {
-    CreateDefinitionNodes pass1 = new CreateDefinitionNodes(
-        newTree.getMutatingVisitController(), newTestBase.getErrorManager());
+    MutatingVisitController vc = newTree.getMutatingVisitController();
+    ErrorManager errorManager = newTestBase.getErrorManager();
+    CreateDefinitionNodes pass1 = new CreateDefinitionNodes(vc, errorManager);
     pass1.runPass();
-    CreateConditionalNodes pass2 = new CreateConditionalNodes(
-        newTree.getMutatingVisitController(), newTestBase.getErrorManager());
+    CreateConditionalNodes pass2 = new CreateConditionalNodes(vc, errorManager);
     pass2.runPass();
-    CreateComponentNodes pass3 = new CreateComponentNodes(
-        newTree.getMutatingVisitController(), newTestBase.getErrorManager());
+    CreateComponentNodes pass3 = new CreateComponentNodes(vc, errorManager);
     pass3.runPass();
+    new CreateStandardAtRuleNodes(vc, errorManager).runPass();
   }
 
 
@@ -71,5 +72,4 @@ public class FunctionalTestBase extends FunctionalTestCommonBase {
     newTree = newTestBase.getTree();
     tree = newTestBase.getTree();
   }
-
 }

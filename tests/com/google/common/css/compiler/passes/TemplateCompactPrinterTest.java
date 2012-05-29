@@ -36,7 +36,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
         + rS + "a{}" + rE
         + rS + "a#a{}" + rE
         + rS + "a#a b{}" + rE
-        + rS + "b+i{}" + rE);
+        + rS + "b+i{}" + rE
+        + "@media print{" + rS + "foo{}" + rE + "}");
     assertTemplateOutput("bar",
         rS + ".bar{}" + rE
         + rS + "b{}" + rE
@@ -54,7 +55,7 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
   private void assertTemplateOutput(
       String chunk, String expected) {
     TemplateCompactPrinter<String> printer =
-        new TemplateCompactPrinter<String>(tree, chunk);
+        new TemplateCompactPrinter<String>(newTree, chunk);
     printer.runPass();
     assertEquals(expected, printer.getCompactPrintedString());
   }
