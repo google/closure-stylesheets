@@ -225,6 +225,9 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
       for (GssError error : errors) {
         print(error.getMessage());
       }
+      for (GssError warning : warnings) {
+        print(warning.getMessage());
+      }
     }
 
     @Override

@@ -128,9 +128,11 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
     try {
       String compilerOutput = compile();
 
-      // If there were errors, show them and fail.
+      // Print any errors or warnings.
+      errorManager.generateReport();
+
+      // If there were errors, fail.
       if (errorManager.hasErrors()) {
-        errorManager.generateReport();
         exitCodeHandler.processExitCode(
             AbstractCommandLineCompiler.ERROR_MESSAGE_EXIT_CODE);
       }

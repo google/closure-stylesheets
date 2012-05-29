@@ -30,6 +30,7 @@ import java.util.SortedSet;
  */
 public abstract class BasicErrorManager implements ErrorManager {
   protected final SortedSet<GssError> errors = Sets.newTreeSet();
+  protected final SortedSet<GssError> warnings = Sets.newTreeSet();
 
   @Override
   public void report(GssError error) {
@@ -37,12 +38,20 @@ public abstract class BasicErrorManager implements ErrorManager {
   }
 
   @Override
+  public void reportWarning(GssError warning) {
+    warnings.add(warning);
+  }
+
+  @Override
   public void generateReport() {
-    for (GssError error : errors) {
+    SortedSet<GssError> all = Sets.newTreeSet();
+    all.addAll(warnings);
+    all.addAll(errors);
+    for (GssError error : all) {
       print(error.format());
     }
-    if (!errors.isEmpty()) {
-      print(errors.size() + " error(s)\n");
+    if (!all.isEmpty()) {
+      print(errors.size() + " error(s), " + warnings.size() + " warning(s)\n");
     }
   }
 

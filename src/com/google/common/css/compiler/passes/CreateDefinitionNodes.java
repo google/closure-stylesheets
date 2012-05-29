@@ -72,14 +72,11 @@ public class CreateDefinitionNodes extends DefaultTreeVisitor
       CssLiteralNode defNameNode = (CssLiteralNode) nameNode;
       String defName = defNameNode.getValue();
       if (!CssConstantReferenceNode.isDefinitionReference(defName)) {
-        // TODO(nicksantos): Update ErrorManager to support warnings as
-        // well as errors.
-        GssError error = new GssError(
+        errorManager.reportWarning(new GssError(
             String.format(
                 "WARNING for invalid @def name %s. We will ignore this.",
                 defName),
-            defNameNode.getSourceCodeLocation());
-        System.err.println(error.format());
+            defNameNode.getSourceCodeLocation()));
 
         // Create a definition node anyway, so that the compiler doesn't crash.
       }

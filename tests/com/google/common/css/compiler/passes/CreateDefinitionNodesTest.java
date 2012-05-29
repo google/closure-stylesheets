@@ -46,13 +46,18 @@ public class CreateDefinitionNodesTest extends NewFunctionalTestBase {
   }
 
   public void testNoNameError() throws Exception {
-      parseAndRun("@def;", "@def without name");
-      assertTrue(isEmptyBody());
+    parseAndRun("@def;", "@def without name");
+    assertTrue(isEmptyBody());
   }
 
   public void testNameError() throws Exception {
-      parseAndRun("@def 1px 2px 3px;",
-          "@def without a valid literal as name");
-      assertTrue(isEmptyBody());
+    parseAndRun("@def 1px 2px 3px;",
+        "@def without a valid literal as name");
+    assertTrue(isEmptyBody());
+  }
+
+  public void testNameSyntacticallyInvalid() throws Exception {
+    parseAndRun("@def FOO-BAR 1;",
+        "WARNING for invalid @def name FOO-BAR. We will ignore this.");
   }
 }

@@ -21,7 +21,12 @@ package com.google.common.css.compiler.ast;
  *
  */
 public interface ErrorManager {
+  /** Report an error message that makes compilation fail. */
   void report(GssError error);
+
+  /** Report an error message that does not make compilation fail. */
+  void reportWarning(GssError warning);
+
   void generateReport();
   boolean hasErrors();
 }
