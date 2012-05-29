@@ -103,12 +103,28 @@ public class DefaultTreeVisitor implements CssTreeVisitor {
   public void leavePropertyValue(CssPropertyValueNode propertyValue) {}
 
   @Override
+  public boolean enterCompositeValueNode(CssCompositeValueNode value) {
+    return true;
+  }
+
+  @Override
+  public void leaveCompositeValueNode(CssCompositeValueNode value) {}
+
+  @Override
   public boolean enterValueNode(CssValueNode value) {
     return true;
   }
 
   @Override
   public void leaveValueNode(CssValueNode value) {}
+
+  @Override
+  public boolean enterCompositeValueNodeOperator(CssCompositeValueNode parent) {
+    return true;
+  }
+
+  @Override
+  public void leaveCompositeValueNodeOperator(CssCompositeValueNode parent) {}
 
   @Override
   public boolean enterFunctionNode(CssFunctionNode value) {
@@ -173,6 +189,16 @@ public class DefaultTreeVisitor implements CssTreeVisitor {
 
   @Override
   public void leaveUnknownAtRule(CssUnknownAtRuleNode node) {}
+
+  @Override
+  public boolean enterMediaTypeListDelimiter(
+      CssNodesListNode<? extends CssNode> node) {
+    return true;
+  }
+
+  @Override
+  public void leaveMediaTypeListDelimiter(
+      CssNodesListNode<? extends CssNode> node) {}
 
   @Override
   public boolean enterComponent(CssComponentNode node) {

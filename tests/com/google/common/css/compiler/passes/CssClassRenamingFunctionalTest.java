@@ -34,8 +34,8 @@ public class CssClassRenamingFunctionalTest extends PassesTestBase {
         ".CSS_RULE_2 {",
         "  border: 2px;",
         "}"),
-        "[[.CSS_RULE_1_]{[padding:[1px];]}" +
-        "[.CSS_RULE_2_]{[border:[2px];]}]");
+        "[[.CSS_RULE_1_]{[padding:[[1px]];]}" +
+        "[.CSS_RULE_2_]{[border:[[2px]];]}]");
   }
 
   public void testCssClassRenaming2() {
@@ -46,8 +46,8 @@ public class CssClassRenamingFunctionalTest extends PassesTestBase {
         ".CSS_RULE_2 {",
         "  border: 2px;",
         "}"),
-        "[[.CSS_RULE_1_ .CSS_RULE_2_]{[padding:[1px];]}" +
-        "[.CSS_RULE_2_]{[border:[2px];]}]");
+        "[[.CSS_RULE_1_ .CSS_RULE_2_]{[padding:[[1px]];]}" +
+        "[.CSS_RULE_2_]{[border:[[2px]];]}]");
   }
 
   public void testCssClassRenaming3() {
@@ -55,7 +55,7 @@ public class CssClassRenamingFunctionalTest extends PassesTestBase {
         "div.CSS_RULE_1 {",
         "  padding: 1px;",
         "}"),
-        "[[div.CSS_RULE_1_]{[padding:[1px];]}]");
+        "[[div.CSS_RULE_1_]{[padding:[[1px]];]}]");
   }
 
   public void testCssClassRenaming4() {
@@ -63,7 +63,7 @@ public class CssClassRenamingFunctionalTest extends PassesTestBase {
         ".CSS_RULE_1#ID_ID {",
         "  padding: 1px;",
         "}"),
-        "[[.CSS_RULE_1_#ID_ID^]{[padding:[1px];]}]");
+        "[[.CSS_RULE_1_#ID_ID^]{[padding:[[1px]];]}]");
   }
 
   @Override

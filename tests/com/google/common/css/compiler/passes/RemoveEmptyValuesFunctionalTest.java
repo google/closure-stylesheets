@@ -32,7 +32,7 @@ public class RemoveEmptyValuesFunctionalTest extends PassesTestBase {
         "  color: COLOR;",
         "  padding: PADDING;",
         "}"),
-        "[[.CSS_RULE]{[padding:[1px];]}]");
+        "[[.CSS_RULE]{[padding:[[1px]];]}]");
   }
 
   public void testRemoveEmptyValues2() {
@@ -43,7 +43,7 @@ public class RemoveEmptyValuesFunctionalTest extends PassesTestBase {
         "  color: COLOR !important;",
         "  padding: PADDING;",
         "}"),
-        "[[.CSS_RULE]{[padding:[1px];]}]");
+        "[[.CSS_RULE]{[padding:[[1px]];]}]");
   }
 
   public void testRemoveEmptyValues3() {
@@ -55,7 +55,7 @@ public class RemoveEmptyValuesFunctionalTest extends PassesTestBase {
         "  color: A B !important;",
         "  padding: C;",
         "}"),
-        "[[.CSS_RULE]{[padding:[1px];]}]");
+        "[[.CSS_RULE]{[padding:[[1px]];]}]");
   }
 
   public void testRemoveEmptyValues4() {
