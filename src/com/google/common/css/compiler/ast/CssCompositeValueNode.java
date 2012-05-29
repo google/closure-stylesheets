@@ -94,9 +94,8 @@ public class CssCompositeValueNode extends CssValueNode {
       @Nullable SourceCodeLocation sourceCodeLocation) {
     super(null, sourceCodeLocation);
     this.operator = operator;
-    // TODO(dgajda): Values should be treated as children and have their parent
-    //     property set, current implementation is buggy and does not do it.
     this.values = Lists.newArrayList(compositeValues);
+    becomeParentForNodes(values);
   }
 
   /**
@@ -124,6 +123,7 @@ public class CssCompositeValueNode extends CssValueNode {
    */
   public void addValue(CssValueNode value) {
     values.add(value);
+    becomeParentForNode(value);
   }
 
   public Operator getOperator() {
