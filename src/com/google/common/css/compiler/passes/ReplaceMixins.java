@@ -19,7 +19,6 @@ package com.google.common.css.compiler.passes;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.css.SourceCodeLocation;
@@ -217,7 +216,7 @@ public class ReplaceMixins extends DefaultTreeVisitor
     Preconditions.checkNotNull(values);
 
     // Create deep copies because the values can be inserted in several places.
-    Builder<CssValueNode> builder = ImmutableList.builder();
+    ImmutableList.Builder<CssValueNode> builder = ImmutableList.builder();
     for (CssValueNode val : values) {
       if (isArgument || !" ".equals(val.getValue())) {
         // Values only containing a whitespace are only added if they inside

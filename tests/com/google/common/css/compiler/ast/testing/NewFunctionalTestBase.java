@@ -17,7 +17,6 @@
 package com.google.common.css.compiler.ast.testing;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.BasicErrorManager;
@@ -143,7 +142,7 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
    */
   protected CssTree parse(ImmutableMap<String, String> fileNameToGss)
       throws GssParserException {
-    Builder<SourceCode> builder = ImmutableList.builder();
+    ImmutableList.Builder<SourceCode> builder = ImmutableList.builder();
     for (Map.Entry<String, String> entry : fileNameToGss.entrySet()) {
       builder.add(new SourceCode(entry.getKey(), entry.getValue()));
     }
