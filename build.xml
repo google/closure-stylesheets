@@ -65,10 +65,12 @@
       Include all dependent jars so this can be run using:
       java -jar build/closure-stylesheets.jar -o output.css input.css...
       -->
-      <zipfileset src="${lib.dir}/args4j-2.0.17.jar" />
-      <zipfileset src="${lib.dir}/gson-1.7.1.jar" />
-      <zipfileset src="${lib.dir}/guava-10.0.1.jar" />
-      <zipfileset src="${lib.dir}/jsr305.jar" />
+      <zipgroupfileset dir="${lib.dir}">
+        <include name="args4j*.jar" />
+        <include name="gson*.jar" />
+        <include name="guava*.jar" />
+        <include name="jsr305.jar" />
+      </zipgroupfileset>
       <manifest>
         <attribute name="Main-Class"
                    value="com.google.common.css.compiler.commandline.ClosureCommandLineCompiler" />
