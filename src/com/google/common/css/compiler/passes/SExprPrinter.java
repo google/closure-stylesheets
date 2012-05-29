@@ -40,7 +40,6 @@ import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssMixinNode;
 import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
 import com.google.common.css.compiler.ast.CssNode;
-import com.google.common.css.compiler.ast.CssNodesListNode;
 import com.google.common.css.compiler.ast.CssPageRuleNode;
 import com.google.common.css.compiler.ast.CssPageSelectorNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
@@ -179,19 +178,6 @@ public class SExprPrinter implements CssTreeVisitor {
 
   /** Called after visiting a {@code CssUnknownAtRuleNode}'s sub trees */
   public void leaveUnknownAtRule(CssUnknownAtRuleNode node) {
-    leave(node);
-  }
-
-  /** Called between adjacent nodes in a media type list */
-  public boolean enterMediaTypeListDelimiter(
-      CssNodesListNode<? extends CssNode> node) {
-    enter(node);
-    return true;
-  }
-
-  /** Called between adjacent nodes in a media type list */
-  public void leaveMediaTypeListDelimiter(
-      CssNodesListNode<? extends CssNode> node) {
     leave(node);
   }
 

@@ -16,12 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import com.google.common.base.Joiner;
 import com.google.common.css.compiler.ast.CssAtRuleNode.Type;
 import com.google.common.css.compiler.ast.CssAttributeSelectorNode;
-import com.google.common.css.compiler.ast.CssBlockNode;
+import com.google.common.css.compiler.ast.CssBooleanExpressionNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
 import com.google.common.css.compiler.ast.CssCombinatorNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
@@ -103,15 +100,17 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterMediaRule(CssMediaRuleNode node) {
     sb.append(node.getType().toString());
-    if (node.getParameters().size() > 0
-        || (node.getType().hasBlock() && node.getBlock() != null)) {
+    for (CssValueNode param : node.getParameters()) {
       sb.append(" ");
+      if (param instanceof CssBooleanExpressionNode) {
+        appendMediaParamterWithParentheses(param);
+      } else {
+        sb.append(param.getValue());
+      }
     }
+    sb.append(" {\n");
+    indent += "  ";
     return true;
-  }
-
-  private void appendCompositeValueNode(CssCompositeValueNode c) {
-    Joiner.on(c.getOperator().getOperatorName()).appendTo(sb, c.getValues());
   }
 
   /**
@@ -119,7 +118,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
    * boolean expression node and only stores the identifier itself.
    * For example: {@code @media all and (color)}
    */
-  private void appendMediaParameterWithParentheses(CssValueNode node) {
+  private void appendMediaParamterWithParentheses(CssValueNode node) {
     // TODO(fbenz): Try to avoid the special handling of this case.
     sb.append("(");
     sb.append(node.getValue());
@@ -127,7 +126,10 @@ public class PrettyPrinter extends DefaultTreeVisitor
   }
 
   @Override
-  public void leaveMediaRule(CssMediaRuleNode node) {}
+  public void leaveMediaRule(CssMediaRuleNode node) {
+    sb.append("}\n");
+    indent = indent.substring(0, indent.length() - 2);
+  }
 
   @Override
   public boolean enterPageRule(CssPageRuleNode node) {
@@ -205,24 +207,6 @@ public class PrettyPrinter extends DefaultTreeVisitor
   }
 
   @Override
-  public boolean enterBlock(CssBlockNode block) {
-    if (block.getParent() instanceof CssUnknownAtRuleNode
-        || block.getParent() instanceof CssMediaRuleNode) {
-      sb.append("{\n");
-      indent += "  ";
-    }
-    return true;
-  }
-
-  @Override
-  public void leaveBlock(CssBlockNode block) {
-    if (block.getParent() instanceof CssMediaRuleNode) {
-      sb.append("}\n");
-      indent = indent.substring(0, indent.length() - 2);
-    }
-  }
-
-  @Override
   public boolean enterDeclaration(CssDeclarationNode declaration) {
     sb.append(indent);
     if (declaration.hasStarHack()) {
@@ -241,40 +225,30 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterValueNode(CssValueNode node) {
-    checkArgument(!(node instanceof CssCompositeValueNode));
-
-    String v = node.toString();
-    if (stripQuotes && node.getParent() instanceof CssDefinitionNode) {
-      v = maybeStripQuotes(v);
+    if (node instanceof CssCompositeValueNode) {
+      CssCompositeValueNode compositeNode = (CssCompositeValueNode) node;
+      String operatorName = compositeNode.getOperator().getOperatorName();
+      for (CssValueNode value : compositeNode.getValues()) {
+        enterValueNode(value);
+        deleteEndingIfEndingIs(" ");
+        sb.append(operatorName);
+      }
+      deleteEndingIfEndingIs(operatorName);
+    } else {
+      String v = node.toString();
+      if (stripQuotes && node.getParent() instanceof CssDefinitionNode) {
+        v = maybeStripQuotes(v);
+      }
+      sb.append(v);
     }
-    sb.append(v);
 
     // NOTE(flan): When visiting function arguments, we don't want to add extra
     // spaces because they are already in the arguments list if they are
     // required. Yes, this sucks.
-    if (!inFunargs(node)) {
+    if (!(node.getParent() instanceof CssFunctionArgumentsNode)) {
       sb.append(" ");
     }
-    return true;
-  }
-
-  @Override
-  public boolean enterCompositeValueNodeOperator(CssCompositeValueNode parent) {
-    sb.append(parent.getOperator().getOperatorName());
-    if (!inFunargs(parent)) {
-      sb.append(" ");
-    }
-    return true;
-  }
-
-  /**
-   * Returns true when @{code node}'s parent or grandparent is a function
-   * arguments node.
-   */
-  private boolean inFunargs(CssValueNode node) {
-    return node.getParent() instanceof CssFunctionArgumentsNode
-        || (node.getParent() instanceof CssCompositeValueNode &&
-            node.getParent().getParent() instanceof CssFunctionArgumentsNode);
+    return !(node instanceof CssCompositeValueNode);
   }
 
   @Override
@@ -437,9 +411,14 @@ public class PrettyPrinter extends DefaultTreeVisitor
   public boolean enterUnknownAtRule(CssUnknownAtRuleNode node) {
     sb.append(indent);
     sb.append('@').append(node.getName().toString());
-    if (node.getParameters().size() > 0
-        || (node.getType().hasBlock() && node.getBlock() != null)) {
+    for (CssValueNode param : node.getParameters()) {
       sb.append(" ");
+      sb.append(param.getValue());
+    }
+    if (node.getType().hasBlock()
+        && !(node.getBlock() instanceof CssDeclarationBlockNode)) {
+      sb.append(" {\n");
+      indent += "  ";
     }
     return true;
   }
@@ -453,7 +432,6 @@ public class PrettyPrinter extends DefaultTreeVisitor
         sb.append("}");
       }
     } else {
-      deleteEndingIfEndingIs(" ");
       sb.append(';');
     }
     sb.append('\n');

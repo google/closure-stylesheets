@@ -18,7 +18,6 @@ package com.google.common.css.compiler.passes.testing;
 
 import com.google.common.css.compiler.ast.CssBooleanExpressionNode;
 import com.google.common.css.compiler.ast.CssCommentNode;
-import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
 import com.google.common.css.compiler.ast.CssConditionalRuleNode;
 import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
@@ -105,32 +104,6 @@ public class AstPrinter extends CompactPrinter {
   @Override
   public void leavePropertyValue(CssPropertyValueNode propertyValue) {
     super.leavePropertyValue(propertyValue);
-    deleteLastCharIfCharIs(' ');
-    sb.append("]");
-  }
-
-  @Override
-  public boolean enterCompositeValueNode(CssCompositeValueNode value) {
-    sb.append("[");
-    return super.enterCompositeValueNode(value);
-  }
-
-  @Override
-  public void leaveCompositeValueNode(CssCompositeValueNode value) {
-    super.leaveCompositeValueNode(value);
-    deleteLastCharIfCharIs(' ');
-    sb.append("]");
-  }
-
-  @Override
-  public boolean enterValueNode(CssValueNode value) {
-    sb.append("[");
-    return super.enterValueNode(value);
-  }
-
-  @Override
-  public void leaveValueNode(CssValueNode value) {
-    super.leaveValueNode(value);
     deleteLastCharIfCharIs(' ');
     sb.append("]");
   }

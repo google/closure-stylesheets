@@ -47,7 +47,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         ".CSS_RULE {",
         "  border-color: COLOR;",
         "}"),
-        "[[.CSS_RULE]{[border-color:[[red][green][blue]];]}]");
+        "[[.CSS_RULE]{[border-color:[red green blue];]}]");
   }
 
   public void testReplaceConstants3() {
@@ -62,7 +62,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         "  border-color: BORDER_COLOR;",
         "}"),
         "[[.CSS_RULE]{[border-color:"
-        + "[blendColors(#ccc,#000) [#ccc][#ccc][#ccc]];]}]");
+        + "[blendColors(#ccc,#000) #ccc #ccc #ccc];]}]");
   }
 
   public void testReplaceConstants4() {
@@ -115,8 +115,8 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
       "  box-shadow: inset DARK_DIVIDER_RIGHT, inset DARK_DIVIDER_LEFT;",
       "}"),
       "[[.A]{[box-shadow:"
-      + "[[inset][[[1px] [0] [1px] [rgba(73,71,71,.3)]],"
-      + "[inset]][-1px][0][1px]rgba(5,4,4,.3)"
+      + "[inset 1px 0 1px rgba(73,71,71,.3),"
+      + "inset -1px 0 1px rgba(5,4,4,.3)"
       + "];]}]");
   }
 
@@ -128,7 +128,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
       ".A {",
       "  font: BASE_TINY_FONT;",
       "}"),
-      "[[.A]{[font:[[19px][[verdana],[arial],[\"Courrier New\"],[sans-serif]]];]}]");
+      "[[.A]{[font:[19px verdana,arial,\"Courrier New\",sans-serif];]}]");
   }
 
   @Override

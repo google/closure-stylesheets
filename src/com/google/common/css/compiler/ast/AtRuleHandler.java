@@ -77,12 +77,6 @@ public interface AtRuleHandler {
   /** Called after visiting a {@code CssUnknownAtRuleNode}'s sub trees */
   void leaveUnknownAtRule(CssUnknownAtRuleNode node);
 
-  /** Called between adjacent nodes in a media type list */
-  boolean enterMediaTypeListDelimiter(CssNodesListNode<? extends CssNode> node);
-
-  /** Called between adjacent nodes in a media type list */
-  void leaveMediaTypeListDelimiter(CssNodesListNode<? extends CssNode> node);
-
   /** Called before visiting a {@code CssComponentNode}'s sub trees */
   boolean enterComponent(CssComponentNode node);
 

@@ -55,7 +55,7 @@ public class GssParserTest extends TestCase {
         new SourceCode("test3", "b {}"))).parse();
     CssRootNode root = tree.getRoot();
     assertNotNull(root);
-    assertEquals("[[a]{[]}@component [c]{[x]{[y:[[z]];]}}[b]{[]}]",
+    assertEquals("[[a]{[]}@component c{[x]{[y:[z];]}}[b]{[]}]",
         AstPrinter.print(tree));
   }
 
@@ -68,23 +68,23 @@ public class GssParserTest extends TestCase {
   }
 
   public void testAst3() throws Exception {
-    testTree("a {x: y}", "[[a]{[x:[[y]];]}]");
+    testTree("a {x: y}", "[[a]{[x:[y];]}]");
   }
 
   public void testAst4() throws Exception {
-    testTree("a {w: x; y: z}", "[[a]{[w:[[x]];y:[[z]];]}]");
+    testTree("a {w: x; y: z}", "[[a]{[w:[x];y:[z];]}]");
   }
 
   public void testAst5() throws Exception {
-    testTree("a {b: 1em}", "[[a]{[b:[[1em]];]}]");
+    testTree("a {b: 1em}", "[[a]{[b:[1em];]}]");
   }
 
   public void testAst6() throws Exception {
-    testTree("a {b: 1.5em}", "[[a]{[b:[[1.5em]];]}]");
+    testTree("a {b: 1.5em}", "[[a]{[b:[1.5em];]}]");
   }
 
   public void testAst7() throws Exception {
-    testTree("a {b: 'x'}", "[[a]{[b:[['x']];]}]");
+    testTree("a {b: 'x'}", "[[a]{[b:['x'];]}]");
   }
 
   public void testAst8() throws Exception {
@@ -96,12 +96,12 @@ public class GssParserTest extends TestCase {
   }
 
   public void testAst10() throws Exception {
-    testTree("a {b: x y z}", "[[a]{[b:[[x][y][z]];]}]");
+    testTree("a {b: x y z}", "[[a]{[b:[x y z];]}]");
   }
 
  public void testAst11() throws Exception {
     testTree("a {b: c,d,e/f g,h i j,k}",
-             "[[a]{[b:[[[c],[d],[[e]/[f]]][[g],[h]][i][[j],[k]]];]}]");
+             "[[a]{[b:[c,d,e/f g,h i j,k];]}]");
   }
 
   public void testAst12() throws Exception {
@@ -113,52 +113,52 @@ public class GssParserTest extends TestCase {
   }
 
   public void testAst14() throws Exception {
-    testTree("@def a b;", "[@def [a] [b];]");
+    testTree("@def a b;", "[@def a b;]");
   }
 
   public void testAst15() throws Exception {
     testTree("@component a { x {y: z} }",
-             "[@component [a]{[x]{[y:[[z]];]}}]");
+             "[@component a{[x]{[y:[z];]}}]");
   }
 
   public void testAst16() throws Exception {
     testTree("a:foo {\n bla : d ; }",
-             "[[a:foo]{[bla:[[d]];]}]");
+             "[[a:foo]{[bla:[d];]}]");
   }
 
   public void testAst17() throws Exception {
     testTree("foo {f: rgb(o=0);}",
-             "[[foo]{[f:[rgb([[o]=[0]])];]}]");
+             "[[foo]{[f:[rgb(o=0)];]}]");
   }
 
   public void testAst18() throws Exception {
     testTree("a:lang(c) { d: e }",
-             "[[a:lang(c)]{[d:[[e]];]}]");
+             "[[a:lang(c)]{[d:[e];]}]");
   }
 
   public void testAst19() throws Exception {
     testTree("a~b { d: e }",
-             "[[a~b]{[d:[[e]];]}]");
+             "[[a~b]{[d:[e];]}]");
   }
 
   public void testAst20() throws Exception {
     testTree("a:b(-2n+3) { d: e }",
-             "[[a:b(-2n+3)]{[d:[[e]];]}]");
+             "[[a:b(-2n+3)]{[d:[e];]}]");
   }
 
   public void testAst21() throws Exception {
     testTree("a:not(#id) { d: e }",
-             "[[a:not(#id)]{[d:[[e]];]}]");
+             "[[a:not(#id)]{[d:[e];]}]");
   }
 
   public void testAst22() throws Exception {
     testTree(".a { d:e,f }",
-             "[[.a]{[d:[[[e],[f]]];]}]");
+             "[[.a]{[d:[e,f];]}]");
   }
 
   public void testAst23() throws Exception {
     testTree(".a { d:e f,g h }",
-             "[[.a]{[d:[[e][[f],[g]][h]];]}]");
+             "[[.a]{[d:[e f,g h];]}]");
   }
 
   public void testParsingRules1() throws Exception {

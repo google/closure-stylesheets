@@ -16,10 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.ast.CssAttributeSelectorNode;
-import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssBooleanExpressionNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
 import com.google.common.css.compiler.ast.CssCombinatorNode;
@@ -37,12 +35,9 @@ import com.google.common.css.compiler.ast.CssKeyListNode;
 import com.google.common.css.compiler.ast.CssKeyNode;
 import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
-import com.google.common.css.compiler.ast.CssNode;
-import com.google.common.css.compiler.ast.CssNodesListNode;
 import com.google.common.css.compiler.ast.CssPageRuleNode;
 import com.google.common.css.compiler.ast.CssPageSelectorNode;
 import com.google.common.css.compiler.ast.CssPriorityNode;
-import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssPseudoClassNode;
 import com.google.common.css.compiler.ast.CssPseudoClassNode.FunctionType;
 import com.google.common.css.compiler.ast.CssPseudoElementNode;
@@ -111,14 +106,16 @@ public class CompactPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterMediaRule(CssMediaRuleNode node) {
     sb.append(node.getType().toString());
-    if (node.getParameters().size() > 0) {
+    for (CssValueNode param : node.getParameters()) {
       sb.append(" ");
+      if (param instanceof CssBooleanExpressionNode) {
+        appendMediaParameterWithParentheses(param);
+      } else {
+        sb.append(param.getValue());
+      }
     }
+    sb.append('{');
     return true;
-  }
-
-  private void appendCompositeValueNode(CssCompositeValueNode c) {
-    Joiner.on(c.getOperator().getOperatorName()).appendTo(sb, c.getValues());
   }
 
   /**
@@ -275,15 +272,6 @@ public class CompactPrinter extends DefaultTreeVisitor
   }
 
   @Override
-  public boolean enterBlock(CssBlockNode block) {
-    if (block.getParent() instanceof CssUnknownAtRuleNode
-        || block.getParent() instanceof CssMediaRuleNode) {
-      sb.append("{");
-    }
-    return true;
-  }
-
-  @Override
   public boolean enterDeclaration(CssDeclarationNode declaration) {
     if (declaration.hasStarHack()) {
       sb.append('*');
@@ -300,33 +288,17 @@ public class CompactPrinter extends DefaultTreeVisitor
   }
 
   @Override
-  public void leaveCompositeValueNode(CssCompositeValueNode node) {
-    if (node.getParent() instanceof CssPropertyValueNode) {
-      sb.append(' ');
-    }
-  }
-
-  @Override
   public boolean enterValueNode(CssValueNode node) {
     if (node instanceof CssPriorityNode) {
-      deleteLastCharIfCharIs(' ');
+      sb.deleteCharAt(sb.length() - 1);
     }
     appendValueNode(node);
-    return true;
+    return !(node instanceof CssCompositeValueNode);
   }
 
   @Override
   public void leaveValueNode(CssValueNode node) {
-    if (node.getParent() instanceof CssPropertyValueNode) {
-      sb.append(' ');
-    }
-  }
-
-  @Override
-  public boolean enterCompositeValueNodeOperator(CssCompositeValueNode parent) {
-    deleteLastCharIfCharIs(' ');
-    sb.append(parent.getOperator().getOperatorName());
-    return true;
+    sb.append(' ');
   }
 
   @Override
@@ -374,17 +346,15 @@ public class CompactPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterUnknownAtRule(CssUnknownAtRuleNode node) {
-    sb.append("@").append(node.getName().toString());
-    if (node.getParameters().size() > 0) {
-      sb.append(" ");
+    sb.append('@').append(node.getName().toString());
+    for (CssValueNode param : node.getParameters()) {
+      sb.append(' ');
+      sb.append(param.getValue());
     }
-    return true;
-  }
-
-  @Override
-  public boolean enterMediaTypeListDelimiter(
-      CssNodesListNode<? extends CssNode> node) {
-    sb.append(' ');
+    if (node.getType().hasBlock()
+        && !(node.getBlock() instanceof CssDeclarationBlockNode)) {
+      sb.append('{');
+    }
     return true;
   }
 
@@ -482,13 +452,15 @@ public class CompactPrinter extends DefaultTreeVisitor
    */
   protected void appendValueNode(CssValueNode node) {
     if (node instanceof CssCompositeValueNode) {
-      return;
+      CssCompositeValueNode compositeNode = (CssCompositeValueNode) node;
+      String operatorName = compositeNode.getOperator().getOperatorName();
+      for (CssValueNode value : compositeNode.getValues()) {
+        appendValueNode(value);
+        sb.append(operatorName);
+      }
+      sb.setLength(sb.length() - operatorName.length()); // trim trailing op
+    } else {
+      sb.append(node.toString());
     }
-    if (node instanceof CssBooleanExpressionNode &&
-        node.getParent() instanceof CssMediaRuleNode) {
-      appendMediaParameterWithParentheses(node);
-      return;
-    }
-    sb.append(node.toString());
   }
 }

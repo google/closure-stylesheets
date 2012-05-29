@@ -33,7 +33,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test1() {
     testTreeConstruction(
         "foo { border-left: green; }",
-        "[[foo]{[border-right:[[green]];]}]");
+        "[[foo]{[border-right:[green];]}]");
   }
 
  /**
@@ -45,7 +45,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test2() {
     testTreeConstruction(
         "foo { padding: 0px 3px 1px 5px; }",
-        "[[foo]{[padding:[[0px][5px][1px][3px]];]}]");
+        "[[foo]{[padding:[0px 5px 1px 3px];]}]");
   }
 
  /**
@@ -57,7 +57,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test3() {
     testTreeConstruction(
         "foo { padding: 0px 3px 1px; }",
-        "[[foo]{[padding:[[0px][3px][1px]];]}]");
+        "[[foo]{[padding:[0px 3px 1px];]}]");
   }
 
  /**
@@ -69,7 +69,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test4() {
     testTreeConstruction(
         "foo { background: 10% 3px red; }",
-        "[[foo]{[background:[[90%][3px][red]];]}]");
+        "[[foo]{[background:[90% 3px red];]}]");
   }
 
  /**
@@ -81,7 +81,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test5() {
     testTreeConstruction(
         "foo { background-position-x: 10%; padding-right: 2px; }",
-        "[[foo]{[background-position-x:[[90%]];padding-left:[[2px]];]}]");
+        "[[foo]{[background-position-x:[90%];padding-left:[2px];]}]");
   }
 
  /**
@@ -158,7 +158,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         + "    background: 10%;"
         + "  }"
         + "}",
-        "[@if [COND1]{[foo]{[background:[[90%]];]}}]");
+        "[@if COND1{[foo]{[background:[90%];]}}]");
   }
 
   /**
@@ -191,8 +191,8 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         + "    background: url('/foo/background-right.png');"
         + "  }"
         + "}",
-        "[@if [COND1]{[foo]{[background:[[60%]];]}}"
-        + "@elseif [COND2]{[foo]{[padding:[[0px][5px][1px][3px]];]}}"
+        "[@if COND1{[foo]{[background:[60%];]}}"
+        + "@elseif COND2{[foo]{[padding:[0px 5px 1px 3px];]}}"
         + "@else{[bar]{[background:[url('/foo/background-left.png')];]}}]");
   }
 
@@ -218,9 +218,9 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         + "    foo { padding-left: 2px }"
         + "  }"
         + "}",
-        "[@media [print]{@if [COND1]{@if [COND2]"
-        + "{[foo]{[background-position-x:[[90%]];]}}}"
-        + "@else{[foo]{[padding-right:[[2px]];]}}}]");
+        "[@media print{@if COND1{@if COND2"
+        + "{[foo]{[background-position-x:[90%];]}}}"
+        + "@else{[foo]{[padding-right:[2px];]}}}]");
   }
 
   /**
@@ -229,7 +229,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test14() {
     testTreeConstruction(
         "foo { font: 100%/1.3em Verdana, Sans-serif; }",
-        "[[foo]{[font:[[[100%]/[1.3em]][[Verdana],[Sans-serif]]];]}]");
+        "[[foo]{[font:[100%/1.3em Verdana,Sans-serif];]}]");
   }
 
   /**
@@ -239,7 +239,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test15() {
     testTreeConstruction(
         "foo { *height: 13px }",
-        "[[foo]{[*height:[[13px]];]}]");
+        "[[foo]{[*height:[13px];]}]");
   }
 
   /**
@@ -251,7 +251,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test16() {
     testTreeConstruction(
         "foo { float: left }",
-        "[[foo]{[float:[[right]];]}]");
+        "[[foo]{[float:[right];]}]");
   }
 
   /**
@@ -263,7 +263,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test17() {
     testTreeConstruction(
         "foo { left: 5px }",
-        "[[foo]{[right:[[5px]];]}]");
+        "[[foo]{[right:[5px];]}]");
   }
 
   /**
@@ -275,7 +275,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test18() {
     testTreeConstruction(
         "foo { cursor: e-resize }",
-        "[[foo]{[cursor:[[w-resize]];]}]");
+        "[[foo]{[cursor:[w-resize];]}]");
   }
 
   /**
@@ -287,7 +287,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test19() {
     testTreeConstruction(
         "foo { border-top-left-radius: 3px }",
-        "[[foo]{[border-top-right-radius:[[3px]];]}]");
+        "[[foo]{[border-top-right-radius:[3px];]}]");
   }
 
   /**
@@ -299,7 +299,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test20() {
     testTreeConstruction(
         "foo { -moz-border-radius-topleft: 3px }",
-        "[[foo]{[-moz-border-radius-topright:[[3px]];]}]");
+        "[[foo]{[-moz-border-radius-topright:[3px];]}]");
   }
 
   /**
@@ -329,9 +329,9 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         true /* allowUndefinedConstants */).runPass();
     new BiDiFlipper(tree.getMutatingVisitController(), true, true).runPass();
     String expectedOutput = "[[.b]{["
-        + "direction:[[ltr]];"
-        + "padding:[[1px][4px][3px][2px]];"
-        + "padding:[[1px][4px][3px][2px]];"
+        + "direction:[ltr];"
+        + "padding:[1px 4px 3px 2px];"
+        + "padding:[1px 4px 3px 2px];"
         + "]}]";
     assertEquals(expectedOutput, AstPrinter.print(tree));
   }
@@ -345,7 +345,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
   public void test22() {
     testTreeConstruction(
         "foo { border-color: #fff #aaa #ccc transparent; }",
-        "[[foo]{[border-color:[[#fff][transparent][#ccc][#aaa]];]}]");
+        "[[foo]{[border-color:[#fff transparent #ccc #aaa];]}]");
   }
 
   @Override

@@ -131,6 +131,11 @@ public class CssCompositeValueNode extends CssValueNode {
   }
 
   @Override
+  public String getValue() {
+    return this.toString();
+  }
+
+  @Override
   public String toString() {
     return Joiner.on(operator.getOperatorName()).join(values);
   }

@@ -91,24 +91,22 @@ public class MergeAdjacentRulesetNodesWithSameSelectorTest extends TestCase {
         "  margin: 2px;",
         "}"))).parse();
 
-    assertEquals(
-        "[@-moz-document [url-prefix()]"
-        + "{[foo]{[padding:[[6px]];]}[foo]{[margin:[[4px]];]}}"
-        + "[foo,.bar #id]{[padding:[[5px]];]}"
-        + "[foo,.bar #id]{[margin:[[2px]];]}]",
-        AstPrinter.print(tree));
+    assertEquals(AstPrinter.print(tree),
+        "[@-moz-document url-prefix()"
+        + "{[foo]{[padding:[6px];]}[foo]{[margin:[4px];]}}"
+        + "[foo,.bar #id]{[padding:[5px];]}"
+        + "[foo,.bar #id]{[margin:[2px];]}]");
 
     MergeAdjacentRulesetNodesWithSameSelector pass =
         new MergeAdjacentRulesetNodesWithSameSelector(tree);
     pass.runPass();
     // As the elimination pass is not run here, we still have the one of the old
     // rulesets in each place.
-    assertEquals(
-        "[@-moz-document [url-prefix()]"
-        + "{[foo]{[padding:[[6px]];margin:[[4px]];]}[foo]{[margin:[[4px]];]}}"
-        + "[foo,.bar #id]{[padding:[[5px]];margin:[[2px]];]}"
-        + "[foo,.bar #id]{[margin:[[2px]];]}]",
-        AstPrinter.print(tree));
+    assertEquals(AstPrinter.print(tree),
+        "[@-moz-document url-prefix()"
+        + "{[foo]{[padding:[6px];margin:[4px];]}[foo]{[margin:[4px];]}}"
+        + "[foo,.bar #id]{[padding:[5px];margin:[2px];]}"
+        + "[foo,.bar #id]{[margin:[2px];]}]");
   }
 
   public void testPassResult2() {

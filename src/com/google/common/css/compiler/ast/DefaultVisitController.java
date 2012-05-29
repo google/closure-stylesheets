@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssCompositeValueNode.Operator;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -283,8 +282,6 @@ class DefaultVisitController implements MutatingVisitController {
    */
   abstract class VisitChildrenOptionalState<T extends CssNode>
       extends BaseVisitState<CssNode> {
-    // TODO(user): move the common code here or delete this
-    // useless complexity.
   }
 
   @VisibleForTesting
@@ -535,67 +532,27 @@ class DefaultVisitController implements MutatingVisitController {
 
     private boolean shouldVisitChildren = true;
 
-    private Iterator<CssValueNode> parameters = null;
-
     VisitMediaRuleState(CssMediaRuleNode node) {
       this.node = node;
     }
 
     @Override
     public void doVisit() {
-      if (!visitedChildren && parameters == null) {
+      if (!visitedChildren) {
         shouldVisitChildren = visitor.enterMediaRule(node);
-      } else if (visitedChildren) {
+      } else {
         visitor.leaveMediaRule(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      if (visitedChildren || !shouldVisitChildren) {
-        stateStack.pop();
-        return;
-      }
-      if (parameters == null) {
-        parameters = node.getParameters().iterator();
-      }
-      if (parameters.hasNext()) {
-        CssValueNode mediaType = parameters.next();
-        if (parameters.hasNext()) {
-          stateStack.push(new VisitMediaTypeListDelimiterState(node));
-        }
-        stateStack.push(getVisitState(mediaType));
-      } else {
+      if (!visitedChildren && shouldVisitChildren) {
         stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
         visitedChildren = true;
-      }
-    }
-
-    public VisitState<? extends CssNode> getVisitState(CssValueNode node) {
-      if (node instanceof CssCompositeValueNode) {
-        return new VisitCompositeValueState((CssCompositeValueNode) node);
       } else {
-        return new VisitValueNodeState(node);
+        stateStack.pop();
       }
-    }
-  }
-
-  private class VisitMediaTypeListDelimiterState
-      extends BaseVisitState<CssNode> {
-
-    private CssNodesListNode<? extends CssNode> node;
-
-    public VisitMediaTypeListDelimiterState(
-        CssNodesListNode<? extends CssNode> node) {
-      this.node = node;
-    }
-
-    @Override public void doVisit() {
-      visitor.enterMediaTypeListDelimiter(node);
-      visitor.leaveMediaTypeListDelimiter(node);
-    }
-    @Override public void transitionToNextState() {
-      stateStack.pop();
     }
   }
 
@@ -1374,7 +1331,6 @@ class DefaultVisitController implements MutatingVisitController {
     private int currentIndex = -1;
     private boolean doNotIncreaseIndex = false;
     private boolean visitChildren = true;
-    private boolean intervalueStateIsNext = false;
 
     VisitCompositeValueState(CssCompositeValueNode node) {
       this.node = node;
@@ -1394,18 +1350,12 @@ class DefaultVisitController implements MutatingVisitController {
       }
 
       // Remain in this state to finish visiting all the children
-      if (intervalueStateIsNext) {
-        stateStack.push(new IntervalueState(node));
-        intervalueStateIsNext = false;
-        return;
-      }
       if (!doNotIncreaseIndex) {
         currentIndex++;
       } else {
         doNotIncreaseIndex = false;
       }
       stateStack.push(getVisitState(children.get(currentIndex)));
-      intervalueStateIsNext = true;
       return;
     }
 
@@ -1427,9 +1377,9 @@ class DefaultVisitController implements MutatingVisitController {
     @Override
     public void doVisit() {
       if (currentIndex < 0) {
-        visitChildren = visitor.enterCompositeValueNode(node);
+        visitChildren = visitor.enterValueNode(node);
       } else if (currentIndex == children.size() - 1) {
-        visitor.leaveCompositeValueNode(node);
+        visitor.leaveValueNode(node);
       }
     }
 
@@ -1457,25 +1407,6 @@ class DefaultVisitController implements MutatingVisitController {
       } else {
         doNotIncreaseIndex = true;
       }
-    }
-  }
-
-  class IntervalueState extends BaseVisitState<CssNode> {
-    private final CssCompositeValueNode parent;
-
-    IntervalueState(CssCompositeValueNode parent) {
-      this.parent = parent;
-    }
-
-    @Override
-    public void doVisit() {
-      visitor.enterCompositeValueNodeOperator(parent);
-      visitor.leaveCompositeValueNodeOperator(parent);
-    }
-
-    @Override
-    public void transitionToNextState() {
-      stateStack.pop();
     }
   }
 
@@ -1621,9 +1552,10 @@ class DefaultVisitController implements MutatingVisitController {
   class VisitUnknownAtRuleState extends VisitChildrenOptionalState<CssNode> {
 
     private final CssUnknownAtRuleNode node;
+
     private boolean visitedChildren = false;
+
     private boolean shouldVisitChildren = true;
-    private int currentIndex = -1;
 
     VisitUnknownAtRuleState(CssUnknownAtRuleNode node) {
       this.node = node;
@@ -1631,45 +1563,22 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      if (!visitedChildren && currentIndex == -1) {
+      if (!visitedChildren) {
         shouldVisitChildren = visitor.enterUnknownAtRule(node);
-      } else if (visitedChildren) {
+      } else {
         visitor.leaveUnknownAtRule(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      if (visitedChildren || !shouldVisitChildren) {
-        stateStack.pop();
-        return;
-      }
-      ++currentIndex;
-      final int parametersCount = node.getParameters().size();
-      if (currentIndex < parametersCount) {
-        if (currentIndex < parametersCount - 1) {
-          stateStack.push(new VisitMediaTypeListDelimiterState(node));
-        }
-        stateStack.push(getVisitState(node.getParameters().get(currentIndex)));
-      } else {
+      if (!visitedChildren && shouldVisitChildren) {
         if (node.getType().hasBlock()) {
           stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
         }
         visitedChildren = true;
-      }
-   }
-
-    /**
-     * Returns a visit state for a given child node.
-     *
-     * @param node child node for which to create visit state
-     * @return new visit state
-     */
-    public VisitState<? extends CssNode> getVisitState(CssValueNode node) {
-      if (node instanceof CssCompositeValueNode) {
-        return new VisitCompositeValueState((CssCompositeValueNode) node);
       } else {
-        return new VisitValueNodeState(node);
+        stateStack.pop();
       }
     }
   }
@@ -1793,7 +1702,6 @@ class DefaultVisitController implements MutatingVisitController {
     }
 
     void push(VisitState<? extends CssNode> state) {
-      Preconditions.checkNotNull(state);
       stack.addFirst(state);
     }
 
