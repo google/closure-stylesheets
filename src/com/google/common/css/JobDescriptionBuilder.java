@@ -134,7 +134,7 @@ public class JobDescriptionBuilder {
     checkJobIsNotAlreadyCreated();
     Preconditions.checkState(this.inputs.isEmpty());
     Preconditions.checkArgument(!newInputs.contains(null));
-    this.inputs = newInputs;
+    this.inputs = Lists.newArrayList(newInputs);
     return this;
   }
 
@@ -163,7 +163,7 @@ public class JobDescriptionBuilder {
     checkJobIsNotAlreadyCreated();
     Preconditions.checkState(this.trueConditionNames.isEmpty());
     Preconditions.checkArgument(!newTrueConditionNames.contains(null));
-    this.trueConditionNames = newTrueConditionNames;
+    this.trueConditionNames = Lists.newArrayList(newTrueConditionNames);
     return this;
   }
 
@@ -179,7 +179,8 @@ public class JobDescriptionBuilder {
     checkJobIsNotAlreadyCreated();
     Preconditions.checkState(this.excludedClassesFromRenaming.isEmpty());
     Preconditions.checkArgument(!excludedClassesFromRenaming.contains(null));
-    this.excludedClassesFromRenaming = excludedClassesFromRenaming;
+    this.excludedClassesFromRenaming =
+        Lists.newArrayList(excludedClassesFromRenaming);
     return this;
   }
 
