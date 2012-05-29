@@ -301,6 +301,7 @@ public class CompactPrinter extends DefaultTreeVisitor
 
   @Override
   public void leaveCompositeValueNode(CssCompositeValueNode node) {
+    deleteLastCharIfCharIs(' ');
     if (node.getParent() instanceof CssPropertyValueNode) {
       sb.append(' ');
     }

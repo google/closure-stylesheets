@@ -1404,23 +1404,14 @@ class DefaultVisitController implements MutatingVisitController {
       } else {
         doNotIncreaseIndex = false;
       }
-      stateStack.push(getVisitState(children.get(currentIndex)));
+      stateStack.push(createVisitState(children.get(currentIndex), this));
       intervalueStateIsNext = true;
       return;
     }
 
-    /**
-     * Returns a visit state for a given child node.
-     *
-     * @param child child node to create visit state for
-     * @return new visit state
-     */
-    VisitState<CssValueNode> getVisitState(CssValueNode child) {
-      if (child instanceof CssCompositeValueNode) {
-        return new VisitCompositeValueState((CssCompositeValueNode) child);
-      } else {
-        return new VisitValueNodeState(child);
-      }
+    @Override
+    public VisitState<CssValueNode> createFallbackState(CssValueNode child) {
+      return new VisitValueNodeState(child);
     }
 
     /** {@inheritDoc} */

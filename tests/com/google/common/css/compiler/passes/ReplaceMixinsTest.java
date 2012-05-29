@@ -333,8 +333,8 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "}"),
 
         "[[.test]{[[/* @alternate */]background:[-webkit-linear-gradient(left,"
-        + "[[rgba(0,0,0,.12)],[rgba(0,0,0,.08)]] [[1px],[rgba(0,0,0,.08)]]"
-        + " [[1px],[rgba(0,0,0,0)]] [[30px],[transparent]] 100%)];]}]");
+        + "[rgba(0,0,0,.12),rgba(0,0,0,.08)] [[1px],rgba(0,0,0,.08)]"
+        + " [[1px],rgba(0,0,0,0)] [[30px],[transparent]] 100%)];]}]");
   }
 
   public void testNoMatchingMixinDefinition() throws GssParserException {

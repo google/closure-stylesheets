@@ -115,9 +115,36 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
       "  box-shadow: inset DARK_DIVIDER_RIGHT, inset DARK_DIVIDER_LEFT;",
       "}"),
       "[[.A]{[box-shadow:"
-      + "[[inset][[[1px] [0] [1px] [rgba(73,71,71,.3)]],"
+      + "[[inset][[[1px] [0] [1px] rgba(73,71,71,.3)],"
       + "[inset]][-1px][0][1px]rgba(5,4,4,.3)"
       + "];]}]");
+  }
+
+  public void testVariableInFunctionInComposite() throws Exception {
+    testTreeConstruction(linesToString(
+        "@def BG_COLOR beige;",
+        "",
+        "a {",
+        "  background:-webkit-linear-gradient(top, BG_COLOR 30%,"
+        + " rgba(255,255,255,0)),",
+        "    -webkit-linear-gradient(top, rgba(255,255,255,0), BG_COLOR 70%);",
+        "}"),
+
+        "[[a]{[background:[[-webkit-linear-gradient(top,beige 30%,"
+        + "rgba(255,255,255,0)),-webkit-linear-gradient(top,"
+        + "rgba(255,255,255,0),beige 70%)]];]}]");
+  }
+
+  public void testCompositeValueNodeWithFunctions() {
+    testTreeConstruction(linesToString(
+        "@def DEF_A top, red 30%, rgba(0, 0, 0, 0);",
+        "@def DEF_B top, rgba(0, 0, 0, 0), red 30%;",
+        ".A {",
+        "  background: linear-gradient(DEF_A), linear-gradient(DEF_B);",
+        "}"),
+        "[[.A]{[background:[["
+        + "linear-gradient([[top],[red]] [[30%],rgba(0,0,0,0)]),"
+        + "linear-gradient([[top],rgba(0,0,0,0),[red]] 30%)]];]}]");
   }
 
   public void testFontReplacement() throws Exception {

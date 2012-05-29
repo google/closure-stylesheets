@@ -674,4 +674,51 @@ public class DefaultVisitControllerTest extends TestCase {
     assertEquals(1, cNodes.size());
     assertTrue(cNodes.contains(parent));
   }
+
+  public void testVisitCompositeValueNodeWithFunction() {
+    List<CssValueNode> simpleValues = Lists.newLinkedList();
+    simpleValues.add(
+        new CssFunctionNode(CssFunctionNode.Function.byName("url"), null));
+    simpleValues.add(
+        new CssFunctionNode(CssFunctionNode.Function.byName("url"), null));
+
+    CssCompositeValueNode parent =
+        new CssCompositeValueNode(
+            simpleValues, CssCompositeValueNode.Operator.COMMA, null);
+
+    CssPropertyValueNode propValue = new CssPropertyValueNode();
+    propValue.addChildToBack(parent);
+    CssDeclarationNode decl =
+        new CssDeclarationNode(
+            new CssPropertyNode("prop"),
+            propValue);
+    CssDeclarationBlockNode db = new CssDeclarationBlockNode();
+    db.addChildToBack(decl);
+    CssRulesetNode ruleset = new CssRulesetNode(db);
+    ruleset.addSelector(new CssSelectorNode("name", null));
+    CssBlockNode b = new CssBlockNode(false);
+    b.addChildToBack(ruleset);
+    CssTree t = new CssTree(null, new CssRootNode(b));
+
+    final List<CssValueNode> compositeNode = Lists.newLinkedList();
+    final List<CssValueNode> functionNodes = Lists.newLinkedList();
+    DefaultTreeVisitor testVisitor = new DefaultTreeVisitor() {
+        @Override
+        public boolean enterCompositeValueNode(CssCompositeValueNode c) {
+          compositeNode.add(c);
+          return true;
+        }
+        @Override
+        public boolean enterFunctionNode(CssFunctionNode n) {
+          functionNodes.add(n);
+          return true;
+        }
+      };
+    DefaultVisitController controller = new DefaultVisitController(t, true);
+    controller.startVisit(testVisitor);
+
+    assertEquals(2, functionNodes.size());
+    assertEquals(1, compositeNode.size());
+    assertTrue(compositeNode.contains(parent));
+  }
 }
