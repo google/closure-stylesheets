@@ -528,6 +528,7 @@ public final class Property {
         builder("-webkit-columns"),
         builder("-webkit-dashboard-region"),
         builder("-webkit-filter"),
+        builder("-webkit-flex"),
         builder("-webkit-flex-align"),
         builder("-webkit-flex-direction"),
         builder("-webkit-flex-flow"),
