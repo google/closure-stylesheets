@@ -139,7 +139,7 @@ public class ReplaceConstantReferences extends DefaultTreeVisitor
         // for function args
         temp.add(new CssLiteralNode(" ", n.getSourceCodeLocation()));
       }
-      if (n instanceof Proxiable<?>) {
+      if (n instanceof Proxiable) {
         @SuppressWarnings("unchecked")
         Proxiable<CssValueNode> proxiable = (Proxiable<CssValueNode>) n;
         temp.add(proxiable.createProxy());
@@ -169,7 +169,7 @@ public class ReplaceConstantReferences extends DefaultTreeVisitor
         List<CssValueNode> params = node.getParameters();
         for (int i = 0; i < params.size(); i++) {
           CssValueNode n = params.get(i);
-          if (n instanceof Proxiable<?>) {
+          if (n instanceof Proxiable) {
             @SuppressWarnings("unchecked")
             Proxiable<CssValueNode> proxiable = (Proxiable<CssValueNode>) n;
             node.replaceChildAt(i, ImmutableList.of(proxiable.createProxy()));

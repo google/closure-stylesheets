@@ -109,7 +109,7 @@ public class ResolveCustomFunctionNodes extends DefaultTreeVisitor
 
   @Override
   public void leaveFunctionNode(CssFunctionNode functionNode) {
-    if (!(functionNode instanceof Proxiable<?>)) {
+    if (!(functionNode instanceof Proxiable)) {
       return;
     }
 

@@ -109,15 +109,15 @@ public class AstUtilityTestCase extends UtilityTestCase {
       for (Type type : collectionType.getActualTypeArguments()) {
 
         // This is a type that inherits from CssNode.
-        if (type instanceof Class<?>
+        if (type instanceof Class
             && CssNode.class.isAssignableFrom((Class<?>) type)) {
           return true;
         }
 
         // Type is a variable type that extends CssNode.
-        if (type instanceof TypeVariable<?>) {
+        if (type instanceof TypeVariable) {
           for (Type t : ((TypeVariable<?>) type).getBounds()) {
-            if (t instanceof Class<?>
+            if (t instanceof Class
                 && CssNode.class.isAssignableFrom((Class<?>) t)) {
               return true;
             }
