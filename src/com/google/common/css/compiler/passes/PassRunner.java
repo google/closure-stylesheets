@@ -156,7 +156,8 @@ public class PassRunner {
     }
     // Perform BiDi flipping if required.
     if (job.needsBiDiFlipping()) {
-      new MarkNonFlippableNodes(cssTree.getVisitController()).runPass();
+      new MarkNonFlippableNodes(cssTree.getMutatingVisitController(),
+          errorManager).runPass();
       new BiDiFlipper(cssTree.getMutatingVisitController(),
                         job.swapLtrRtlInUrl, job.swapLeftRightInUrl).runPass();
     }
