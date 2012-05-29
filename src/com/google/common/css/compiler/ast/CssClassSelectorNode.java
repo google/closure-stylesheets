@@ -33,6 +33,7 @@ public class CssClassSelectorNode extends CssRefinerNode {
 
   protected CssClassSelectorNode(CssClassSelectorNode node) {
     this(node.refinerName, node.getSourceCodeLocation());
+    this.setComments(node.getComments());
   }
 
   @Override

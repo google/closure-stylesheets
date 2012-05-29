@@ -36,11 +36,14 @@ public class CssSelectorNodeTest extends NewFunctionalTestBase {
     node.setChunk("baz");
     CssClassSelectorNode refiner = new CssClassSelectorNode("c", location);
     node.getRefiners().addChildToBack(refiner);
+    refiner.appendComment(new CssCommentNode("/* @noflip */", null));
 
     CssSelectorNode copy = node.deepCopy();
     assertEquals(node.getChunk(), copy.getChunk());
     assertEquals(node.getSelectorName(), copy.getSelectorName());
     assertEquals(node.getSourceCodeLocation(), copy.getSourceCodeLocation());
+    assertEquals(node.getRefiners().getChildAt(0).getComments(),
+        copy.getRefiners().getChildAt(0).getComments());
   }
 
   // Examples from http://www.w3.org/TR/CSS2/cascade.html#specificity
