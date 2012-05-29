@@ -19,6 +19,7 @@ package com.google.common.css.compiler.passes;
 import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssAtRuleNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssConstantReferenceNode;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNode;
@@ -32,18 +33,20 @@ import com.google.common.css.compiler.ast.MutatingVisitController;
 import java.util.List;
 
 /**
- * A compiler pass that transforms each well-formed {@code @def} {@link CssUnknownAtRuleNode}
- * to a {@link CssDefinitionNode}.
+ * A compiler pass that transforms each well-formed {@code @def}
+ * {@link CssUnknownAtRuleNode} to a {@link CssDefinitionNode}.
  *
  */
 public class CreateDefinitionNodes extends DefaultTreeVisitor
     implements CssCompilerPass {
 
-  private static final String defName = CssAtRuleNode.Type.DEF.getCanonicalName();
+  private static final String defName =
+      CssAtRuleNode.Type.DEF.getCanonicalName();
   private final MutatingVisitController visitController;
   private final ErrorManager errorManager;
 
-  public CreateDefinitionNodes(MutatingVisitController visitController, ErrorManager errorManager) {
+  public CreateDefinitionNodes(
+      MutatingVisitController visitController, ErrorManager errorManager) {
     this.visitController = visitController;
     this.errorManager = errorManager;
   }
@@ -65,12 +68,28 @@ public class CreateDefinitionNodes extends DefaultTreeVisitor
         reportError("@" + defName + " without a valid literal as name", node);
         return false;
       }
+
+      CssLiteralNode defNameNode = (CssLiteralNode) nameNode;
+      String defName = defNameNode.getValue();
+      if (!CssConstantReferenceNode.isDefinitionReference(defName)) {
+        // TODO(nicksantos): Update ErrorManager to support warnings as
+        // well as errors.
+        GssError error = new GssError(
+            String.format(
+                "WARNING for invalid @def name %s. We will ignore this.",
+                defName),
+            defNameNode.getSourceCodeLocation());
+        System.err.println(error.format());
+
+        // Create a definition node anyway, so that the compiler doesn't crash.
+      }
       CssDefinitionNode def = new CssDefinitionNode(
           params.subList(1, params.size()),
           (CssLiteralNode) nameNode,
           node.getComments(),
           node.getSourceCodeLocation());
-      visitController.replaceCurrentBlockChildWith(Lists.newArrayList((CssNode) def), false);
+      visitController.replaceCurrentBlockChildWith(
+          Lists.newArrayList((CssNode) def), false);
       return false;
     }
     return true;
