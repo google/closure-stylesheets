@@ -44,7 +44,7 @@ public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
     RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
     assertEquals(1, rules.getRulesetNodes().size());
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
-    checkRuleset("[[.CSS_RULE]{[border:[2px];]}]", rule);
+    checkRuleset("[[.CSS_RULE]{[border:[[2px]];]}]", rule);
   }
 
   public void testAllOneChunkButSkipping() {
@@ -91,7 +91,7 @@ public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
     RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
     assertEquals(1, rules.getRulesetNodes().size());
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
-    checkRuleset("[[.CSS_RULE]{[border:[1px];]}]", rule);
+    checkRuleset("[[.CSS_RULE]{[border:[[1px]];]}]", rule);
   }
 
   private void collectRemovableRulesetNodes(

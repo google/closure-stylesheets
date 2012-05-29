@@ -116,11 +116,27 @@ public interface CssTreeVisitor extends AtRuleHandler {
   /** Called after visiting a {@code CssPropertyValueNode}'s sub trees */
   void leavePropertyValue(CssPropertyValueNode propertyValue);
 
-  /** Called before visiting a {@code CssValueNode} */
+  /** Called before visiting a {@code CssValueNode} that is a
+      {@code CssCompositeValueNode} */
+  boolean enterCompositeValueNode(CssCompositeValueNode value);
+
+  /** Called after visiting a {@code CssValueNode} that is a
+      {@code CssCompositeValueNode} */
+  void leaveCompositeValueNode(CssCompositeValueNode value);
+
+  /** Called before visiting a {@code CssValueNode} that is not a
+      {@code CssCompositeValueNode} */
   boolean enterValueNode(CssValueNode value);
 
-  /** Called after visiting a {@code CssValueNode} */
+  /** Called after visiting a {@code CssValueNode} that is not a
+      {@code CssCompositeValueNode} */
   void leaveValueNode(CssValueNode value);
+
+  /** Called between values in a {@code CssCompositeValueNode} */
+  boolean enterCompositeValueNodeOperator(CssCompositeValueNode parent);
+
+  /** Called between values in a {@code CssCompositeValueNode} */
+  void leaveCompositeValueNodeOperator(CssCompositeValueNode parent);
 
   /** Called before visiting a {@code CssFunctionNode}'s sub trees */
   boolean enterFunctionNode(CssFunctionNode value);

@@ -33,7 +33,7 @@ public class RemoveDefaultDeclarationsFunctionalTest extends PassesTestBase {
         "  color: COLOR;",
         "  padding: PADDING;",
         "}"),
-        "[[.CSS_RULE]{[padding:[1px];]}]");
+        "[[.CSS_RULE]{[padding:[[1px]];]}]");
   }
 
   public void testRemoveDeclarations2() {
@@ -49,8 +49,8 @@ public class RemoveDefaultDeclarationsFunctionalTest extends PassesTestBase {
         "  color: COLOR;",
         "  border: 2px;",
         "}"),
-        "[[.CSS_RULE_1]{[color:[red];padding:[1px];]}" +
-        "[.CSS_RULE_2]{[color:[red];border:[2px];]}]");
+        "[[.CSS_RULE_1]{[color:[[red]];padding:[[1px]];]}" +
+        "[.CSS_RULE_2]{[color:[[red]];border:[[2px]];]}]");
   }
 
   public void testRemoveDeclarations3() {
@@ -65,8 +65,8 @@ public class RemoveDefaultDeclarationsFunctionalTest extends PassesTestBase {
         "  color: OTHER_COLOR;",
         "  border: 2px;",
         "}"),
-        "[[.CSS_RULE_1]{[padding:[1px];]}" +
-        "[.CSS_RULE_2]{[border:[2px];]}]");
+        "[[.CSS_RULE_1]{[padding:[[1px]];]}" +
+        "[.CSS_RULE_2]{[border:[[2px]];]}]");
   }
 
 public void testRemoveDeclarations4() {
@@ -83,9 +83,9 @@ public void testRemoveDeclarations4() {
         ".CSS_RULE_3 {",
         "  border-color: #000 COLOR #000 COLOR;",
         "}"),
-        "[[.CSS_RULE_1]{[padding:[1px];]}" +
-        "[.CSS_RULE_2]{[border:[2px];]}" +
-        "[.CSS_RULE_3]{[border-color:[#000 #fff #000 #fff];]}]");
+        "[[.CSS_RULE_1]{[padding:[[1px]];]}" +
+        "[.CSS_RULE_2]{[border:[[2px]];]}" +
+        "[.CSS_RULE_3]{[border-color:[[#000][#fff][#000][#fff]];]}]");
   }
 
 public void testRemoveDeclarations5() {
@@ -102,9 +102,9 @@ public void testRemoveDeclarations5() {
         ".CSS_RULE_3 {",
         "  border-width: normal WIDTH thick WIDTH;",
         "}"),
-        "[[.CSS_RULE_1]{[padding:[1px];]}" +
-        "[.CSS_RULE_2]{[margin:[2px];]}" +
-        "[.CSS_RULE_3]{[border-width:[normal thin thick thin];]}]");
+        "[[.CSS_RULE_1]{[padding:[[1px]];]}" +
+        "[.CSS_RULE_2]{[margin:[[2px]];]}" +
+        "[.CSS_RULE_3]{[border-width:[[normal][thin][thick][thin]];]}]");
   }
 
 public void testRemoveDeclarations6() {
@@ -121,9 +121,9 @@ public void testRemoveDeclarations6() {
         ".CSS_RULE_3 {",
         "  border-style: STYLE dotted;",
         "}"),
-        "[[.CSS_RULE_1]{[padding:[1px];]}" +
-        "[.CSS_RULE_2]{[margin:[2px];]}" +
-        "[.CSS_RULE_3]{[border-style:[solid dotted];]}]");
+        "[[.CSS_RULE_1]{[padding:[[1px]];]}" +
+        "[.CSS_RULE_2]{[margin:[[2px]];]}" +
+        "[.CSS_RULE_3]{[border-style:[[solid][dotted]];]}]");
   }
 
 public void testRemoveDeclarations7() {
@@ -140,9 +140,9 @@ public void testRemoveDeclarations7() {
         ".CSS_RULE_3 {",
         "  margin: MARGIN 0  MARGIN 1px;",
         "}"),
-        "[[.CSS_RULE_1]{[padding:[1px];]}" +
-        "[.CSS_RULE_2]{[color:[#fff];]}" +
-        "[.CSS_RULE_3]{[margin:[4px 0 4px 1px];]}]");
+        "[[.CSS_RULE_1]{[padding:[[1px]];]}" +
+        "[.CSS_RULE_2]{[color:[[#fff]];]}" +
+        "[.CSS_RULE_3]{[margin:[[4px][0][4px][1px]];]}]");
   }
 
 public void testRemoveDeclarations8() {
@@ -159,9 +159,9 @@ public void testRemoveDeclarations8() {
         ".CSS_RULE_3 {",
         "  padding: PADDING PADDING PADDING 0;",
         "}"),
-        "[[.CSS_RULE_1]{[margin:[1px];]}" +
-        "[.CSS_RULE_2]{[color:[#fff];]}" +
-        "[.CSS_RULE_3]{[padding:[4px 4px 4px 0];]}]");
+        "[[.CSS_RULE_1]{[margin:[[1px]];]}" +
+        "[.CSS_RULE_2]{[color:[[#fff]];]}" +
+        "[.CSS_RULE_3]{[padding:[[4px][4px][4px][0]];]}]");
   }
 
 public void testRemoveDeclarations9() {
@@ -179,9 +179,9 @@ public void testRemoveDeclarations9() {
         ".CSS_RULE_3 {",
         "  border: normal STYLE COLOR;",
         "}"),
-        "[[.CSS_RULE_1]{[margin:[1px];]}" +
-        "[.CSS_RULE_2]{[border:[#000];]}" +
-        "[.CSS_RULE_3]{[border:[normal];]}]");
+        "[[.CSS_RULE_1]{[margin:[[1px]];]}" +
+        "[.CSS_RULE_2]{[border:[[#000]];]}" +
+        "[.CSS_RULE_3]{[border:[[normal]];]}]");
   }
 
 public void testRemoveDeclarations10() {
@@ -197,8 +197,8 @@ public void testRemoveDeclarations10() {
       "  border: normal STYLE !important;",
       "}"),
 
-      "[[.CSS_RULE_1]{[border:[thin solid #fff!important];margin:[1px];]}" +
-      "[.CSS_RULE_3]{[border:[normal solid!important];]}]");
+      "[[.CSS_RULE_1]{[border:[[thin][solid][#fff][!important]];margin:[[1px]];]}" +
+      "[.CSS_RULE_3]{[border:[[normal][solid][!important]];]}]");
 }
 
 public void testRemoveDeclarations11() {
@@ -214,7 +214,7 @@ public void testRemoveDeclarations11() {
       "  border: WIDTH COLOR;",
       "}"
       ),
-      "[[.CSS_RULE_1]{[border:[thin #fff!important];margin:[1px];]}" +
+      "[[.CSS_RULE_1]{[border:[[thin][#fff][!important]];margin:[[1px]];]}" +
       "[.CSS_RULE_2]{[]}]");
 }
 
@@ -230,7 +230,7 @@ public void testRemoveDeclarations12() {
       "  border: BORDERCOLOR;",
       "}"
       ),
-      "[[.CSS_RULE_1]{[border:[#fff!important];]}" +
+      "[[.CSS_RULE_1]{[border:[[#fff][!important]];]}" +
       "[.CSS_RULE_2]{[]}]");
 }
 

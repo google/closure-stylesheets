@@ -340,4 +340,19 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}",
             ""));
   }
+
+  public void testYouTube() throws Exception {
+    assertNewCompactPrintedResult(
+        ".test{"
+        + "background:-webkit-linear-gradient(left,rgba(0,0,0,.12),"
+        + "rgba(0,0,0,.08) 1px,rgba(0,0,0,.08) 1px,rgba(0,0,0,0) 30px,"
+        + "transparent 100%)"
+        + "}",
+        lines(
+            ".test {",
+            "  background: -webkit-linear-gradient(left, rgba(0,0,0,.12),"
+            + " rgba(0,0,0,.08) 1px, rgba(0,0,0,.08) 1px,rgba(0,0,0,0) 30px,"
+            + "transparent 100%);",
+            "}"));
+  }
 }

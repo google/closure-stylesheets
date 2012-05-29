@@ -56,7 +56,7 @@ public class ProcessComponentsTest extends PassesTestBase {
   private static final String FAKE_FUNCTION_REF = "~fake~function~ref~";
 
   private final String globalInput = "@def GLOBAL_COLOR white;";
-  private final String globalOutput = "@def GLOBAL_COLOR [white]";
+  private final String globalOutput = "@def GLOBAL_COLOR [[white]]";
 
   private final ImmutableList<String> topComponentPrefixInput = ImmutableList.of(
       "@component CSS_TOP {");
@@ -66,9 +66,9 @@ public class ProcessComponentsTest extends PassesTestBase {
       "  @def OTHER_BG_COLOR GLOBAL_COLOR;",
       "  @def OTHER_COLOR someColorFunction(SOME_COLOR, OTHER_BG_COLOR);");
   private final String topComponentOutputConstantsTemplate =
-      "@def CSS_TOP__SOME_COLOR [black];" +
-      "@def CSS_TOP__OTHER_BG_COLOR [GLOBAL_COLOR];" +
-      "@def CSS_TOP__OTHER_COLOR [" + FAKE_FUNCTION_REF + "];";
+      "@def CSS_TOP__SOME_COLOR [[black]];" +
+      "@def CSS_TOP__OTHER_BG_COLOR [[GLOBAL_COLOR]];" +
+      "@def CSS_TOP__OTHER_COLOR [[" + FAKE_FUNCTION_REF + "]];";
 
 
   private final ImmutableList<String> topComponentInputRules = ImmutableList.of(
@@ -80,10 +80,10 @@ public class ProcessComponentsTest extends PassesTestBase {
       "  }");
   private final String topComponentOutputRulesTemplate =
       "[.CSS_TOP-CSS_SOME_CLASS,.CSS_TOP-CSS_SOME_OTHER_CLASS]{" +
-      "[color:[CSS_TOP__SOME_COLOR];" +
-      "background-color:[CSS_TOP__OTHER_BG_COLOR];" +
-      "width:[100px];" +
-      "border-color:[" + FAKE_FUNCTION_REF + "];]}";
+      "[color:[[CSS_TOP__SOME_COLOR]];" +
+      "background-color:[[CSS_TOP__OTHER_BG_COLOR]];" +
+      "width:[[100px]];" +
+      "border-color:[[" + FAKE_FUNCTION_REF + "]];]}";
 
 
   private final String abstractTopComponentInput = joinNl(Iterables.concat(
@@ -95,7 +95,7 @@ public class ProcessComponentsTest extends PassesTestBase {
       replaceFunction(topComponentOutputConstantsTemplate,
           "someColorFunction(CSS_TOP__SOME_COLOR,CSS_TOP__OTHER_BG_COLOR)");
   private final String abstractTopComponentOutputResolved =
-      replaceFunction(topComponentOutputConstantsTemplate, DEF_PREFIX + "0");
+      replaceFunction(topComponentOutputConstantsTemplate, "[" + DEF_PREFIX + "0]");
 
 
   private final String topComponentInput = joinNl(Iterables.concat(
@@ -110,8 +110,8 @@ public class ProcessComponentsTest extends PassesTestBase {
   private final String topComponentOutputResolved =
       globalOutput + ";" +
       abstractTopComponentOutputResolved +
-      // This is the second occurence of the function.
-      replaceFunction(topComponentOutputRulesTemplate, DEF_PREFIX + "1");
+      // This is the second occurrence of the function.
+      replaceFunction(topComponentOutputRulesTemplate, "[" + DEF_PREFIX + "1]");
 
   private final String childComponentInput = linesToString(
       "@component CSS_CHILD extends CSS_TOP {",
@@ -121,17 +121,17 @@ public class ProcessComponentsTest extends PassesTestBase {
       "  }",
       "}");
   private final String childComponentOutputTemplate =
-      "@def CSS_CHILD__SOME_COLOR [CSS_TOP__SOME_COLOR];" +
-      "@def CSS_CHILD__OTHER_BG_COLOR [CSS_TOP__OTHER_BG_COLOR];" +
-      "@def CSS_CHILD__OTHER_COLOR [CSS_TOP__OTHER_COLOR];" +
+      "@def CSS_CHILD__SOME_COLOR [[CSS_TOP__SOME_COLOR]];" +
+      "@def CSS_CHILD__OTHER_BG_COLOR [[CSS_TOP__OTHER_BG_COLOR]];" +
+      "@def CSS_CHILD__OTHER_COLOR [[CSS_TOP__OTHER_COLOR]];" +
       "[.CSS_CHILD-CSS_SOME_CLASS,.CSS_CHILD-CSS_SOME_OTHER_CLASS]{" +
-      "[color:[CSS_CHILD__SOME_COLOR];" +
-      "background-color:[CSS_CHILD__OTHER_BG_COLOR];" +
-      "width:[100px];" +
-      "border-color:[" + FAKE_FUNCTION_REF + "];]}" +
-      "@def CSS_CHILD__SOME_COLOR [yellow];" +
+      "[color:[[CSS_CHILD__SOME_COLOR]];" +
+      "background-color:[[CSS_CHILD__OTHER_BG_COLOR]];" +
+      "width:[[100px]];" +
+      "border-color:[[" + FAKE_FUNCTION_REF + "]];]}" +
+      "@def CSS_CHILD__SOME_COLOR [[yellow]];" +
       "[.CSS_CHILD-CSS_SOME_CLASS]{" +
-      "[border:[1px solid CSS_CHILD__SOME_COLOR];]}";
+      "[border:[[1px][solid][CSS_CHILD__SOME_COLOR]];]}";
   private final String childComponentOutput =
       replaceFunction(childComponentOutputTemplate,
           "someColorFunction(CSS_CHILD__SOME_COLOR,CSS_CHILD__OTHER_BG_COLOR)");
@@ -144,20 +144,20 @@ public class ProcessComponentsTest extends PassesTestBase {
       "  }",
       "}");
   private final String grandChildComponentOutputTemplate =
-      "@def CSS_GRAND_CHILD__SOME_COLOR [CSS_CHILD__SOME_COLOR];" +
-      "@def CSS_GRAND_CHILD__OTHER_BG_COLOR [CSS_CHILD__OTHER_BG_COLOR];" +
-      "@def CSS_GRAND_CHILD__OTHER_COLOR [CSS_CHILD__OTHER_COLOR];" +
+      "@def CSS_GRAND_CHILD__SOME_COLOR [[CSS_CHILD__SOME_COLOR]];" +
+      "@def CSS_GRAND_CHILD__OTHER_BG_COLOR [[CSS_CHILD__OTHER_BG_COLOR]];" +
+      "@def CSS_GRAND_CHILD__OTHER_COLOR [[CSS_CHILD__OTHER_COLOR]];" +
       "[.CSS_GRAND_CHILD-CSS_SOME_CLASS,.CSS_GRAND_CHILD-CSS_SOME_OTHER_CLASS]{" +
-      "[color:[CSS_GRAND_CHILD__SOME_COLOR];" +
-      "background-color:[CSS_GRAND_CHILD__OTHER_BG_COLOR];" +
-      "width:[100px];" +
-      "border-color:[" + FAKE_FUNCTION_REF + "];]}" +
-      "@def CSS_GRAND_CHILD__SOME_COLOR [CSS_CHILD__SOME_COLOR];" +
+      "[color:[[CSS_GRAND_CHILD__SOME_COLOR]];" +
+      "background-color:[[CSS_GRAND_CHILD__OTHER_BG_COLOR]];" +
+      "width:[[100px]];" +
+      "border-color:[[" + FAKE_FUNCTION_REF + "]];]}" +
+      "@def CSS_GRAND_CHILD__SOME_COLOR [[CSS_CHILD__SOME_COLOR]];" +
       "[.CSS_GRAND_CHILD-CSS_SOME_CLASS]{" +
-      "[border:[1px solid CSS_GRAND_CHILD__SOME_COLOR];]}" +
-      "@def CSS_GRAND_CHILD__NEW_BORDER_COLOR [green];" +
+      "[border:[[1px][solid][CSS_GRAND_CHILD__SOME_COLOR]];]}" +
+      "@def CSS_GRAND_CHILD__NEW_BORDER_COLOR [[green]];" +
       "[.CSS_GRAND_CHILD-CSS_SOME_OTHER_CLASS]{" +
-      "[border:[1px solid CSS_GRAND_CHILD__NEW_BORDER_COLOR];]}";
+      "[border:[[1px][solid][CSS_GRAND_CHILD__NEW_BORDER_COLOR]];]}";
   private final String grandChildComponentOutput =
     replaceFunction(grandChildComponentOutputTemplate,
         "someColorFunction(CSS_GRAND_CHILD__SOME_COLOR,CSS_GRAND_CHILD__OTHER_BG_COLOR)");
@@ -192,8 +192,8 @@ public class ProcessComponentsTest extends PassesTestBase {
 
   private final String ifComponentOutput =
       "@if[BROWSER_IE]{" +
-      "@if[RTL_LANG]{[.CSS_IF-CSS_BAR]{[border:[1px];]}}" +
-        "@else[]{[.CSS_IF-CSS_BAR]{[border:[2px];]}}}";
+      "@if[RTL_LANG]{[.CSS_IF-CSS_BAR]{[border:[[1px]];]}}" +
+        "@else[]{[.CSS_IF-CSS_BAR]{[border:[[2px]];]}}}";
 
   @Override
   protected void runPass() {
@@ -244,7 +244,7 @@ public class ProcessComponentsTest extends PassesTestBase {
             FILE3, childComponentInput),
         "[" + topComponentOutputResolved +
             // Suffix is 2 since the top component is also resolved.
-            replaceFunction(childComponentOutputTemplate, DEF_PREFIX + "2") + "]");
+            replaceFunction(childComponentOutputTemplate, "[" + DEF_PREFIX + "2]") + "]");
   }
 
   public void testChildComponentWithReferenceWorkaround() throws Exception {
@@ -264,7 +264,7 @@ public class ProcessComponentsTest extends PassesTestBase {
             FILE3, childComponentWithRefWorkaroundInput),
         "[" + topComponentOutputResolved +
             // Suffix is 2 since the top component is also resolved.
-            replaceFunction(childComponentOutputTemplate, DEF_PREFIX + "2") + "]");
+            replaceFunction(childComponentOutputTemplate, "[" + DEF_PREFIX + "2]") + "]");
   }
 
   public void testChildComponentWithAbstractParent() throws Exception {
@@ -278,7 +278,7 @@ public class ProcessComponentsTest extends PassesTestBase {
             FILE3, childComponentInput),
         "[" + globalOutput + ";" + abstractTopComponentOutputResolved +
             // Suffix is 1 since the abstract top component is also resolved.
-            replaceFunction(childComponentOutputTemplate, DEF_PREFIX + "1") + "]");
+            replaceFunction(childComponentOutputTemplate, "[" + DEF_PREFIX + "1]") + "]");
   }
 
   public void testGrandChildComponent() throws Exception {
@@ -296,9 +296,9 @@ public class ProcessComponentsTest extends PassesTestBase {
             TEST_FILENAME, grandChildComponentInput),
         "[" + topComponentOutputResolved +
             // Suffixes are 2 and 3 since the top component is also resolved.
-            replaceFunction(childComponentOutputTemplate, DEF_PREFIX + "2") +
-            replaceFunction(grandChildComponentOutputTemplate, DEF_PREFIX +
-                "3") + "]");
+            replaceFunction(childComponentOutputTemplate, "[" + DEF_PREFIX + "2]") +
+            replaceFunction(grandChildComponentOutputTemplate, "[" + DEF_PREFIX +
+                "3]") + "]");
   }
 
   public void testIfComponent() throws Exception {
@@ -342,7 +342,7 @@ public class ProcessComponentsTest extends PassesTestBase {
    * @return the component output with the fake function reference replaced
    */
   private String replaceFunction(String componentOutputTemplate, String replacement) {
-    return componentOutputTemplate.replace(FAKE_FUNCTION_REF, replacement);
+    return componentOutputTemplate.replace("[" + FAKE_FUNCTION_REF + "]", replacement);
   }
 
   private static class UniqueSuffixFunction implements Function<String, String> {

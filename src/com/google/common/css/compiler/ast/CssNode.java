@@ -18,8 +18,10 @@ package com.google.common.css.compiler.ast;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.css.SourceCodeLocation;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -272,5 +274,44 @@ public abstract class CssNode {
   @Override
   public String toString() {
     return super.toString();
+  }
+
+  /**
+   * This node and the transitive closure of its {@link #parent}s.
+   */
+  public Iterable<CssNode> ancestors() {
+    return new Iterable<CssNode>() {
+      public Iterator<CssNode> iterator() {
+        return new UnmodifiableIterator<CssNode>() {
+
+          private CssNode current = CssNode.this;
+
+          @Override
+          public boolean hasNext() {
+            return current != null;
+          }
+
+          @Override
+          public CssNode next() {
+            CssNode result = current;
+            current = current.getParent();
+            return result;
+          }
+        };
+      }
+    };
+  }
+
+  /**
+   * Returns true when any of a {@code node}'s {@link #ancestors} is a function
+   * node.
+   */
+  public boolean inFunArgs() {
+    for (CssNode n : ancestors()) {
+      if (n instanceof CssFunctionNode) {
+        return true;
+      }
+    }
+    return false;
   }
 }

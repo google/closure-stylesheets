@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssPriorityNode;
 import com.google.common.css.compiler.ast.CssValueNode;
@@ -41,11 +42,21 @@ public class RemoveDefaultDeclarations extends DefaultTreeVisitor
   }
 
   @Override
+  public boolean enterCompositeValueNode(CssCompositeValueNode node) {
+    removeDefault(node);
+    return true;
+  }
+
+  @Override
   public boolean enterValueNode(CssValueNode node) {
+    removeDefault(node);
+    return true;
+  }
+
+  private void removeDefault(CssValueNode node) {
     if (canRemoveDefaultValue && node.getIsDefault()) {
       visitController.removeCurrentNode();
     }
-    return true;
   }
 
   @Override

@@ -466,6 +466,20 @@ public class DefaultVisitControllerTest extends TestCase {
     // Then we enter the unknown at-rule node that we created.
     expect(testVisitor.enterUnknownAtRule(eq(atDef))).andReturn(true);
 
+    // Then the media type list params
+    for (int i = 0; i < defParameters.size(); ++i) {
+      expect(
+          testVisitor.enterValueNode(eq(defParameters.get(i)))).andReturn(true);
+      testVisitor.leaveValueNode(eq(defParameters.get(i)));
+      if (i < defParameters.size() - 1) {
+        expect(testVisitor.enterMediaTypeListDelimiter(eq(atDef)))
+            .andReturn(true);
+        testVisitor.leaveMediaTypeListDelimiter(eq(atDef));
+      }
+    }
+
+    // We've got no block associated with this at rule.
+
     // Exit the nodes.
     testVisitor.leaveUnknownAtRule(eq(atDef));
     testVisitor.leaveBlock(eq(block));
@@ -519,11 +533,35 @@ public class DefaultVisitControllerTest extends TestCase {
     // Then we enter the unknown 'if' at-rule node that we created.
     expect(testVisitor.enterUnknownAtRule(eq(atIf))).andReturn(true);
 
+    // Then the media type list params for 'if'
+    for (int i = 0; i < ifParameters.size(); ++i) {
+      expect(
+          testVisitor.enterValueNode(eq(ifParameters.get(i)))).andReturn(true);
+      testVisitor.leaveValueNode(eq(ifParameters.get(i)));
+      if (i < ifParameters.size() - 1) {
+        expect(testVisitor.enterMediaTypeListDelimiter(eq(atIf)))
+            .andReturn(true);
+        testVisitor.leaveMediaTypeListDelimiter(eq(atIf));
+      }
+    }
+
     // Then we enter the defBlock.
     expect(testVisitor.enterBlock(eq(defBlock))).andReturn(true);
 
     // Then we enter the unknown 'def' at-rule node within the 'if'.
     expect(testVisitor.enterUnknownAtRule(eq(atDef))).andReturn(true);
+
+    // Then the media type list params for 'def'
+    for (int i = 0; i < defParameters.size(); ++i) {
+      expect(
+          testVisitor.enterValueNode(eq(defParameters.get(i)))).andReturn(true);
+      testVisitor.leaveValueNode(eq(defParameters.get(i)));
+      if (i < defParameters.size() - 1) {
+        expect(testVisitor.enterMediaTypeListDelimiter(eq(atDef)))
+            .andReturn(true);
+        testVisitor.leaveMediaTypeListDelimiter(eq(atDef));
+      }
+    }
 
     // Exit the nodes.
     testVisitor.leaveUnknownAtRule(eq(atDef));
@@ -587,5 +625,53 @@ public class DefaultVisitControllerTest extends TestCase {
     controller.startVisit(testVisitor);
 
     mockControl.verify();
+  }
+
+  public void testVisitValueNodes() {
+    List<CssValueNode> simpleValues = Lists.newLinkedList();
+    for (String v : new String [] {"a", "b", "c"}) {
+      simpleValues.add(new CssLiteralNode(v, null));
+    }
+    CssCompositeValueNode parent =
+        new CssCompositeValueNode(
+            simpleValues, CssCompositeValueNode.Operator.COMMA, null);
+
+    CssPropertyValueNode propValue = new CssPropertyValueNode();
+    propValue.addChildToBack(parent);
+    CssDeclarationNode decl =
+        new CssDeclarationNode(
+            new CssPropertyNode("prop"),
+            propValue);
+    CssDeclarationBlockNode db = new CssDeclarationBlockNode();
+    db.addChildToBack(decl);
+    CssRulesetNode ruleset = new CssRulesetNode(db);
+    ruleset.addSelector(new CssSelectorNode("name", null));
+    CssBlockNode b = new CssBlockNode(false);
+    b.addChildToBack(ruleset);
+    CssTree t = new CssTree(null, new CssRootNode(b));
+
+    final List<CssValueNode> cNodes = Lists.newLinkedList();
+    final List<CssValueNode> evnNodes = Lists.newLinkedList();
+    DefaultTreeVisitor testVisitor = new DefaultTreeVisitor() {
+        @Override
+        public boolean enterCompositeValueNode(CssCompositeValueNode c) {
+          cNodes.add(c);
+          return true;
+        }
+        @Override
+        public boolean enterValueNode(CssValueNode n) {
+          evnNodes.add(n);
+          return true;
+        }
+      };
+    DefaultVisitController controller = new DefaultVisitController(t, true);
+    controller.startVisit(testVisitor);
+
+    assertEquals(simpleValues.size(), evnNodes.size());
+    for (CssValueNode i : simpleValues) {
+      assertTrue(evnNodes.contains(i));
+    }
+    assertEquals(1, cNodes.size());
+    assertTrue(cNodes.contains(parent));
   }
 }

@@ -35,7 +35,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  @mixin test(#FFF);",
         "}"),
 
-        "[[p]{[color:[#fff];]}]");
+        "[[p]{[color:[[#fff]];]}]");
   }
 
   public void testMixinReplacement2() {
@@ -53,7 +53,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  @mixin color(red);",
         "}"),
 
-        "[[p]{[width:[60%];height:[50%];position:[absolute];color:[red];]}]");
+        "[[p]{[width:[[60%]];height:[[50%]];position:[[absolute]];color:[[red]];]}]");
   }
 
   public void testMixinReplacement3() {
@@ -70,8 +70,8 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  @mixin size(100px, 200px);",
         "}"),
 
-        "[[p]{[width:[60%];height:[50%];position:[absolute];]}"
-        + "[div]{[width:[200px];height:[100px];]}]");
+        "[[p]{[width:[[60%]];height:[[50%]];position:[[absolute]];]}"
+        + "[div]{[width:[[200px]];height:[[100px]];]}]");
   }
 
   public void testMixinReplacement4() {
@@ -92,7 +92,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  @mixin position(absolute);",
         "}"),
 
-        "[[p]{[color:[#fff];width:[50%];height:[60%];position:[absolute];]}]");
+        "[[p]{[color:[[#fff]];width:[[50%]];height:[[60%]];position:[[absolute]];]}]");
   }
 
   public void testMixinReplacement5() {
@@ -116,7 +116,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  @mixin test(#FFF);",
         "}"),
 
-        "[[p]{[color:[#fff];color:[#fff];]}]");
+        "[[p]{[color:[[#fff]];color:[[#fff]];]}]");
   }
 
   public void testMixinReplacementNested1() {
@@ -133,7 +133,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  position: absolute;",
         "}"),
 
-        "[[p]{[width:[50%];height:[60%];position:[absolute];]}]");
+        "[[p]{[width:[[50%]];height:[[60%]];position:[[absolute]];]}]");
   }
 
   public void testMixinReplacementNested2() {
@@ -151,7 +151,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  position: absolute;",
         "}"),
 
-        "[[p]{[width:[50%];height:[60%];width:[10px];position:[absolute];]}]");
+        "[[p]{[width:[[50%]];height:[[60%]];width:[[10px]];position:[[absolute]];]}]");
   }
 
   public void testMixinReplacementNested3() {
@@ -170,8 +170,8 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  position: absolute;",
         "}"),
 
-        "[[p]{[width:[50%];height:[60%];width:[60%];width:[10px];"
-        + "position:[absolute];]}]");
+        "[[p]{[width:[[50%]];height:[[60%]];width:[[60%]];width:[[10px]];"
+        + "position:[[absolute]];]}]");
   }
 
   public void testMixinReplacementNested4() {
@@ -221,8 +221,14 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "p {",
         "  @mixin font(1em/1.3em);",
         "}"),
-
-        "[[p]{[font:[1em/1.3em Arial];]}]");
+        // TODO(user): note Arial has been incorrectly parsed here
+        // as a GSS variable use rather than a font-family list.
+        // There's no comma so no way to tell the difference. It
+        // doesn't make any difference though because the ASTs are
+        // identical, but someday if we want to
+        // expand shorthands we will need to disambiguate these
+        // cases in the AST.
+        "[[p]{[font:[[[1em]/[1.3em]][Arial]];]}]");
   }
 
   public void testCompositeValues2() {
@@ -234,7 +240,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  @mixin margin(1px 2px 3px 4px);",
         "}"),
 
-        "[[p]{[margin:[1px 2px 3px 4px];]}]");
+        "[[p]{[margin:[[1px][2px][3px][4px]];]}]");
   }
 
   public void testMixinReplacementComponents() {
@@ -257,10 +263,10 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  .INCOMP { @mixin col(green);}",
         "}"),
 
-        "[[.BLUE_ABY-ABSTRACT]{[background:[blue];font:[red];]}"
-        + "[.BLUE_ABY-INCOMP]{[color:[blue];background-color:[blue];]}"
-        + "[.YELLOW_ABY-ABSTRACT]{[background:[yellow];font:[red];]}"
-        + "[.YELLOW_ABY-INCOMP]{[color:[green];background-color:[yellow];]}]");
+        "[[.BLUE_ABY-ABSTRACT]{[background:[[blue]];font:[[red]];]}"
+        + "[.BLUE_ABY-INCOMP]{[color:[[blue]];background-color:[[blue]];]}"
+        + "[.YELLOW_ABY-ABSTRACT]{[background:[[yellow]];font:[[red]];]}"
+        + "[.YELLOW_ABY-INCOMP]{[color:[[green]];background-color:[[yellow]];]}]");
   }
 
   public void testMixinReplacementGradient1() {
@@ -279,10 +285,10 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "  font-size: FONT_SIZE_SMALL;",
         "}"),
 
-        "[[.SOME_CLASS]{[background-color:[#cc0000];"
+        "[[.SOME_CLASS]{[background-color:[[#cc0000]];"
         + "background-image:"
         + "[-webkit-linear-gradient(top,hsl(0%,50%,70%),#cc0000)];"
-        + "font-size:[80%];]}]");
+        + "font-size:[[80%]];]}]");
   }
 
   public void testMixinReplacementGradient2() {
@@ -311,6 +317,24 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[.SOME_CLASS]{["
         + "background-image:[-webkit-linear-gradient("
         + "bottom left,red 20px,yellow,green,blue 90%)];]}]");
+  }
+
+  public void testMixinReplacementGradientYouTube() {
+    testTreeConstruction(linesToString(
+        "@def _VR_MAIN rgba(0, 0, 0, .12), rgba(0, 0, 0, .08) 1px,"
+        + " rgba(0, 0, 0, .08) 1px, rgba(0, 0, 0, 0) 30px, transparent 100%;",
+        "@defmixin rule_main(ORIENTATION, GRADIENT_PARAMS) {",
+        "/* @alternate */ background: -webkit-linear-gradient(ORIENTATION,",
+        "GRADIENT_PARAMS);",
+        "}",
+        "",
+        ".test {",
+        "@mixin rule_main(left, _VR_MAIN);",
+        "}"),
+
+        "[[.test]{[[/* @alternate */]background:[-webkit-linear-gradient(left,"
+        + "[[rgba(0,0,0,.12)],[rgba(0,0,0,.08)]] [[1px],[rgba(0,0,0,.08)]]"
+        + " [[1px],[rgba(0,0,0,0)]] [[30px],[transparent]] 100%)];]}]");
   }
 
   public void testNoMatchingMixinDefinition() throws GssParserException {
@@ -388,6 +412,16 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "}"),
 
         ReplaceMixins.CYCLE_ERROR_MESSAGE);
+  }
+
+  public void testIdSeqInFontShorthandUsingDefMixin() throws Exception {
+    testTreeConstruction(linesToString(
+        "@defmixin myfont(FONTSTYLE, FONTFACEA, FONTFACEB) {",
+        "  font: FONTSTYLE FONTFACEA, FONTFACEB;",
+        "}",
+        ".foo { @mixin myfont(bold, arial, serif); }"),
+
+        "[[.foo]{[font:[[bold][[arial],[serif]]];]}]");
   }
 
   @Override

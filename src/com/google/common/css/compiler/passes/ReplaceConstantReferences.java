@@ -24,6 +24,7 @@ import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
+import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
@@ -122,7 +123,22 @@ public class ReplaceConstantReferences extends DefaultTreeVisitor
 
     List<CssValueNode> params = constantNode.getParameters();
     List<CssValueNode> temp = Lists.newArrayListWithCapacity(params.size());
+    boolean inFunArgs = node.inFunArgs();
+    boolean intermediate = false;
     for (CssValueNode n : params) {
+      if (inFunArgs && intermediate) {
+        // Usually, the parser consumes whitespace and lets tree
+        // structure suffice to distinguish elements of the AST. But
+        // functions are different: the parser adds CssLiteralNode("
+        // ") between function args. Here we are looking at a sequence
+        // of values parsed from a @def (where we do not represent
+        // whitespace explicitly) and a use/reference that occurs in a
+        // function (where we do represent whitespace explicitly). So,
+        // we need to reconstitute the whitespace nodes.
+        // TODO(user): change the parser to eliminate special cases
+        // for function args
+        temp.add(new CssLiteralNode(" ", n.getSourceCodeLocation()));
+      }
       if (n instanceof Proxiable<?>) {
         @SuppressWarnings("unchecked")
         Proxiable<CssValueNode> proxiable = (Proxiable<CssValueNode>) n;
@@ -130,6 +146,7 @@ public class ReplaceConstantReferences extends DefaultTreeVisitor
       } else {
         temp.add(n.deepCopy());
       }
+      intermediate = true;
     }
     // The composite value is used so that we can store nodes with different
     // separators in one another. visitController.replaceCurrentBlockChildWith
