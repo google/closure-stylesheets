@@ -85,8 +85,9 @@ public class PassRunner {
     new HandleUnknownAtRuleNodes(cssTree.getMutatingVisitController(),
         errorManager, job.allowedAtRules,
         true /* report */, false /* remove */).runPass();
-    new ProcessWebkitKeyframes(cssTree.getMutatingVisitController(),
-        errorManager, job.allowWebkitKeyframes, job.simplifyCss).runPass();
+    new ProcessKeyframes(cssTree.getMutatingVisitController(),
+        errorManager, job.allowKeyframes || job.allowWebkitKeyframes,
+        job.simplifyCss).runPass();
     new ProcessRefiners(cssTree.getMutatingVisitController(), errorManager,
         job.simplifyCss).runPass();
 

@@ -83,11 +83,11 @@ public interface AtRuleHandler {
   /** Called after visiting a {@code CssComponentNode}'s sub trees */
   void leaveComponent(CssComponentNode node);
 
-  /** Called before visiting a {@code CssWebkitKeyframesNode}'s sub trees */
-  boolean enterWebkitKeyframesRule(CssWebkitKeyframesNode node);
+  /** Called before visiting a {@code CssKeyframesNode}'s sub trees */
+  boolean enterKeyframesRule(CssKeyframesNode node);
 
-  /** Called after visiting a {@code CssWebkitKeyframesNode}'s sub trees */
-  void leaveWebkitKeyframesRule(CssWebkitKeyframesNode node);
+  /** Called after visiting a {@code CssKeyframesNode}'s sub trees */
+  void leaveKeyframesRule(CssKeyframesNode node);
 
   /** Called before visiting a {@code CssMixinDefinitionNode}'s sub trees */
   boolean enterMixinDefinition(CssMixinDefinitionNode node);

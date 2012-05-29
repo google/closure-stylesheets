@@ -186,12 +186,12 @@ public class DefaultTreeVisitor implements CssTreeVisitor {
   public void visit(CssNode node) {}
 
   @Override
-  public boolean enterWebkitKeyframesRule(CssWebkitKeyframesNode node) {
+  public boolean enterKeyframesRule(CssKeyframesNode node) {
     return true;
   }
 
   @Override
-  public void leaveWebkitKeyframesRule(CssWebkitKeyframesNode node) {}
+  public void leaveKeyframesRule(CssKeyframesNode node) {}
 
   @Override
   public boolean enterKey(CssKeyNode node) {

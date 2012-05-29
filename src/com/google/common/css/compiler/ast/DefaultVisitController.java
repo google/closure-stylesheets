@@ -1628,22 +1628,22 @@ class DefaultVisitController implements MutatingVisitController {
   @VisibleForTesting
   class VisitWebkitKeyframesState extends VisitChildrenOptionalState<CssNode> {
 
-    private final CssWebkitKeyframesNode node;
+    private final CssKeyframesNode node;
 
     private boolean visitedChildren = false;
 
     private boolean shouldVisitChildren = true;
 
-    VisitWebkitKeyframesState(CssWebkitKeyframesNode node) {
+    VisitWebkitKeyframesState(CssKeyframesNode node) {
       this.node = node;
     }
 
     @Override
     public void doVisit() {
       if (!visitedChildren) {
-        shouldVisitChildren = visitor.enterWebkitKeyframesRule(node);
+        shouldVisitChildren = visitor.enterKeyframesRule(node);
       } else {
-        visitor.leaveWebkitKeyframesRule(node);
+        visitor.leaveKeyframesRule(node);
       }
     }
 
@@ -1841,8 +1841,8 @@ class DefaultVisitController implements MutatingVisitController {
     }
 
     // VisitUnknownAtRuleBlockState
-    if (child instanceof CssWebkitKeyframesNode) {
-      return new VisitWebkitKeyframesState((CssWebkitKeyframesNode) child);
+    if (child instanceof CssKeyframesNode) {
+      return new VisitWebkitKeyframesState((CssKeyframesNode) child);
     }
 
     // VisitKeyBlockState

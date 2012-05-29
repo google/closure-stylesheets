@@ -48,6 +48,7 @@ public class JobDescription {
   public final boolean allowUnrecognizedProperties;
   public final Set<String> allowedUnrecognizedProperties;
   public final Vendor vendor;
+  public final boolean allowKeyframes;
   public final boolean allowWebkitKeyframes;
   public final boolean processDependencies;
   public final ImmutableSet<String> allowedAtRules;
@@ -109,8 +110,8 @@ public class JobDescription {
       Set<String> allowedNonStandardFunctions,
       boolean allowUnrecognizedProperties,
       Set<String> allowedUnrecognizedProperties, Vendor vendor,
-      boolean allowWebkitKeyframes, boolean processDependencies,
-      Set<String> allowedAtRules,
+      boolean allowKeyframes, boolean allowWebkitKeyframes,
+      boolean processDependencies, Set<String> allowedAtRules,
       String cssRenamingPrefix, List<String> excludedClassesFromRenaming,
       GssFunctionMapProvider gssFunctionMapProvider,
       SubstitutionMapProvider cssSubstitutionMapProvider) {
@@ -141,6 +142,7 @@ public class JobDescription {
     this.allowedUnrecognizedProperties = ImmutableSet.copyOf(
         allowedUnrecognizedProperties);
     this.vendor = vendor;
+    this.allowKeyframes = allowKeyframes;
     this.allowWebkitKeyframes = allowWebkitKeyframes;
     this.processDependencies = processDependencies;
     this.allowedAtRules = ImmutableSet.copyOf(allowedAtRules);

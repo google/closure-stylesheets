@@ -21,19 +21,19 @@ package com.google.common.css.compiler.ast;
  *
  * @author fbenz@google.com (Florian Benz)
  */
-public class CssWebkitKeyframesNode extends CssAtRuleNode {
+public class CssKeyframesNode extends CssAtRuleNode {
 
-  public CssWebkitKeyframesNode(CssLiteralNode name) {
+  public CssKeyframesNode(CssLiteralNode name) {
     super(Type.UNKNOWN_BLOCK, name, new CssBlockNode());
   }
 
-  public CssWebkitKeyframesNode(CssWebkitKeyframesNode node) {
+  public CssKeyframesNode(CssKeyframesNode node) {
     super(node);
   }
 
   @Override
-  public CssWebkitKeyframesNode deepCopy() {
-    return new CssWebkitKeyframesNode(this);
+  public CssKeyframesNode deepCopy() {
+    return new CssKeyframesNode(this);
   }
 
   public boolean isOkWithoutProcessing() {
@@ -64,4 +64,3 @@ public class CssWebkitKeyframesNode extends CssAtRuleNode {
     return (CssBlockNode) super.getBlock();
   }
 }
-

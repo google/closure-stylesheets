@@ -52,6 +52,7 @@ public class JobDescriptionBuilder {
   private boolean allowUnrecognizedProperties;
   private Set<String> allowedUnrecognizedProperties;
   private Vendor vendor;
+  private boolean allowKeyframes;
   private boolean allowWebkitKeyframes;
   private boolean processDependencies;
   private String cssRenamingPrefix;
@@ -79,6 +80,7 @@ public class JobDescriptionBuilder {
     this.allowUnrecognizedProperties = false;
     this.allowedUnrecognizedProperties = Sets.newHashSet();
     this.vendor = null;
+    this.allowKeyframes = false;
     this.allowWebkitKeyframes = false;
     this.processDependencies = false;
     this.cssRenamingPrefix = "";
@@ -107,6 +109,7 @@ public class JobDescriptionBuilder {
     this.allowedUnrecognizedProperties =
         ImmutableSet.copyOf(jobToCopy.allowedUnrecognizedProperties);
     this.vendor = jobToCopy.vendor;
+    this.allowKeyframes = jobToCopy.allowKeyframes;
     this.allowWebkitKeyframes = jobToCopy.allowWebkitKeyframes;
     this.cssRenamingPrefix = jobToCopy.cssRenamingPrefix;
     setExcludedClassesFromRenaming(
@@ -324,6 +327,16 @@ public class JobDescriptionBuilder {
     return this;
   }
 
+  public JobDescriptionBuilder setAllowKeyframes(boolean allow) {
+    checkJobIsNotAlreadyCreated();
+    this.allowKeyframes = allow;
+    return this;
+  }
+
+  public JobDescriptionBuilder allowKeyframes() {
+    return setAllowKeyframes(true);
+  }
+
   public JobDescriptionBuilder setAllowWebkitKeyframes(boolean allow) {
     checkJobIsNotAlreadyCreated();
     this.allowWebkitKeyframes = allow;
@@ -354,9 +367,9 @@ public class JobDescriptionBuilder {
         swapLeftRightInUrl, simplifyCss, eliminateDeadStyles,
         allowUnrecognizedFunctions, allowedNonStandardFunctions,
         allowUnrecognizedProperties, allowedUnrecognizedProperties, vendor,
-        allowWebkitKeyframes, processDependencies, allowedAtRules,
-        cssRenamingPrefix, excludedClassesFromRenaming, gssFunctionMapProvider,
-        cssSubstitutionMapProvider);
+        allowKeyframes, allowWebkitKeyframes, processDependencies,
+        allowedAtRules, cssRenamingPrefix, excludedClassesFromRenaming,
+        gssFunctionMapProvider, cssSubstitutionMapProvider);
     return job;
   }
 }

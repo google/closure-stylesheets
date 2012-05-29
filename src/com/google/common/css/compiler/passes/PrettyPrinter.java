@@ -49,7 +49,7 @@ import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
-import com.google.common.css.compiler.ast.CssWebkitKeyframesNode;
+import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.VisitController;
 
@@ -438,7 +438,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   }
 
   @Override
-  public boolean enterWebkitKeyframesRule(CssWebkitKeyframesNode node) {
+  public boolean enterKeyframesRule(CssKeyframesNode node) {
     sb.append(indent);
     sb.append('@').append(node.getName().toString());
     for (CssValueNode param : node.getParameters()) {
@@ -453,7 +453,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   }
 
   @Override
-  public void leaveWebkitKeyframesRule(CssWebkitKeyframesNode node) {
+  public void leaveKeyframesRule(CssKeyframesNode node) {
     if (node.getType().hasBlock()) {
       indent = indent.substring(0, indent.length() - 2);
       sb.append(indent);

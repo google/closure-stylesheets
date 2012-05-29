@@ -394,10 +394,10 @@ public class GssParserCC {
       return at;
     }
 
-    public CssWebkitKeyframesNode buildWebkitKeyframesNode(CssLiteralNode name,
+    public CssKeyframesNode buildWebkitKeyframesNode(CssLiteralNode name,
         CssBlockNode block, SourceCodeLocation location,
         List<CssValueNode> parameters, List<Token> tokens) {
-      CssWebkitKeyframesNode at = new CssWebkitKeyframesNode(name);
+      CssKeyframesNode at = new CssKeyframesNode(name);
       at.setSourceCodeLocation(location);
       at.setBlock(block);
       at.setParameters(parameters);
@@ -572,7 +572,8 @@ PARSER_END(GssParserCC)
 
   // "@-webkit-keyframes"
   // Special handling needed because of the keys instead of the selectors
-  | < WEBKITKEYFRAMES: <AT> ( "-webkit-keyframes" | "-moz-keyframes" ) >
+  | < WEBKITKEYFRAMES: <AT> ( "keyframes" | "-webkit-keyframes" |
+      "-moz-keyframes" | "-ms-keyframes" ) >
 
   // Top-level @-rules that contain a declaration block. General top-level
   // @-rules contain a block with rulesets.
