@@ -58,7 +58,7 @@ public class GssCommentsTest extends NewFunctionalTestBase {
 
   protected void markNonFlippableNodes() {
    MarkNonFlippableNodes pass = new MarkNonFlippableNodes(
-        tree.getMutatingVisitController());
+        tree.getVisitController(), errorManager);
     pass.runPass();
   }
 
