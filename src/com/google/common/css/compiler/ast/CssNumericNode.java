@@ -77,7 +77,7 @@ public class CssNumericNode extends CssValueNode {
     return new CssNumericNode(this);
   }
 
-  public String getUnit(){
+  public String getUnit() {
     return unit;
   }
 
