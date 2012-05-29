@@ -22,7 +22,6 @@ import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
-import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
 
 /**
@@ -32,12 +31,6 @@ import com.google.common.css.compiler.passes.testing.PassesTestBase;
  * @author fbenz@google.com (Florian Benz)
  */
 public class MarkNonFlippableNodesTest extends PassesTestBase {
-
-  public void testMisplacedAnnotation() throws GssParserException {
-    parseAndRun(
-        linesToString(".CLASSX,", "/* @noflip */ .CLASSY { left:10px; }"),
-        MarkNonFlippableNodes.INVALID_NOFLIP_ERROR_MESSAGE);
-  }
 
   public void testMarkNonFlippableSingelDeclaration() {
     parseAndBuildTree(linesToString(
@@ -233,7 +226,7 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
   @Override
   protected void runPass() {
     MarkNonFlippableNodes pass = new MarkNonFlippableNodes(
-        tree.getMutatingVisitController(), errorManager);
+        tree.getVisitController());
     pass.runPass();
   }
 }

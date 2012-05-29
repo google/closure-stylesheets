@@ -16,7 +16,6 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.css.compiler.ast.CssCommentNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
@@ -30,11 +29,7 @@ import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorListNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
-import com.google.common.css.compiler.ast.ErrorManager;
-import com.google.common.css.compiler.ast.GssError;
-import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import java.util.logging.Logger;
+import com.google.common.css.compiler.ast.VisitController;
 
 /**
  * Compiler pass that traverses the tree and marks as non flippable the nodes
@@ -45,16 +40,7 @@ import java.util.logging.Logger;
 public class MarkNonFlippableNodes extends DefaultTreeVisitor
     implements CssCompilerPass {
 
-  @VisibleForTesting
-  static final String INVALID_NOFLIP_ERROR_MESSAGE =
-      "@noflip must be moved outside of selector sequence since it applies " +
-          "to entire block.";
-
-  private final MutatingVisitController visitController;
-  private final ErrorManager errorManager;
-
-  private static final Logger logger = Logger.getLogger(
-      MarkNonFlippableNodes.class.getName());
+  private VisitController visitController;
 
   /**
    * String that matches the comment marking a rule that should not be
@@ -63,10 +49,8 @@ public class MarkNonFlippableNodes extends DefaultTreeVisitor
    */
   private static final String NOFLIP = "/* @noflip */";
 
-  public MarkNonFlippableNodes(MutatingVisitController visitController,
-      ErrorManager errorManager) {
+  public MarkNonFlippableNodes(VisitController visitController) {
     this.visitController = visitController;
-    this.errorManager = errorManager;
   }
 
   /**
@@ -76,25 +60,6 @@ public class MarkNonFlippableNodes extends DefaultTreeVisitor
   private boolean hasNoFlip(CssNode node) {
     for (CssCommentNode comment : node.getComments()) {
       if (comment.getValue().equals(NOFLIP)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Returns whether the node's parent is a ruleset where the first selector is
-   * marked @noflip.
-   */
-  private boolean firstParentSelectorHasNoFlip(CssDeclarationBlockNode node) {
-    CssNode parentNode = node.getParent();
-    if (parentNode instanceof CssRulesetNode) {
-      CssRulesetNode rulesetNode = (CssRulesetNode) parentNode;
-      CssSelectorListNode selectors = rulesetNode.getSelectors();
-      if (selectors.numChildren() == 0) {
-        return false;
-      }
-      if (!selectors.getChildAt(0).getShouldBeFlipped()) {
         return true;
       }
     }
@@ -144,21 +109,13 @@ public class MarkNonFlippableNodes extends DefaultTreeVisitor
 
   @Override
   public void leaveRuleset(CssRulesetNode node) {
-    boolean firstSelector = true;
     CssSelectorListNode selectors = node.getSelectors();
     for (CssSelectorNode sel : selectors.childIterable()) {
       if (!sel.getShouldBeFlipped()) {
-        if (!firstSelector) {
-          // Make sure no non-first selectors are marked @noflip.
-          errorManager.report(new GssError(INVALID_NOFLIP_ERROR_MESSAGE,
-              node.getSourceCodeLocation()));
-        } else {
-          node.setShouldBeFlipped(false);
-          selectors.setShouldBeFlipped(false);
-        }
+        node.setShouldBeFlipped(false);
+        selectors.setShouldBeFlipped(false);
         return;
       }
-      firstSelector = false;
     }
   }
 
@@ -181,8 +138,7 @@ public class MarkNonFlippableNodes extends DefaultTreeVisitor
 
   @Override
   public boolean enterDeclarationBlock(CssDeclarationBlockNode node) {
-    if (hasNoFlip(node) || !node.getParent().getShouldBeFlipped()
-        || firstParentSelectorHasNoFlip(node)) {
+    if (hasNoFlip(node) || !node.getParent().getShouldBeFlipped()) {
       node.setShouldBeFlipped(false);
     }
     return true;
