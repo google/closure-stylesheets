@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 /**
  * Unit tests for {@link CssFunctionNode}.
  * 
- * @author oana@google.com (Your Name Here)
+ * @author oana@google.com (Oana Florescu)
  */
 public class CssFunctionNodeTest extends TestCase {
 
