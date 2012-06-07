@@ -16,7 +16,6 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
@@ -50,8 +49,7 @@ import java.util.Set;
 public class ResolveCustomFunctionNodesForChunks<T> extends ResolveCustomFunctionNodes {
 
   /** The prefix for definitions of calls with references */
-  @VisibleForTesting
-  static final String DEF_PREFIX = "__F";
+  public static final String DEF_PREFIX = "__F";
 
   private final Function<T, String> nextUniqueSuffix;
   private final Map<T, ConstantDefinitions> constantDefinitions =

@@ -16,24 +16,34 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
- * A container for GSS constant definitions.  This is used to calculate what
- * the correct constant value should be based on the last definition.
+ * A container for GSS constant definitions, since a constant could be
+ * defined multiple times in the tree, this class has two set of interfaces
+ * that can be used to get either all definitions of a constant or only last
+ * definition of a constant.
  *
  * @author oana@google.com (Oana Florescu)
  */
 public class ConstantDefinitions {
   private final Map<String, CssDefinitionNode> constants = Maps.newHashMap();
 
-  @VisibleForTesting
+  private final Multimap<String, CssDefinitionNode> constantsMultimap =
+      LinkedListMultimap.create();
+
   Map<String, CssDefinitionNode> getConstants() {
     return constants;
+  }
+
+  Multimap<String, CssDefinitionNode> getConstantMultimap() {
+    return constantsMultimap;
   }
 
   /**
@@ -47,6 +57,16 @@ public class ConstantDefinitions {
   }
 
   /**
+   * Returns all definitions of a constant.
+   *
+   * @return collection of definition node or empty collection if the
+   * constant is not defined
+   */
+  public Collection<CssDefinitionNode> getConstantDefinitions(String constant) {
+    return constantsMultimap.get(constant);
+  }
+
+  /**
    * Adds a constant definition to this css tree.
    *
    * Note that a constant may be defined multiple times in the tree. For the
@@ -55,8 +75,9 @@ public class ConstantDefinitions {
    * (to ignore the definitions in inactive condition blocks the
    * {@code EliminateConditionalNodes} compiler pass needs to be run first).
    */
-  void addConstantDefinition(CssDefinitionNode definition) {
+  public void addConstantDefinition(CssDefinitionNode definition) {
     constants.put(definition.getName().getValue(), definition);
+    constantsMultimap.put(definition.getName().getValue(), definition);
   }
 
   /**

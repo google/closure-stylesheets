@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssConstantReferenceNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssFunctionArgumentsNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
@@ -52,13 +53,25 @@ public class BiDiFlipper extends DefaultTreeVisitor
 
   boolean shouldSwapLeftRightInUrl;
   boolean shouldSwapLtrRtlInUrl;
+  boolean shouldFlipConstantReferences;
 
   public BiDiFlipper(MutatingVisitController visitController,
-                       boolean swapLtrRtlInUrl,
-                       boolean swapLeftRightInUrl) {
+      boolean swapLtrRtlInUrl,
+      boolean swapLeftRightInUrl,
+      boolean shouldFlipConstantReferences) {
     this.visitController = visitController;
     this.shouldSwapLtrRtlInUrl = swapLtrRtlInUrl;
     this.shouldSwapLeftRightInUrl = swapLeftRightInUrl;
+    this.shouldFlipConstantReferences = shouldFlipConstantReferences;
+  }
+
+  public BiDiFlipper(MutatingVisitController visitController,
+      boolean swapLtrRtlInUrl,
+      boolean swapLeftRightInUrl) {
+    this(visitController,
+        swapLtrRtlInUrl,
+        swapLeftRightInUrl,
+        false /* Don't flip constant reference by default. */);
   }
 
   /**
@@ -220,6 +233,25 @@ public class BiDiFlipper extends DefaultTreeVisitor
   }
 
   /**
+   * Return if the node is ConstantReference and also flippable.
+   */
+  private boolean shouldFlipConstantReference(CssValueNode valueNode) {
+    if (!shouldFlipConstantReferences) {
+      return false;
+    }
+    if (!(valueNode instanceof CssConstantReferenceNode)) {
+      return false;
+    }
+    String ref = valueNode.getValue();
+    if (ref.startsWith(ResolveCustomFunctionNodesForChunks.DEF_PREFIX)) {
+      // Since gss function could generate multiple values, we can't do flip if
+      // there's gss function call in place, simply skip this case.
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Return if the node is numeric and also has '%'.
    */
   private boolean isNumericAndHasPercentage(CssValueNode value) {
@@ -278,7 +310,8 @@ public class BiDiFlipper extends DefaultTreeVisitor
     for (CssValueNode valueNode : valueNodes) {
       if (isNumericNode(valueNode)
           || isAutoOrInheritOrTransparent(valueNode.toString())
-          || isCssHexColorNode(valueNode)) {
+          || isCssHexColorNode(valueNode)
+          || shouldFlipConstantReference(valueNode)) {
         switch (count) {
           case 3:
             lastValueNode = valueNode.deepCopy();
