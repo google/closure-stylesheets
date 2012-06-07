@@ -32,7 +32,7 @@ import java.util.Arrays;
  */
 public final class MoreAsserts {
 
-  private MoreAsserts() { }
+  private MoreAsserts() {}
 
   /**
    * Asserts that {@code actual} contains equal elements to those in

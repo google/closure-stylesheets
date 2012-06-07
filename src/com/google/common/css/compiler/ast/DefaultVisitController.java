@@ -128,7 +128,7 @@ class DefaultVisitController implements MutatingVisitController {
   abstract class BaseVisitState<N extends CssNode>
       implements VisitState<N> {
     @Override
-    public void stopVisitCalled() { }
+    public void stopVisitCalled() {}
 
     @Override
     public void removeCurrentChild() {
