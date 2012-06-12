@@ -50,6 +50,14 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
     assertEquals(1, importRule.getParametersCount());
   }
 
+  public void testCreateUriImportNode() throws Exception {
+    parseAndRun("@import url('/js/closure/css/common.css');");
+    assertTrue(getFirstActualNode() instanceof CssImportRuleNode);
+    CssImportRuleNode importRule = (CssImportRuleNode) getFirstActualNode();
+    assertEquals("import", importRule.getName().getValue());
+    assertEquals(1, importRule.getParametersCount());
+  }
+
   public void testCreateComplexImportNode() throws Exception {
     parseAndRun("@import \"name\" param1, param2, param3;");
     assertTrue(getFirstActualNode() instanceof CssImportRuleNode);

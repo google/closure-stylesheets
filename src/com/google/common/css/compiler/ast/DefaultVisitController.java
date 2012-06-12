@@ -32,8 +32,8 @@ import java.util.List;
  */
 class DefaultVisitController implements MutatingVisitController {
 
-  /** The CssTree to be visited. */
-  private CssTree tree;
+  /** The (sub)tree to be visited. */
+  private CssNode subtree;
 
   /** Whether mutations of the tree are allowed or not. */
   private boolean allowMutating;
@@ -1502,10 +1502,16 @@ class DefaultVisitController implements MutatingVisitController {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void removeCurrentNodeCalled() {
-      // Remove the nearest declaration that contains the function.
-      while (!(stateStack.getTop() instanceof VisitDeclarationState)) {
-        stateStack.pop();
+      // If the function is a singleton, remove the nearest declaration that
+      // contains it.
+      CssNodesListNode<CssValueNode> parent =
+          (CssNodesListNode<CssValueNode>) node.getParent();
+      if (parent.numChildren() == 1) {
+        while (!(stateStack.getTop() instanceof VisitDeclarationState)) {
+          stateStack.pop();
+        }
       }
       stateStack.pop();
       stateStack.getTop().removeCurrentChild();
@@ -1806,10 +1812,14 @@ class DefaultVisitController implements MutatingVisitController {
     }
   }
 
-  public DefaultVisitController(CssTree tree, boolean allowMutating) {
-    Preconditions.checkNotNull(tree);
-    this.tree = tree;
+  public DefaultVisitController(CssNode subtree, boolean allowMutating) {
+    Preconditions.checkNotNull(subtree);
+    this.subtree = subtree;
     this.allowMutating = allowMutating;
+  }
+
+  public DefaultVisitController(CssTree tree, boolean allowMutating) {
+    this(tree.getRoot(), allowMutating);
   }
 
   public StateStack getStateStack() {
@@ -1838,7 +1848,7 @@ class DefaultVisitController implements MutatingVisitController {
     Preconditions.checkNotNull(treeVisitor);
     this.visitor = treeVisitor;
 
-    stateStack.push(new RootVisitBeforeChildrenState(tree.getRoot()));
+    stateStack.push(createVisitStateInternal(subtree));
 
     while (!stateStack.isEmpty()) {
       try {
@@ -1961,6 +1971,14 @@ class DefaultVisitController implements MutatingVisitController {
 
     if (child instanceof CssCompositeValueNode) {
       return new VisitCompositeValueState((CssCompositeValueNode) child);
+    }
+
+    if (child instanceof CssPropertyValueNode) {
+      return new VisitPropertyValueState((CssPropertyValueNode) child);
+    }
+
+    if (child instanceof CssRootNode) {
+      return new RootVisitBeforeChildrenState((CssRootNode) child);
     }
 
     return null;

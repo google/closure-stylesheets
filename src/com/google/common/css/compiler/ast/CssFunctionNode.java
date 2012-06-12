@@ -35,7 +35,7 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
   /**
    * Contains the list of recognized CSS functions.
    */
-  public static class Function {
+  public abstract static class Function {
 
     /** A map of function names to function objects. */
     private static final Map<String, Function> NAME_TO_FUNCTION_MAP;
@@ -88,7 +88,13 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "-webkit-linear-gradient");
       ImmutableMap.Builder<String, Function> builder = ImmutableMap.builder();
       for (String functionName : recognizedCssFunctions) {
-        builder.put(functionName, new Function(functionName));
+        builder.put(
+            functionName,
+            new Function(functionName) {
+              @Override public boolean isRecognized() {
+                return true;
+              }
+            });
       }
       NAME_TO_FUNCTION_MAP = builder.build();
     }
@@ -96,7 +102,12 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
     /**
      * Serves as a placeholder for custom functions.
      */
-    public static final Function CUSTOM = new Function(null /* functionName */);
+    public static final Function CUSTOM =
+        new Function(null /* functionName */) {
+          @Override public boolean isRecognized() {
+            return false;
+          }
+        };
 
 
     /** The name of the function, as it appears in a CSS stylesheet. */
@@ -116,6 +127,12 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
     public static Function byName(String name) {
       return NAME_TO_FUNCTION_MAP.get(name);
     }
+
+    /**
+     * Returns {@code true} when this function is in the list of
+     * recognized names.
+     */
+    public abstract boolean isRecognized();
 
     /**
      * @return the name of the CSS function, such as "rgb" or "url"
