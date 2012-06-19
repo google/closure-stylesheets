@@ -48,7 +48,6 @@ import com.google.common.css.compiler.ast.CssPseudoElementNode;
 import com.google.common.css.compiler.ast.CssRefinerNode;
 import com.google.common.css.compiler.ast.CssSelectorListNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
-import com.google.common.css.compiler.ast.CssStringNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
@@ -70,7 +69,7 @@ public class CompactPrinter extends DefaultTreeVisitor
 
   private String compactedPrintedString = null;
   private VisitController visitController;
-  private CssNode subtree;
+  private CssTree tree;
   private static final Logger logger = Logger.getLogger(
       CompactPrinter.class.getName());
 
@@ -83,13 +82,9 @@ public class CompactPrinter extends DefaultTreeVisitor
    */
   protected StringBuilder sb = null;
 
-  public CompactPrinter(CssNode subtree) {
-    this.subtree = subtree;
-    this.visitController = this.subtree.getVisitController();
-  }
-
   public CompactPrinter(CssTree tree) {
-    this(tree.getRoot());
+    this.tree = tree;
+    this.visitController = this.tree.getVisitController();
   }
 
   @Override
@@ -102,14 +97,7 @@ public class CompactPrinter extends DefaultTreeVisitor
     sb.append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
       sb.append(' ');
-      // TODO(user): teach visit controllers to explore
-      // CssImportRuleNode parameters rather than leaving it to each
-      // pass to figure things out.
-      if (param instanceof CssStringNode) {
-        sb.append(param.toString());
-      } else {
-        sb.append(param.getValue());
-      }
+      sb.append(param.getValue());
     }
     return true;
   }
@@ -495,11 +483,6 @@ public class CompactPrinter extends DefaultTreeVisitor
     if (node instanceof CssBooleanExpressionNode &&
         node.getParent() instanceof CssMediaRuleNode) {
       appendMediaParameterWithParentheses(node);
-      return;
-    }
-    if (node instanceof CssStringNode) {
-      CssStringNode s = (CssStringNode) node;
-      sb.append(s.toString(CssStringNode.HTML_ESCAPER));
       return;
     }
     sb.append(node.toString());

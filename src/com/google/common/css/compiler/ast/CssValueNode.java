@@ -17,15 +17,7 @@
 package com.google.common.css.compiler.ast;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.css.SourceCodeLocation;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -91,6 +83,7 @@ public abstract class CssValueNode extends CssNode {
    */
   public void setValue(String value) {
     Preconditions.checkNotNull(value);
+    Preconditions.checkArgument(!value.isEmpty());
     this.value = value;
   }
 
@@ -100,52 +93,6 @@ public abstract class CssValueNode extends CssNode {
 
   public boolean getIsDefault() {
     return isDefault;
-  }
-
-  /**
-   * Visit just the leaves in the subtrees from the given roots.
-   */
-  public static Iterable<CssValueNode> leaves(
-      final Collection<CssValueNode> roots) {
-    return new Iterable<CssValueNode>() {
-      public Iterator<CssValueNode> iterator() {
-        return new UnmodifiableIterator<CssValueNode>() {
-          LinkedList<CssValueNode> q;
-          {
-            q = Lists.newLinkedList();
-            q.addAll(roots);
-          }
-          List<CssValueNode> expand(CssValueNode n) {
-            if (n instanceof CssBooleanExpressionNode) {
-              CssBooleanExpressionNode b = (CssBooleanExpressionNode) n;
-              return ImmutableList.<CssValueNode>of(b.getLeft(), b.getRight());
-            } else if (n instanceof CssCompositeValueNode) {
-              CssCompositeValueNode c = (CssCompositeValueNode) n;
-              return c.getValues();
-            } else {
-              return ImmutableList.<CssValueNode>of(n);
-            }
-          }
-          void advance() {
-            CssValueNode unexpanded;
-            List<CssValueNode> expanded;
-            do {
-              unexpanded = q.remove();
-              expanded = expand(unexpanded);
-              q.addAll(0, expanded);
-            } while (expanded.size() != 1
-                     || !expanded.get(0).equals(unexpanded));
-          }
-          public boolean hasNext() {
-            return !q.isEmpty();
-          }
-          public CssValueNode next() {
-            advance();
-            return q.remove();
-          }
-        };
-      }
-    };
   }
 
   /**

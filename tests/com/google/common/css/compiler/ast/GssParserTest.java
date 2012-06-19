@@ -665,49 +665,4 @@ public class GssParserTest extends TestCase {
     testValid("div { @mixin foo(1px/1em); }");
     testValid("div { @mixin foo(1px 1px); }");
   }
-
-  public void testUnquotedUrl() throws Exception {
-    testValid("div { background-image: url(http://google.com/logo.png) }");
-  }
-
-  public void testFunctionApplicationUrl() throws Exception {
-    testValid("div { background-image: url(dataUrl('s')) }");
-  }
-
-  public void testUrlOfFunctionOfId() throws Exception {
-    // Bare URLs in function arguments are deprecated, but
-    // we have some dependent code to cleanup before removing
-    // the feature.
-    testValid("div { background-image: url(dataUrl(x)); }");
-  }
-
-  public void testFn() throws Exception {
-    testValid("div { background-image: url(http://foo) }");
-  }
-
-  public void testUrlPrefix() throws Exception {
-    testTree("div { background-image: url-prefix(http://fo); }",
-             "[[div]{[background-image:[url-prefix(http://fo)];]}]");
-  }
-
-  public void testUrlPrefix2() throws Exception {
-    testTree("div { background-image: url-prefix(fn(0)); }",
-             "[[div]{[background-image:[url-prefix(fn(0))];]}]");
-  }
-
-  public void testEmptyUrl() throws Exception {
-    testValid("div { background-image: url() }");
-  }
-
-  public void testUrlWithWhitespace() throws Exception {
-    testTree("div { background-image: url( 'http://google.com/logo.png'); }",
-             "[[div]{[background-image:"
-             + "[url('http://google.com/logo.png')];]}]");
-  }
-
-  public void testUnquotedUrlWithWhitespace() throws Exception {
-    testTree("div { background-image: url( http://google.com/logo.png); }",
-             "[[div]{[background-image:"
-             + "[url(http://google.com/logo.png)];]}]");
-  }
 }

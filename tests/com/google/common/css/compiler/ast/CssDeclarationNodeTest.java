@@ -87,3 +87,4 @@ public class CssDeclarationNodeTest extends TestCase {
     tester.deepEquals(node1, node2);
   }
 }
+

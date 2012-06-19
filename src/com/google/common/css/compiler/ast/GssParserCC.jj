@@ -119,26 +119,14 @@ public class GssParserCC {
   }
 
   private CssFunctionNode createUrlFunction(Token t) {
-    // We tried using finer-grained tokens for URI parsing, but an
-    // unquoted URI can look just like an identifier or even a whole
-    // declaration. We tried using lexical states to recognize bare
-    // URIs only within URL_FUNCTIONS, but that had two problems:
-    // (1) it means ordinary functions can't take bare URLs, which
-    // harms orthogonality of GSS and outlaws some custom functions
-    // we've found in the wild
-    // (2) it means our special lexical state must either exclude
-    // ordinary functions, or we must import many other tokens into this
-    // new state, which adds complexity for little benefit.
-    // Therefore, we ask the lexer to distinguish only big
-    // recognizably-URLish chunks of input and break those down here.
     SourceCodeLocation loc = this.getLocation(t);
     int pi = t.image.indexOf('(');
     String funName = t.image.substring(0, pi);
     Preconditions.checkState(URL_FUNCTIONS.contains(funName));
     CssFunctionNode.Function funType = CssFunctionNode.Function.byName(funName);
     CssFunctionNode fun = new CssFunctionNode(funType, loc);
-    String parenContents = trim(t.image.substring(pi + 1, t.image.length() - 1));
-    CssValueNode arg = new CssLiteralNode(parenContents, loc);
+    CssValueNode arg = new CssLiteralNode(
+        t.image.substring(pi + 1, t.image.length() - 1), loc);
     fun.setArguments(new CssFunctionArgumentsNode(ImmutableList.of(arg)));
     return fun;
   }
@@ -226,16 +214,6 @@ public class GssParserCC {
       return node;
     }
 
-    public CssStringNode buildStringNode(CssStringNode.Type type,
-        String image, SourceCodeLocation location, Token token) {
-        Preconditions.checkNotNull(image, "image should be non-null");
-        Preconditions.checkArgument(
-            image.length() > 1, "the image argument must be quoted", image);
-        CssStringNode node = new CssStringNode(type, location);
-        attachComments(Lists.newArrayList(token), node);
-        return node;
-    }
-
     public CssHexColorNode buildHexColorNode(String image,
         SourceCodeLocation location, List<Token> tokens) {
       CssHexColorNode node = new CssHexColorNode(image, location);
@@ -317,7 +295,7 @@ public class GssParserCC {
 
     public CssAttributeSelectorNode buildAttributeSelectorNode(
         CssAttributeSelectorNode.MatchType matchType, String attribute,
-        CssValueNode value, SourceCodeLocation location, List<Token> tokens) {
+        String value, SourceCodeLocation location, List<Token> tokens) {
       CssAttributeSelectorNode node = new CssAttributeSelectorNode(matchType,
           attribute, value, location);
       attachComments(tokens, node);
@@ -560,21 +538,17 @@ PARSER_END(GssParserCC)
   | < IMPORTANT_SYM: <EXCL_MARK> <W> "important" >
 
   // string1      \"([^\n\r\f\\"]|\\{nl}|{escape})*\"
-  | < DOUBLE_QUOTED_STRING: <DOUBLE_QUOTE>
+  | < STRING1: <DOUBLE_QUOTE>
        (~["\n","\r","\f","\\","\""] | "\\" <NL> | <ESCAPE>)* <DOUBLE_QUOTE> >
 
   // string2      \'([^\n\r\f\\']|\\{nl}|{escape})*\'
-  | < SINGLE_QUOTED_STRING: <SINGLE_QUOTE>
+  | < STRING2: <SINGLE_QUOTE>
        (~["\n","\r","\f","\\","\'"] | "\\" <NL> | <ESCAPE>)* <SINGLE_QUOTE> >
 
-  // Bare URIs. URIs with quoted string arguments are parsed as ordinary
-  // functions. See the comments in createUrlFunction to understand why
-  // it is hard to unify parsing for urls and other functions; then you
-  // can understand why we divide url processing at all and why it is
-  // useful to avoid duplicating string-parsing logic in the treatment of
-  // the special case for url functions.
+  // "url("{w}{string}{w}")"  {return URI;}
   // "url("{w}{url}{w}")" {return URI;}
-  | < URI: ("url" | "url-prefix" | "domain") "(" <W> (<URL>)* <W> ")" >
+  | < URI: ("url" | "url-prefix" | "domain") "(" <W> (<STRING1> | <STRING2> |
+      (<URL>)*) <W> ")" >
 
   // url      ([!#$%&*-~]|{nonascii}|{escape})*
   | < #URL: <EXCL_MARK> | <HASH> | <PERCENT> | <DOLLAR> | <AMPERSAND> |
@@ -622,23 +596,14 @@ PARSER_END(GssParserCC)
 // but IDENTIFIER stays the same.
 
 // string
-//   : DOUBLE_QUOTED_STRING | SINGLE_QUOTED_STRING
+//   : STRING1 | STRING2
 //   ;
-CssStringNode string() :
+Token string() :
 {
   Token t;
-  CssStringNode.Type type;
-  SourceCodeLocation beginLocation;
 }
 {
-  { beginLocation = this.getLocation(token.next); }
-  ( t = <DOUBLE_QUOTED_STRING> { type = CssStringNode.Type.DOUBLE_QUOTED_STRING; }
-   | t = <SINGLE_QUOTED_STRING> { type = CssStringNode.Type.SINGLE_QUOTED_STRING; } )
-  {
-    SourceCodeLocation endLocation = this.getLocation();
-    return nodeBuilder.buildStringNode(
-        type, t.image, this.mergeLocations(beginLocation, endLocation), t);
-  }
+  ( t = <STRING1> | t = <STRING2> ) { return t; }
 }
 
 // ruleset
@@ -852,9 +817,8 @@ String nth() :
 CssAttributeSelectorNode attribute() :
 {
   Token t;
-  CssStringNode stringNode = null;
-  CssLiteralNode idNode = null;
   String attribute;
+  String value = "";
   List<Token> tokens = Lists.newArrayList();
   SourceCodeLocation beginLocation;
   CssAttributeSelectorNode.MatchType matchType =
@@ -881,9 +845,8 @@ CssAttributeSelectorNode attribute() :
     )
     ( <S> )*
     (
-        t = <IDENTIFIER> { idNode = new CssLiteralNode(t.image, this.getLocation());
-            tokens.add(t); }
-      | stringNode = string()
+        t = <IDENTIFIER> { value = t.image; tokens.add(t); }
+      | t = string()     { value = t.image; tokens.add(t); }
     )
     ( <S> )*
   )?
@@ -891,16 +854,7 @@ CssAttributeSelectorNode attribute() :
 
   {
     SourceCodeLocation endLocation = this.getLocation();
-    CssValueNode v;
-    if (stringNode != null) {
-      v = stringNode;
-    } else if (idNode != null) {
-      v = idNode;
-    } else {
-      v = new CssLiteralNode("");
-    }
-    return nodeBuilder.buildAttributeSelectorNode(
-        matchType, attribute, v,
+    return nodeBuilder.buildAttributeSelectorNode(matchType, attribute, value,
         this.mergeLocations(beginLocation, endLocation), tokens);
   }
 }
@@ -1181,7 +1135,6 @@ CssValueNode term() :
   String unit = null;
   String unop = "";
   CssFunctionNode function = null;
-  CssStringNode stringNode = null;
   List<Token> tokens = Lists.newArrayList();
   boolean hexcolor = false;
 }
@@ -1193,7 +1146,7 @@ CssValueNode term() :
           ( (dim = <PERCENT> | dim = <IDENTIFIER>)
               { unit = dim.image.toLowerCase(); tokens.add(dim);} )?
     )
-    | stringNode = string()
+    | t = string() { tokens.add(t); }
     | // This lookahead is to support function names with . and :.
       ( LOOKAHEAD({getToken(2).kind != DOT && getToken(2).kind != COLON})
       t = <IDENTIFIER> { tokens.add(t); } )
@@ -1218,7 +1171,7 @@ CssValueNode term() :
         )
         ( <S> )*
         t = <RIGHTROUND> { tokens.add(t); } )
-    | LOOKAHEAD({getToken(1).kind == URI}) function = uri()
+    | t = <URI>        { function = createUrlFunction(t); tokens.add(t); }
     | t = hexcolor()   { tokens.add(t); hexcolor = true; }
     | function = function()
   ) ( <S> )*
@@ -1229,8 +1182,6 @@ CssValueNode term() :
       return function;
     } else if (hexcolor) {
       return nodeBuilder.buildHexColorNode(t.image, this.getLocation(t), tokens);
-    } else if (stringNode != null) {
-      return stringNode;
     } else {
       StringBuilder sb = new StringBuilder();
       for (Token token : tokens) {
@@ -1428,19 +1379,6 @@ Token hexcolor() :
   t = <HASH_NAME> { return t; }
 }
 
-CssFunctionNode uri() :
-{
-  Token t;
-  String funName;
-  CssValueNode arg = null;
-  CssPropertyValueNode expr = null;
-  SourceCodeLocation beginLocation;
-}
-{
-  { beginLocation = this.getLocation(token.next); }
-  t = <URI> { return createUrlFunction(t); }
-}
-
 // function
 //   : [ FUNCTION
 //     | [ IDENTIFIER [ '.' | ':' ] [ IDENTIFIER [ '.' | ':' ] ]* FUNCTION ]
@@ -1465,8 +1403,7 @@ CssFunctionNode function() :
        ( t = <IDENTIFIER> { functionName.append(t.image); }
            (  <DOT>       { functionName.append("."); }
             | <COLON>     { functionName.append(":"); } ) )*
-       t = <FUNCTION>     { functionName.append(t.image); functionName.setLength(functionName.length() - 1); } )
-  )
+       t = <FUNCTION>     { functionName.append(t.image); functionName.setLength(functionName.length() - 1); } ) )
   ( <S> )* expr = expr() t = <RIGHTROUND> { tokens.add(t); }
   {
     SourceCodeLocation endLocation = this.getLocation();

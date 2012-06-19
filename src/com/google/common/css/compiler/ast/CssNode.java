@@ -314,8 +314,4 @@ public abstract class CssNode {
     }
     return false;
   }
-
-  public VisitController getVisitController() {
-    return new DefaultVisitController(this, false /* allowMutating */);
-  }
 }

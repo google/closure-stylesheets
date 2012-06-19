@@ -49,7 +49,6 @@ import com.google.common.css.compiler.ast.CssRefinerNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorListNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
-import com.google.common.css.compiler.ast.CssStringNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
@@ -90,14 +89,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
     sb.append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
       sb.append(" ");
-      // TODO(user): teach visit controllers to explore this subtree
-      // rather than leaving it to each pass to figure things out.
-      if (param instanceof CssStringNode) {
-        CssStringNode n = (CssStringNode) param;
-        sb.append(n.toString(CssStringNode.SHORT_ESCAPER));
-      } else {
-        sb.append(param.getValue());
-      }
+      sb.append(param.getValue());
     }
     return true;
   }

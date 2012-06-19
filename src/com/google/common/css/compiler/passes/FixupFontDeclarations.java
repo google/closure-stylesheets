@@ -43,7 +43,6 @@ import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssNumericNode;
 import com.google.common.css.compiler.ast.CssPriorityNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
-import com.google.common.css.compiler.ast.CssStringNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
@@ -618,7 +617,12 @@ public class FixupFontDeclarations extends DefaultTreeVisitor
   }
 
   private boolean isString(CssValueNode n) {
-    return n instanceof CssStringNode;
+    // TODO(user): parse strings fully in javacc rather than making this
+    // pass and all others that care about reading or writing strings don't
+    // have to reimplement parsing the sublanguage of CSS strings.
+    return n instanceof CssLiteralNode
+        && n.getValue() != null
+        && (n.getValue().startsWith("'") || n.getValue().startsWith("\""));
   }
 
   private static SourceCodeLocation getSourceCodeLocation(CssNode n) {

@@ -29,7 +29,7 @@ public class CssAttributeSelectorNode extends CssRefinerNode {
   /** Indicates which kind of attribute selector is used. */
   private MatchType matchType;
   private String attributeName;
-  private CssValueNode value;
+  private String value;
 
   /**
    * Determines how the given value has to match the value of the attribute so
@@ -56,7 +56,7 @@ public class CssAttributeSelectorNode extends CssRefinerNode {
   }
 
   public CssAttributeSelectorNode(MatchType matchType, String attributeName,
-      CssValueNode value, SourceCodeLocation sourceCodeLocation) {
+      String value, SourceCodeLocation sourceCodeLocation) {
     super(Refiner.ATTRIBUTE, "", sourceCodeLocation);
     this.matchType = matchType;
     this.attributeName = attributeName;
@@ -85,7 +85,7 @@ public class CssAttributeSelectorNode extends CssRefinerNode {
     return attributeName;
   }
 
-  public CssValueNode getValue() {
+  public String getValue() {
     return value;
   }
 

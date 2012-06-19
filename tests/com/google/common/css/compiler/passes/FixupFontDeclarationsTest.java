@@ -57,7 +57,7 @@ public class FixupFontDeclarationsTest extends TestCase {
     assertEquals("a", alternatives.getValues().get(0).getValue());
     assertEquals("b c d", alternatives.getValues().get(1).getValue());
     assertEquals("e f g h i", alternatives.getValues().get(2).getValue());
-    assertEquals("jkl", alternatives.getValues().get(3).getValue());
+    assertEquals("'jkl'", alternatives.getValues().get(3).getValue());
   }
 
   // TODO(user): when we have string parsing, test that this pass
