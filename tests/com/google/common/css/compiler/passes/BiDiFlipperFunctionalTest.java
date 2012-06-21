@@ -76,7 +76,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
    * Tests that
    *   background-position-x : 10%; padding-right: 2px
    * is flipped to
-   *   background-position-x : 90%; padding-right: 2px
+   *   background-position-x : 90%; padding-left: 2px
    */
   public void test5() {
     testTreeConstruction(
@@ -346,6 +346,98 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
     testTreeConstruction(
         "foo { border-color: #fff #aaa #ccc transparent; }",
         "[[foo]{[border-color:[[#fff][transparent][#ccc][#aaa]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   -ms-background-position-x : 10%
+   * is flipped to
+   *   -ms-background-position-x : 90%
+   */
+  public void test23() {
+    testTreeConstruction(
+         "foo { -ms-background-position-x: 10%; }",
+        "[[foo]{[-ms-background-position-x:[[90%]];]}]");
+ }
+
+ /**
+   * Tests that
+   *   background-position-y : 10%
+   * is not flipped.
+   */
+  public void test24() {
+    testTreeConstruction(
+         "foo { background-position-y: 10%; }",
+        "[[foo]{[background-position-y:[[10%]];]}]");
+ }
+
+ /**
+   * Tests that
+   *   background-size : 10% 20%
+   * is not flipped.
+   */
+  public void test25() {
+    testTreeConstruction(
+         "foo { background-size: 10% 20%; }",
+        "[[foo]{[background-size:[[10%][20%]];]}]");
+ }
+
+ /**
+   * Tests that
+   *   background-position: 10% 20%
+   * is flipped to
+   *   background-position: 90% 20%
+   */
+  public void test26() {
+    testTreeConstruction(
+        "foo { background-position: 10% 20%; }",
+        "[[foo]{[background-position:[[90%][20%]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   background-position: 0 0
+   * is not flipped.
+   */
+  public void test27() {
+    testTreeConstruction(
+        "foo { background-position: 0 0; }",
+        "[[foo]{[background-position:[[0][0]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   background: rgb(1%, 2%, 3%) 4% 5%
+   * is flipped to
+   *   background: rgb(1%, 2%, 3%) 96% 5%
+   */
+  public void test28() {
+    testTreeConstruction(
+        "foo { background: rgb(1%, 2%, 3%) 4% 5%; }",
+        "[[foo]{[background:[rgb(1%,2%,3%) [96%][5%]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   background: red 4% 5%
+   * is flipped to
+   *   background: red 96% 5%
+   */
+  public void test29() {
+    testTreeConstruction(
+        "foo { background: red 4% 5%; }",
+        "[[foo]{[background:[[red][96%][5%]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   background: center 5%
+   * is not flipped.
+   */
+  public void test30() {
+    testTreeConstruction(
+        "foo { background: center 5%; }",
+        "[[foo]{[background:[[center][5%]];]}]");
   }
 
   @Override

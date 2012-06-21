@@ -146,7 +146,10 @@ public class BiDiFlipper extends DefaultTreeVisitor
    * Set of properties that have flippable percentage values.
    */
   private static final Set<String> PROPERTIES_WITH_FLIPPABLE_PERCENTAGE =
-    ImmutableSet.of("background");
+    ImmutableSet.of("background",
+                    "background-position",
+                    "background-position-x",
+                    "-ms-background-position-x");
 
   /**
    * Map with the patterns to match URLs against if swap_ltr_rtl_in_url flag is
@@ -219,6 +222,15 @@ public class BiDiFlipper extends DefaultTreeVisitor
   }
 
   /**
+   * Return if the string is "left" or "center" or "right".
+   */
+  private boolean isLeftOrCenterOrRight(String value) {
+    return "left".equals(value)
+        || "center".equals(value)
+        || "right".equals(value);
+  }
+
+  /**
    * Return if the node is CssHexColorNode.
    */
   private boolean isCssHexColorNode(CssValueNode valueNode) {
@@ -264,17 +276,35 @@ public class BiDiFlipper extends DefaultTreeVisitor
 
   /**
    * Returns if the percentage value of this node is flippable.
+   *
+   * Assumes simpler CSS 2.1 use of background and background-position
+   * (multi-layer is not supported yet, neither is the extended CSS 3 syntax
+   * for positioning, like "right 10% top 20%").
+   * TODO(roozbeh): add support CSS 3 multi-layer backgrounds.
+   * TODO(roozbeh): add support for extended CSS 3 syntax for positioning.
    */
-  private boolean isNodeValidForPercentageFlipping(
-      CssPropertyNode propertyNode) {
-    boolean flippable = false;
-    for (String flippableProperty : PROPERTIES_WITH_FLIPPABLE_PERCENTAGE) {
-      if (propertyNode.getPropertyName().startsWith(flippableProperty)) {
-        flippable = true;
-        break;
+  private boolean isValidForPercentageFlipping(
+      CssPropertyNode propertyNode, CssPropertyValueNode propertyValueNode,
+      int valueIndex) {
+
+    String propertyName = propertyNode.getPropertyName();
+    if (PROPERTIES_WITH_FLIPPABLE_PERCENTAGE.contains(propertyName)) {
+      if (valueIndex == 0) {
+        return true; // If this is the first value, it's always flippable
+      }
+      if ("background".equals(propertyName)) {
+        // Make sure this is not the vertical position: Only flip if the
+        // previous value is not numeric or "left", "center", or "right".
+        CssValueNode previousValueNode =
+            propertyValueNode.getChildAt(valueIndex - 1);
+        if (!isNumericNode(previousValueNode)
+            && !isLeftOrCenterOrRight(previousValueNode.toString())) {
+          return true;
+        }
       }
     }
-    return flippable;
+
+    return false;
   }
 
   /**
@@ -296,7 +326,7 @@ public class BiDiFlipper extends DefaultTreeVisitor
 
   /**
    * Takes the list of property values, validate them, then swap the second
-   * and last values.
+   * and last values. So that 0 1 2 3 becomes 0 3 2 1.
    */
   private List<CssValueNode> flipFourNumericValues(
       List<CssValueNode> valueNodes) {
@@ -493,6 +523,7 @@ public class BiDiFlipper extends DefaultTreeVisitor
     // Update the property value.
     CssPropertyValueNode propertyValueNode = declarationNode.getPropertyValue();
     List<CssValueNode> valueNodes = Lists.newArrayList();
+    int valueIndex = 0;
     for (CssValueNode valueNode : propertyValueNode.childIterable()) {
       // Flip URL argument, if it is a valid url function.
       CssValueNode temp = flipUrlNode(valueNode);
@@ -501,10 +532,12 @@ public class BiDiFlipper extends DefaultTreeVisitor
       temp = flipNode(temp);
       // Flip node value, if it is numeric and has percentage that
       // needs flipping.
-      if (isNodeValidForPercentageFlipping(propertyNode)) {
+      if (isValidForPercentageFlipping(propertyNode, propertyValueNode,
+                                       valueIndex)) {
         temp = flipPercentageValueNode(temp);
       }
       valueNodes.add(temp.deepCopy());
+      valueIndex++;
     }
     if (valueNodes.size() != 0) {
       newDeclarationNode.setPropertyValue(new CssPropertyValueNode(
