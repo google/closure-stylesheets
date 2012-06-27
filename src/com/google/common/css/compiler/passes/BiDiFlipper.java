@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssFunctionArgumentsNode;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -54,6 +56,9 @@ public class BiDiFlipper extends DefaultTreeVisitor
   boolean shouldSwapLeftRightInUrl;
   boolean shouldSwapLtrRtlInUrl;
   boolean shouldFlipConstantReferences;
+
+  private static final Logger logger = Logger.getLogger(
+      BiDiFlipper.class.getName());
 
   public BiDiFlipper(MutatingVisitController visitController,
       boolean swapLtrRtlInUrl,
@@ -151,6 +156,27 @@ public class BiDiFlipper extends DefaultTreeVisitor
                     "background-position-x",
                     "-ms-background-position-x");
 
+  /*
+   * Set of properties that are equivalent to border-radius.
+   * TODO(roozbeh): Replace the explicit listing of prefixes with a general
+   * pattern of "-[a-z]+-" to avoid maintaining a prefix list.
+   */
+  private static final Set<String> BORDER_RADIUS_PROPERTIES =
+    ImmutableSet.of("border-radius",
+                    "-webkit-border-radius",
+                    "-moz-border-radius");
+
+  /**
+   * Set of properties whose property values may flip if they match the
+   * four-part pattern.
+   */
+  private static final Set<String> FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP =
+    ImmutableSet.of("border-color",
+                    "border-style",
+                    "border-width",
+                    "margin",
+                    "padding");
+
   /**
    * Map with the patterns to match URLs against if swap_ltr_rtl_in_url flag is
    * true, and their replacement string. Only the first occurrence of the
@@ -211,16 +237,6 @@ public class BiDiFlipper extends DefaultTreeVisitor
         "$1left$2")
     .build();
 
-
-  /**
-   * Return if the string is "auto" or "inherit" or "transparent".
-   */
-  private boolean isAutoOrInheritOrTransparent(String value) {
-    return "auto".equals(value)
-        || "inherit".equals(value)
-        || "transparent".equals(value);
-  }
-
   /**
    * Return if the string is "left" or "center" or "right".
    */
@@ -238,10 +254,29 @@ public class BiDiFlipper extends DefaultTreeVisitor
   }
 
   /**
+   * Return if the node is CssLiteralNode.
+   */
+  private boolean isCssLiteralNode(CssValueNode valueNode) {
+    return (valueNode instanceof CssLiteralNode);
+  }
+
+  /**
    * Return if the node is CssNumericNode.
    */
   private boolean isNumericNode(CssValueNode valueNode) {
     return (valueNode instanceof CssNumericNode);
+  }
+
+  /**
+   * Return if the node is a slash operator node.
+   */
+  private boolean isSlashNode(CssValueNode valueNode) {
+    if (valueNode instanceof CssCompositeValueNode) {
+      CssCompositeValueNode compositeNode = (CssCompositeValueNode) valueNode;
+      return
+          compositeNode.getOperator() == CssCompositeValueNode.Operator.SLASH;
+    }
+    return false;
   }
 
   /**
@@ -298,7 +333,7 @@ public class BiDiFlipper extends DefaultTreeVisitor
         CssValueNode previousValueNode =
             propertyValueNode.getChildAt(valueIndex - 1);
         if (!isNumericNode(previousValueNode)
-            && !isLeftOrCenterOrRight(previousValueNode.toString())) {
+            && !isLeftOrCenterOrRight(previousValueNode.getValue())) {
           return true;
         }
       }
@@ -325,26 +360,141 @@ public class BiDiFlipper extends DefaultTreeVisitor
   }
 
   /**
+   * Flips corners of a border-radius property. Corners are reordered in the
+   * following way:
+   * <ul>
+   *   <li>0 1 is replaced with 1 0,
+   *   <li> 0 1 2 is replaced with 1 0 1 2, and
+   *   <li> 0 1 2 3 is replaced with 1 0 3 2.
+   * </ul>
+   *
+   * <p>Lists of other lengths are returned unchanged.
+   *
+   * @param valueNodes the list of values representing the corners of a
+   * border-radius property.
+   * @return a list of values with the corners flipped.
+   */
+  private List<CssValueNode> flipCorners(List<CssValueNode> valueNodes) {
+    switch (valueNodes.size()) {
+      case 2:
+        return Lists.newArrayList(
+            valueNodes.get(1),
+            valueNodes.get(0));
+      case 3:
+        return Lists.newArrayList(
+            valueNodes.get(1),
+            valueNodes.get(0),
+            valueNodes.get(1).deepCopy(),
+            valueNodes.get(2));
+      case 4:
+        return Lists.newArrayList(
+            valueNodes.get(1),
+            valueNodes.get(0),
+            valueNodes.get(3),
+            valueNodes.get(2));
+      default:
+        return valueNodes;
+    }
+  }
+
+  /**
+   * Takes a list of property values that belong to a border-radius property
+   * and flips them. If there is a slash in the values, the data is divided
+   * around the slash. Then for each section, flipCorners is called.
+   */
+  private List<CssValueNode> flipBorderRadius(List<CssValueNode> valueNodes) {
+
+    int count = 0, slashLocation = -1;
+    CssCompositeValueNode slashNode = null;
+    for (CssValueNode valueNode : valueNodes) {
+      if (isSlashNode(valueNode)) {
+        slashLocation = count;
+        slashNode = (CssCompositeValueNode) valueNode;
+        break;
+      }
+      ++count;
+    }
+
+    if (slashLocation == -1) { // No slash found, just one set of values
+      return flipCorners(valueNodes);
+    }
+
+    // The parser treats slashes as combinging the two values around the slash
+    // into one composite value node. This is not really the correct semantics
+    // for the border-radius properties, as the parser will treat
+    // "border-radius: 1px 2px / 5px 6px" as having three value nodes: the first
+    // one will be "1px", the second one the composite value "2px / 5px",
+    // and the third one "6px". We work in this unfortunate parser model here,
+    // first deconstructing and later reconstructing that tree.
+
+    List<CssValueNode> slashNodeValues = slashNode.getValues();
+
+    // Create a list of horizontal values and flip them
+    List<CssValueNode> horizontalValues = Lists.newArrayList();
+    horizontalValues.addAll(valueNodes.subList(0, slashLocation));
+    horizontalValues.add(slashNodeValues.get(0));
+    List<CssValueNode> newHorizontalValues = flipCorners(horizontalValues);
+
+    // Do the same for vertical values
+    List<CssValueNode> verticalValues = Lists.newArrayList();
+    verticalValues.add(slashNodeValues.get(1));
+    verticalValues.addAll(valueNodes.subList(slashLocation + 1,
+        valueNodes.size()));
+    List<CssValueNode> newVerticalValues = flipCorners(verticalValues);
+
+    // Create a new slash node
+    List<CssValueNode> newSlashNodeValues = Lists.newArrayList();
+    newSlashNodeValues.add(newHorizontalValues.get(
+        newHorizontalValues.size() - 1));
+    newSlashNodeValues.add(newVerticalValues.get(0));
+    CssCompositeValueNode newSlashNode = new CssCompositeValueNode(
+      newSlashNodeValues,
+      CssCompositeValueNode.Operator.SLASH,
+      null
+    );
+
+    List<CssValueNode> newValueList = Lists.newArrayList();
+    newValueList.addAll(newHorizontalValues.subList(0,
+        newHorizontalValues.size() - 1));
+    newValueList.add(newSlashNode);
+    newValueList.addAll(newVerticalValues.subList(1, newVerticalValues.size()));
+
+    return newValueList;
+  }
+
+  /**
    * Takes the list of property values, validate them, then swap the second
    * and last values. So that 0 1 2 3 becomes 0 3 2 1.
+   *
+   * That is unless the length of the list is not four, it belongs to a property
+   * that shouldn't be flipped, or it's border-radius, where it will be
+   * specially handled.
+   *
+   * TODO(roozbeh): Add explicit flipping for 'border-image*' and '*-shadow'
+   * properties.
    */
-  private List<CssValueNode> flipFourNumericValues(
-      List<CssValueNode> valueNodes) {
-    if (valueNodes.size() != 4) {
+  private List<CssValueNode> flipNumericValues(
+      List<CssValueNode> valueNodes,
+      String propertyName) {
+
+    if (BORDER_RADIUS_PROPERTIES.contains(propertyName)) {
+      return flipBorderRadius(valueNodes);
+    } else if (valueNodes.size() != 4 ||
+        !FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP.contains(propertyName)) {
       return valueNodes;
     }
 
     int count = 0;
     CssValueNode secondValueNode = null;
-    CssValueNode lastValueNode = null;
+    CssValueNode fourthValueNode = null;
     for (CssValueNode valueNode : valueNodes) {
       if (isNumericNode(valueNode)
-          || isAutoOrInheritOrTransparent(valueNode.toString())
+          || isCssLiteralNode(valueNode)
           || isCssHexColorNode(valueNode)
           || shouldFlipConstantReference(valueNode)) {
         switch (count) {
           case 3:
-            lastValueNode = valueNode.deepCopy();
+            fourthValueNode = valueNode.deepCopy();
             break;
           case 1:
             secondValueNode = valueNode.deepCopy();
@@ -360,7 +510,7 @@ public class BiDiFlipper extends DefaultTreeVisitor
     List<CssValueNode> newValueList = Lists.newArrayList();
     for (CssValueNode valueNode : valueNodes) {
       if (1 == count) {
-        newValueList.add(lastValueNode);
+        newValueList.add(fourthValueNode);
       } else if (3 == count) {
         newValueList.add(secondValueNode);
       } else {
@@ -541,7 +691,7 @@ public class BiDiFlipper extends DefaultTreeVisitor
     }
     if (valueNodes.size() != 0) {
       newDeclarationNode.setPropertyValue(new CssPropertyValueNode(
-          flipFourNumericValues(valueNodes)));
+          flipNumericValues(valueNodes, propertyNode.getPropertyName())));
     } else {
       newDeclarationNode.setPropertyValue(propertyValueNode.deepCopy());
     }

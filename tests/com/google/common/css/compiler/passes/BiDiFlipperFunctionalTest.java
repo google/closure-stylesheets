@@ -440,6 +440,236 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         "[[foo]{[background:[[center][5%]];]}]");
   }
 
+ /**
+   * Tests that
+   *   box-shadow: 1px 2px 3px 4px
+   * is not flipped.
+   */
+  public void test31() {
+    testTreeConstruction(
+        "foo { box-shadow: 1px 2px 3px 4px; }",
+        "[[foo]{[box-shadow:[[1px][2px][3px][4px]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   text-shadow: 1px 2px 3px 4px
+   * is not flipped.
+   */
+  public void test32() {
+    testTreeConstruction(
+        "foo { text-shadow: 1px 2px 3px 4px; }",
+        "[[foo]{[text-shadow:[[1px][2px][3px][4px]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   border-radius: 1px
+   * is not flipped.
+   */
+  public void test33() {
+    testTreeConstruction(
+        "foo { border-radius: 1px; }",
+        "[[foo]{[border-radius:[[1px]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   border-radius: 1px / 5px
+   * is not flipped.
+   */
+  public void test34() {
+    testTreeConstruction(
+        "foo { border-radius: 1px / 5px; }",
+        "[[foo]{[border-radius:[[[1px]/[5px]]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   border-radius: 1px 2px
+   * is flipped to
+   *   border-radius: 2px 1px
+   */
+  public void test35() {
+    testTreeConstruction(
+        "foo { border-radius: 1px 2px; }",
+        "[[foo]{[border-radius:[[2px][1px]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   border-radius: 1px 2px 3px
+   * is flipped to
+   *   border-radius: 2px 1px 2px 3px
+   */
+  public void test36() {
+    testTreeConstruction(
+        "foo { border-radius: 1px 2px 3px; }",
+        "[[foo]{[border-radius:[[2px][1px][2px][3px]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   border-radius: 1px 2px 3px 4px
+   * is flipped to
+   *   border-radius: 2px 1px 4px 3px
+   */
+  public void test37() {
+    testTreeConstruction(
+        "foo { border-radius: 1px 2px 3px 4px; }",
+        "[[foo]{[border-radius:[[2px][1px][4px][3px]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   border-radius: 1px 2px 3px 4px / 5px 6px 7px 8px
+   * is flipped to
+   *   border-radius: 2px 1px 4px 3px / 6px 5px 8px 7px
+   */
+  public void test38() {
+    testTreeConstruction(
+        "foo { border-radius: 1px 2px 3px 4px / 5px 6px 7px 8px; }",
+        "[[foo]{[border-radius:" +
+        "[[2px][1px][4px][[3px]/[6px]][5px][8px][7px]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   border-radius: 1px / 5px 6px 7px 8px
+   * is flipped to
+   *   border-radius: 1px / 6px 5px 8px 7px
+   */
+  public void test39() {
+    testTreeConstruction(
+        "foo { border-radius: 1px / 5px 6px 7px 8px; }",
+        "[[foo]{[border-radius:[[[1px]/[6px]][5px][8px][7px]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   border-radius: 1px 2px 3px / 5px 6px
+   * is flipped to
+   *   border-radius: 2px 1px 2px 3px / 6px 5px
+   */
+  public void test40() {
+    testTreeConstruction(
+        "foo { border-radius: 1px 2px 3px / 5px 6px; }",
+        "[[foo]{[border-radius:[[2px][1px][2px][[3px]/[6px]][5px]];]}]");
+  }
+
+ /**
+   * Tests that
+   *   -webkit-border-radius: 1px 2px 3px / 5px 6px
+   * is flipped to
+   *   -webkit-border-radius: 2px 1px 2px 3px / 6px 5px
+   */
+  public void test41() {
+    testTreeConstruction(
+        "foo { -webkit-border-radius: 1px 2px 3px / 5px 6px; }",
+        "[[foo]{[-webkit-border-radius:[[2px][1px][2px][[3px]/[6px]][5px]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   border-color: red yellow green blue
+   * is flipped to
+   *   border-color: red blue green yellow
+   */
+  public void test42() {
+    testTreeConstruction(
+        "foo { border-color: red yellow green blue; }",
+        "[[foo]{[border-color:[[red][blue][green][yellow]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   border-width: thin medium thick 2px
+   * is flipped to
+   *   border-width: thin 2px thick medium
+   */
+  public void test43() {
+    testTreeConstruction(
+        "foo { border-width: thin medium thick 2px; }",
+        "[[foo]{[border-width:[[thin][2px][thick][medium]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   border-image-slice: 5% 10% 15% 20%
+   * is not flipped.
+   */
+  public void test44() {
+    testTreeConstruction(
+        "foo { border-image-slice: 5% 10% 15% 20%; }",
+        "[[foo]{[border-image-slice:[[5%][10%][15%][20%]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   border-image-slice: 5% 10% 15% 20% fill
+   * is not flipped.
+   */
+  public void test45() {
+    testTreeConstruction(
+        "foo { border-image-slice: 5% 10% 15% 20% fill; }",
+        "[[foo]{[border-image-slice:[[5%][10%][15%][20%][fill]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   border-image-slice: 5% 10% 15% fill
+   * is not flipped.
+   */
+  public void test46() {
+    testTreeConstruction(
+        "foo { border-image-slice: 5% 10% 15% fill; }",
+        "[[foo]{[border-image-slice:[[5%][10%][15%][fill]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   border-image-slice: 5% 10% fill
+   * is not flipped.
+   */
+  public void test47() {
+    testTreeConstruction(
+        "foo { border-image-slice: 5% 10% fill; }",
+        "[[foo]{[border-image-slice:[[5%][10%][fill]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   border-image-slice: 5% fill
+   * is not flipped.
+   */
+  public void test48() {
+    testTreeConstruction(
+        "foo { border-image-slice: 5% fill; }",
+        "[[foo]{[border-image-slice:[[5%][fill]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   border-image-outset: 1 2 3 4
+   * is not flipped.
+   */
+  public void test49() {
+    testTreeConstruction(
+        "foo { border-image-outset: 1 2 3 4; }",
+        "[[foo]{[border-image-outset:[[1][2][3][4]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   border-image-width: 1px auto 0 3%
+   * is not flipped.
+   */
+  public void test50() {
+    testTreeConstruction(
+        "foo { border-image-width: 1px auto 0 3%; }",
+        "[[foo]{[border-image-width:[[1px][auto][0][3%]];]}]");
+  }
+
   @Override
   protected void runPass() {
     BiDiFlipper pass
