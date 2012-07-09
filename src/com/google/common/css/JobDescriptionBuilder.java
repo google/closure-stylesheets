@@ -80,8 +80,8 @@ public class JobDescriptionBuilder {
     this.allowUnrecognizedProperties = false;
     this.allowedUnrecognizedProperties = Sets.newHashSet();
     this.vendor = null;
-    this.allowKeyframes = false;
-    this.allowWebkitKeyframes = false;
+    this.allowKeyframes = true;
+    this.allowWebkitKeyframes = true;
     this.processDependencies = false;
     this.cssRenamingPrefix = "";
     this.excludedClassesFromRenaming = Lists.newArrayList();
