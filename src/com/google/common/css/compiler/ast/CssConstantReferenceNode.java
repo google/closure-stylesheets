@@ -67,14 +67,6 @@ public class CssConstantReferenceNode extends CssValueNode {
     return new CssConstantReferenceNode(this);
   }
 
-  public boolean equals(CssConstantReferenceNode node) {
-    boolean equalValues = this.getValue().equals(node.getValue());
-    if (this.scope == null || node.scope == null) {
-      return this.scope == null && node.scope == null && equalValues;
-    }
-    return equalValues && this.scope.equals(node.scope);
-  }
-
   /**
    * Returns the scope of the reference. If the reference belongs to a global
    * definition, the scope is the 'global scope'. If the reference belongs to
