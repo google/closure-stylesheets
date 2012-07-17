@@ -115,7 +115,9 @@ public class DefaultVisitControllerTest extends TestCase {
     CssPseudoClassNode pseudoClass = new CssPseudoClassNode("foo", null);
     CssPseudoElementNode pseudoElement = new CssPseudoElementNode("bar", null);
     CssAttributeSelectorNode attrSelector = new CssAttributeSelectorNode(
-        MatchType.EXACT, "hreflang", "\"en\"", null);
+        MatchType.EXACT, "hreflang",
+        new CssStringNode(
+            CssStringNode.Type.DOUBLE_QUOTED_STRING, "en"), null);
 
     CssSelectorNode selector = new CssSelectorNode("name", null);
     selector.getRefiners().addChildToBack(classSelector);

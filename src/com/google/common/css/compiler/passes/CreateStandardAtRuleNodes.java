@@ -36,6 +36,7 @@ import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssPageRuleNode;
 import com.google.common.css.compiler.ast.CssPageSelectorNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
+import com.google.common.css.compiler.ast.CssStringNode;
 import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
@@ -131,7 +132,7 @@ public class CreateStandardAtRuleNodes extends DefaultTreeVisitor implements Css
         return false;
       }
       CssValueNode param = params.get(0);
-      if (!(checkIfString(param) || checkIfUri(param))) {
+      if (!((param instanceof CssStringNode) || checkIfUri(param))) {
         reportError("@" + importName + "'s first parameter has to be a string or an url", node);
         return false;
       }
@@ -394,19 +395,6 @@ public class CreateStandardAtRuleNodes extends DefaultTreeVisitor implements Css
     fontFace.setSourceCodeLocation(node.getSourceCodeLocation());
     visitController.replaceCurrentBlockChildWith(
         Lists.newArrayList(fontFace), true /* visitTheReplacementNodes */);
-  }
-
-  private boolean checkIfString(CssValueNode node) {
-    if (!(node instanceof CssLiteralNode)) {
-      return false;
-    }
-    CssLiteralNode literal = (CssLiteralNode)node;
-    String value = literal.getValue();
-    if (value.startsWith("\"") && value.endsWith("\"")
-        || value.startsWith("'") && value.endsWith("'")) {
-      return true;
-    }
-    return false;
   }
 
   private boolean checkIfUri(CssValueNode node) {
