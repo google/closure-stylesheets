@@ -596,6 +596,7 @@ public final class Property {
         builder("-webkit-min-logical-width"),
         builder("-webkit-nbsp-mode"),
         builder("-webkit-opacity"),
+        builder("-webkit-overflow-scrolling"),
         builder("-webkit-padding-after"),
         builder("-webkit-padding-before"),
         builder("-webkit-padding-end"),
