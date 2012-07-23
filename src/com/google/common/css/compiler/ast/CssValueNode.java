@@ -136,9 +136,11 @@ public abstract class CssValueNode extends CssNode {
             } while (expanded.size() != 1
                      || !expanded.get(0).equals(unexpanded));
           }
+          @Override
           public boolean hasNext() {
             return !q.isEmpty();
           }
+          @Override
           public CssValueNode next() {
             advance();
             return q.remove();
