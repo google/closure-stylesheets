@@ -17,11 +17,11 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,15 +35,11 @@ import java.util.Map;
 public class ConstantDefinitions {
   private final Map<String, CssDefinitionNode> constants = Maps.newHashMap();
 
-  private final Multimap<String, CssDefinitionNode> constantsMultimap =
+  private final ListMultimap<String, CssDefinitionNode> constantsMultimap =
       LinkedListMultimap.create();
 
   Map<String, CssDefinitionNode> getConstants() {
     return constants;
-  }
-
-  Multimap<String, CssDefinitionNode> getConstantMultimap() {
-    return constantsMultimap;
   }
 
   /**
@@ -62,7 +58,7 @@ public class ConstantDefinitions {
    * @return collection of definition node or empty collection if the
    * constant is not defined
    */
-  public Collection<CssDefinitionNode> getConstantDefinitions(String constant) {
+  public List<CssDefinitionNode> getConstantDefinitions(String constant) {
     return constantsMultimap.get(constant);
   }
 
