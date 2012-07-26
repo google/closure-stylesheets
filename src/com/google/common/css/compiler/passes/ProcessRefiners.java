@@ -45,7 +45,7 @@ public class ProcessRefiners extends DefaultTreeVisitor
     "and b are (signed) integers that can be omitted";
   @VisibleForTesting
   static final String INVALID_NOT_SELECTOR_ERROR_MESSAGE =
-    "a :not selcetor and pseudo-elements ('::') are not allowed inside of" +
+    "a :not selector and pseudo-elements ('::') are not allowed inside of" +
     " a :not";
   @VisibleForTesting
   static final String NOT_LANG_ERROR_MESSAGE =
