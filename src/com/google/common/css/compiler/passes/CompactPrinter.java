@@ -38,6 +38,7 @@ import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssNodesListNode;
+import com.google.common.css.compiler.ast.CssNumericNode;
 import com.google.common.css.compiler.ast.CssPageRuleNode;
 import com.google.common.css.compiler.ast.CssPageSelectorNode;
 import com.google.common.css.compiler.ast.CssPriorityNode;
@@ -500,6 +501,16 @@ public class CompactPrinter extends DefaultTreeVisitor
     if (node instanceof CssStringNode) {
       CssStringNode s = (CssStringNode) node;
       sb.append(s.toString(CssStringNode.HTML_ESCAPER));
+      return;
+    }
+    if (node instanceof CssNumericNode) {
+      // TODO(user): Consider introducing
+      //   void CssNode.appendTo(Appendable sb)
+      // or
+      //   CharSequence CssNode.asCharSequence
+      CssNumericNode n = (CssNumericNode) node;
+      sb.append(n.getNumericPart());
+      sb.append(n.getUnit());
       return;
     }
     sb.append(node.toString());
