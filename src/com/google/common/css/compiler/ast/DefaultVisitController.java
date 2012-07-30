@@ -18,11 +18,11 @@ package com.google.common.css.compiler.ast;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Queues;
 import com.google.common.css.compiler.ast.CssCompositeValueNode.Operator;
 
+import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -1783,10 +1783,10 @@ class DefaultVisitController implements MutatingVisitController {
   // CssTreeBuilder too.
   @VisibleForTesting
   static class StateStack {
-    LinkedList<VisitState<? extends CssNode>> stack = Lists.newLinkedList();
+    Deque<VisitState<? extends CssNode>> stack = Queues.newArrayDeque();
 
     VisitState<? extends CssNode> getTop() {
-      return stack.getFirst();
+      return stack.peek();
     }
 
     void push(VisitState<? extends CssNode> state) {
