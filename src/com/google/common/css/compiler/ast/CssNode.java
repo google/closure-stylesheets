@@ -174,6 +174,12 @@ public abstract class CssNode {
    */
   final void becomeParentForNodes(List<? extends CssNode> children) {
     Preconditions.checkNotNull(children);
+    if (children.size() == 0) {
+      // otherwise we'll spend a lot of CPU collecting garbage due to
+      // the empty iterators we use below (as of June 2012, javac
+      // does not optimize the Collection case of enh-for).
+      return;
+    }
     for (CssNode child : children) {
       becomeParentForNode(child);
     }
