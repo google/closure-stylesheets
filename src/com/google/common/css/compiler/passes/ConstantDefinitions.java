@@ -19,6 +19,7 @@ package com.google.common.css.compiler.passes;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 
 import java.util.List;
@@ -40,6 +41,10 @@ public class ConstantDefinitions {
 
   Map<String, CssDefinitionNode> getConstants() {
     return constants;
+  }
+
+  public Multimap<String, CssDefinitionNode> getConstantMultimap() {
+    return constantsMultimap;
   }
 
   /**
