@@ -21,7 +21,9 @@ package com.google.common.css.compiler.ast;
  *
  * @author fbenz@google.com (Florian Benz)
  */
-public class CssKeyframesNode extends CssAtRuleNode {
+public class CssKeyframesNode extends CssAtRuleNode implements ChunkAware {
+  /** The chunk this selector belongs to. */
+  private Object chunk;
 
   public CssKeyframesNode(CssLiteralNode name) {
     super(Type.UNKNOWN_BLOCK, name, new CssBlockNode());
@@ -62,5 +64,15 @@ public class CssKeyframesNode extends CssAtRuleNode {
   public CssBlockNode getBlock() {
     // The type is ensured by the constructor.
     return (CssBlockNode) super.getBlock();
+  }
+
+  @Override
+  public void setChunk(Object chunk) {
+    this.chunk = chunk;
+  }
+
+  @Override
+  public Object getChunk() {
+    return chunk;
   }
 }

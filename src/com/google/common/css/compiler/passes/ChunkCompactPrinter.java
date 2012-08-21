@@ -20,6 +20,7 @@ import com.google.common.css.compiler.ast.CssAttributeSelectorNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
 import com.google.common.css.compiler.ast.CssCombinatorNode;
 import com.google.common.css.compiler.ast.CssIdSelectorNode;
+import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssPseudoClassNode;
 import com.google.common.css.compiler.ast.CssPseudoElementNode;
@@ -101,6 +102,22 @@ public class ChunkCompactPrinter<T> extends CompactPrinter {
   public void leaveMediaRule(CssMediaRuleNode media) {
     if (printSelector) {
       super.leaveMediaRule(media);
+    }
+  }
+
+  @Override
+  public boolean enterKeyframesRule(CssKeyframesNode keyframes) {
+    printSelector = chunk.equals(keyframes.getChunk());
+    if (!printSelector) {
+      return false;
+    }
+    return super.enterKeyframesRule(keyframes);
+  }
+
+  @Override
+  public void leaveKeyframesRule(CssKeyframesNode keyframes) {
+    if (printSelector) {
+      super.leaveKeyframesRule(keyframes);
     }
   }
 

@@ -42,7 +42,11 @@ public abstract class AbstractCompactPrinterTest extends FunctionalTestBase {
   }
 
   protected CssTree parseStyleSheet(String sourceCode) {
-    parseAndBuildTree(sourceCode);
+    // NOTE(reinerp): We don't use the old parser, because it can't parse
+    // @keyframes rules correctly: it expects the animation name to be enclosed
+    // in double-quotes - see com.google.common.css.CssParser.scanKeyframes.
+    buildTreeWithNewParser(sourceCode);
+    runPassesOnNewTree();
     return newTree;
   }
 

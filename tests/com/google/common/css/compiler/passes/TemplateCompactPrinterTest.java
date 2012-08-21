@@ -42,7 +42,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
         rS + ".bar{}" + rE
         + rS + "b{}" + rE
         + rS + "b#b{}" + rE
-        + rS + "b>i+em{}" + rE);
+        + rS + "b>i+em{}" + rE
+        + "@keyframes my-animation{" + rS + "0%{}" + rE + "}");
     assertTemplateOutput("baz",
         rS + "hr,i{}" + rE
         + rS + "i{}" + rE

@@ -21,6 +21,7 @@ import com.google.common.css.compiler.ast.ChunkAware;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
+import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
@@ -73,6 +74,12 @@ public class MapChunkAwareNodesToChunk<T> extends DefaultTreeVisitor
   @Override
   public boolean enterMediaRule(CssMediaRuleNode media) {
     media.setChunk(getChunk(media));
+    return true;
+  }
+
+  @Override
+  public boolean enterKeyframesRule(CssKeyframesNode keyframes) {
+    keyframes.setChunk(getChunk(keyframes));
     return true;
   }
 

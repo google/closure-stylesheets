@@ -18,6 +18,7 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
+import com.google.common.css.compiler.ast.CssKeyframeRulesetNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
@@ -43,6 +44,10 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
 
   public static final char RULE_START = '\u0118';
   public static final char RULE_END = '\u0119';
+
+  // TODO(reinerp): Add delimiters RULE_GROUP_START, RULE_GROUP_END
+  // for @keyframes and @media rule groups, so that the TemplateStylesheetLinker
+  // can drop empty @keyframes{} clauses.
 
   /**
    * Whether currently visited rule has any selectors that belong to the
@@ -98,6 +103,23 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
       sb.append(RULE_END);
     }
     super.leaveRuleset(ruleset);
+  }
+
+  @Override
+  public boolean enterKeyframeRuleset(CssKeyframeRulesetNode ruleset) {
+    printRule = super.enterKeyframeRuleset(ruleset);
+    if (printRule) {
+      sb.append(RULE_START);
+    }
+    return printRule;
+  }
+
+  @Override
+  public void leaveKeyframeRuleset(CssKeyframeRulesetNode ruleset) {
+    if (printRule) {
+      sb.append(RULE_END);
+    }
+    super.leaveKeyframeRuleset(ruleset);
   }
 
   @Override

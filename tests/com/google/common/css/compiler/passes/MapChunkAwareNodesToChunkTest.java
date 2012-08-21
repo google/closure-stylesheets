@@ -21,7 +21,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
+import com.google.common.css.compiler.ast.CssFunctionNode;
+import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
+import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 
@@ -74,6 +77,12 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
   protected CssDefinitionNode def1a;
   protected CssDefinitionNode def2a;
 
+  protected CssFunctionNode fun1b;
+
+  protected CssMediaRuleNode media3a;
+
+  protected CssKeyframesNode keyframes3b;
+
   @Override
   protected void setUp() throws Exception {
     super.setUp();
@@ -92,6 +101,8 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
     SourceCodeLocation location1b =
       new SourceCodeLocation(sourceCode1, 10, 2, 2, 11, 2, 2);
     sel1b = new CssSelectorNode("b", location1b);
+    fun1b =
+        new CssFunctionNode(CssFunctionNode.Function.byName("url"), location1b);
 
     SourceCode sourceCode2 = new SourceCode(F2, null);
 
@@ -106,10 +117,14 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
     SourceCodeLocation location3a =
         new SourceCodeLocation(sourceCode3, 1, 1, 1, 2, 1, 1);
     sel3a = new CssSelectorNode("a", location3a);
+    media3a = new CssMediaRuleNode();
+    media3a.setSourceCodeLocation(location3a);
 
     SourceCodeLocation location3b =
         new SourceCodeLocation(sourceCode3, 1, 1, 1, 2, 1, 1);
     sel3b = new CssSelectorNode("b", location3b);
+    keyframes3b = new CssKeyframesNode(new CssLiteralNode("keyframes"));
+    keyframes3b.setSourceCodeLocation(location3b);
 
     SourceCodeLocation location3c =
       new SourceCodeLocation(sourceCode3, 10, 2, 2, 11, 2, 2);
@@ -131,9 +146,18 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
   public void testMapToChunk() {
     setupEnterSelector();
     setupEnterDefinition();
+    setupEnterFunctionNode();
+    setupEnterMediaRule();
+    setupEnterKeyframesRule();
 
     checkEnterSelector();
     checkEnterDefinition();
+
+    // Only one assert per node type, so these aren't put into their own
+    // functions.
+    assertEquals(CA, fun1b.getChunk());
+    assertEquals(CB, media3a.getChunk());
+    assertEquals(CB, keyframes3b.getChunk());
   }
 
   public void testMissingFileToChunkMapping() {
@@ -199,5 +223,20 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
 
     pass.enterDefinition(def1a);
     pass.enterDefinition(def2a);
+  }
+
+  private void setupEnterFunctionNode() {
+    assertNull(fun1b.getChunk());
+    pass.enterFunctionNode(fun1b);
+  }
+
+  private void setupEnterMediaRule() {
+    assertNull(media3a.getChunk());
+    pass.enterMediaRule(media3a);
+  }
+
+  private void setupEnterKeyframesRule() {
+    assertNull(keyframes3b.getChunk());
+    pass.enterKeyframesRule(keyframes3b);
   }
 }

@@ -18,6 +18,7 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
@@ -43,7 +44,8 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
         "a i{}" +
         "b > i + em, a#a b {}" +
         "b + i, a+i {}" +
-        "@media print { foo {} }";
+        "@media print { foo {} }" +
+        "@keyframes my-animation { 0% {} }";
 
     Map<String, String> selectorToChunk =
       new ImmutableMap.Builder<String, String>()
@@ -60,6 +62,8 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
       .put("i", "baz")
       .put("a i", "baz")
       .put("a+i", "baz")
+      .put("my-animation", "bar")
+      .put("print", "foo")
       .build();
 
     parseStyleSheet(sourceCode);
@@ -70,7 +74,8 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
     setupTestTree();
     assertChunkOutput("foo", "foo{}a{}a#a{}a#a b{}b+i{}@media print{foo{}}",
                       newTree);
-    assertChunkOutput("bar", ".bar{}b{}b#b{}b>i+em{}", newTree);
+    assertChunkOutput(
+        "bar", ".bar{}b{}b#b{}b>i+em{}@keyframes my-animation{0%{}}", newTree);
     assertChunkOutput("baz", "hr,i{}i{}hr{}i,hr{}a i{}a+i{}", newTree);
   }
 
@@ -102,13 +107,6 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
     private String topSelectorChunk;
 
     /**
-     * The current media rule, if any. This test helper pass
-     * assumes they can't nest.
-     */
-    private CssMediaRuleNode currentMediaRule;
-
-
-    /**
      * Creates the helper pass for a given CSS AST and selector to chunk
      * mapping.
      *
@@ -130,10 +128,6 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
             PassUtil.printSelector(selector));
       }
       selector.setChunk(topSelectorChunk);
-      if (currentMediaRule != null) {
-        // Use the last selector in a media rule to decide its chunk
-        currentMediaRule.setChunk(topSelectorChunk);
-      }
       return true;
     }
 
@@ -147,13 +141,16 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
 
     @Override
     public boolean enterMediaRule(CssMediaRuleNode media) {
-      currentMediaRule = media;
+      media.setChunk(
+          selectorToChunkMap.get(media.getParameters().get(0).getValue()));
       return true;
     }
 
     @Override
-    public void leaveMediaRule(CssMediaRuleNode media) {
-      currentMediaRule = null;
+    public boolean enterKeyframesRule(CssKeyframesNode keyframes) {
+      keyframes.setChunk(
+          selectorToChunkMap.get(keyframes.getParameters().get(0).getValue()));
+      return true;
     }
 
     @Override
