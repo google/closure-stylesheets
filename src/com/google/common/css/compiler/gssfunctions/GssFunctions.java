@@ -217,7 +217,8 @@ public class GssFunctions {
         String imgColor, String imgSizeWithUnits, String cornerId,
         String browserInfo)
         throws GssFunctionException {
-      Size sizeWithUnits = parseSize(imgSizeWithUnits);
+      Size sizeWithUnits = parseSize(imgSizeWithUnits,
+          /* isUnitOptional */ false);
       return roundedCornerBackground(imgColor, sizeWithUnits.size,
           sizeWithUnits.units, cornerId, browserInfo).toString();
     }
@@ -321,7 +322,8 @@ public class GssFunctions {
     protected String semiTransparentRoundedCornerImage(
         String imgColor, String imgSizeWithUnits, String cornerId,
         String alphaChannel) throws GssFunctionException {
-      Size sizeWithUnits = parseSize(imgSizeWithUnits);
+      Size sizeWithUnits = parseSize(imgSizeWithUnits,
+          /* isUnitOptional */ false);
       return semiTransparentRoundedCornerImage(imgColor, sizeWithUnits.size,
           sizeWithUnits.units, cornerId, alphaChannel).toString();
     }
@@ -911,6 +913,11 @@ public class GssFunctions {
     protected boolean isIdentityValue(double value) {
       return false;
     }
+
+    protected Size parseSize(String sizeWithUnits)
+        throws GssFunctionException {
+      return GssFunctions.parseSize(sizeWithUnits, /* isUnitOptional */ false);
+    }
   }
 
 
@@ -1004,6 +1011,24 @@ public class GssFunctions {
           overallUnit != null ? overallUnit : CssNumericNode.NO_UNITS,
           args.get(0).getSourceCodeLocation());
     }
+
+    @Override
+    public String getCallResultString(List<String> args)
+        throws GssFunctionException {
+      List<CssNumericNode> numericList = Lists.newArrayList();
+      for (String arg : args) {
+        Size sizeWithUnits = parseSize(arg);
+        numericList.add(
+            new CssNumericNode(sizeWithUnits.size, sizeWithUnits.units));
+      }
+      CssNumericNode result = calculate(numericList, null);
+      return result.getNumericPart() + result.getUnit();
+    }
+
+    @Override
+    protected Size parseSize(String size) throws GssFunctionException {
+      return GssFunctions.parseSize(size, /* isUnitOptional */ true);
+    }
   }
 
   /**
@@ -1023,7 +1048,7 @@ public class GssFunctions {
   }
 
   /**
-   * A {@link GssFunction} that returns the product of its arguments. Only the
+   * A {@link GssFunction} that returns the quotient of its arguments. Only the
    * first argument may have a unit.
    */
   public static class Div extends ScalarLeftAssociativeOperator {
@@ -1350,13 +1375,6 @@ public class GssFunctions {
   }
 
   private static void checkSize(String valueString, String unit,
-      ErrorManager errorManager, SourceCodeLocation location)
-      throws GssFunctionException {
-    checkSize(valueString, unit, errorManager, location,
-        false /* isUnitOptional */);
-  }
-
-  private static void checkSize(String valueString, String unit,
       ErrorManager errorManager, SourceCodeLocation location,
       boolean isUnitOptional) throws GssFunctionException {
     if (unit.equals(CssNumericNode.NO_UNITS)) {
@@ -1434,15 +1452,15 @@ public class GssFunctions {
     }
   }
 
-  private static Size parseSize(String sizeWithUnits)
+  private static Size parseSize(String sizeWithUnits, boolean isUnitOptional)
       throws GssFunctionException {
-
     int unitIndex = CharMatcher.JAVA_LETTER.indexIn(sizeWithUnits);
     String size = unitIndex > 0 ?
         sizeWithUnits.substring(0, unitIndex) : sizeWithUnits;
     String units = unitIndex > 0 ?
         sizeWithUnits.substring(unitIndex) : CssNumericNode.NO_UNITS;
-    checkSize(size, units, null /* errorManager */, null /* location */);
+    checkSize(size, units, null /* errorManager */, null /* location */,
+        isUnitOptional);
     return new Size(size, units);
   }
 }
