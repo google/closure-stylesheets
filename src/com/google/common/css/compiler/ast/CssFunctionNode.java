@@ -91,7 +91,11 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "-moz-linear-gradient",
           "-ms-linear-gradient",
           "-o-linear-gradient",
-          "-webkit-linear-gradient");
+          "-webkit-linear-gradient",
+
+          // Image set (proposal)
+          // http://lists.w3.org/Archives/Public/www-style/2012Feb/1103.html
+          "-webkit-image-set");
       ImmutableMap.Builder<String, Function> builder = ImmutableMap.builder();
       for (String functionName : recognizedCssFunctions) {
         builder.put(
