@@ -19,6 +19,7 @@ package com.google.common.css.compiler.passes;
 import com.google.common.css.compiler.ast.CssAttributeSelectorNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
 import com.google.common.css.compiler.ast.CssCombinatorNode;
+import com.google.common.css.compiler.ast.CssFontFaceNode;
 import com.google.common.css.compiler.ast.CssIdSelectorNode;
 import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
@@ -118,6 +119,22 @@ public class ChunkCompactPrinter<T> extends CompactPrinter {
   public void leaveKeyframesRule(CssKeyframesNode keyframes) {
     if (printSelector) {
       super.leaveKeyframesRule(keyframes);
+    }
+  }
+
+  @Override
+  public boolean enterFontFace(CssFontFaceNode cssFontFaceNode) {
+    printSelector = chunk.equals(cssFontFaceNode.getChunk());
+    if (!printSelector) {
+      return false;
+    }
+    return super.enterFontFace(cssFontFaceNode);
+  }
+
+  @Override
+  public void leaveFontFace(CssFontFaceNode cssFontFaceNode) {
+    if (printSelector) {
+      super.leaveFontFace(cssFontFaceNode);
     }
   }
 

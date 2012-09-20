@@ -18,6 +18,7 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
+import com.google.common.css.compiler.ast.CssFontFaceNode;
 import com.google.common.css.compiler.ast.CssKeyframeRulesetNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssTree;
@@ -103,6 +104,23 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
       sb.append(RULE_END);
     }
     super.leaveRuleset(ruleset);
+  }
+
+  @Override
+  public boolean enterFontFace(CssFontFaceNode cssFontFaceNode) {
+    printRule = super.enterFontFace(cssFontFaceNode);
+    if (printRule) {
+      sb.append(RULE_START);
+    }
+    return printRule;
+  }
+
+  @Override
+  public void leaveFontFace(CssFontFaceNode cssFontFaceNode) {
+    if (printRule) {
+      sb.append(RULE_END);
+    }
+    super.leaveFontFace(cssFontFaceNode);
   }
 
   @Override

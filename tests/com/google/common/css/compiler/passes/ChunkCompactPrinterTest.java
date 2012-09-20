@@ -18,6 +18,7 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssFontFaceNode;
 import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
@@ -45,7 +46,8 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
         "b > i + em, a#a b {}" +
         "b + i, a+i {}" +
         "@media print { foo {} }" +
-        "@keyframes my-animation { 0% {} }";
+        "@keyframes my-animation { 0% {} }" +
+        "@font-face { font-family:'Roboto'; }";
 
     Map<String, String> selectorToChunk =
       new ImmutableMap.Builder<String, String>()
@@ -72,8 +74,8 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
 
   public void testChunkOutput() {
     setupTestTree();
-    assertChunkOutput("foo", "foo{}a{}a#a{}a#a b{}b+i{}@media print{foo{}}",
-                      newTree);
+    assertChunkOutput("foo", "foo{}a{}a#a{}a#a b{}b+i{}@media print{foo{}}"
+        + "@font-face{font-family:'Roboto'}", newTree);
     assertChunkOutput(
         "bar", ".bar{}b{}b#b{}b>i+em{}@keyframes my-animation{0%{}}", newTree);
     assertChunkOutput("baz", "hr,i{}i{}hr{}i,hr{}a i{}a+i{}", newTree);
@@ -150,6 +152,12 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
     public boolean enterKeyframesRule(CssKeyframesNode keyframes) {
       keyframes.setChunk(
           selectorToChunkMap.get(keyframes.getParameters().get(0).getValue()));
+      return true;
+    }
+
+    @Override
+    public boolean enterFontFace(CssFontFaceNode cssFontFaceNode) {
+      cssFontFaceNode.setChunk("foo");
       return true;
     }
 

@@ -28,6 +28,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
   public void testChunkOutput() {
     char rS = TemplateCompactPrinter.RULE_START;
     char rE = TemplateCompactPrinter.RULE_END;
+    char dS = TemplateCompactPrinter.DECLARATION_START;
+    char dE = TemplateCompactPrinter.DECLARATION_END;
 
     setupTestTree();
 
@@ -37,7 +39,9 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
         + rS + "a#a{}" + rE
         + rS + "a#a b{}" + rE
         + rS + "b+i{}" + rE
-        + "@media print{" + rS + "foo{}" + rE + "}");
+        + "@media print{" + rS + "foo{}" + rE + "}"
+        + "@font-face" + rS + "{" + dS
+        + "font-family:'Roboto'" + dE + "}" + rE);
     assertTemplateOutput("bar",
         rS + ".bar{}" + rE
         + rS + "b{}" + rE

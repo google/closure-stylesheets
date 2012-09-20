@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.css.compiler.ast.ChunkAware;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
+import com.google.common.css.compiler.ast.CssFontFaceNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
@@ -80,6 +81,12 @@ public class MapChunkAwareNodesToChunk<T> extends DefaultTreeVisitor
   @Override
   public boolean enterKeyframesRule(CssKeyframesNode keyframes) {
     keyframes.setChunk(getChunk(keyframes));
+    return true;
+  }
+
+  @Override
+  public boolean enterFontFace(CssFontFaceNode fontFaceNode) {
+    fontFaceNode.setChunk(getChunk(fontFaceNode));
     return true;
   }
 
