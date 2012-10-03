@@ -385,6 +385,7 @@ public final class Property {
         builder("opacity"),
         builder("orphans"),
         builder("outline-color"),
+        builder("outline-offset"),
         builder("outline-style"),
         builder("outline-width"),
         builder("outline"),
