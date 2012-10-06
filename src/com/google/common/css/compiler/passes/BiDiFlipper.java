@@ -90,6 +90,14 @@ public class BiDiFlipper extends DefaultTreeVisitor
     .put("rtl", "ltr")
     .put("left", "right")
     .put("right", "left")
+    .put("e-resize", "w-resize")
+    .put("w-resize", "e-resize")
+    .put("ne-resize", "nw-resize")
+    .put("nw-resize", "ne-resize")
+    .put("nesw-resize", "nwse-resize")
+    .put("nwse-resize", "nesw-resize")
+    .put("se-resize", "sw-resize")
+    .put("sw-resize", "se-resize")
     .build();
 
   /**
@@ -124,27 +132,6 @@ public class BiDiFlipper extends DefaultTreeVisitor
     new ImmutableMap.Builder<String, String>()
     .put("-left-", "-right-")
     .put("-right-", "-left-")
-    .build();
-
-  /**
-   * Map with the "starts-with" substrings that can be flipped and their
-   * corresponding flipped value.
-   * For example, for
-   * <p>
-   *   cursor: e-resize
-   * <p>
-   * we need to match that the value "e-resize" starts with "e-" as there are
-   * other values that may contain it and they should not be flipped such as
-   * "ie-something: boo".
-   */
-  private static final Map<String, String> STARTS_WITH_MATCHING_FOR_FLIPPING =
-    new ImmutableMap.Builder<String, String>()
-    .put("e-", "w-")
-    .put("se-", "sw-")
-    .put("ne-", "nw-")
-    .put("w-", "e-")
-    .put("sw-", "se-")
-    .put("nw-", "ne-")
     .build();
 
   /**
@@ -540,12 +527,6 @@ public class BiDiFlipper extends DefaultTreeVisitor
     for (String s : CONTAINS_MATCHING_FOR_FLIPPING.keySet()) {
       if (value.indexOf(s) > 0) {
         value = value.replace(s, CONTAINS_MATCHING_FOR_FLIPPING.get(s));
-        break;
-      }
-    }
-    for (String s : STARTS_WITH_MATCHING_FOR_FLIPPING.keySet()) {
-      if (value.startsWith(s)) {
-        value = value.replace(s, STARTS_WITH_MATCHING_FOR_FLIPPING.get(s));
         break;
       }
     }

@@ -681,6 +681,30 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         "[[foo]{[background:[url()];]}]");
   }
 
+  /**
+   * Tests that
+   *     future-property: e-mail
+   * is not flipped.
+   */
+  public void test52() {
+    testTreeConstruction(
+        "foo { future-property: e-mail }",
+        "[[foo]{[future-property:[[e-mail]];]}]");
+  }
+
+
+  /**
+   * Tests that
+   *     cursor: nesw-resize
+   * is flipped to
+   *     cursor: nwse-resize
+   */
+  public void test53() {
+    testTreeConstruction(
+        "foo { cursor: nesw-resize }",
+        "[[foo]{[cursor:[[nwse-resize]];]}]");
+  }
+
   @Override
   protected void runPass() {
     BiDiFlipper pass
