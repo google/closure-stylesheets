@@ -670,6 +670,17 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         "[[foo]{[border-image-width:[[1px][auto][0][3%]];]}]");
   }
 
+  /**
+   * Tests that
+   *   background: url()
+   * is handled fine.
+   */
+  public void test51() {
+    testTreeConstruction(
+        "foo { background: url(); }",
+        "[[foo]{[background:[url()];]}]");
+  }
+
   @Override
   protected void runPass() {
     BiDiFlipper pass
