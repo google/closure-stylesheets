@@ -55,6 +55,7 @@ public class JobDescription {
   public final List<String> excludedClassesFromRenaming;
   public final GssFunctionMapProvider gssFunctionMapProvider;
   public final SubstitutionMapProvider cssSubstitutionMapProvider;
+  public final OutputRenamingMapFormat outputRenamingMapFormat;
 
   static final String CONDITION_FOR_LTR = "GSS_LTR";
   static final String CONDITION_FOR_RTL = "GSS_RTL";
@@ -113,7 +114,8 @@ public class JobDescription {
       boolean processDependencies, Set<String> allowedAtRules,
       String cssRenamingPrefix, List<String> excludedClassesFromRenaming,
       GssFunctionMapProvider gssFunctionMapProvider,
-      SubstitutionMapProvider cssSubstitutionMapProvider) {
+      SubstitutionMapProvider cssSubstitutionMapProvider,
+      OutputRenamingMapFormat outputRenamingMapFormat) {
     Preconditions.checkArgument(!inputs.contains(null));
     Preconditions.checkNotNull(outputFormat);
     Preconditions.checkNotNull(inputOrientation);
@@ -150,6 +152,7 @@ public class JobDescription {
         ImmutableList.copyOf(excludedClassesFromRenaming);
     this.gssFunctionMapProvider = gssFunctionMapProvider;
     this.cssSubstitutionMapProvider = cssSubstitutionMapProvider;
+    this.outputRenamingMapFormat = outputRenamingMapFormat;
   }
 
   /**

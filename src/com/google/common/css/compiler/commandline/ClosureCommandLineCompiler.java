@@ -18,7 +18,6 @@ package com.google.common.css.compiler.commandline;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.css.AbstractCommandLineCompiler;
 import com.google.common.css.DefaultExitCodeHandler;
@@ -28,6 +27,7 @@ import com.google.common.css.JobDescription;
 import com.google.common.css.JobDescription.InputOrientation;
 import com.google.common.css.JobDescription.OutputOrientation;
 import com.google.common.css.JobDescriptionBuilder;
+import com.google.common.css.OutputRenamingMapFormat;
 import com.google.common.css.SourceCode;
 import com.google.common.css.Vendor;
 import com.google.common.css.compiler.ast.ErrorManager;
@@ -45,7 +45,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -57,13 +56,9 @@ import javax.annotation.Nullable;
  */
 public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
 
-  private final OutputInfo outputInfo;
-
   protected ClosureCommandLineCompiler(JobDescription job,
-      ExitCodeHandler exitCodeHandler, ErrorManager errorManager,
-      OutputInfo outputInfo) {
+      ExitCodeHandler exitCodeHandler, ErrorManager errorManager) {
     super(job, exitCodeHandler, errorManager);
-    this.outputInfo = outputInfo;
   }
 
   private static class Flags {
@@ -203,6 +198,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setEliminateDeadStyles(true);
       builder.setCssSubstitutionMapProvider(renamingType
           .getCssSubstitutionMapProvider());
+      builder.setOutputRenamingMapFormat(outputRenamingMapFormat);
 
       GssFunctionMapProvider gssFunctionMapProvider =
           getGssFunctionMapProviderForName(gssFunctionMapProviderClassName);
@@ -229,8 +225,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     private OutputInfo createOutputInfo() {
       return new OutputInfo(
           (outputFile == null) ? null : new File(outputFile),
-          (renameFile == null) ? null : new File(renameFile),
-          outputRenamingMapFormat);
+          (renameFile == null) ? null : new File(renameFile));
     }
   }
 
@@ -273,14 +268,10 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
   private static class OutputInfo {
     public final @Nullable File outputFile;
     public final @Nullable File renameFile;
-    public final OutputRenamingMapFormat outputRenamingMapFormat;
 
-    private OutputInfo(File outputFile, File renameFile,
-        OutputRenamingMapFormat outputRenamingMapFormat) {
-      Preconditions.checkNotNull(outputRenamingMapFormat);
+    private OutputInfo(File outputFile, File renameFile) {
       this.outputFile = outputFile;
       this.renameFile = renameFile;
-      this.outputRenamingMapFormat = outputRenamingMapFormat;
     }
   }
 
@@ -289,7 +280,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     CompilerErrorManager errorManager = new CompilerErrorManager();
 
     ClosureCommandLineCompiler compiler = new ClosureCommandLineCompiler(
-        job, exitCodeHandler, errorManager, outputInfo);
+        job, exitCodeHandler, errorManager);
 
     String compilerOutput = compiler.execute(outputInfo.renameFile);
 
@@ -303,13 +294,6 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
             exitCodeHandler);
       }
     }
-  }
-
-  @Override
-  protected void writeRenamingMap(Map<String, String> renamingMap,
-      PrintWriter renamingMapWriter)  {
-    this.outputInfo.outputRenamingMapFormat.writeRenamingMap(renamingMap,
-        renamingMapWriter);
   }
 
   /**

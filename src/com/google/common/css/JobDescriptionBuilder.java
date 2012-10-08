@@ -59,6 +59,7 @@ public class JobDescriptionBuilder {
   private List<String> excludedClassesFromRenaming;
   private GssFunctionMapProvider gssFunctionMapProvider;
   private SubstitutionMapProvider cssSubstitutionMapProvider;
+  private OutputRenamingMapFormat outputRenamingMapFormat;
 
   private JobDescription job = null;
 
@@ -87,6 +88,7 @@ public class JobDescriptionBuilder {
     this.excludedClassesFromRenaming = Lists.newArrayList();
     this.gssFunctionMapProvider = null;
     this.cssSubstitutionMapProvider = null;
+    this.outputRenamingMapFormat = OutputRenamingMapFormat.JSCOMP_VARIABLE_MAP;
   }
 
   public JobDescriptionBuilder copyFrom(JobDescription jobToCopy) {
@@ -116,6 +118,7 @@ public class JobDescriptionBuilder {
         ImmutableList.copyOf(jobToCopy.excludedClassesFromRenaming));
     this.gssFunctionMapProvider = jobToCopy.gssFunctionMapProvider;
     this.cssSubstitutionMapProvider = jobToCopy.cssSubstitutionMapProvider;
+    this.outputRenamingMapFormat = jobToCopy.outputRenamingMapFormat;
     return this;
   }
 
@@ -354,6 +357,13 @@ public class JobDescriptionBuilder {
     return this;
   }
 
+  public JobDescriptionBuilder setOutputRenamingMapFormat(
+      OutputRenamingMapFormat format) {
+    checkJobIsNotAlreadyCreated();
+    this.outputRenamingMapFormat = format;
+    return this;
+  }
+
 
   public JobDescription getJobDescription() {
     if (job != null) {
@@ -370,7 +380,8 @@ public class JobDescriptionBuilder {
         allowUnrecognizedProperties, allowedUnrecognizedProperties, vendor,
         allowKeyframes, allowWebkitKeyframes, processDependencies,
         allowedAtRules, cssRenamingPrefix, excludedClassesFromRenaming,
-        gssFunctionMapProvider, cssSubstitutionMapProvider);
+        gssFunctionMapProvider, cssSubstitutionMapProvider,
+        outputRenamingMapFormat);
     return job;
   }
 }

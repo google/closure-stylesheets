@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.common.css.compiler.commandline;
+package com.google.common.css;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -31,13 +34,47 @@ import java.util.Properties;
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-enum OutputRenamingMapFormat {
+public enum OutputRenamingMapFormat {
   /**
    * Writes the mapping as JSON, passed as an argument to
    * {@code goog.setCssNameMapping()}. Designed for use with the Closure
    * Library in compiled mode.
    */
   CLOSURE_COMPILED("goog.setCssNameMapping(%s);\n"),
+
+  /**
+   * Before writing the mapping as CLOSURE_COMPILED, split the css name maps
+   * by hyphens and write out each piece individually. see
+   * {@code CLOSURE_COMPILED}
+   */
+  CLOSURE_COMPILED_SPLIT_HYPHENS {
+    @Override
+    public void writeRenamingMap(Map<String, String> renamingMap,
+        PrintWriter renamingMapWriter)  {
+      Map<String, String> newSplitRenamingMap = Maps.newHashMap();
+      for (Map.Entry<String, String> entry : renamingMap.entrySet()) {
+        Iterator<String> parts =
+            HYPHEN_SPLITTER.split(entry.getKey()).iterator();
+        Iterator<String> partsNew =
+            HYPHEN_SPLITTER.split(entry.getValue()).iterator();
+        while(parts.hasNext() && partsNew.hasNext()) {
+          newSplitRenamingMap.put(parts.next(), partsNew.next());
+        }
+        if (parts.hasNext()) {
+          throw new AssertionError("Not all parts of the original class " +
+              "name were output. Class: " + entry.getKey() + " Next Part:" +
+              parts.next());
+        }
+        if (partsNew.hasNext()) {
+          throw new AssertionError("Not all parts of the renamed class were " +
+              "output. Class: " + entry.getKey() + " Renamed Class: " +
+              entry.getValue() + " Next Part:" + partsNew.next());
+        }
+      }
+      OutputRenamingMapFormat.CLOSURE_COMPILED.writeRenamingMap(
+          newSplitRenamingMap, renamingMapWriter);
+    }
+  },
 
   /**
    * Writes the mapping as JSON, assigned to the global JavaScript variable
@@ -57,7 +94,7 @@ enum OutputRenamingMapFormat {
    */
   PROPERTIES {
     @Override
-    void writeRenamingMap(Map<String, String> renamingMap,
+    public void writeRenamingMap(Map<String, String> renamingMap,
         PrintWriter renamingMapWriter)  {
       // We write the properties directly rather than using
       // Properties#store() because it is impossible to suppress the timestamp
@@ -70,7 +107,23 @@ enum OutputRenamingMapFormat {
       }
     }
   },
-  ;
+
+  /**
+   * This is the current default behavior for output maps. Still used for
+   * legacy reasons.
+   */
+  JSCOMP_VARIABLE_MAP {
+    @Override
+    public void writeRenamingMap(Map<String, String> renamingMap,
+        PrintWriter renamingMapWriter)  {
+      for (Map.Entry<String, String> entry : renamingMap.entrySet()) {
+        renamingMapWriter.format("%s:%s\n", entry.getKey(), entry.getValue());
+      }
+    }
+  };
+
+  // Splitter used for CLOSURE_COMPILED_SPLIT_HYPHENS format.
+  private static final Splitter HYPHEN_SPLITTER = Splitter.on("-");
 
   private final String formatString;
 
@@ -84,9 +137,10 @@ enum OutputRenamingMapFormat {
   }
 
   /**
-   * @see DefaultCommandLineCompiler#writeRenamingMap(Map, PrintWriter)
+   * @see com.google.common.css.compiler.commandline.DefaultCommandLineCompiler
+   *     #writeRenamingMap(Map, PrintWriter)
    */
-  void writeRenamingMap(Map<String, String> renamingMap,
+  public void writeRenamingMap(Map<String, String> renamingMap,
       PrintWriter renamingMapWriter) {
     // Build up the renaming map as a JsonObject.
     JsonObject properties = new JsonObject();

@@ -181,9 +181,8 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
    */
   protected void writeRenamingMap(Map<String, String> renamingMap,
       PrintWriter renamingMapWriter) {
-    for (Map.Entry<String, String> entry : renamingMap.entrySet()) {
-      renamingMapWriter.format("%s:%s\n", entry.getKey(), entry.getValue());
-    }
+    job.outputRenamingMapFormat.writeRenamingMap(renamingMap,
+        renamingMapWriter);
   }
 
   /**
