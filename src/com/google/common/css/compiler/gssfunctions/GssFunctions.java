@@ -84,7 +84,7 @@ public class GssFunctions {
 
   /**
    * This class encapsulates results of background definition calculation and
-   * is used to build either a list of {@link CssValueNode}s or a string that
+   * is used to build either a list of {@link CssValueNode} instances or a string that
    * represents the background CSS property.
    */
   static class ImageBackground {
@@ -1305,7 +1305,7 @@ public class GssFunctions {
 
   /**
    * Allows the equivalent of the ternary operator in GSS, using three
-   * {@code @def}s as inputs. This GSS:
+   * {@code @def} statements as inputs. This GSS:
    * <p>
    * {@code @def MYDEF selectFrom(FOO, BAR, BAZ);}
    * <p>

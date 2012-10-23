@@ -48,10 +48,10 @@ import java.util.regex.Pattern;
  * <p>
  * Java's {@code Character} and {@code String} classes represent
  * values in the UTF-16 encoding; some codepoints are represented by
- * surrogate pairs of {@code Character}s. CSS escape sequences are
+ * surrogate pairs of {@code Character} instances. CSS escape sequences are
  * designed without a particular encoding in mind; there are CSS
  * escape sequences that correspond to a single Unicode character
- * and multiple Java {@code Character}s.
+ * and multiple Java {@code Character} instances.
  * <p>
  * Java's {@code Character} repertoire is a strict subset of the
  * codepoints that can be represented in CSS. When decoding CSS

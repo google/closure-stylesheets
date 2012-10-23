@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This compiler pass evaluates {@link CssCustomFunctionNode}s only when they
+ * This compiler pass evaluates {@link CssCustomFunctionNode} instances only when they
  * have no references as arguments. Otherwise, it creates a new definition for
  * the function call even if it's already a definition. At the end, the main
  * tree is free of function calls; all the new definitions are collected in a

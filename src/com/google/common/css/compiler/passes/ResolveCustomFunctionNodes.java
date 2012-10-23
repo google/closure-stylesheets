@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This compiler pass replaces {@link CssCustomFunctionNode}s with the
+ * This compiler pass replaces {@link CssCustomFunctionNode} instances with the
  * list of nodes returned by the GssFunction.
  *
  */

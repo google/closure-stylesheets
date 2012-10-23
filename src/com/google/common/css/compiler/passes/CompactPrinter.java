@@ -59,7 +59,7 @@ import com.google.common.css.compiler.ast.VisitController;
 import java.util.logging.Logger;
 
 /**
- * A compact-printer for {@link CssTree}s.
+ * A compact-printer for {@link CssTree} instances.
  * TODO(oana): Change this pass to stop visiting when definitions are
  * encountered. The same goes for its test.
  *

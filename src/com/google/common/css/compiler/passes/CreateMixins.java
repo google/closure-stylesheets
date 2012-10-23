@@ -36,7 +36,7 @@ import com.google.common.css.compiler.ast.MutatingVisitController;
 import java.util.List;
 
 /**
- * A compiler pass that transforms matching {@link CssUnknownAtRuleNode}s
+ * A compiler pass that transforms matching {@link CssUnknownAtRuleNode} instances
  * into mixins or mixin definitions.
  *
  * @author fbenz@google.com (Florian Benz)

@@ -23,7 +23,7 @@ import com.google.common.css.compiler.ast.*;
 import java.util.Set;
 
 /**
- * Compiler pass that handles remaining {@link CssUnknownAtRuleNode}s
+ * Compiler pass that handles remaining {@link CssUnknownAtRuleNode} instances
  * by optionally reporting them as errors and optionally removing
  * them.
  *

@@ -134,7 +134,7 @@ public class AstUtilityTestCase extends UtilityTestCase {
       Collection<? extends CssNode> collection2)
       throws IllegalArgumentException, IllegalAccessException {
 
-    // Recursively compare two collections of {@code CssNode}s.
+    // Recursively compare two collections of {@code CssNode} instances.
     Iterator<? extends CssNode> it1 = collection1.iterator();
     Iterator<? extends CssNode> it2 = collection2.iterator();
 

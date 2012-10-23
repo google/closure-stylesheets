@@ -34,7 +34,7 @@ import java.util.Set;
 
 /**
  * Compiler pass that collects all mixin definitions and afterwards provides a
- * mapping of mixin definition names to {@link CssMixinDefinitionNode}s.
+ * mapping of mixin definition names to {@link CssMixinDefinitionNode} instances.
  *
  * <p>In addition, this pass checks that no two definitions with the same name
  * exist and that no definition exits that has arguments with the same name

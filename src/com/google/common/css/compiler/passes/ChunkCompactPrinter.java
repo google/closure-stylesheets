@@ -30,7 +30,7 @@ import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 
 /**
- * Compact-printer for {@link CssTree}s that only outputs rulesets which
+ * Compact-printer for {@link CssTree} instances that only outputs rulesets which
  * include a selector belonging to one chunk. This printer does not support
  * code moving between chunks and ouputs the same ruleset for as many chunks
  * as this ruleset belongs to.
@@ -38,7 +38,7 @@ import com.google.common.css.compiler.ast.CssTree;
  * <p>This pass can only be used if {@link MapChunkAwareNodesToChunk} pass has been
  * run before. Otherwise this pass won't work.
  *
- * @param <T> type of chunk id objects set on {@link CssSelectorNode}s
+ * @param <T> type of chunk id objects set on {@link CssSelectorNode} instances
  *
  * @author dgajda@google.com (Damian Gajda)
  */

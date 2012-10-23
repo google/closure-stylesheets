@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A compiler pass that transforms standard {@link CssUnknownAtRuleNode}s
+ * A compiler pass that transforms standard {@link CssUnknownAtRuleNode} instances
  * to more specific at-rule nodes, or deletes them.
  *
  */

@@ -57,7 +57,7 @@ import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.VisitController;
 
 /**
- * A pretty-printer for {@link CssTree}s. This is work in progress.
+ * A pretty-printer for {@link CssTree} instances. This is work in progress.
  * Look at PrettyPrinterTest to see what's supported.
  *
  * @author mkretzschmar@google.com (Martin Kretzschmar)

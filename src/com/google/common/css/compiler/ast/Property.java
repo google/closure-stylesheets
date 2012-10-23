@@ -806,7 +806,7 @@ public final class Property {
   }
 
   /**
-   * @return an immutable set of {@link Property}s recognized by default by the
+   * @return an immutable set of {@link Property} instances recognized by default by the
    *     CSS Compiler
    */
   public static Set<Property> allRecognizedProperties() {
