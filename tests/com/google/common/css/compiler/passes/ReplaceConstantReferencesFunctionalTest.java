@@ -158,9 +158,32 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
       "[[.A]{[font:[[19px][[verdana],[arial],[\"Courrier New\"],[sans-serif]]];]}]");
   }
 
+  public void testMediaQueryReplacement1() throws Exception {
+    testTreeConstruction(linesToString(
+      "@def QUERY screen and (min-resolution:96dpi);",
+      "@media QUERY {",
+      "  .A {",
+      "    color: red;",
+      "  }",
+      "}"),
+      "[@media [screen] [and] [(min-resolution:96dpi)]{[.A]{[color:[[red]];]}}]");
+  }
+
+  public void testMediaQueryReplacement2() throws Exception {
+    testTreeConstruction(linesToString(
+      "@def QUERY (min-resolution:96dpi);",
+      "@media screen and QUERY {",
+      "  .A {",
+      "    color: red;",
+      "  }",
+      "}"),
+      "[@media [screen] [and] [(min-resolution:96dpi)]{[.A]{[color:[[red]];]}}]");
+  }
+
   @Override
   protected void runPass() {
     new CreateDefinitionNodes(tree.getMutatingVisitController(), errorManager).runPass();
+    new CreateStandardAtRuleNodes(tree.getMutatingVisitController(), errorManager).runPass();
     new CreateConstantReferences(tree.getMutatingVisitController()).runPass();
     new CreateConditionalNodes(tree.getMutatingVisitController(), errorManager).runPass();
     CollectConstantDefinitions defPass = new CollectConstantDefinitions(tree);

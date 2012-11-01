@@ -22,7 +22,6 @@ import com.google.common.collect.Queues;
 import com.google.common.css.compiler.ast.CssCompositeValueNode.Operator;
 
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -527,7 +526,7 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   @VisibleForTesting
-  class VisitMediaRuleState extends VisitChildrenOptionalState<CssNode> {
+  class VisitMediaRuleState extends VisitReplaceChildrenState<CssValueNode> {
 
     private final CssMediaRuleNode node;
 
@@ -535,15 +534,14 @@ class DefaultVisitController implements MutatingVisitController {
 
     private boolean shouldVisitChildren = true;
 
-    private Iterator<CssValueNode> parameters = null;
-
     VisitMediaRuleState(CssMediaRuleNode node) {
+      super(node);
       this.node = node;
     }
 
     @Override
     public void doVisit() {
-      if (!visitedChildren && parameters == null) {
+      if (!visitedChildren && currentIndex == -1) {
         shouldVisitChildren = visitor.enterMediaRule(node);
       } else if (visitedChildren) {
         visitor.leaveMediaRule(node);
@@ -551,22 +549,48 @@ class DefaultVisitController implements MutatingVisitController {
     }
 
     @Override
+    public void replaceCurrentBlockChildWith(
+        List<CssValueNode> replacementNodes, boolean visitTheReplacementNodes) {
+      // If we're replacing the current property with a composite value
+      // separated by the space, we really just want to graft those nodes at
+      // the current child's location.
+      if (replacementNodes.size() == 1
+          && replacementNodes.get(0) instanceof CssCompositeValueNode) {
+        CssCompositeValueNode compositeValueNode =
+            (CssCompositeValueNode) replacementNodes.get(0);
+        if (compositeValueNode.getOperator() == Operator.SPACE) {
+          replacementNodes = compositeValueNode.getValues();
+        }
+      }
+
+      super.replaceCurrentBlockChildWith(
+          replacementNodes, visitTheReplacementNodes);
+    }
+
+
+    @Override
     public void transitionToNextState() {
       if (visitedChildren || !shouldVisitChildren) {
         stateStack.pop();
         return;
       }
-      if (parameters == null) {
-        parameters = node.getParameters().iterator();
+
+      if (!doNotIncreaseIndex) {
+        currentIndex++;
+      } else {
+        doNotIncreaseIndex = false;
       }
-      if (parameters.hasNext()) {
-        CssValueNode mediaType = parameters.next();
-        if (parameters.hasNext()) {
+
+      final int parametersCount = node.getParameters().size();
+      if (currentIndex < parametersCount) {
+        if (currentIndex < parametersCount - 1) {
           stateStack.push(new VisitMediaTypeListDelimiterState(node));
         }
-        stateStack.push(getVisitState(mediaType));
+        stateStack.push(getVisitState(node.getParameters().get(currentIndex)));
       } else {
-        stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
+        if (node.getType().hasBlock()) {
+          stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
+        }
         visitedChildren = true;
       }
     }
