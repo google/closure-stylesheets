@@ -69,6 +69,8 @@ public class PassRunner {
           errorManager).runPass();
     }
 
+    new CreateStandardAtRuleNodes(cssTree.getMutatingVisitController(),
+        errorManager).runPass();
     new CreateMixins(cssTree.getMutatingVisitController(),
         errorManager).runPass();
     new CreateDefinitionNodes(cssTree.getMutatingVisitController(),
@@ -80,8 +82,6 @@ public class PassRunner {
     new CreateComponentNodes(cssTree.getMutatingVisitController(),
         errorManager).runPass();
 
-    new CreateStandardAtRuleNodes(cssTree.getMutatingVisitController(),
-        errorManager).runPass();
     new HandleUnknownAtRuleNodes(cssTree.getMutatingVisitController(),
         errorManager, job.allowedAtRules,
         true /* report */, false /* remove */).runPass();
