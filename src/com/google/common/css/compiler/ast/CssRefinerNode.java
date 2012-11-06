@@ -38,7 +38,7 @@ public abstract class CssRefinerNode extends CssNode {
    */
   // TODO(fbenz): The handling of the pre- and suffixes should be moved to
   // the corresponding classes.
-  protected enum Refiner {
+  public enum Refiner {
     CLASS(".", ""),
     ID("#", ""),
     PSEUDO_CLASS(":", ""),

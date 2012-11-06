@@ -159,6 +159,34 @@ public class MergeAdjacentRulesetNodesWithSameDeclarationsTest
         + "[bar]{[padding:[5px], display:[5px]]}]");
   }
 
+  public void testDoNotMergePseudoElements() throws Exception {
+    CssTree tree = new GssParser(new SourceCode(null, lines(
+      "foo {",
+      "  padding: 5px;",
+      "}",
+      ".bar {",
+      "  padding: 5px;",
+      "}",
+      "baz::-ms-clear {",
+      "  padding: 5px;",
+      "}",
+      ".bez {",
+      "  padding: 5px;",
+      "}",
+      "biz {",
+      "  padding: 5px;",
+      "}"))).parse();
+
+    MergeAdjacentRulesetNodesWithSameDeclarations pass =
+        new MergeAdjacentRulesetNodesWithSameDeclarations(tree);
+    pass.runPass();
+    assertEquals(
+        "[[foo, .bar]{[padding:[5px]]}, [.bar]{[padding:[5px]]}, " +
+        "[baz::-ms-clear]{[padding:[5px]]}, " +
+        "[.bez, biz]{[padding:[5px]]}, [biz]{[padding:[5px]]}]",
+        tree.getRoot().getBody().toString());
+  }
+
   private String lines(String... lines) {
     return Joiner.on("\n").join(lines);
   }
