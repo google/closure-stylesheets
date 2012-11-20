@@ -82,6 +82,13 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "translateZ",
           "translate3d",
 
+          // Image-Set
+          "image-set",
+          "-moz-image-set",
+          "-ms-image-set",
+          "-o-image-set",
+          "-webkit-image-set",
+
           // These take the type of gradient (linear or radial) as a parameter.
           "-khtml-gradient",
           "-webkit-gradient", // Prefer -webkit-(linear|radial)-gradient
