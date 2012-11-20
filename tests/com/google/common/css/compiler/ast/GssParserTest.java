@@ -406,6 +406,15 @@ public class GssParserTest extends TestCase {
     testValid("h1[foo|=\"bar\"] {x : y}");
   }
 
+  public void testImageSet() throws Exception {
+    testValid("div:before {"
+        + "content: -webkit-image-set(url(a.png) 1x, url(b.png) 2x);"
+        + "content: -moz-image-set(url(a.png) 1x, url(b.png) 2x);"
+        + "content: -o-image-set(url(a.png) 1x, url(b.png) 2x);"
+        + "content: image-set(url(a.png) 1x, url(b.png) 2x);"
+        + "}");
+  }
+
   public void testWebkitGradient() throws Exception {
     CssTree tree = testValid(".CSS { background: " +
         "-webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#ddd)) }");
