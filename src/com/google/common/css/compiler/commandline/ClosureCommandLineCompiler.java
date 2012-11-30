@@ -167,6 +167,10 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         "com.google.common.css.compiler.gssfunctions."
         + "DefaultGssFunctionMapProvider";
 
+    @Option(name = "--css-renaming-prefix",
+        usage = "Add a prefix to all renamed css class names.")
+    private String cssRenamingPrefix = "";
+
     /**
      * All remaining arguments are considered input CSS files.
      */
@@ -198,6 +202,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setEliminateDeadStyles(true);
       builder.setCssSubstitutionMapProvider(renamingType
           .getCssSubstitutionMapProvider());
+      builder.setCssRenamingPrefix(cssRenamingPrefix);
       builder.setOutputRenamingMapFormat(outputRenamingMapFormat);
 
       GssFunctionMapProvider gssFunctionMapProvider =
