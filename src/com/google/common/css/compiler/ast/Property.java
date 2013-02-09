@@ -464,6 +464,8 @@ public final class Property {
         builder("visibility"),
         builder("voice-family"),
         builder("volume"),
+        builder("-webkit-align-items"),
+        builder("-webkit-align-self"),
         builder("-webkit-animation"),
         builder("-webkit-animation-delay"),
         builder("-webkit-animation-direction"),
