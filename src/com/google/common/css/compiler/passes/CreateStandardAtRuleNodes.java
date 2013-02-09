@@ -277,7 +277,7 @@ public class CreateStandardAtRuleNodes extends DefaultTreeVisitor implements Css
     if (comp.getValues().size() == 2) {
       startValue = comp.getValues().get(1);
     } else {
-      List<CssValueNode> newChildren = comp.getValues();
+      List<CssValueNode> newChildren = Lists.newArrayList(comp.getValues());
       newChildren.remove(0);
       startValue = new CssCompositeValueNode(newChildren,
           comp.getOperator(), comp.getSourceCodeLocation());
@@ -401,7 +401,7 @@ public class CreateStandardAtRuleNodes extends DefaultTreeVisitor implements Css
     if (!(node instanceof CssFunctionNode)) {
       return false;
     }
-    CssFunctionNode function = (CssFunctionNode)node;
+    CssFunctionNode function = (CssFunctionNode) node;
     if (function.getFunctionName().toLowerCase().equals("url")) {
       return true;
     }
