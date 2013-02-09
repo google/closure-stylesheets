@@ -318,7 +318,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
 
         // Because super.printUsage() creates its own PrintWriter to wrap the
         // OutputStream, we call flush() on our PrinterWriter first to make sure
-        // that everything from this PrintWritter is written to the OutputStream
+        // that everything from this PrintWriter is written to the OutputStream
         // before any usage information.
         writer.flush();
         super.printUsage(out);
