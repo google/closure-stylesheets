@@ -161,6 +161,7 @@ public final class Property {
         // This is not a MICROSOFT-specific property because it is also an SVG
         // property: http://www.w3.org/TR/SVG/styling.html
         builder("filter"),
+        builder("flex"),
         builder("float"),
         builder("flood-color").isSvgOnly(),
         builder("flood-opacity").isSvgOnly(),
@@ -250,6 +251,7 @@ public final class Property {
         builder("-moz-column-rule-width"),
         builder("-moz-column-width"),
         builder("-moz-columns"),
+        builder("-moz-flex"),
         builder("-moz-float-edge"),
         builder("-moz-font-feature-settings"),
         builder("-moz-font-language-override"),
@@ -317,6 +319,7 @@ public final class Property {
         builder("-ms-box-shadow"),
         builder("-ms-box-sizing"),
         builder("-ms-filter"),
+        builder("-ms-flex"),
         builder("-ms-grid-column"),
         builder("-ms-grid-column-align"),
         builder("-ms-grid-column-span"),
@@ -632,6 +635,7 @@ public final class Property {
         builder("-webkit-transition"),
         builder("-webkit-transition-delay"),
         builder("-webkit-transition-duration"),
+        builder("-webkit-transition-function"),
         builder("-webkit-transition-property"),
         builder("-webkit-transition-timing-function"),
         builder("-webkit-user-drag"),
