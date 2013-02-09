@@ -1435,7 +1435,7 @@ public class GssFunctions {
    * Helper method for implementors of GssFunction to allow the creation of
    * a url string in the GSS.
    *
-   * @param url The url of the image to to add.
+   * @param url The url of the image to add.
    * @return The proper GSS url string.
    */
   public static String createUrl(String url) {

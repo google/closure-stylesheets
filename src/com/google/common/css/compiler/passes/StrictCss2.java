@@ -111,7 +111,7 @@ public class StrictCss2 extends StrictCssBase {
 
   /**
    * Ensures that only pseudo-classes valid in CSS 2.1 are used. Especially, the
-   * the new pseudo-classes introduced in CSS 3 are not valid.
+   * new pseudo-classes introduced in CSS 3 are not valid.
    */
   @Override
   public boolean enterPseudoClass(CssPseudoClassNode node) {

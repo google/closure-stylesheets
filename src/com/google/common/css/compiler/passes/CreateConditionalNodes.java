@@ -162,7 +162,7 @@ public class CreateConditionalNodes extends DefaultTreeVisitor
 
   /**
    * Assigns a new SourceCodeLocation to the BlockNode which starts at the
-   * the BlockNode's first child's beginning location point and ends at the
+   * BlockNode's first child's beginning location point and ends at the
    * last child's ending location point.
    */
   private void updateLocation(CssConditionalBlockNode blockNode){

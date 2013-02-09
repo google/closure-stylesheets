@@ -310,7 +310,7 @@ public class CssStringNode extends CssValueNode {
   /**
    * Represents this node's value in CSS syntax that is also safe for
    * inclusion in HTML attribute values and element contents. This is a
-   * a good choice when you want defense in depth against client code that
+   * good choice when you want defense in depth against client code that
    * fails to escape things properly.
    */
   public static final Function<String, String> HTML_ESCAPER =

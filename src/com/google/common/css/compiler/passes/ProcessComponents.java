@@ -124,7 +124,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
    * @param constants the set of names of constants defined in the ancestor
    *     components, used to differentiate local constant names from global
    *     constant names
-   * @param current the component for which the the nodes are collected
+   * @param current the component for which the nodes are collected
    * @param parentLiteralNode the node which contains the name of the ancestor
    *     node to process, may be {@code null} if we reached the root of the
    *     inheritance tree
