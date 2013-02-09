@@ -79,6 +79,12 @@ public class GssFunctions {
         .build();
   }
 
+  /**
+   * Round decimals to the eight places, which appears to be the smallest
+   * precision that works well across all browsers. (Yes, this is crazy.)
+   */
+  private static final String DECIMAL_FORMAT = "#.########";
+
   /** All four corners corner parameter value. */
   private static final String ALL_FOUR = "af";
 
@@ -895,7 +901,7 @@ public class GssFunctions {
         }
         total = performOperation(total, value);
       }
-      String resultString = new DecimalFormat("#.##").format(total);
+      String resultString = new DecimalFormat(DECIMAL_FORMAT).format(total);
 
       return new CssNumericNode(resultString,
           overallUnit != null ? overallUnit : CssNumericNode.NO_UNITS,
@@ -1005,7 +1011,7 @@ public class GssFunctions {
         double value = Double.valueOf(node.getNumericPart());
         total = performOperation(total, value);
       }
-      String resultString = new DecimalFormat("#.##").format(total);
+      String resultString = new DecimalFormat(DECIMAL_FORMAT).format(total);
 
       return new CssNumericNode(resultString,
           overallUnit != null ? overallUnit : CssNumericNode.NO_UNITS,

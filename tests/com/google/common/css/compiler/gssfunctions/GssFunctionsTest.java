@@ -81,6 +81,8 @@ public class GssFunctionsTest extends TestCase {
         funct.getCallResultString(ImmutableList.of("60px", "2")));
     assertEquals("-30px",
         funct.getCallResultString(ImmutableList.of("60px", "-2")));
+    assertEquals("103.06748466px",
+        funct.getCallResultString(ImmutableList.of("100800px", "978")));
   }
 
   public void testDivGetCallResultString_noUnits() throws GssFunctionException {
@@ -89,6 +91,8 @@ public class GssFunctionsTest extends TestCase {
         funct.getCallResultString(ImmutableList.of("60", "2")));
     assertEquals("-30",
         funct.getCallResultString(ImmutableList.of("60", "-2")));
+    assertEquals("103.06748466",
+        funct.getCallResultString(ImmutableList.of("100800", "978")));
   }
 
   public void testMaxGetCallResultString() throws GssFunctionException {
