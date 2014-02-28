@@ -57,7 +57,7 @@ public enum OutputRenamingMapFormat {
             HYPHEN_SPLITTER.split(entry.getKey()).iterator();
         Iterator<String> partsNew =
             HYPHEN_SPLITTER.split(entry.getValue()).iterator();
-        while(parts.hasNext() && partsNew.hasNext()) {
+        while (parts.hasNext() && partsNew.hasNext()) {
           newSplitRenamingMap.put(parts.next(), partsNew.next());
         }
         if (parts.hasNext()) {
