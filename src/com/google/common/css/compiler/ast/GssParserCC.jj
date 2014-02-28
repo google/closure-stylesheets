@@ -579,7 +579,8 @@ PARSER_END(GssParserCC)
   // "url("{w}{url}{w}")" {return URI;}
   | < URI: ("url" | "url-prefix" | "domain") "(" <W> (<URL>)* <W> ")" >
 
-  // url      ([!#$%&*-~]|{nonascii}|{escape})*
+  // Unquoted URLs don't accept escape sequences unlike the spec so far.
+  // url      ([!#$%&*-~]|{nonascii})*
   | < #URL: <EXCL_MARK> | <HASH> | <PERCENT> | <DOLLAR> | <AMPERSAND> |
       <ASTERISK> | <PLUS> | <COMMA> | <MINUS> | <DOT> | "/" | <DIGIT> |
       <COLON> | <SEMICOLON> | "<" | <EQUALS> | <GREATER> | "?" | <AT> |
