@@ -34,7 +34,11 @@ public class CollectConstantDefinitions extends DefaultTreeVisitor
   private final ConstantDefinitions constantDefinitions;
 
   public CollectConstantDefinitions(CssTree tree) {
-    this.visitController = tree.getVisitController();
+    this(tree.getVisitController());
+  }
+
+  public CollectConstantDefinitions(VisitController visitController) {
+    this.visitController = visitController;
     this.constantDefinitions = new ConstantDefinitions();
   }
 
