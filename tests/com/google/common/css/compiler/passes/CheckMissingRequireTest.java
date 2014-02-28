@@ -32,14 +32,23 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
 
   protected void runPasses(TestErrorManager errorMgr) {
     List<CssCompilerPass> l = Lists.newArrayList();
-    l.add(new CreateMixins(tree.getMutatingVisitController(), errorManager));
-    l.add(new CreateDefinitionNodes(tree.getMutatingVisitController(), errorManager));
+    l.add(new CreateMixins(tree.getMutatingVisitController(), errorMgr));
+    l.add(new CreateDefinitionNodes(tree.getMutatingVisitController(), errorMgr));
     l.add(new CreateConstantReferences(tree.getMutatingVisitController()));
     l.add(new CheckDependencyNodes(tree.getMutatingVisitController(), errorMgr));
-    l.add(new CheckMissingRequire(tree.getMutatingVisitController(), errorMgr));
     for (CssCompilerPass pass : l) {
       pass.runPass();
     }
+    CollectProvideNamespaces collectProvides = new CollectProvideNamespaces(
+        tree.getMutatingVisitController(), errorMgr);
+    collectProvides.runPass();
+    new CheckMissingRequire(
+        tree.getMutatingVisitController(),
+        errorMgr,
+        collectProvides.getFilenameProvideMap(),
+        collectProvides.getFilenameRequireMap(),
+        collectProvides.getDefProvideMap(),
+        collectProvides.getDefmixinProvideMap()).runPass();
   }
 
   public void testBaseCase1() throws GssParserException {
@@ -168,5 +177,4 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     errorManager.generateReport();
     assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
   }
-
 }

@@ -16,20 +16,13 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.css.compiler.ast.CssCommentNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
-import com.google.common.css.compiler.ast.CssDefinitionNode;
-import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
 import com.google.common.css.compiler.ast.CssMixinNode;
-import com.google.common.css.compiler.ast.CssProvideNode;
 import com.google.common.css.compiler.ast.CssRefinerNode;
-import com.google.common.css.compiler.ast.CssRequireNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
@@ -46,7 +39,8 @@ import java.util.regex.Pattern;
 
 /**
  * A compiler pass that checks for missing {@code &#64;require} lines for def constant references
- * and mixins.
+ * and mixins. This pass is used in conjunction with CollectProvideNamespaces, which provides
+ * namespaces for constant definitions and mixins.
  * Example for def references:
  * file foo/gss/button.gss provides namespace {@code &#64;provide 'foo.gss.button';} and has
  *  the def: {@code &#64;def FONT_SIZE 10px;}.
@@ -65,51 +59,28 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
   private final ErrorManager errorManager;
 
   // Key: filename; Value: provide namespace
-  private final Map<String, String> filenameProvideMap = Maps.newHashMap();
+  private final Map<String, String> filenameProvideMap;
   // Key: filename; Value: require namespace
-  private final ListMultimap<String, String> filenameRequireMap = LinkedListMultimap.create();
+  private final ListMultimap<String, String> filenameRequireMap;
 
   // Multiple namespaces can contain the same defs due to duplicate defs (or mods).
   // Key: def name; Value: provide namespace
-  private final ListMultimap<String, String> defProvideMap = LinkedListMultimap.create();
+  private final ListMultimap<String, String> defProvideMap;
   // Key: defmixin name; Value: provide namespace
-  private final ListMultimap<String, String> defmixinProvideMap = LinkedListMultimap.create();
+  private final ListMultimap<String, String> defmixinProvideMap;
 
-  public CheckMissingRequire(MutatingVisitController visitController, ErrorManager errorManager) {
+  public CheckMissingRequire(MutatingVisitController visitController,
+      ErrorManager errorManager,
+      Map<String, String> filenameProvideMap,
+      ListMultimap<String, String> filenameRequireMap,
+      ListMultimap<String, String> defProvideMap,
+      ListMultimap<String, String> defmixinProvideMap) {
     this.visitController = visitController;
     this.errorManager = errorManager;
-  }
-
-  @Override
-  public boolean enterProvideNode(CssProvideNode node) {
-    Preconditions.checkState(node.getSourceCodeLocation() != null);
-    String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
-    filenameProvideMap.put(filename, node.getProvide());
-    return true;
-  }
-
-  @Override
-  public boolean enterRequireNode(CssRequireNode node) {
-    Preconditions.checkState(node.getSourceCodeLocation() != null);
-    String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
-    filenameRequireMap.put(filename, node.getRequire());
-    return true;
-  }
-
-  @Override
-  public boolean enterDefinition(CssDefinitionNode node) {
-    if (node.getSourceCodeLocation() == null) {
-      // Cannot enforce provide / require for generated GSS components.
-      return true;
-    }
-    String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
-    String provideNamespace = filenameProvideMap.get(filename);
-    // Remove this after switching to the new syntax.
-    if (provideNamespace == null) {  // ignore old format @provide
-      return true;
-    }
-    defProvideMap.put(node.getName().getValue(), provideNamespace);
-    return true;
+    this.filenameProvideMap = filenameProvideMap;
+    this.filenameRequireMap = filenameRequireMap;
+    this.defProvideMap = defProvideMap;
+    this.defmixinProvideMap = defmixinProvideMap;
   }
 
   @Override
@@ -138,23 +109,6 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
         errorManager.report(new GssError(error.toString(), reference.getSourceCodeLocation()));
       }
     }
-    return true;
-  }
-
-  @Override
-  public boolean enterMixinDefinition(CssMixinDefinitionNode node) {
-    if (node.getSourceCodeLocation() == null) {
-      // Cannot enforce provide / require for generated GSS components.
-      return true;
-    }
-    String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
-    String provideNamespace = filenameProvideMap.get(filename);
-    // Remove this after switching to the new syntax.
-    if (provideNamespace == null) {  // ignore old format @provide
-      return true;
-    }
-    Preconditions.checkArgument(provideNamespace != null);
-    defmixinProvideMap.put(node.getDefinitionName(), provideNamespace);
     return true;
   }
 
