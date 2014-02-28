@@ -52,6 +52,7 @@ public class CheckDependencyNodes extends DefaultTreeVisitor
       .getCanonicalName();
   private final MutatingVisitController visitController;
   private final ErrorManager errorManager;
+  private final boolean suppressDependencyCheck;
 
   /**
    * A linked collection is used so the dependencies can be iterated in the
@@ -61,8 +62,14 @@ public class CheckDependencyNodes extends DefaultTreeVisitor
 
   public CheckDependencyNodes(MutatingVisitController visitController,
       ErrorManager errorManager) {
+    this(visitController, errorManager, false /* suppressDependencyCheck */);
+  }
+
+  public CheckDependencyNodes(MutatingVisitController visitController,
+      ErrorManager errorManager, boolean suppressDependencyCheck) {
     this.visitController = visitController;
     this.errorManager = errorManager;
+    this.suppressDependencyCheck = suppressDependencyCheck;
   }
 
   @Override
@@ -143,8 +150,10 @@ public class CheckDependencyNodes extends DefaultTreeVisitor
   }
 
   private void reportError(String message, CssNode node) {
-    errorManager.report(new GssError(message, node.getSourceCodeLocation()));
-    visitController.removeCurrentNode();
+    if (!suppressDependencyCheck) {
+      errorManager.report(new GssError(message, node.getSourceCodeLocation()));
+      visitController.removeCurrentNode();
+    }
   }
 
   @Override

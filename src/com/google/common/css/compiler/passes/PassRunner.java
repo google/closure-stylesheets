@@ -65,7 +65,8 @@ public class PassRunner {
    */
   public void runPasses(CssTree cssTree) {
     new CheckDependencyNodes(cssTree.getMutatingVisitController(),
-        errorManager).runPass();
+        errorManager,
+        false).runPass();
     new CreateStandardAtRuleNodes(cssTree.getMutatingVisitController(),
         errorManager).runPass();
     new CreateMixins(cssTree.getMutatingVisitController(),
