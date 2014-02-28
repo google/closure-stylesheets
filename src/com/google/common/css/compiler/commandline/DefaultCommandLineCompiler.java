@@ -16,7 +16,8 @@
 
 package com.google.common.css.compiler.commandline;
 
-import com.google.common.base.Charsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.common.base.Preconditions;
 import com.google.common.css.AbstractCommandLineCompiler;
 import com.google.common.css.ExitCodeHandler;
@@ -144,7 +145,7 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
           .getRecordingSubstitutionMap();
       if (recordingSubstitutionMap != null && renameFile != null) {
         PrintWriter renamingMapWriter = new PrintWriter(
-            Files.newWriter(renameFile, Charsets.UTF_8));
+            Files.newWriter(renameFile, UTF_8));
         Map<String, String> renamingMap = recordingSubstitutionMap
             .getMappings();
         writeRenamingMap(renamingMap, renamingMapWriter);

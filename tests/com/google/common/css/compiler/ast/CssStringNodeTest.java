@@ -16,7 +16,8 @@
 
 package com.google.common.css.compiler.ast;
 
-import com.google.common.base.Charsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.common.base.Functions;
 
 import junit.framework.TestCase;
@@ -95,7 +96,7 @@ public class CssStringNodeTest extends TestCase {
         //{"𠍱", "\\20371"}
         {new String(
             new byte[] {(byte) 0xf0, (byte) 0xa0, (byte) 0x8d, (byte) 0xb1},
-            Charsets.UTF_8),
+            UTF_8),
          "\\20371"}}) {
       assertEquals(io[1], CssStringNode.SHORT_ESCAPER.apply(io[0]));
     }
@@ -108,11 +109,11 @@ public class CssStringNodeTest extends TestCase {
     byte[] puabUtf8 = {(byte) 0xf4, (byte) 0x80, (byte) 0x80, (byte) 0x80};
     assertEquals("\\100000",
                  CssStringNode.SHORT_ESCAPER.apply(
-                     new String(puabUtf8, Charsets.UTF_8)));
+                     new String(puabUtf8, UTF_8)));
     assertEquals("\\100000a",
                  CssStringNode.SHORT_ESCAPER.apply(
                      String.format("%sa",
-                                   new String(puabUtf8, Charsets.UTF_8))));
+                                   new String(puabUtf8, UTF_8))));
   }
 
   public void testHtmlEscaper() throws Exception {
@@ -133,7 +134,7 @@ public class CssStringNodeTest extends TestCase {
         //{"𠍱", "\\020371"}
         {new String(
             new byte[] {(byte) 0xf0, (byte) 0xa0, (byte) 0x8d, (byte) 0xb1},
-            Charsets.UTF_8),
+            UTF_8),
          "\\020371"}}) {
       assertEquals(io[1], CssStringNode.HTML_ESCAPER.apply(io[0]));
     }
@@ -188,16 +189,16 @@ public class CssStringNodeTest extends TestCase {
         // {"\\020371", "𠍱"}
         {"\\020371", new String(
             new byte[] {(byte) 0xf0, (byte) 0xa0, (byte) 0x8d, (byte) 0xb1},
-            Charsets.UTF_8)}}) {
+            UTF_8)}}) {
       assertEquals(io[1], CssStringNode.unescape(io[0]));
     }
 
     // Now let's look at a character that requires a max-length escape
     // code in CSS and use of surrogate pairs in the JVM
     byte[] puabUtf8 = {(byte) 0xf4, (byte) 0x80, (byte) 0x80, (byte) 0x80};
-    assertEquals(new String(puabUtf8, Charsets.UTF_8),
+    assertEquals(new String(puabUtf8, UTF_8),
                  CssStringNode.unescape("\\100000"));
-    assertEquals(new String(puabUtf8, Charsets.UTF_8) + "a",
+    assertEquals(new String(puabUtf8, UTF_8) + "a",
                  CssStringNode.unescape("\\100000a"));
 
     // Here's an escape sequence denoting a code point beyond the Java
