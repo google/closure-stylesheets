@@ -415,6 +415,8 @@ public final class Property {
         builder("pause-after"),
         builder("pause-before"),
         builder("pause"),
+        builder("perspective"),
+        builder("perspective-origin"),
         builder("pitch-range"),
         builder("pitch"),
         builder("play-during"),
