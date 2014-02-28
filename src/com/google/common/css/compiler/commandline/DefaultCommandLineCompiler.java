@@ -57,10 +57,10 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
   private final PassRunner passRunner;
 
   /**
-   * Constructs a {@code NewCommandLineCompiler}.
+   * Constructs a {@code DefaultCommandLineCompiler}.
    *
-   * @param job the inputs the compiler should process and the options to use
-   * @param errorManager the error manager to use for error reporting
+   * @param job The inputs the compiler should process and the options to use.
+   * @param errorManager The error manager to use for error reporting.
    */
   protected DefaultCommandLineCompiler(JobDescription job,
       ExitCodeHandler exitCodeHandler, ErrorManager errorManager) {
