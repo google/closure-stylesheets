@@ -283,7 +283,7 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
       CssValueNode node = params.get(0);
       reportWarning(
           String.format(
-              "Expected CssLiteralNode but found {0}",
+              "Expected CssLiteralNode but found %s",
               node.getClass().getName()),
           node);
       return false;
