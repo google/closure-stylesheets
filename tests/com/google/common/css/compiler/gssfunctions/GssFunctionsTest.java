@@ -22,7 +22,6 @@ import com.google.common.css.compiler.ast.GssFunctionException;
 
 import junit.framework.TestCase;
 
-
 /**
  * Unit tests for {@link GssFunctions}. Specifically checks for correctness of
  * getCallResultString results from the GssFunctions since

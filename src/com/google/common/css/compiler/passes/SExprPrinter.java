@@ -17,9 +17,9 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.CssCompositeValueNode;
-import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssNodesListNode;
+import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
 
 /**
