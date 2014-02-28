@@ -719,4 +719,24 @@ public class GssParserTest extends TestCase {
              "[[div]{[background-image:"
              + "[url(http://google.com/logo.png)];]}]");
   }
+
+  public void testCdoCdc() throws Exception {
+    testTree(
+        "<!--\ndiv { color: red; }\n-->",
+        "[[div]{[color:[[red]];]}]");
+  }
+
+  public void testIntraPropertyCdoCdc() throws Exception {
+    String css = ".foo{border:1px<!--solid-->blue;}";
+    try {
+      parse(css);
+      fail("CDO should not be accepted in property values.");
+    } catch (GssParserException e) {
+      assertEquals(
+          "The error should reflect that CDO is not accepted in property "
+          + "values.",
+          css.indexOf("<!--"),
+          e.getGssError().getLocation().getBeginCharacterIndex());
+    }
+  }
 }

@@ -497,6 +497,8 @@ PARSER_END(GssParserCC)
   | < DOLLAR_EQUALS: <DOLLAR> <EQUALS> >
   | < ASTERISK_EQUALS: <ASTERISK> <EQUALS> >
   | < PIPE_EQUALS: <PIPE> <EQUALS> >
+  | < CDO: "<!--" >
+  | < CDC: "-->" >
 
   // CSS2 grammar allows up to 6-digit hex strings for unicode
   // hex        [0-9a-f]
@@ -1889,7 +1891,7 @@ CssBlockNode block(boolean isEnclosedWithBraces) :
     | n = webkit_keyframes_rule()
     | n = atRuleWithDeclBlock()
    ) { block.addChildToBack(n); }
-   ( <S> )*)*
+   ( <S> | <CDO> | <CDC> )*)*
   { return block; }
 }
 
@@ -1897,7 +1899,7 @@ CssBlockNode block(boolean isEnclosedWithBraces) :
 void start() :
 {}
 {
-  ( <S> )*
+  ( <S> | <CDO> | <CDC> )*
   block(false)
   <EOF>
 }
