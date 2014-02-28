@@ -39,7 +39,7 @@ import javax.annotation.Nonnull;
  *   -webkit-border-radius: 2px;
  * }
  * </pre>
- * If {@link Vendor#WEBKIT} were specified as the "vendor to keep" when running
+ * <p>If {@link Vendor#WEBKIT} were specified as the "vendor to keep" when running
  * this pass, then the resulting CSS would be:
  * <pre>
  * .button {

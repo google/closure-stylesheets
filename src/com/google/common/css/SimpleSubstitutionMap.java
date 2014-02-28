@@ -28,7 +28,7 @@ package com.google.common.css;
  * // Case II: Name used as variable (correct)
  * &lt;div class="{css CSS_MENU_BAR}">&lt;/div>
  * </pre>
- * In Case I, the div would not get the effects of the CSS class when it is
+ * <p>In Case I, the div would not get the effects of the CSS class when it is
  * renamed, so hopefully the missing styles would help discover the source of
  * the error.
  *

@@ -176,7 +176,7 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
    * <pre>
    * key:value
    * </pre>
-   * Subclasses may override this method to provide alternate output formats.
+   * <p>Subclasses may override this method to provide alternate output formats.
    * Subclasses <em>must not</em> close the writer.
    */
   protected void writeRenamingMap(Map<String, String> renamingMap,

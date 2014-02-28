@@ -52,7 +52,7 @@ import javax.annotation.Nullable;
  * int i = 0;
  * ____#####_
  * </pre>
- * are considered valid. Note that the indicator line contains no whitespace and
+ * <p>are considered valid. Note that the indicator line contains no whitespace and
  * that both lines are the same size. As long as the visual indication is
  * achieved, the indicator line is unconstrained.
  *
