@@ -16,6 +16,7 @@
 
 package com.google.common.css;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import junit.framework.TestCase;
@@ -60,6 +61,20 @@ public class MinimalSubstitutionMapTest extends TestCase {
     assertEquals("a1", map.get("baz"));
 
     assertEquals("a", map.get("foo"));
+  }
+
+  /**
+   * Tests that the get() function correctly omits values from the blacklist.
+   */
+  public void testGetWithBlacklist() {
+    map = new MinimalSubstitutionMap(START_CHARS, CHARS, ImmutableSet.of("a"));
+
+    // We skipped over "a".  See testGet().
+    assertEquals("a2", map.get("foo"));
+
+    // Move on to a new value, and then go back to "foo" to prove repeatability
+    assertEquals("a1", map.get("bar"));
+    assertEquals("a2", map.get("foo"));
   }
 
   /**

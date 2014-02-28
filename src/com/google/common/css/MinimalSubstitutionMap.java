@@ -17,10 +17,13 @@
 package com.google.common.css;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * MinimalSubstitutionMap is a SubstitutionMap that renames CSS classes to the
@@ -85,8 +88,21 @@ public class MinimalSubstitutionMap implements SubstitutionMap {
    */
   private final Map<String, String> renamedCssClasses;
 
+  /**
+   * A set of CSS class names that may not be output from this substitution map.
+   */
+  private final Set<String> outputValueBlacklist;
+
   public MinimalSubstitutionMap() {
-    this(START_CHARS, CHARS);
+    this(ImmutableSet.<String>of());
+  }
+
+  /**
+   * @param outputValueBlacklist A set of CSS class names that may not be
+   *     returned as the output from a substitution lookup.
+   */
+  public MinimalSubstitutionMap(Set<String> outputValueBlacklist) {
+    this(START_CHARS, CHARS, outputValueBlacklist);
   }
 
   /**
@@ -99,6 +115,22 @@ public class MinimalSubstitutionMap implements SubstitutionMap {
    */
   @VisibleForTesting
   MinimalSubstitutionMap(char[] startChars, char[] chars) {
+    this(startChars, chars, ImmutableSet.<String>of());
+  }
+
+  /**
+   * Creates a new MinimalSubstitutionMap that generates CSS class names from
+   * the specified set of characters.
+   * @param startChars Possible values for the first character of a CSS class
+   *     name.
+   * @param chars Possible values for the characters other than the first
+   *     character in a CSS class name.
+   * @param outputValueBlacklist A set of CSS class names that may not be
+   *     returned as the output from a substitution lookup.
+   */
+  @VisibleForTesting
+  MinimalSubstitutionMap(
+      char[] startChars, char[] chars, Set<String> outputValueBlacklist) {
     this.lastIndex = 0;
     this.startChars = Arrays.copyOf(startChars, startChars.length);
     this.startCharsRadix = this.startChars.length;
@@ -106,6 +138,8 @@ public class MinimalSubstitutionMap implements SubstitutionMap {
     this.charsRadix = this.chars.length;
     this.logCharsRadix = Math.log(charsRadix);
     this.renamedCssClasses = Maps.newHashMap();
+    this.outputValueBlacklist =
+        ImmutableSet.copyOf(Preconditions.checkNotNull(outputValueBlacklist));
   }
 
   /** {@inheritDoc} */
@@ -113,7 +147,10 @@ public class MinimalSubstitutionMap implements SubstitutionMap {
   public String get(String key) {
     String value = renamedCssClasses.get(key);
     if (value == null) {
-      value = toShortString(lastIndex++);
+      do {
+        value = toShortString(lastIndex++);
+      } while (this.outputValueBlacklist.contains(value));
+
       renamedCssClasses.put(key, value);
     }
     return value;
@@ -162,11 +199,11 @@ public class MinimalSubstitutionMap implements SubstitutionMap {
     // Once n is known, the standard modulo-then-divide approach can be used to
     // determine each character that should be appended to s.
     int i = index / startCharsRadix;
-    final int n = (int) (Math.log(i * (charsRadix - 1) + 1) / logCharsRadix); 
+    final int n = (int) (Math.log(i * (charsRadix - 1) + 1) / logCharsRadix);
 
     // The array is 1 more than the number of secondary chars to account for the
     // first char.
-    char[] cssNameChars = new char[n + 1];    
+    char[] cssNameChars = new char[n + 1];
     cssNameChars[0] = startChars[index % startCharsRadix];
 
     for (int k = 1; k <= n; ++k) {
