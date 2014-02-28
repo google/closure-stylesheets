@@ -36,6 +36,8 @@ public class GssFunctionsTest extends TestCase {
         funct.getCallResultString(ImmutableList.of("12px", "30px")));
     assertEquals("0px",
         funct.getCallResultString(ImmutableList.of("10px", "-10px")));
+    assertEquals("22",
+        funct.getCallResultString(ImmutableList.of("10", "12")));
   }
 
   public void testAddGetCallResultString_mismatchedUnitsFail() {
@@ -50,6 +52,8 @@ public class GssFunctionsTest extends TestCase {
         funct.getCallResultString(ImmutableList.of("60px", "30px")));
     assertEquals("-30px",
         funct.getCallResultString(ImmutableList.of("0px", "30px")));
+    assertEquals("-8",
+        funct.getCallResultString(ImmutableList.of("1", "9")));
   }
 
   public void testSubGetCallResultString_mismatchedUnitsFail() {
@@ -72,10 +76,6 @@ public class GssFunctionsTest extends TestCase {
         funct.getCallResultString(ImmutableList.of("21", "2")));
     assertEquals("-42",
         funct.getCallResultString(ImmutableList.of("21", "-2")));
-    GssFunctions.SubtractScalar subtractScalar = new GssFunctions.SubtractScalar();
-    assertEquals("19", subtractScalar.getCallResultString(ImmutableList.of("21", "2")));
-    GssFunctions.AddScalar addScalar = new GssFunctions.AddScalar();
-    assertEquals("23", addScalar.getCallResultString(ImmutableList.of("21", "2")));
   }
 
   public void testDivGetCallResultString() throws GssFunctionException {
@@ -104,6 +104,8 @@ public class GssFunctionsTest extends TestCase {
         funct.getCallResultString(ImmutableList.of("42px", "-42px")));
     assertEquals("0px",
         funct.getCallResultString(ImmutableList.of("0px", "0px")));
+    assertEquals("11",
+        funct.getCallResultString(ImmutableList.of("-1", "11")));
   }
 
   public void testMaxGetCallResultString_mismatchedUnitsFail() {
@@ -117,22 +119,13 @@ public class GssFunctionsTest extends TestCase {
         funct.getCallResultString(ImmutableList.of("42px", "-42px")));
     assertEquals("0px",
         funct.getCallResultString(ImmutableList.of("0px", "0px")));
+    assertEquals("5",
+        funct.getCallResultString(ImmutableList.of("5", "10")));
   }
 
   public void testMinGetCallResultString_mismatchedUnitsFail() {
     GssFunctions.MinValue funct = new GssFunctions.MinValue();
     testFunctionCallFail(funct, ImmutableList.of("60px", "30em"));
-  }
-
-  public void testLeftAssociativeOperator_noUnitsFail() {
-    testFunctionCallFail(new GssFunctions.AddToNumericValue(),
-        ImmutableList.of("42", "-42"));
-    testFunctionCallFail(new GssFunctions.SubtractFromNumericValue(),
-        ImmutableList.of("42", "-42"));
-    testFunctionCallFail(new GssFunctions.MinValue(),
-        ImmutableList.of("42", "-42"));
-    testFunctionCallFail(new GssFunctions.MaxValue(),
-        ImmutableList.of("42", "-42"));
   }
 
   public void testScalarLeftAssociativeOperator_unexpectedUnitsFail() {

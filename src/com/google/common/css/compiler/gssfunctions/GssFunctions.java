@@ -64,9 +64,6 @@ public class GssFunctions {
         .put("divide", new GssFunctions.Div())
         .put("min", new GssFunctions.MinValue())
         .put("max", new GssFunctions.MaxValue())
-        // Scalar versions off add/sub
-        .put("addScalar", new GssFunctions.AddScalar())
-        .put("subScalar", new GssFunctions.SubtractScalar())
 
         // Color functions.
         .put("blendColorsHsb", new BlendColorsHsb())
@@ -865,7 +862,8 @@ public class GssFunctions {
         throws GssFunctionException {
       List<CssNumericNode> numericList = Lists.newArrayList();
       for (String arg : args) {
-        Size sizeWithUnits = parseSize(arg);
+        // Note, the unit may be 'NO_UNITS'
+        Size sizeWithUnits = parseSize(arg, true /* isUnitOptional */);
         numericList.add(
             new CssNumericNode(sizeWithUnits.size, sizeWithUnits.units));
       }
@@ -922,11 +920,6 @@ public class GssFunctions {
     protected boolean isIdentityValue(double value) {
       return false;
     }
-
-    protected Size parseSize(String sizeWithUnits)
-        throws GssFunctionException {
-      return GssFunctions.parseSize(sizeWithUnits, /* isUnitOptional */ false);
-    }
   }
 
 
@@ -946,41 +939,10 @@ public class GssFunctions {
   }
 
   /**
-   * The "add()" function which unit is not required on parameters.
-   */
-  public static class AddScalar extends ScalarLeftAssociativeOperator {
-    @Override
-    protected double performOperation(double left, double right) {
-      return left + right;
-    }
-
-    @Override
-    protected boolean isIdentityValue(double value) {
-      return value == 0.0;
-    }
-  }
-
-
-  /**
    * The "sub()" function subtracts a list of numeric values.
    * SubtractFromNumericValue(a, b, c) evaluates to ((a - b) - c).
    */
   public static class SubtractFromNumericValue extends LeftAssociativeOperator {
-    @Override
-    protected double performOperation(double left, double right) {
-      return left - right;
-    }
-
-    @Override
-    protected boolean isIdentityValue(double value) {
-      return value == 0.0;
-    }
-  }
-
-  /**
-   * The "sub()" function which unit is not required on parameters.
-   */
-  public static class SubtractScalar extends ScalarLeftAssociativeOperator {
     @Override
     protected double performOperation(double left, double right) {
       return left - right;
@@ -1050,24 +1012,6 @@ public class GssFunctions {
       return new CssNumericNode(resultString,
           overallUnit != null ? overallUnit : CssNumericNode.NO_UNITS,
           args.get(0).getSourceCodeLocation());
-    }
-
-    @Override
-    public String getCallResultString(List<String> args)
-        throws GssFunctionException {
-      List<CssNumericNode> numericList = Lists.newArrayList();
-      for (String arg : args) {
-        Size sizeWithUnits = parseSize(arg);
-        numericList.add(
-            new CssNumericNode(sizeWithUnits.size, sizeWithUnits.units));
-      }
-      CssNumericNode result = calculate(numericList, null);
-      return result.getNumericPart() + result.getUnit();
-    }
-
-    @Override
-    protected Size parseSize(String size) throws GssFunctionException {
-      return GssFunctions.parseSize(size, /* isUnitOptional */ true);
     }
   }
 
