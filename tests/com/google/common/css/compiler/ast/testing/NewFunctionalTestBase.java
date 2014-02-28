@@ -223,11 +223,17 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
     @Override
     public void generateReport() {
       for (GssError error : errors) {
-        print(error.getMessage());
+        print(error);
       }
       for (GssError warning : warnings) {
-        print(warning.getMessage());
+        print(warning);
       }
+    }
+
+    public void print(GssError error) {
+      assertTrue("Unexpected extra error: " + error.format(),
+          currentIndex < expectedMessages.length);
+      print(error.getMessage());
     }
 
     @Override

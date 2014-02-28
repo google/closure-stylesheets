@@ -344,4 +344,25 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
     parseAndRun("@font-face param { font-family: Gentium }",
         CreateStandardAtRuleNodes.FONT_FACE_PARAMETERS_ERROR_MESSAGE);
   }
+
+  public void testMonochrome() throws Exception {
+    parseAndRun(
+        "@media (monochrome) {\n"
+        + "  .test { text-decoration: underline; }\n"
+        + "}");
+  }
+
+  public void testMediaAndAnd() throws Exception {
+    parseAndRun(
+        "@media (monochrome) and (min-width:800px) and (scan:progressive) {\n"
+        + "  .test { text-decoration: underline; }\n"
+        + "}");
+  }
+
+  public void testMinColorIndex() throws Exception {
+    parseAndRun(
+        "@media (min-color-index: 256) {\n"
+        + "  .test { font-color: red; }\n"
+        + "}");
+  }
 }

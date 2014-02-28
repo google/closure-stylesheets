@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssAtRuleNode;
 import com.google.common.css.compiler.ast.CssAtRuleNode.Type;
 import com.google.common.css.compiler.ast.CssBlockNode;
+import com.google.common.css.compiler.ast.CssBooleanExpressionNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
@@ -274,8 +275,17 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
   private boolean checkMediaParameter(List<CssValueNode> params) {
     if (params.get(0) instanceof CssCompositeValueNode) {
       return checkMediaCompositeExpression(params, 0);
+    } else if (params.get(0) instanceof CssBooleanExpressionNode) {
+      // shorthand syntax: implicit "all and..."
+      return checkMediaExpression(params, 0);
     } else if (!(params.get(0) instanceof CssLiteralNode)) {
       // nodes like the function node are invalid
+      CssValueNode node = params.get(0);
+      reportWarning(
+          String.format(
+              "Expected CssLiteralNode but found {0}",
+              node.getClass().getName()),
+          node);
       return false;
     }
     int numberOfStartingLiterals = 1;
@@ -285,10 +295,13 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
     }
     if (params.size() < numberOfStartingLiterals) {
       // only 'only' or 'not'
+      reportWarning(
+          "Expected CssLiteralNode after 'only' or 'not'.",
+          params.get(params.size() - 1));
       return false;
     }
     if (params.size() - numberOfStartingLiterals > 0) {
-      return checkMediaExpression(params, numberOfStartingLiterals);
+      return checkAndMediaExpression(params, numberOfStartingLiterals);
     }
     return true;
   }
@@ -296,7 +309,8 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
   /**
    * Checks for [ AND S* expression ]* where expression is some value.
    */
-  private boolean checkMediaExpression(List<CssValueNode> params, int start) {
+  private boolean checkAndMediaExpression(
+      List<CssValueNode> params, int start) {
     if (params.size() - start < 2) {
       // at least two more: 'and X'
       return false;
@@ -305,10 +319,23 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
       // expected 'and'
       return false;
     }
-    if (params.get(start + 1) instanceof CssCompositeValueNode) {
-      return checkMediaCompositeExpression(params, start + 1);
-    } else if (params.size() > start + 2) {
-      return checkMediaExpression(params, start + 2);
+    return checkMediaExpression(params, start + 1);
+  }
+
+  /**
+   * Checks for S* expression | S* expression [ AND S* expression ]*
+   * where expression is some value.
+   */
+  private boolean checkMediaExpression(
+      List<CssValueNode> params, int start) {
+    if (params.size() - start < 1) {
+      // at least one
+      return false;
+    }
+    if (params.get(start) instanceof CssCompositeValueNode) {
+      return checkMediaCompositeExpression(params, start);
+    } else if (params.size() > start + 1) {
+      return checkAndMediaExpression(params, start + 1);
     }
     return true;
   }
