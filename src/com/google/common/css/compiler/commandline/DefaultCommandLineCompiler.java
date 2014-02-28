@@ -26,6 +26,7 @@ import com.google.common.css.RecordingSubstitutionMap;
 import com.google.common.css.compiler.ast.BasicErrorManager;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.ErrorManager;
+import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.CompactPrinter;
@@ -188,10 +189,25 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
   /**
    * An error message handler.
    */
-  protected static class CompilerErrorManager extends BasicErrorManager {
+  protected static final class CompilerErrorManager extends BasicErrorManager {
+    private boolean warningsAsErrors = false;
+
     @Override
     public void print(String msg) {
       System.err.println(msg);
+    }
+
+    @Override
+    public void reportWarning(GssError warning) {
+      if (warningsAsErrors) {
+        report(warning);
+      } else {
+        super.reportWarning(warning);
+      }
+    }
+
+    public void setWarningsAsErrors(boolean state) {
+      warningsAsErrors = state;
     }
   }
 }
