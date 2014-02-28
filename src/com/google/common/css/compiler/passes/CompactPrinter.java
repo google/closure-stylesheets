@@ -521,4 +521,8 @@ public class CompactPrinter extends DefaultTreeVisitor
     p.runPass();
     return p.getCompactPrintedString().trim();
   }
+
+  public static String printCompactly(CssTree t) {
+    return printCompactly(t.getRoot());
+  }
 }
