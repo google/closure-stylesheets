@@ -17,7 +17,10 @@
 package com.google.common.css.compiler.ast;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.css.SourceCodeLocation;
+
+import java.text.MessageFormat;
 
 /**
  * GSS parser error description.
@@ -60,18 +63,46 @@ public class GssError implements Comparable<GssError> {
 
   public String format() {
     if (format == null) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(message).append(" in ").append(location.getSourceCode().getFileName());
-      sb.append(" at line ").append(location.getBeginLineNumber());
-      sb.append(" column ").append(location.getBeginIndexInLine());
-      sb.append(":\n").append(getLine()).append('\n');
-      for (int i = 1; i < location.getBeginIndexInLine(); i++) {
-        sb.append(' ');
-      }
-      sb.append('^').append('\n');
-      format = sb.toString();
+      format = messageFormat().apply();
     }
     return format;
+  }
+
+  /**
+   * A String template, together with values for the template holes.
+   * {@see java.text.MessageFormat}
+   */
+  public static class MessageFormatArgs {
+    public final String pattern;
+    public final Object[] arguments;
+
+    public MessageFormatArgs(String pattern, Object... arguments) {
+      this.pattern = pattern;
+      this.arguments = arguments;
+    }
+
+    public String apply() {
+      return MessageFormat.format(pattern, arguments);
+    }
+  }
+
+  /**
+   * Returns a MessageFormatArgs representation of the object. This is
+   * a parbaked precursor to the value given by {@link #format},
+   * intended for use in FormattingLoggers and other contexts where it
+   * is useful to maintain separation between boilerplate and details.
+   */
+  public MessageFormatArgs messageFormat() {
+    if (location.isUnknown()) {
+      return new MessageFormatArgs("{0} at unknown location", message);
+    } else {
+      return new MessageFormatArgs(
+          "{0} in {1} at line {2} column {3}:\n{4}\n{5}^\n",
+          message, location.getSourceCode().getFileName(),
+          location.getBeginLineNumber(),
+          location.getBeginIndexInLine(), getLine(),
+          Strings.repeat(" ", location.getBeginIndexInLine() - 1));
+    }
   }
 
   @Override
