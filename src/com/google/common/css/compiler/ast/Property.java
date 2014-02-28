@@ -532,6 +532,7 @@ public final class Property {
         builder("-webkit-column-span"),
         builder("-webkit-column-width"),
         builder("-webkit-columns"),
+        builder("-webkit-cursor-visibility"),
         builder("-webkit-dashboard-region"),
         builder("-webkit-filter"),
         builder("-webkit-flex"),
