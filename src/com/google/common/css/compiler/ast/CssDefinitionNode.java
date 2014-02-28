@@ -58,6 +58,16 @@ public class CssDefinitionNode extends CssAtRuleNode implements ChunkAware {
    * Constructor of a definition.
    */
   public CssDefinitionNode(List<CssValueNode> parameters, CssLiteralNode name,
+                           SourceCodeLocation sourceCodeLocation) {
+    super(CssAtRuleNode.Type.DEF, name);
+    setParameters(parameters);
+    setSourceCodeLocation(sourceCodeLocation);
+  }
+
+  /**
+   * Constructor of a definition.
+   */
+  public CssDefinitionNode(List<CssValueNode> parameters, CssLiteralNode name,
                            List<CssCommentNode> comments) {
     super(CssAtRuleNode.Type.DEF, name, comments);
     setParameters(parameters);

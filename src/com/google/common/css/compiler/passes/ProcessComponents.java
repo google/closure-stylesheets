@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.CssAtRuleNode;
 import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
@@ -221,6 +222,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     private final boolean isAbstract;
     private final String currentName;
     private final String parentName;
+    private final SourceCodeLocation sourceCodeLocation;
 
     public TransformNodes(Set<String> constants, CssComponentNode current, boolean inAncestorBlock,
                           MutatingVisitController visitController, ErrorManager errorManager) {
@@ -232,6 +234,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
       this.isAbstract = current.isAbstract();
       this.currentName = current.getName().getValue();
       this.parentName = inAncestorBlock ? current.getParentName().getValue() : null;
+      this.sourceCodeLocation = current.getSourceCodeLocation();
     }
 
     @Override
@@ -284,9 +287,11 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
             ? defName : parentRefPrefix + defName;
         CssConstantReferenceNode parentRefNode =
             new CssConstantReferenceNode(parentRefName);
-        newNode = new CssDefinitionNode(ImmutableList.<CssValueNode>of(parentRefNode), newDefLit);
+        newNode = new CssDefinitionNode(ImmutableList.<CssValueNode>of(parentRefNode),
+            newDefLit, sourceCodeLocation);
       } else {
-        newNode = new CssDefinitionNode(CssAtRuleNode.copyNodes(node.getParameters()), newDefLit);
+        newNode = new CssDefinitionNode(CssAtRuleNode.copyNodes(node.getParameters()),
+            newDefLit, sourceCodeLocation);
       }
       componentConstants.add(defName);
       renamedDefinitions.add(newNode);
