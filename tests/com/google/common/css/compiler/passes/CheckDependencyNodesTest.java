@@ -29,7 +29,7 @@ import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 public class CheckDependencyNodesTest extends NewFunctionalTestBase {
 
   private CheckDependencyNodes processDependencyNodes;
-  
+
   @Override
   protected void runPass() {
     processDependencyNodes = new CheckDependencyNodes(
@@ -39,31 +39,31 @@ public class CheckDependencyNodesTest extends NewFunctionalTestBase {
 
   public void testOrdinaryProvideRequire() throws GssParserException {
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
-        "first.css", "@provide foo;",
-        "second.css", "@require foo;");
+        "first.css", "@provide 'foo.bar';",
+        "second.css", "@require 'foo.bar';");
     parseAndRun(fileNameToGss);
-    assertEquals(ImmutableList.of("foo"),
+    assertEquals(ImmutableList.of("foo.bar"),
         processDependencyNodes.getProvidesInOrder());
   }
 
   public void testMissingProvide() throws GssParserException {
-    parseAndRun("@require foo;", "Missing provide for: foo");
+    parseAndRun("@require 'foo.bar';", "Missing provide for: foo.bar");
   }
 
   public void testDuplicateProvide() throws GssParserException {
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
-        "first.css", "@provide foo;",
-        "second.css", "@provide foo;");
-    parseAndRun(fileNameToGss, "Duplicate provide for: foo");
+        "first.css", "@provide 'foo.bar';",
+        "second.css", "@provide 'foo.bar';");
+    parseAndRun(fileNameToGss, "Duplicate provide for: foo.bar");
   }
 
   public void testDependencyOrder() throws GssParserException {
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
-        "first.css", "@provide foo;",
-        "second.css", "@provide bar;",
-        "third.css", "@provide baz; @require foo; @require bar;",
-        "fourth.css", "@provide buzz; @require baz;",
-        "fifth.css", "@require buzz;");
+        "first.css", "@provide 'foo';",
+        "second.css", "@provide 'bar';",
+        "third.css", "@provide 'baz'; @require 'foo'; @require 'bar';",
+        "fourth.css", "@provide 'buzz'; @require 'baz';",
+        "fifth.css", "@require 'buzz';");
     parseAndRun(fileNameToGss);
     assertEquals(ImmutableList.of("foo", "bar", "baz", "buzz"),
         processDependencyNodes.getProvidesInOrder());

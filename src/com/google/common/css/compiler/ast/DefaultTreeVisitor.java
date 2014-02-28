@@ -323,4 +323,20 @@ public class DefaultTreeVisitor implements CssTreeVisitor {
 
   @Override
   public void leavePseudoElement(CssPseudoElementNode pseudoElement) {}
+
+  @Override
+  public boolean enterProvideNode(CssProvideNode node) {
+    return true;
+  }
+
+  @Override
+  public void leaveProvideNode(CssProvideNode node) {}
+
+  @Override
+  public boolean enterRequireNode(CssRequireNode node) {
+    return true;
+  }
+
+  @Override
+  public void leaveRequireNode(CssRequireNode node) {}
 }

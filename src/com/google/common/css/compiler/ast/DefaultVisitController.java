@@ -434,6 +434,49 @@ class DefaultVisitController implements MutatingVisitController {
     }
   }
 
+
+  @VisibleForTesting
+  class VisitProvideState extends BaseVisitState<CssNode> {
+
+    private final CssProvideNode node;
+
+    VisitProvideState(CssProvideNode node) {
+      this.node = node;
+    }
+
+    @Override
+    public void doVisit() {
+      visitor.enterProvideNode(node);
+      visitor.leaveProvideNode(node);
+    }
+
+    @Override
+    public void transitionToNextState() {
+      stateStack.pop();
+    }
+  }
+
+  @VisibleForTesting
+  class VisitRequireState extends BaseVisitState<CssNode> {
+
+    private final CssRequireNode node;
+
+    VisitRequireState(CssRequireNode node) {
+      this.node = node;
+    }
+
+    @Override
+    public void doVisit() {
+      visitor.enterRequireNode(node);
+      visitor.leaveRequireNode(node);
+    }
+
+    @Override
+    public void transitionToNextState() {
+      stateStack.pop();
+    }
+  }
+
   @VisibleForTesting
   class RootVisitBodyState extends VisitChildrenOptionalState<CssNode> {
 
@@ -1912,6 +1955,16 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   private VisitState<? extends CssNode> createVisitStateInternal(CssNode child) {
+    // VisitProvideState
+    if (child instanceof CssProvideNode) {
+      return new VisitProvideState((CssProvideNode) child);
+    }
+
+    // VisitRequireState
+    if (child instanceof CssRequireNode) {
+      return new VisitRequireState((CssRequireNode) child);
+    }
+
     // VisitUnknownAtRuleBlockState
     if (child instanceof CssMediaRuleNode) {
       return new VisitMediaRuleState((CssMediaRuleNode) child);

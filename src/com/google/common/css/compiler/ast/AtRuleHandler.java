@@ -106,4 +106,18 @@ public interface AtRuleHandler {
 
   /** Called after visiting a {@code CssMixinNode}'s sub trees */
   void leaveMixin(CssMixinNode node);
+
+  /** Called before visiting a {@code CssProvideNode}'s sub trees */
+  boolean enterProvideNode(CssProvideNode node);
+
+  /** Called after visiting a {@code CssProvideNode}'s sub trees */
+  void leaveProvideNode(CssProvideNode node);
+
+  /** Called before visiting a {@code CssRequireNode}'s sub trees */
+  boolean enterRequireNode(CssRequireNode node);
+
+  /** Called after visiting a {@code CssRequireNode}'s sub trees */
+  void leaveRequireNode(CssRequireNode node);
+
+
 }
