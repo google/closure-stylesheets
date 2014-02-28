@@ -53,6 +53,9 @@ public final class Property {
 
   static {
     List<Builder> recognizedProperties = ImmutableList.of(
+        builder("align-content"),
+        builder("align-items"),
+        builder("align-self"),
         builder("alignment-baseline").isSvgOnly(),
         builder("animation"),
         builder("animation-delay"),
