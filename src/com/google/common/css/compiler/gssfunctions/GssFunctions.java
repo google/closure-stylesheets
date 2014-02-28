@@ -64,6 +64,9 @@ public class GssFunctions {
         .put("divide", new GssFunctions.Div())
         .put("min", new GssFunctions.MinValue())
         .put("max", new GssFunctions.MaxValue())
+        // Scalar versions off add/sub
+        .put("addScalar", new GssFunctions.AddScalar())
+        .put("subScalar", new GssFunctions.SubtractScalar())
 
         // Color functions.
         .put("blendColorsHsb", new BlendColorsHsb())
