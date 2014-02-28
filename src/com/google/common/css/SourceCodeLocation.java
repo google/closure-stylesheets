@@ -66,7 +66,7 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
    * <p>Instances of this class are immutable.
    */
   @VisibleForTesting
-  public static class SourceCodePoint implements Comparable<SourceCodePoint> {
+  static class SourceCodePoint implements Comparable<SourceCodePoint> {
 
     /**
      * The index of the character immediately after the source code point.
@@ -90,23 +90,10 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
       this.lineNumber = lineNumber;
       this.indexInLine = indexInLine;
       this.characterIndex = characterIndex;
-      if (!hasValidKnownCoordinates()
-          && !hasValidUnknownCoordinates()) {
-        throw new IllegalArgumentException(
-          String.format(
-              "The location passed "
-              + "(lineNumber %d, indexInLine %d, characterIndex %d) "
-              + "is not valid.",
-              lineNumber, indexInLine, characterIndex));
-      }
-      if (!hasPlausibleCoordinates()) {
-        throw new IllegalArgumentException(
-          String.format(
-              "The location passed "
-              + "(lineNumber %d, indexInLine %d, characterIndex %d) "
-              + "is not plausible.",
-              lineNumber, indexInLine, characterIndex));
-      }
+      Preconditions.checkArgument(hasValidKnownCoordinates()
+          || hasValidUnknownCoordinates(), "The location passed is not valid.");
+      Preconditions.checkArgument(hasPlausibleCoordinates(),
+          "The location passed is not valid.");
     }
 
     SourceCodePoint(SourceCodePoint that) {
@@ -175,27 +162,6 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
       Preconditions.checkNotNull(o);
       return Ints.compare(this.characterIndex, o.characterIndex);
     }
-  }
-
-  private static final SourceCode UNKNOWN_SOURCE_CODE =
-      new SourceCode("unknown", "");
-
-  /**
-   * Returns an unknown location.
-   */
-  public static SourceCodeLocation getUnknownLocation() {
-    SourceCodeLocation result = new SourceCodeLocation(
-        UNKNOWN_SOURCE_CODE,
-        -1 /* beginCharacterIndex */,
-        0 /* beginLineNumber */,
-        0 /* beginIndexInLine */,
-        -1 /* endCharacterindex */,
-        0 /* endLineNumber */,
-        0 /* endIndexInLine */);
-    Preconditions.checkState(result.isUnknown());
-    Preconditions.checkState(result.begin.hasValidUnknownCoordinates());
-    Preconditions.checkState(result.end.hasValidUnknownCoordinates());
-    return result;
   }
 
   private final SourceCode sourceCode;
@@ -271,14 +237,6 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
 
   public int getIndexInLine() {
     return getBeginIndexInLine();
-  }
-
-  public SourceCodePoint getBegin() {
-    return begin;
-  }
-
-  public SourceCodePoint getEnd() {
-    return end;
   }
 
   @Override

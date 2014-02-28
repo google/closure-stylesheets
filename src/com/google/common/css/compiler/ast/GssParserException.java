@@ -32,7 +32,7 @@ public class GssParserException extends Exception {
     this(location, null);
   }
 
-  public GssError getGssError() {
+  GssError getGssError() {
     return gssError;
   }
 

@@ -81,14 +81,6 @@ public class SourceCodeLocationBuilder {
     return this;
   }
 
-  public SourceCodeLocationBuilder setBeginLocation(SourceCodeLocation.SourceCodePoint begin) {
-    checkLocationIsNotAlreadyCreated();
-    Preconditions.checkNotNull(begin);
-    setBeginLocation(begin.getCharacterIndex(), begin.getLineNumber(),
-        begin.getIndexInLine());
-    return this;
-  }
-
   public boolean hasBeginLocation() {
     return this.beginCharacterIndex != -1;
   }
@@ -105,14 +97,6 @@ public class SourceCodeLocationBuilder {
     this.endCharacterIndex = characterIndex;
     this.endLineNumber = lineNumber;
     this.endIndexInLine = indexInLine;
-    return this;
-  }
-
-  public SourceCodeLocationBuilder setEndLocation(SourceCodeLocation.SourceCodePoint end) {
-    checkLocationIsNotAlreadyCreated();
-    Preconditions.checkNotNull(end);
-    setEndLocation(end.getCharacterIndex(), end.getLineNumber(),
-        end.getIndexInLine());
     return this;
   }
 
