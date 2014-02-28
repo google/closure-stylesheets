@@ -411,10 +411,12 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
           && !PSEUDO_PAGES.contains(params.get(1).getValue())) {
       reportError(INVALID_PARAMETERS_ERROR_MESSAGE, node);
       return;
-    } else if (numParams == 1
-        && !PSEUDO_PAGES.contains(params.get(0).getValue())) {
-      reportError(INVALID_PARAMETERS_ERROR_MESSAGE, node);
-      return;
+    } else if (numParams == 1) {
+      if (params.get(0).getValue().startsWith(":")
+          && !PSEUDO_PAGES.contains(params.get(0).getValue())) {
+        reportError(INVALID_PARAMETERS_ERROR_MESSAGE, node);
+        return;
+      }
     }
     CssDeclarationBlockNode block = (CssDeclarationBlockNode) node.getBlock();
     CssPageRuleNode pageRule = new CssPageRuleNode(node.getComments(),

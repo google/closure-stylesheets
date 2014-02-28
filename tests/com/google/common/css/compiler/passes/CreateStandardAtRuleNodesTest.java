@@ -227,6 +227,15 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
     assertEquals(":right", pageRule.getParameters().get(1).getValue());
   }
 
+  public void testCreatePageWithTypeSelector() throws Exception {
+    parseAndRun("@page artsy { a:b }");
+    assertTrue(getFirstActualNode() instanceof CssPageRuleNode);
+    CssPageRuleNode pageRule = (CssPageRuleNode) getFirstActualNode();
+    assertEquals("page", pageRule.getName().getValue());
+    assertEquals(1, pageRule.getParametersCount());
+    assertEquals("artsy", pageRule.getParameters().get(0).getValue());
+  }
+
   public void testCreatePageInMedia() throws Exception {
     parseAndRun("@media print { @page { a:b } } ");
     assertTrue(getFirstActualNode() instanceof CssMediaRuleNode);
