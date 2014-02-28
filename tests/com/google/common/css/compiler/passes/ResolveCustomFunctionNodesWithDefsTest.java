@@ -39,9 +39,12 @@ public class ResolveCustomFunctionNodesWithDefsTest
   protected boolean allowUnknownFunctions = false;
 
   protected Map<String, GssFunction> createTestFunctionMap() {
-    return new ImmutableMap.Builder<String, GssFunction>()
-        .put("testMultipleArg", new SampleMultipleArgsFunc())
-        .build();
+    /*
+     * The explicit type parameters required here due to a bug in the JDK used
+     * to compile the open-source test.
+     */
+    return ImmutableMap.<String, GssFunction>of(
+        "testMultipleArg", new SampleMultipleArgsFunc());
   }
 
   @Override
