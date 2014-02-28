@@ -165,7 +165,7 @@ public class CreateConditionalNodes extends DefaultTreeVisitor
    * BlockNode's first child's beginning location point and ends at the
    * last child's ending location point.
    */
-  private void updateLocation(CssConditionalBlockNode blockNode){
+  private void updateLocation(CssConditionalBlockNode blockNode) {
     SourceCodeLocation firstLocation = blockNode.getSourceCodeLocation();
     SourceCodeLocation lastLocation = blockNode.getLastChild().getSourceCodeLocation();
     SourceCodeLocation mergedLocation = new SourceCodeLocation(

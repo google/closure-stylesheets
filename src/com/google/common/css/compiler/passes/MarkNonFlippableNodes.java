@@ -112,7 +112,7 @@ public class MarkNonFlippableNodes extends DefaultTreeVisitor
 
   @Override
   public boolean enterSelector(CssSelectorNode node) {
-    if (hasNoFlip(node)){
+    if (hasNoFlip(node)) {
       node.setShouldBeFlipped(false);
     }
     return true;
@@ -120,7 +120,7 @@ public class MarkNonFlippableNodes extends DefaultTreeVisitor
 
   @Override
   public void leaveSelector(CssSelectorNode node) {
-    for (CssRefinerNode refiner : node.getRefiners().getChildren()){
+    for (CssRefinerNode refiner : node.getRefiners().getChildren()) {
       if (hasNoFlip(refiner)) {
         node.setShouldBeFlipped(false);
         return;

@@ -1145,7 +1145,7 @@ public class GssFunctions {
         return originalColorStr;
       }
       Color originalColor = ColorParser.parseAny(originalColorStr);
-      float brightnessFloat = Float.parseFloat(brightnessStr) / (float)100.0;
+      float brightnessFloat = Float.parseFloat(brightnessStr) / (float) 100.0;
 
       float[] originalColorHsb = toHsb(originalColor);
       float requestedBrightness = originalColorHsb[2] + brightnessFloat;
