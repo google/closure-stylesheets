@@ -17,18 +17,24 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.BasicErrorManager;
-import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
 
 import java.util.SortedSet;
 
 /**
- * {@link DummyErrorManager} is a dummy for testing to satisfy a method that
- * requires a non-null {@link ErrorManager}.
+ * {@link DummyErrorManager} is a stateless error manager suitable for use
+ * in the Null Object pattern.
+ * {@link ErrorManager}.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
 public class DummyErrorManager extends BasicErrorManager {
+  private static final DummyErrorManager INSTANCE = new DummyErrorManager();
+
+  public static DummyErrorManager getInstance() {
+    return INSTANCE;
+  }
+
   @Override
   public void print(String msg) {
   }
