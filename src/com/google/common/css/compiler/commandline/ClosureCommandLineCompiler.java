@@ -114,7 +114,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     private String renameFile = null;
 
     @Option(name = "--output-renaming-map-format", usage = "How to format the"
-        + " output from the the CSS class renaming.")
+        + " output from the CSS class renaming.")
     private OutputRenamingMapFormat outputRenamingMapFormat =
         OutputRenamingMapFormat.JSON;
 
