@@ -18,6 +18,7 @@ package com.google.common.css.compiler.ast;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.css.SourceCode;
+import com.google.common.css.compiler.passes.CompactPrinter;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
 
 import junit.framework.TestCase;
@@ -737,6 +738,52 @@ public class GssParserTest extends TestCase {
           + "values.",
           css.indexOf("<!--"),
           e.getGssError().getLocation().getBeginCharacterIndex());
+    }
+  }
+
+  public void testMicrosoftListAtRule() throws Exception {
+    // This is syntactically valid according to CSS3, so we should
+    // be able to ignore the proprietary @list rule and not fail
+    // the whole parse.
+    String[] samples = new String[] {
+      "@list l0\n"
+      + "{mso-list-id:792754432;}\n"
+      + "div { border: solid thin black }",
+      "@list l0:level1\n"
+      + "{mso-list-id:792754432;}\n"
+      + "div { border: solid thin black }"};
+    for (String css : samples) {
+      // no exceptions the first time
+      CssTree t1 = parse(css);
+      String output1 = CompactPrinter.printCompactly(t1);
+      // also no exceptions the second time
+      CssTree t2 = parse(output1);
+      // and the we've reached a fixed point
+      assertEquals(
+          AstPrinter.print(t1), AstPrinter.print(t2));
+    }
+  }
+
+  public void testRunawayMicrosoftListAtRule() throws Exception {
+    String[] samples = new String[] {
+      // unterminated block
+      "@list l0 {mso-list-id:792754432;",
+      // unterminated nested paren
+      "@list l0 {mso-list-id:792754432;(}",
+      // improper nesting with parens
+      "@list l0 {mso-list-id:792754432;(})",
+      // unterminated block, unmatched open bracket
+      "@list l0 {mso-list-id:792754432;[",
+      // unterminated block, close bracket without matching open bracket
+      "@list l0 {mso-list-id:792754432;]"};
+    for (String css : samples) {
+      try {
+        CssTree t = parse(css);
+        fail("The compiler should only accept complete @list rules, not "
+            + css);
+      } catch (GssParserException e) {
+        // expected
+      }
     }
   }
 }

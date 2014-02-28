@@ -599,6 +599,8 @@ PARSER_END(GssParserCC)
   // {ident}"(        {return FUNCTION;}
   | < FUNCTION: <IDENTIFIER> <LEFTROUND> >
 
+  | < ATLIST: <AT> "list" >
+
   // "@-webkit-keyframes"
   // Special handling needed because of the keys instead of the selectors
   | < WEBKITKEYFRAMES: <AT> ( "keyframes" | "-webkit-keyframes" |
@@ -1887,6 +1889,7 @@ CssBlockNode block(boolean isEnclosedWithBraces) :
     }
   }
   ((  n = ruleSet()
+    | LOOKAHEAD( <ATLIST> ) n = atRuleWithCrazySyntax()
     | n = at_rule()
     | n = webkit_keyframes_rule()
     | n = atRuleWithDeclBlock()
@@ -1902,4 +1905,191 @@ void start() :
   ( <S> | <CDO> | <CDC> )*
   block(false)
   <EOF>
+}
+
+
+// CSS3 has very few syntactic constraints on at-rules. We shouldn't let
+// our inability to understand the details of future or non-standard at-rules
+// prevent us from parsing the rest of the stylesheet.
+// at_rule_with_crazy_syntax
+//   : ATKEYWORD S* [^;{] LOOKAHEAD( ( ';' | <?LEFTBRACE> ) ) ';'?
+CssAtRuleNode atRuleWithCrazySyntax() :
+{
+  Token t;
+  String s;
+  SourceCodeLocation beginLocation = null;
+  CssLiteralNode name;
+  CssLiteralNode nonBlockContent;
+  CssLiteralNode blockishContent = null;
+  List<Token> tokens = Lists.newArrayList();
+  SourceCodeLocation endLocation = null;
+}
+{
+  // Don't add more special cases like this one and the webkit keyframes
+  // one. If you want to support a new block type that follows the CSS 2.1
+  // and 3 grammars and doesn't quite fit into the traditional GssParser
+  // expectations, just change ATLIST below to ATKEYWORD, move the
+  // use site in the block() to the bottom of its disjunction, and use
+  // syntactic LOOKAHEAD(foo()) as needed for each foo() in the other choices
+  // at that disjunction to ensure that the parser eventually falls back to
+  // this rule. It will cost about 1.5% cpu time, but it will keep us from
+  // adding any more code complexity here.
+  t = <ATLIST>
+  {
+    beginLocation = this.getLocation(t);
+    name = new CssLiteralNode(t.image.substring(1), beginLocation);
+    tokens.add(t);
+  }
+  ( <S> ) *
+  s = scanCrazyContent(";{")
+  {
+    nonBlockContent = new CssLiteralNode(s);
+    tokens.add(t);
+  }
+  ( [blockishContent = crazyBlockBrace()
+    ]
+    [t = <SEMICOLON>
+     {
+       tokens.add(t);
+     }
+    ]
+  )
+  {
+    endLocation = this.getLocation(tokens.get(tokens.size() - 1));
+    List<CssValueNode> parameters = Lists.newArrayList();
+    if (nonBlockContent == null) {
+      throw new AssertionError("nonBlockContent should not be null");
+    }
+    parameters.add(nonBlockContent);
+    if (blockishContent != null) {
+      parameters.add(blockishContent);
+    }
+    return nodeBuilder.buildUnknownAtRuleNode(
+        name, null, this.mergeLocations(beginLocation, endLocation),
+        parameters,
+        tokens);
+  }
+}
+// A last-resort, minimally-restrictive brace-delimited production.
+CssLiteralNode crazyBlockBrace() :
+{
+  Token t;
+  String s;
+  SourceCodeLocation beginLocation;
+  SourceCodeLocation endLocation;
+  CssLiteralNode childContent = null;
+  CssLiteralNode childCrazy = null;
+  StringBuilder result = new StringBuilder();
+}
+{
+  t = <LEFTBRACE>
+  ( <S> )*
+  s = scanCrazyContent("{[()]}")
+  {
+    childContent = new CssLiteralNode(s);
+  }
+  (
+    (
+      (childCrazy = crazyBlockBrace()
+       | childCrazy = crazyBlockBracket()
+       | childCrazy = crazyBlockParen()))?
+    t = <RIGHTBRACE> { endLocation = this.getLocation(t); }
+  )
+  {
+    result.append("{");
+    if (childContent != null) result.append(childContent.getValue());
+    if (childContent != null && childCrazy != null) result.append(" ");
+    if (childCrazy != null) result.append(childCrazy.getValue());
+    result.append("}");
+    return new CssLiteralNode(result.toString());
+  }
+}
+// Inside blocks, brackets, parens, and braces must be balanced.
+CssLiteralNode crazyBlockBracket() :
+{
+  Token t;
+  String s;
+  SourceCodeLocation beginLocation;
+  SourceCodeLocation endLocation;
+  CssLiteralNode childContent = null;
+  CssLiteralNode childCrazy = null;
+  StringBuilder result = new StringBuilder();
+}
+{
+  t = <LEFTSQUARE>
+  ( <S> )*
+  s = scanCrazyContent("{[()]}")
+  {
+    childContent = new CssLiteralNode(s);
+  }
+  (
+    (
+      (childCrazy = crazyBlockBrace()
+       | childCrazy = crazyBlockBracket()
+       | childCrazy = crazyBlockParen()))?
+    t = <RIGHTSQUARE> { endLocation = this.getLocation(t); }
+  )
+  {
+    result.append("[");
+    if (childContent != null) result.append(childContent.getValue());
+    if (childContent != null && childCrazy != null) result.append(" ");
+    if (childCrazy != null) result.append(childCrazy.getValue());
+    result.append("]");
+    return new CssLiteralNode(result.toString());
+  }
+}
+// Inside blocks, brackets, parens, and braces must be balanced.
+CssLiteralNode crazyBlockParen() :
+{
+  Token t;
+  String s;
+  SourceCodeLocation beginLocation;
+  SourceCodeLocation endLocation;
+  CssLiteralNode childContent = null;
+  CssLiteralNode childCrazy = null;
+  StringBuilder result = new StringBuilder();
+}
+{
+  t = <LEFTROUND>
+  ( <S> )*
+  s = scanCrazyContent("{[()]}")
+  {
+    childContent = new CssLiteralNode(s);
+  }
+  (
+    (
+      (childCrazy = crazyBlockBrace()
+       | childCrazy = crazyBlockBracket()
+       | childCrazy = crazyBlockParen()))?
+    t = <RIGHTROUND> { endLocation = this.getLocation(t); }
+  )
+  {
+    result.append("(");
+    if (childContent != null) result.append(childContent.getValue());
+    if (childContent != null && childCrazy != null) result.append(" ");
+    if (childCrazy != null) result.append(childCrazy.getValue());
+    result.append(")");
+    return new CssLiteralNode(result.toString());
+  }
+}
+JAVACODE
+String scanCrazyContent(String endChars) {
+  StringBuilder sb = new StringBuilder();
+  Token t;
+  while (true) {
+    t = getToken(1);
+    if (t.kind == EOF) {
+      break;
+    }
+    if (t.image.length() == 1
+        && endChars.indexOf(t.image) != -1) {
+        break;
+    }
+    sb.append(t.image);
+    t = getNextToken();
+  }
+  if (sb.length() < 1) {
+    throw new ParseException("expected [" + endChars + "]");
+  }
+  return sb.toString();
 }
