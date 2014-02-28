@@ -21,7 +21,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.css.SourceCode;
-import com.google.common.css.compiler.ast.BasicErrorManager;
+import com.google.common.css.compiler.ast.AccessibleErrorManager;
 import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
@@ -35,22 +35,11 @@ import com.google.common.css.compiler.passes.testing.AstPrinter;
 
 import junit.framework.TestCase;
 
-import java.util.SortedSet;
-
 /**
  * Unit tests for {@link FixupFontDeclarations}.
  *
  */
 public class FixupFontDeclarationsTest extends TestCase {
-  private static class AccessibleErrorManager extends BasicErrorManager {
-    @Override
-    public void print(String msg) {}
-
-    public SortedSet<GssError> getErrors() {
-      return errors;
-    }
-  }
-
   private AccessibleErrorManager errorManager;
 
   public void testIdSequenceFontFamilies() throws Exception {
