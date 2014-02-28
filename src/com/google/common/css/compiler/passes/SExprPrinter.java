@@ -28,10 +28,16 @@ import com.google.common.css.compiler.ast.CssValueNode;
  */
 public class SExprPrinter extends UniformVisitor {
 
-  public StringBuilder sb;
+  public final StringBuilder sb;
+  public final boolean includeHashCodes;
+
+  public SExprPrinter(StringBuilder sb, boolean includeHashCodes) {
+    this.sb = sb;
+    this.includeHashCodes = includeHashCodes;
+  }
 
   public SExprPrinter(StringBuilder sb) {
-    this.sb = sb;
+    this(sb, true);
   }
 
   public SExprPrinter() {
@@ -40,8 +46,13 @@ public class SExprPrinter extends UniformVisitor {
 
   @Override
   public void enter(CssNode node) {
-    sb.append(
-        String.format("(%s@%d ", node.getClass().getName(), node.hashCode()));
+    if (includeHashCodes) {
+      sb.append(
+          String.format("(%s@%d ", node.getClass().getName(), node.hashCode()));
+    } else {
+      sb.append(
+          String.format("(%s ", node.getClass().getName()));
+    }
   }
 
   private void trim(StringBuilder sb, String waste) {
@@ -112,6 +123,24 @@ public class SExprPrinter extends UniformVisitor {
   public static String print(CssTree t) {
     StringBuilder sb = new StringBuilder();
     t.getVisitController().startVisit(new SExprPrinter(sb));
+    return sb.toString();
+  }
+
+  public static String print(boolean includeHashCodes, CssTree t) {
+    StringBuilder sb = new StringBuilder();
+    t.getVisitController().startVisit(new SExprPrinter(sb, includeHashCodes));
+    return sb.toString();
+  }
+
+  public static String print(CssNode n) {
+    StringBuilder sb = new StringBuilder();
+    n.getVisitController().startVisit(new SExprPrinter(sb));
+    return sb.toString();
+  }
+
+  public static String print(boolean includeHashCodes, CssNode n) {
+    StringBuilder sb = new StringBuilder();
+    n.getVisitController().startVisit(new SExprPrinter(sb, includeHashCodes));
     return sb.toString();
   }
 }

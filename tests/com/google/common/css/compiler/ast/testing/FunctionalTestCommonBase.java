@@ -21,6 +21,8 @@ import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssTree;
+import com.google.common.css.compiler.ast.VisitController;
+import com.google.common.css.compiler.passes.UniformVisitor;
 
 /**
  * Utility methods for all the functional tests.
@@ -69,6 +71,21 @@ public abstract class FunctionalTestCommonBase extends AstUtilityTestCase {
 
   protected CssNode getFirstActualNode() {
     return tree.getRoot().getBody().getChildAt(0);
+  }
+
+  protected <T> T findFirstNodeOf(final Class<T> clazz) {
+    final Object[] holder = new Object[1];
+    final VisitController vc = tree.getVisitController();
+    vc.startVisit(
+        new UniformVisitor() {
+          @Override public void enter(CssNode n) {
+            if (clazz.isAssignableFrom(n.getClass())) {
+              holder[0] = n;
+              vc.stopVisit();
+            }
+          }
+        });
+    return clazz.cast(holder[0]);
   }
 
   /**

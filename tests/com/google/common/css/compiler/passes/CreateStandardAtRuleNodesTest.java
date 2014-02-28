@@ -16,11 +16,15 @@
 
 package com.google.common.css.compiler.passes;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.common.css.compiler.ast.CssFontFaceNode;
+import com.google.common.css.compiler.ast.CssImportBlockNode;
 import com.google.common.css.compiler.ast.CssImportRuleNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssPageRuleNode;
 import com.google.common.css.compiler.ast.CssPageSelectorNode;
+import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
 
@@ -44,24 +48,26 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
 
   public void testCreateSimpleImportNode() throws Exception {
     parseAndRun("@import \"name\" ;");
-    assertTrue(getFirstActualNode() instanceof CssImportRuleNode);
-    CssImportRuleNode importRule = (CssImportRuleNode) getFirstActualNode();
+    CssImportRuleNode importRule = findFirstNodeOf(CssImportRuleNode.class);
     assertEquals("import", importRule.getName().getValue());
     assertEquals(1, importRule.getParametersCount());
+    assertTrue(
+        "Import rules should occur in the import block.",
+        Iterables.any(
+            importRule.ancestors(),
+            Predicates.instanceOf(CssImportBlockNode.class)));
   }
 
   public void testCreateUriImportNode() throws Exception {
     parseAndRun("@import url('/js/closure/css/common.css');");
-    assertTrue(getFirstActualNode() instanceof CssImportRuleNode);
-    CssImportRuleNode importRule = (CssImportRuleNode) getFirstActualNode();
+    CssImportRuleNode importRule = findFirstNodeOf(CssImportRuleNode.class);
     assertEquals("import", importRule.getName().getValue());
     assertEquals(1, importRule.getParametersCount());
   }
 
   public void testCreateComplexImportNode() throws Exception {
     parseAndRun("@import \"name\" param1, param2, param3;");
-    assertTrue(getFirstActualNode() instanceof CssImportRuleNode);
-    CssImportRuleNode importRule = (CssImportRuleNode) getFirstActualNode();
+    CssImportRuleNode importRule = findFirstNodeOf(CssImportRuleNode.class);
     assertEquals("import", importRule.getName().getValue());
     assertEquals(2, importRule.getParametersCount());
   }
@@ -79,6 +85,33 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
   public void testImportWithTooManyParamsError() throws Exception {
     parseAndRun("@import \"A\" b c,d;" , "@import with too many parameters");
     assertTrue(isEmptyBody());
+  }
+
+  public void testMisplacedImportWarnings() throws Exception {
+    CssTree t = parseAndRun("div { font-family: sans } @import 'a';",
+        CreateStandardAtRuleNodes.IGNORE_IMPORT_WARNING_MESSAGE,
+        CreateStandardAtRuleNodes.IGNORED_IMPORT_WARNING_MESSAGE);
+    assertEquals(
+        "This pass should not reorder misplaced nodes.",
+        "(com.google.common.css.compiler.ast.CssRootNode "
+        + "(com.google.common.css.compiler.ast.CssImportBlockNode)"
+        + "(com.google.common.css.compiler.ast.CssBlockNode "
+        + "(com.google.common.css.compiler.ast.CssRulesetNode "
+        + "(com.google.common.css.compiler.ast.CssSelectorListNode "
+        + "(com.google.common.css.compiler.ast.CssSelectorNode))"
+        + "(com.google.common.css.compiler.ast.CssDeclarationBlockNode "
+        + "(com.google.common.css.compiler.ast.CssDeclarationNode "
+        + "(com.google.common.css.compiler.ast.CssPropertyValueNode "
+        + "(com.google.common.css.compiler.ast.CssLiteralNode sans)))))"
+        + "(com.google.common.css.compiler.ast.CssImportRuleNode)))",
+        SExprPrinter.print(false /* includeHashCodes */, t));
+  }
+
+  public void testPrintableImports() throws Exception {
+    String css = "@import url('foo');div{font-family:sans}";
+    assertEquals(
+        css,
+        CompactPrinter.printCompactly(parseAndRun(css).getRoot()));
   }
 
   public void testCreateMediaNode1() throws Exception {
