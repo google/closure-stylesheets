@@ -143,29 +143,6 @@ public class GssFunctionsTest extends TestCase {
     testFunctionCallFail(div, ImmutableList.of("42px", "2em"));
   }
 
-  public void testSemiTransparentBackgroundColorNormalizesAlpha()
-      throws GssFunctionException {
-    GssFunctions.SemiTransparentBackgroundColor function =
-        new GssFunctions.SemiTransparentBackgroundColor();
-    assertEquals("url(rc/?a=tl&c=123456ff&ic=123456ff&w=2&h=1)",
-        function.getCallResultString(ImmutableList.of("#123456", "f")));
-  }
-
-  public void testSemiTransparentBackgroundColorNormalizesColor()
-      throws GssFunctionException {
-    GssFunctions.SemiTransparentBackgroundColor function =
-        new GssFunctions.SemiTransparentBackgroundColor();
-    assertEquals("url(rc/?a=tl&c=aabbccff&ic=aabbccff&w=2&h=1)",
-        function.getCallResultString(ImmutableList.of("#abc", "ff")));
-  }
-
-  public void testSemiTransparentBackgroundColorNormalizesColorAndAlpha()
-      throws GssFunctionException {
-    GssFunctions.SemiTransparentBackgroundColor function =
-        new GssFunctions.SemiTransparentBackgroundColor();
-    assertEquals("url(rc/?a=tl&c=ccddeeff&ic=ccddeeff&w=2&h=1)",
-        function.getCallResultString(ImmutableList.of("#cde", "f")));
-  }
 
   /*
    * Test that calling the function with the given arguments throws a
