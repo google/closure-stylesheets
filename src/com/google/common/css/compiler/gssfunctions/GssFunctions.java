@@ -943,10 +943,41 @@ public class GssFunctions {
   }
 
   /**
+   * The "add()" function which unit is not required on parameters.
+   */
+  public static class AddScalar extends ScalarLeftAssociativeOperator {
+    @Override
+    protected double performOperation(double left, double right) {
+      return left + right;
+    }
+
+    @Override
+    protected boolean isIdentityValue(double value) {
+      return value == 0.0;
+    }
+  }
+
+
+  /**
    * The "sub()" function subtracts a list of numeric values.
    * SubtractFromNumericValue(a, b, c) evaluates to ((a - b) - c).
    */
   public static class SubtractFromNumericValue extends LeftAssociativeOperator {
+    @Override
+    protected double performOperation(double left, double right) {
+      return left - right;
+    }
+
+    @Override
+    protected boolean isIdentityValue(double value) {
+      return value == 0.0;
+    }
+  }
+
+  /**
+   * The "sub()" function which unit is not required on parameters.
+   */
+  public static class SubtractScalar extends ScalarLeftAssociativeOperator {
     @Override
     protected double performOperation(double left, double right) {
       return left - right;

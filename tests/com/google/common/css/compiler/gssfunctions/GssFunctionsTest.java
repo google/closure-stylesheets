@@ -72,6 +72,10 @@ public class GssFunctionsTest extends TestCase {
         funct.getCallResultString(ImmutableList.of("21", "2")));
     assertEquals("-42",
         funct.getCallResultString(ImmutableList.of("21", "-2")));
+    GssFunctions.SubtractScalar subtractScalar = new GssFunctions.SubtractScalar();
+    assertEquals("19", subtractScalar.getCallResultString(ImmutableList.of("21", "2")));
+    GssFunctions.AddScalar addScalar = new GssFunctions.AddScalar();
+    assertEquals("23", addScalar.getCallResultString(ImmutableList.of("21", "2")));
   }
 
   public void testDivGetCallResultString() throws GssFunctionException {
