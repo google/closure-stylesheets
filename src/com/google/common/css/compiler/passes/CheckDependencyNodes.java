@@ -62,7 +62,7 @@ public class CheckDependencyNodes extends DefaultTreeVisitor
 
   public CheckDependencyNodes(MutatingVisitController visitController,
       ErrorManager errorManager) {
-    this(visitController, errorManager, false /* suppressDependencyCheck */);
+    this(visitController, errorManager, true /* suppressDependencyCheck */);
   }
 
   public CheckDependencyNodes(MutatingVisitController visitController,

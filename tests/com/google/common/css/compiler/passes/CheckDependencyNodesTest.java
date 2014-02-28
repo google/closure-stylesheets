@@ -33,7 +33,7 @@ public class CheckDependencyNodesTest extends NewFunctionalTestBase {
   @Override
   protected void runPass() {
     processDependencyNodes = new CheckDependencyNodes(
-        tree.getMutatingVisitController(), errorManager);
+        tree.getMutatingVisitController(), errorManager, false);
     processDependencyNodes.runPass();
   }
 
