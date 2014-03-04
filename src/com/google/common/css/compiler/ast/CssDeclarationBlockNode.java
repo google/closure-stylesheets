@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 /**
  * A {@link CssAbstractBlockNode} that contains only declarations and @-rules.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssDeclarationBlockNode extends CssAbstractBlockNode {
 

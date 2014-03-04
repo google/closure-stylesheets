@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
  * A node representing a CSS declaration in the abstract syntax tree.
  * For example: <code>background: red</code>
  *
+ * @author oana@google.com (Oana Florescu)
  */
 public class CssDeclarationNode extends CssNode {
   /** The node representing the property. */

@@ -44,7 +44,6 @@ import java.util.Set;
  * map of {link ConstantDefinitions} per chunk; there are no nested calls.
  *
  * @author dgajda@google.com (Damian Gajda)
- * @author nadaa@google.com (Nada Amin)
  */
 public class ResolveCustomFunctionNodesForChunks<T> extends ResolveCustomFunctionNodes {
 

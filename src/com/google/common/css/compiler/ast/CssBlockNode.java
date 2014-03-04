@@ -23,6 +23,7 @@ import java.util.List;
 /**
  * A {@link CssAbstractBlockNode} that contains only rulesets and @-rules.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CssBlockNode extends CssAbstractBlockNode {
 

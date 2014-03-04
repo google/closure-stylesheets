@@ -28,6 +28,7 @@ import java.util.List;
  * Default implementation of the MutatingVisitController. The controller is
  * mutating or not depending on a flag passed as a parameter to the constructor.
  *
+ * @author oana@google.com (Oana Florescu)
  */
 class DefaultVisitController implements MutatingVisitController {
 

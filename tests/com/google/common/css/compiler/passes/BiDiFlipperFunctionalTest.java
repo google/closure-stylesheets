@@ -22,6 +22,7 @@ import com.google.common.css.compiler.passes.testing.PassesTestBase;
 /**
  * Functional tests for {@link BiDiFlipper}.
  *
+ * @author roozbeh@google.com (Roozbeh Pournader)
  */
 public class BiDiFlipperFunctionalTest extends PassesTestBase {
   /**

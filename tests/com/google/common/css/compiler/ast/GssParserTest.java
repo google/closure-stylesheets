@@ -26,6 +26,7 @@ import junit.framework.TestCase;
 /**
  * Unit tests for the {@link GssParser}.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 
 public class GssParserTest extends TestCase {

@@ -37,7 +37,6 @@ import com.google.common.css.compiler.ast.CssValueNode;
  * @param <T> type of chunk id objects
  *
  * @author dgajda@google.com (Damian Gajda)
- * @author nadaa@google.com (Nada Amin)
  */
 public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
 

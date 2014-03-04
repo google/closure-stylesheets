@@ -49,6 +49,8 @@ import javax.annotation.Nullable;
 /**
  * Container for common GSS functions.
  *
+ * @author oana@google.com (Oana Florescu)
+ * @author dgajda@google.com (Damian Gajda)
  */
 public class GssFunctions {
 

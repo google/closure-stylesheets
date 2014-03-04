@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
  *
  * <p>This is meant to represent a leaf node so it lacks child nodes.
  *
+ * @author oana@google.com (Oana Florescu)
  */
 public class CssLiteralNode extends CssValueNode {
 

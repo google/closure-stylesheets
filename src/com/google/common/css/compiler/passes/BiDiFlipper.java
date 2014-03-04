@@ -48,6 +48,7 @@ import java.util.regex.Pattern;
  * Compiler pass that BiDi flips all the flippable nodes.
  * TODO(user): Need to add a function to return tree before flipping.
  *
+ * @author roozbeh@google.com (Roozbeh Pournader)
  */
 public class BiDiFlipper extends DefaultTreeVisitor
     implements CssCompilerPass {

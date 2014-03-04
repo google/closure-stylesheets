@@ -38,6 +38,7 @@ import java.util.List;
 /**
  * Unit tests for {@link ProcessComponents}.
  *
+ * @author dgajda@google.com (Damian Gajda)
  */
 public class ProcessComponentsTest extends PassesTestBase {
 

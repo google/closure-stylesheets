@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 /**
  * A node representing a style rule.
  *
+ * @author oana@google.com (Oana Florescu)
  */
 public class CssRulesetNode extends CssNode {
   /** List of selectors of this style rule. */

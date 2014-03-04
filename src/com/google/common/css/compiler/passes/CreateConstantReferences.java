@@ -31,6 +31,7 @@ import com.google.common.css.compiler.ast.MutatingVisitController;
  * A compiler pass that transforms each upper-cased {@link CssLiteralNode} to
  * a {@link CssConstantReferenceNode}.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CreateConstantReferences extends DefaultTreeVisitor
     implements CssCompilerPass {

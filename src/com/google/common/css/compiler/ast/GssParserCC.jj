@@ -3,6 +3,7 @@
 /**
  * GssParserCC.jj : parses gss files, produces the new AST.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 
 options {

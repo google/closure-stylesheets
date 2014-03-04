@@ -19,6 +19,7 @@ package com.google.common.css.compiler.ast;
 /**
  * Visits everything and does nothing.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class DefaultTreeVisitor implements CssTreeVisitor {
 

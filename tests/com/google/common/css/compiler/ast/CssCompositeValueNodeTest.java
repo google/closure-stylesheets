@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 
 /**
  * Tests for {@link CssCompositeValueNode}.
+ * @author chrishenry@google.com (Chris Henry)
  */
 public class CssCompositeValueNodeTest extends TestCase {
 

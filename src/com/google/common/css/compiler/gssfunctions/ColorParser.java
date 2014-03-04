@@ -63,7 +63,6 @@ import java.util.regex.Pattern;
  * <p>Also see the {@link #parseAny} static convenience method.
  *
  * @author chrisn@google.com (Chris Nokleberg)
- * @author manucornet@google.com (Manu Cornet)
  */
 final class ColorParser {
 

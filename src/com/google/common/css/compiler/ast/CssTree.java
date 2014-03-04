@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 /**
  * A mutable abstract syntax tree that corresponds to a CSS input file.
  *
+ * @author oana@google.com (Oana Florescu)
  */
 public class CssTree {
   /** The root of the tree. */

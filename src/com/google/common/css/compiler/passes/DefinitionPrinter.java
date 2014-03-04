@@ -34,7 +34,6 @@ import com.google.common.css.compiler.ast.VisitController;
  * @param <T> type of chunk id objects
  *
  * @author dgajda@google.com (Damian Gajda)
- * @author nadaa@google.com (Nada Amin)
  */
 public class DefinitionPrinter<T> extends DefaultTreeVisitor
     implements CssCompilerPass {

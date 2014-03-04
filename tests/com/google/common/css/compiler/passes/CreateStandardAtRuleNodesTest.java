@@ -31,6 +31,7 @@ import com.google.common.css.compiler.passes.testing.PassesTestBase;
 /**
  * Unit tests for {@link CreateStandardAtRuleNodes}.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 public class CreateStandardAtRuleNodesTest extends PassesTestBase {
 

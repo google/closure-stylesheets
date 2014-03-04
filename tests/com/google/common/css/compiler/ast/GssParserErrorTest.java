@@ -27,6 +27,7 @@ import java.util.List;
 /**
  * Unit tests for error handling of {@link GssParser}.
  *
+ * @author fbenz@google.com (Florian Benz)
  */
 
 public class GssParserErrorTest extends TestCase {
