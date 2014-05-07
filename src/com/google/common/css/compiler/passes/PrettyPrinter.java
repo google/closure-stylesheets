@@ -70,7 +70,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   private StringBuilder sb = null;
   private String prettyPrintedString = null;
   private String indent = "";
-  private VisitController visitController;
+  private final VisitController visitController;
   private boolean stripQuotes = false;
 
   public PrettyPrinter(VisitController visitController) {
@@ -199,6 +199,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   //     this.
   @Override
   public boolean enterDeclarationBlock(CssDeclarationBlockNode block) {
+    deleteEndingIfEndingIs(" ");
     sb.append(" {\n");
     indent += "  ";
     return true;
