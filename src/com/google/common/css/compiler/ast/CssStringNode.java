@@ -237,26 +237,6 @@ public class CssStringNode extends CssValueNode {
     Matcher unicode = ESCAPE_CHAR_HARD_TO_TYPE.matcher(result);
     StringBuffer sb = new StringBuffer();
     while (unicode.find()) {
-      // ESCAPE_CHAR_HARD_TO_TYPE recognizes trailing whitespace, which is only
-      // sometimes part of the escape sequence.
-      String trailer = "";
-      if (unicode.group(2) != null && unicode.group(2).length() > 0) {
-        // Divide the string into three parts: prefix whitespace suffix.
-        // A trailing space is part of the escape sequence when the
-        // prefix has fewer than 6 characters and the first character of the
-        // suffix matches [0-9a-fA-F].
-        if (unicode.group(1).length() < 6
-            && result.length() >= unicode.end()
-            && HEX_PATTERN.matcher(result.substring(unicode.end(),
-                                                    unicode.end() + 1))
-                .matches()) {
-          // let the whitespace be replaced as part of the escape sequence
-        } else {
-          // use the whitespace in the replacement following the escape
-          // sequence interpretation.
-          trailer = unicode.group(2);
-        }
-      }
       // CSS allows us to substitute characters above 0x110000. Java
       // requires us to stay at or below MAX_CODE_POINT. If we are
       // allowed to substitute, and Java requires us to substitute,
@@ -277,8 +257,7 @@ public class CssStringNode extends CssValueNode {
       }
       String replacement =
           codepoint == 0 ? "" : new String(Character.toChars(codepoint));
-      unicode.appendReplacement(
-          sb, replacement + trailer);
+      unicode.appendReplacement(sb, replacement);
     }
     unicode.appendTail(sb);
     result = sb.toString();
