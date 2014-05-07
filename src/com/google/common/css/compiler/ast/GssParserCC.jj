@@ -523,6 +523,8 @@ PARSER_END(GssParserCC)
 
   | < #NL: "\r\n" | <NL1> >
 
+  | < WMINUSW: (<S>)+ <MINUS> (<S>)+>
+
   | < WPLUS: <W> <PLUS> >
   | < WGREATER: <W> <GREATER> >
   | < WTILDE: <W> <TILDE> >
@@ -596,6 +598,12 @@ PARSER_END(GssParserCC)
   // an argument.
   | < NOTFUNCTION: "not" <LEFTROUND> >
   | < LANGFUNCTION: "lang" <LEFTROUND> >
+
+  // "calc("
+  // Special handling because the content between the parentheses is a
+  // mathematical expression tree, not an argument list, so it uses a different
+  // parse tree.
+  | < CALC: ("calc"|"-webkit-calc"|"-moz-calc") <LEFTROUND> >
 
   // {ident}"(        {return FUNCTION;}
   | < FUNCTION: <IDENTIFIER> <LEFTROUND> >
@@ -837,6 +845,8 @@ String nth() :
       t = <WPLUS> { argument.append(t.image); }
       |
       t = <MINUS> { argument.append(t.image); }
+      |
+      t = <WMINUSW> { argument.append(trim(t.image)); }
       |
       t = <NUMBER> { argument.append(t.image); }
       |
@@ -1178,6 +1188,7 @@ CssValueNode slash_term() :
 //   : unary_operator?
 //     [ [ NUMBER [ PERCENT | IDENTIFIER ] ] | STRING | IDENT
 //       | '(' S? IDENT ':' S* NUMBER IDENT? ')' | URI | hexcolor | function
+//       | math
 //     ] S*
 //   ;
 CssValueNode term() :
@@ -1226,6 +1237,7 @@ CssValueNode term() :
         t = <RIGHTROUND> { tokens.add(t); } )
     | LOOKAHEAD({getToken(1).kind == URI}) function = uri()
     | t = hexcolor()   { tokens.add(t); hexcolor = true; }
+    | function = calc()
     | function = function()
   ) ( <S> )*
   {
@@ -1493,6 +1505,119 @@ CssFunctionNode function() :
         functionName.toString(),
         this.mergeLocations(beginLocation, endLocation), args, tokens);
     return functionNode;
+  }
+}
+
+// calc
+//  : "calc(" S* sum S* ")"
+//  ;
+CssFunctionNode calc() :
+{
+  Token t;
+  SourceCodeLocation beginLocation;
+  StringBuilder functionName = new StringBuilder();
+  String sum = "";
+  List<Token> tokens = Lists.newArrayList();
+}
+{
+  { beginLocation = this.getLocation(token.next); }
+  t = <CALC> { functionName.append(t.image); functionName.setLength(functionName.length() - 1); tokens.add(t); }
+  (<S>)* sum = sum() (<S>)* t = <RIGHTROUND> { tokens.add(t); }
+  {
+    SourceCodeLocation endLocation = this.getLocation(t);
+    CssFunctionArgumentsNode args = new CssFunctionArgumentsNode();
+    CssMathNode arg = new CssMathNode(sum);
+    addArgumentsWithSeparator(args, ImmutableList.<CssValueNode>of(arg), 1, "");
+    return nodeBuilder.buildFunctionNode(
+        functionName.toString(),
+        this.mergeLocations(beginLocation, endLocation), args, tokens);
+  }
+}
+
+// sum
+//  : product [ S+ [ "+" | "-" ] S+ product ]*
+//  ;
+String sum() :
+{
+  Token t;
+  StringBuilder content = new StringBuilder();
+  String p = "";
+}
+{
+  (
+    p = product() {content.append(p);}
+    (
+      (((<WPLUS>(<S>)+) {content.append(" + ");}) | (<WMINUSW> {content.append(" - ");}))
+      p = product() {content.append(p);}
+    )*
+  )
+  {
+    return content.toString();
+  }
+}
+
+// product
+//  : unit [ S* [ "*" S* unit | "/" S* NUMBER ] ]*
+//  ;
+String product() :
+{
+  Token t;
+  StringBuilder content = new StringBuilder();
+  String u = "";
+}
+{
+  (
+    u = unit() {content.append(u);}
+    (
+      (<S>)*
+      (
+         (
+           <ASTERISK> {content.append("*");}
+           (<S>)*
+           u = unit() {content.append(u);}
+         )
+         | (
+           <SLASH> {content.append("/");}
+           (<S>)*
+           t = <NUMBER> {content.append(t.image);}
+         )
+       )
+    )*
+  )
+  {
+    return content.toString();
+  }
+}
+
+// unit
+//  : [ NUMBER | DIMENSION | PERCENTAGE | "(" S* sum S* ")" | calc ];
+//  ;
+String unit() :
+{
+  Token t;
+  Token dim;
+  StringBuilder content = new StringBuilder();
+  String sum = "";
+  CssFunctionNode math = null;
+}
+{
+  (
+    (
+      (t = unary_operator() {content.append(t.image);})?
+      t = <NUMBER> {content.append(t.image);}
+      (
+        (dim = <PERCENT> | dim = <IDENTIFIER>) {content.append(dim.image.toLowerCase());}
+      )?
+    )
+    | (
+        <LEFTROUND> { content.append("("); }
+        (<S>)* sum = sum() {content.append(sum);} (<S>)*
+        <RIGHTROUND> { content.append(")"); }
+      )
+    | (math = calc() {content.append(math.getValue());})
+  )
+  {
+    return content.toString();
   }
 }
 
