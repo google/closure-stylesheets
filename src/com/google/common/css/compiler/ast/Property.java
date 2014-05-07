@@ -594,8 +594,10 @@ public final class Property {
             "The flexbox spec has changed and this property is no longer supported."),
         builder("-webkit-box-ordinal-group").warn(
             "The flexbox spec has changed and this property is no longer supported."),
-        builder("-webkit-box-orient").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
+        // This property should ideally trigger a warning since it's not part
+        // of the spec, but we'll allow it since there's no valid replacement
+        // when used with -webkit-line-clamp to ellipsize multiline text.
+        builder("-webkit-box-orient"),
         builder("-webkit-box-pack").warn(
             "The flexbox spec has changed and this property is no longer supported."),
         builder("-webkit-box-reflect"),
