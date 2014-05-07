@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.*;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -117,6 +118,18 @@ public class GssParserCC {
                                   endLocation.getEndCharacterIndex(),
                                   endLocation.getEndLineNumber(),
                                   endLocation.getEndIndexInLine());
+  }
+
+  private SourceCodeLocation mergeLocations(
+      Iterable<? extends CssNode> locations) {
+    Iterator<? extends CssNode> i = locations.iterator();
+    SourceCodeLocation loc = i.next().getSourceCodeLocation();
+    while (i.hasNext()) {
+      SourceCodeLocation iLoc = i.next().getSourceCodeLocation();
+      if (iLoc == null) continue;
+      loc = mergeLocations(loc, iLoc);
+    }
+    return loc;
   }
 
   private CssFunctionNode createUrlFunction(Token t) {
@@ -349,6 +362,9 @@ public class GssParserCC {
     public CssDeclarationNode buildDeclarationNode(CssPropertyNode property,
         CssPropertyValueNode value, List<Token> tokens) {
       CssDeclarationNode node = new CssDeclarationNode(property, value);
+      node.setSourceCodeLocation(
+        mergeLocations(
+          property.getSourceCodeLocation(), value.getSourceCodeLocation()));
       attachComments(tokens, node);
       return node;
     }
@@ -1104,7 +1120,11 @@ CssPropertyValueNode expr() :
 {
     value = composite_term() { lst.add(value); }
   ( value = composite_term() { lst.add(value); } )*
-  { return new CssPropertyValueNode(lst); }
+  {
+    CssPropertyValueNode result = new CssPropertyValueNode(lst);
+    result.setSourceCodeLocation(mergeLocations(lst));
+    return result;
+  }
 }
 
 // (non-standard GSS extension)
