@@ -1477,6 +1477,16 @@ class DefaultVisitController implements MutatingVisitController {
     }
 
     @Override
+    public void removeCurrentChild() {
+      children.remove(currentIndex);
+      intervalueStateIsNext = false;
+      doNotIncreaseIndex = true;
+      if (currentIndex == children.size()) {
+        stateStack.pop();
+      }
+    }
+
+    @Override
     public VisitState<CssValueNode> createFallbackState(CssValueNode child) {
       return new VisitValueNodeState(child);
     }
@@ -1569,15 +1579,27 @@ class DefaultVisitController implements MutatingVisitController {
     }
 
     @Override
+    public void removeCurrentChild() {
+      node.setArguments(new CssFunctionArgumentsNode());
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void removeCurrentNodeCalled() {
       // If the function is a singleton, remove the nearest declaration that
       // contains it.
-      CssNodesListNode<CssValueNode> parent =
-          (CssNodesListNode<CssValueNode>) node.getParent();
-      if (parent.numChildren() == 1) {
-        while (!(stateStack.getTop() instanceof VisitDeclarationState)) {
-          stateStack.pop();
+      CssNode parent = node.getParent();
+      // TODO(user): generalize this to work with CssCompositeValueNode
+      // parents as well.
+      if (parent instanceof CssNodesListNode) {
+        CssNodesListNode<CssValueNode> p =
+            (CssNodesListNode<CssValueNode>) parent;
+        // TODO(user): shouldn't this check also be a stopping condition for
+        // the loop?
+        if (p.numChildren() == 1) {
+          while (!(stateStack.getTop() instanceof VisitDeclarationState)) {
+            stateStack.pop();
+          }
         }
       }
       stateStack.pop();

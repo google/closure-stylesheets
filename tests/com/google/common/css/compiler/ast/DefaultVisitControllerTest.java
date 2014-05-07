@@ -723,4 +723,88 @@ public class DefaultVisitControllerTest extends TestCase {
     assertEquals(1, compositeNode.size());
     assertTrue(compositeNode.contains(parent));
   }
+
+  private static class ValueDetector extends DefaultTreeVisitor {
+    private final String quarry;
+    private boolean[] foundValue = {false};
+    @Override public boolean enterValueNode(CssValueNode node) {
+      if (quarry.equals(node.getValue())) {
+        foundValue[0] = true;
+      }
+      return true;
+    }
+    private ValueDetector(String quarry) { this.quarry = quarry; }
+    public static boolean detect(CssTree t, String quarry) {
+      ValueDetector detector = new ValueDetector(quarry);
+      new DefaultVisitController(
+          t, false /* allowMutating */).startVisit(detector);
+      return detector.foundValue[0];
+    }
+  }
+
+  private static class FunctionDetector extends DefaultTreeVisitor {
+    private boolean[] foundValue = {false};
+    @Override public boolean enterFunctionNode(CssFunctionNode node) {
+      foundValue[0] = true;
+      return true;
+    }
+    public static boolean detect(CssTree t) {
+      FunctionDetector detector = new FunctionDetector();
+      new DefaultVisitController(
+          t, false /* allowMutating */).startVisit(detector);
+      return detector.foundValue[0];
+    }
+  }
+
+  public void verifyRemoveablePropertyValueElement(String backgroundValue) {
+    try {
+      CssTree t = new GssParser(
+          new com.google.common.css.SourceCode(null,
+              String.format("p { background: %s; }", backgroundValue)))
+          .parse();
+      assertTrue(
+          "This test assumes we start with a stylesheet containing detectable "
+          + "function nodes.",
+          FunctionDetector.detect(t));
+      final DefaultVisitController vc =
+          new DefaultVisitController(t, true /* allowMutating */);
+      CssTreeVisitor functionRemover = new DefaultTreeVisitor() {
+          @Override public boolean enterFunctionNode(CssFunctionNode node) {
+            System.err.println(node.getParent().getClass().getName());
+            vc.removeCurrentNode();
+            return true;
+          }
+        };
+      vc.startVisit(functionRemover);
+      assertFalse(
+          "We should be able to remove function nodes that occur as property "
+          + "values.",
+          FunctionDetector.detect(t));
+      assertTrue(
+          "Removing one composite element within a property value should not "
+          + "affect its siblings.",
+          ValueDetector.detect(t, "red"));
+      assertTrue(
+          "Removing one composite element within a property value should not "
+          + "affect its siblings.",
+          ValueDetector.detect(t, "fixed"));
+    } catch (GssParserException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void testRemoveCompositePropertyValueElement() {
+    verifyRemoveablePropertyValueElement(
+        "url(http://www.google.com/logo), red fixed");
+  }
+
+  public void testRemoveCompositePropertyValueElementMiddle() {
+    verifyRemoveablePropertyValueElement(
+        "red, url(http://www.google.com/logo), fixed");
+  }
+
+  public void testRemoveCompositePropertyValueElementEnd() {
+    verifyRemoveablePropertyValueElement(
+        "red fixed, url(http://www.google.com/logo)");
+  }
 }
