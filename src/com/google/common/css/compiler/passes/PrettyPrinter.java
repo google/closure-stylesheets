@@ -448,13 +448,12 @@ public class PrettyPrinter extends DefaultTreeVisitor
       if (!(node.getBlock() instanceof CssDeclarationBlockNode)) {
         indent = indent.substring(0, indent.length() - 2);
         sb.append(indent);
-        sb.append("}");
+        sb.append("}\n");
       }
     } else {
       deleteEndingIfEndingIs(" ");
-      sb.append(';');
+      sb.append(";\n");
     }
-    sb.append('\n');
   }
 
   @Override
@@ -477,11 +476,10 @@ public class PrettyPrinter extends DefaultTreeVisitor
     if (node.getType().hasBlock()) {
       indent = indent.substring(0, indent.length() - 2);
       sb.append(indent);
-      sb.append("}");
+      sb.append("}\n");
     } else {
-      sb.append(';');
+      sb.append(";\n");
     }
-    sb.append('\n');
   }
 
   @Override
