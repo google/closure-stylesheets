@@ -1289,6 +1289,12 @@ class DefaultVisitController implements MutatingVisitController {
         stateStack.pop();
       }
     }
+
+    @Override
+    public void removeCurrentChild() {
+      stateStack.pop();
+      stateStack.getTop().removeCurrentChild();
+    }
   }
 
   @VisibleForTesting
@@ -1588,22 +1594,64 @@ class DefaultVisitController implements MutatingVisitController {
     public void removeCurrentNodeCalled() {
       // If the function is a singleton, remove the nearest declaration that
       // contains it.
-      CssNode parent = node.getParent();
-      // TODO(user): generalize this to work with CssCompositeValueNode
-      // parents as well.
-      if (parent instanceof CssNodesListNode) {
-        CssNodesListNode<CssValueNode> p =
-            (CssNodesListNode<CssValueNode>) parent;
-        // TODO(user): shouldn't this check also be a stopping condition for
-        // the loop?
-        if (p.numChildren() == 1) {
-          while (!(stateStack.getTop() instanceof VisitDeclarationState)) {
-            stateStack.pop();
-          }
-        }
-      }
-      stateStack.pop();
+      popToNonDegenerateState();
       stateStack.getTop().removeCurrentChild();
+    }
+
+    /**
+     * Exit states until we reach the nearest ancestor that will not
+     * be made degenerate by the removal of its current child.
+     *
+     * <p>E.g., if this node's parent's role is to represent a collection of
+     * children, and this node has no siblings, then we want to remove
+     * the parent, and the transitive closure. So for example if we have
+     *   div {
+     *     background: url('http://google.com/logo')
+     *   }
+     * and we remove the url function node, then we should not leave
+     *   div {
+     *     background:
+     *   }
+     * but rather should remove background as well.
+     */
+    private void popToNonDegenerateState() {
+      for (CssNode child = node; true; child = child.getParent()) {
+        // will removing the child leave the tree in a bad state?
+        boolean otherSiblingsExist;
+        if (child instanceof CssDeclarationNode) {
+          // it's just too hard, so stop removing ancestors if we
+          // get this high.
+          otherSiblingsExist = true;
+        } else if (child instanceof CssNodesListNode) {
+          otherSiblingsExist = ((CssNodesListNode) child).numChildren() > 1;
+        } else if (child instanceof CssCompositeValueNode) {
+          otherSiblingsExist =
+              ((CssCompositeValueNode) child).getValues().size() > 1;
+        } else if (child instanceof CssDeclarationNode) {
+          // there's always just one CssPropertyValueNode
+          otherSiblingsExist = false;
+        } else if (child instanceof CssDeclarationNode) {
+          otherSiblingsExist = false;
+        } else if (child instanceof CssFunctionNode) {
+          otherSiblingsExist = false;
+        } else {
+          break;
+        }
+        if (otherSiblingsExist) {
+          break;
+        }
+        // TODO(user): refactor the preceding giant conditional branch to
+        // use dynamic dispatch. Maybe each node state should just have a
+        // locally-sane predicate to verify that its own properties are in
+        // good shape. Then we could just remove and pop our way up to
+        // sanity.
+        // TODO(user): verify that the stateStack.getTop() corresponds to
+        // node. I think the only VisitState implementation whose ctor does
+        // not demand a corresponding CssNode is the IntervalueState, so we
+        // can add a method to get the node and then bail on this loop if
+        // the result is either null or inconsistent with the current child.
+        stateStack.pop();
+      }
     }
   }
 
