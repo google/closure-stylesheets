@@ -68,13 +68,18 @@ public class CreateComponentNodesTest extends NewFunctionalTestBase {
     assertEquals("[@def[X, Y]]", comp.getBlock().toString());
   }
 
-  public void testBlockError() throws Exception {
-    parseAndRun("@component CSS_X;", "@component without block");
-    assertTrue(isEmptyBody());
+  public void testImplicitlyNamedComponent() throws Exception {
+    parseAndRun("@component { @def X Y; }");
+    assertTrue(getFirstActualNode() instanceof CssComponentNode);
+    CssComponentNode comp = (CssComponentNode) getFirstActualNode();
+    assertSame(CssComponentNode.IMPLICIT_NODE_NAME, comp.getName().getValue());
+    assertNull(comp.getParentName());
+    assertFalse(comp.isAbstract());
+    assertEquals("[@def[X, Y]]", comp.getBlock().toString());
   }
 
-  public void testNoNameError() throws Exception {
-    parseAndRun("@component {}", "@component without name");
+  public void testBlockError() throws Exception {
+    parseAndRun("@component CSS_X;", "@component without block");
     assertTrue(isEmptyBody());
   }
 

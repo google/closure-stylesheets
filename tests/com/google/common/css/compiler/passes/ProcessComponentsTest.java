@@ -195,12 +195,35 @@ public class ProcessComponentsTest extends PassesTestBase {
       "@if[RTL_LANG]{[.CSS_IF-CSS_BAR]{[border:[[1px]];]}}" +
         "@else[]{[.CSS_IF-CSS_BAR]{[border:[[2px]];]}}}";
 
+  private final ImmutableList<String> namelessComponentPrefixInput = ImmutableList.of(
+      "@provide \"some.example.package\";",
+      "@component {");
+
+  private final String namelessComponentInput = joinNl(Iterables.concat(
+      namelessComponentPrefixInput,
+      topComponentInputConstants,
+      topComponentInputRules,
+      ImmutableList.of("}")));
+
+  private final String namelessComponentOutput =
+      "@def SOME_EXAMPLE_PACKAGE_SOME_COLOR [[black]];" +
+      "@def SOME_EXAMPLE_PACKAGE_OTHER_BG_COLOR [[GLOBAL_COLOR]];" +
+      "@def SOME_EXAMPLE_PACKAGE_OTHER_COLOR [someColorFunction(" +
+          "SOME_EXAMPLE_PACKAGE_SOME_COLOR,SOME_EXAMPLE_PACKAGE_OTHER_BG_COLOR)];" +
+      "[.someExamplePackageCSS_SOME_CLASS,.someExamplePackageCSS_SOME_OTHER_CLASS]{" +
+      "[color:[[SOME_EXAMPLE_PACKAGE_SOME_COLOR]];" +
+      "background-color:[[SOME_EXAMPLE_PACKAGE_OTHER_BG_COLOR]];" +
+      "width:[[100px]];" +
+      "border-color:[someColorFunction(" +
+          "SOME_EXAMPLE_PACKAGE_SOME_COLOR,SOME_EXAMPLE_PACKAGE_OTHER_BG_COLOR)];]}";
+
   @Override
   protected void runPass() {
     new CreateDefinitionNodes(tree.getMutatingVisitController(), errorManager).runPass();
     new MapChunkAwareNodesToChunk<String>(tree, FILE_TO_CHUNK).runPass();
     new CreateConstantReferences(tree.getMutatingVisitController()).runPass();
     new CreateConditionalNodes(tree.getMutatingVisitController(), errorManager).runPass();
+    new CheckDependencyNodes(tree.getMutatingVisitController(), errorManager).runPass();
     new CreateComponentNodes(tree.getMutatingVisitController(), errorManager).runPass();
     new ProcessComponents<String>(
         tree.getMutatingVisitController(), errorManager, FILE_TO_CHUNK).runPass();
@@ -222,7 +245,6 @@ public class ProcessComponentsTest extends PassesTestBase {
     resolveFunctions.runPass();
     checkTreeDebugString(expectedOutput);
   }
-
 
   public void testTopComponent() throws Exception {
     testTreeConstruction(topComponentInput, "[" + topComponentOutput + "]");
@@ -328,6 +350,31 @@ public class ProcessComponentsTest extends PassesTestBase {
     parseAndRun("@component CSS_X { @component CSS_Y {} }\n@component CSS_Z extends CSS_X {}",
         "nested components are not allowed");
     assertTrue(isEmptyBody());
+  }
+
+  public void testImplicitlyNamed() throws Exception {
+    testTreeConstruction(namelessComponentInput, "[" + namelessComponentOutput + "]");
+  }
+
+  public void testImplicitlyNamedNoPackageError() throws Exception {
+    parseAndRun("@component { }",
+        "implicitly-named @components require a single @provide declaration " + TEST_CHUNK);
+    assertTrue(isEmptyBody());
+  }
+
+  public void testImplicitlyNamedMultiplePackageError() throws Exception {
+    parseAndRun(
+        "@provide \"some.example.package\";\n" +
+        "@provide \"another.example.package\";\n" +
+            "@component { }",
+        "implicitly-named @components require a single @provide declaration " + TEST_CHUNK);
+  }
+
+  public void testMultiplePackageWithNoComponentError() throws Exception {
+    testTreeConstruction(
+        "@provide \"some.example.package\";\n" +
+        "@provide \"another.example.package\";\n",
+        "[]");
   }
 
   private String joinNl(Iterable<String> lines) {

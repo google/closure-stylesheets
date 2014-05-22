@@ -20,6 +20,10 @@ import javax.annotation.Nullable;
 
 public class CssComponentNode extends CssAtRuleNode {
 
+  // Sentinel value used to indicate that the node name should be derived
+  // from the @provide package name.
+  public static final String IMPLICIT_NODE_NAME = "$package";
+
   private final CssLiteralNode parentName;
 
   /**
@@ -61,6 +65,12 @@ public class CssComponentNode extends CssAtRuleNode {
     return getType() == CssAtRuleNode.Type.ABSTRACT_COMPONENT;
   }
 
+  @SuppressWarnings("StringEquality")
+  public boolean isImplicitlyNamed() {
+    // Test against the exact string instance.
+    return getName().getValue() == IMPLICIT_NODE_NAME;
+  }
+
   /**
    * For debugging only.
    */
@@ -68,7 +78,9 @@ public class CssComponentNode extends CssAtRuleNode {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(getType().toString()).append(' ');
-    sb.append(getName().getValue()).append(' ');
+    if (!isImplicitlyNamed()) {
+      sb.append(getName().getValue()).append(' ');
+    }
     if (parentName != null) {
       sb.append("extends ").append(parentName.getValue()).append(' ');
     }

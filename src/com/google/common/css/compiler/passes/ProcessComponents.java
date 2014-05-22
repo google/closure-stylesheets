@@ -16,11 +16,14 @@
 
 package com.google.common.css.compiler.passes;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.CssAtRuleNode;
 import com.google.common.css.compiler.ast.CssBlockNode;
@@ -32,6 +35,7 @@ import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNode;
+import com.google.common.css.compiler.ast.CssProvideNode;
 import com.google.common.css.compiler.ast.CssRootNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
@@ -59,6 +63,8 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
   private final MutatingVisitController visitController;
   private final ErrorManager errorManager;
   private final Map<String, T> fileToChunk;
+  private final List<CssProvideNode> provideNodes = Lists.newArrayList();
+  private SourceCode lastFile = null;
 
   /**
    * Creates a new pass to process components for the given visit
@@ -83,6 +89,20 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
   }
 
   @Override
+  public boolean enterProvideNode(CssProvideNode node) {
+    // Often this pass is called on a bunch of GSS files which have been concatenated
+    // together, meaning that there will be multiple @provide declarations. We are only
+    // interested in @provide nodes which are in the same source file as the @component.
+    SourceCode sourceCode = node.getSourceCodeLocation().getSourceCode();
+    if (sourceCode != lastFile) {
+      provideNodes.clear();
+      lastFile = sourceCode;
+    }
+    provideNodes.add(node);
+    return false;
+  }
+
+  @Override
   public boolean enterComponent(CssComponentNode node) {
     String name = node.getName().getValue();
     if (components.containsKey(name)) {
@@ -92,6 +112,15 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     CssLiteralNode parentName = node.getParentName();
     if ((parentName != null) && !components.containsKey(parentName.getValue())) {
       reportError("parent component is undefined in chunk ", node);
+      return false;
+    }
+    SourceCode sourceCode = node.getSourceCodeLocation().getSourceCode();
+    if (sourceCode != lastFile) {
+      provideNodes.clear();
+      lastFile = sourceCode;
+    }
+    if (node.isImplicitlyNamed() && provideNodes.size() != 1) {
+      reportError("implicitly-named @components require a single @provide declaration ", node);
       return false;
     }
     visitController.replaceCurrentBlockChildWith(transformAllNodes(node), false);
@@ -166,7 +195,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     CssTree tree = new CssTree(
         target.getSourceCodeLocation().getSourceCode(), new CssRootNode(copyBlock));
     new TransformNodes(constants, target, target != source,
-        tree.getMutatingVisitController(), errorManager).runPass();
+        tree.getMutatingVisitController(), errorManager, provideNodes).runPass();
     if (fileToChunk != null) {
       T chunk = MapChunkAwareNodesToChunk.getChunk(target, fileToChunk);
       new SetChunk(tree, chunk).runPass();
@@ -220,19 +249,33 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
 
     private final Set<String> componentConstants;
     private final boolean isAbstract;
-    private final String currentName;
+    private final String classPrefix;
+    private final String defPrefix;
     private final String parentName;
     private final SourceCodeLocation sourceCodeLocation;
 
     public TransformNodes(Set<String> constants, CssComponentNode current, boolean inAncestorBlock,
-                          MutatingVisitController visitController, ErrorManager errorManager) {
+        MutatingVisitController visitController, ErrorManager errorManager,
+        List<CssProvideNode> provideNodes) {
       this.componentConstants = constants;
       this.inAncestorBlock = inAncestorBlock;
       this.visitController = visitController;
       this.errorManager = errorManager;
 
+      String currentName = current.getName().getValue();
+      if (current.isImplicitlyNamed()) {
+        currentName = Iterables.getOnlyElement(provideNodes).getProvide();
+      }
       this.isAbstract = current.isAbstract();
-      this.currentName = current.getName().getValue();
+      // TODO(user): Allow this behavior to work with any component name that is
+      // a quoted string.
+      if (current.isImplicitlyNamed()) {
+        this.classPrefix = getClassPrefixFromDottedName(currentName);
+        this.defPrefix = getDefPrefixFromDottedName(currentName);
+      } else {
+        this.classPrefix = currentName + CLASS_SEP;
+        this.defPrefix = currentName + DEF_SEP;
+      }
       this.parentName = inAncestorBlock ? current.getParentName().getValue() : null;
       this.sourceCodeLocation = current.getSourceCodeLocation();
     }
@@ -259,7 +302,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     public boolean enterClassSelector(CssClassSelectorNode node) {
       Preconditions.checkState(!isAbstract);
       CssClassSelectorNode newNode = new CssClassSelectorNode(
-          currentName + CLASS_SEP + node.getRefinerName(),
+          classPrefix + node.getRefinerName(),
           node.getSourceCodeLocation());
       visitController.replaceCurrentBlockChildWith(ImmutableList.of(newNode), false);
       return true;
@@ -273,7 +316,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
         return true;
       }
       String defName = node.getName().getValue();
-      CssLiteralNode newDefLit = new CssLiteralNode(currentName + DEF_SEP + defName);
+      CssLiteralNode newDefLit = new CssLiteralNode(defPrefix + defName);
       CssDefinitionNode newNode;
       // When copying the ancestor block, we want to replace definition values
       // with a reference to the constant emitted when the parent component was
@@ -306,7 +349,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
           // component tree.
           && componentConstants.contains(node.getValue())) {
         CssConstantReferenceNode newNode =
-            new CssConstantReferenceNode(currentName + DEF_SEP + node.getValue());
+            new CssConstantReferenceNode(defPrefix + node.getValue());
         visitController.replaceCurrentBlockChildWith(ImmutableList.of(newNode), false);
       }
       return true;
@@ -320,6 +363,32 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     @Override
     public void runPass() {
       visitController.startVisit(this);
+    }
+
+    /**
+     * Compute the name of the class prefix from the package name. This converts
+     * the dot-separated package name to camel case, so foo.bar becomes fooBar.
+     *
+     * @param packageName the @provide package name
+     * @return the converted class prefix
+     */
+    private String getClassPrefixFromDottedName(String packageName) {
+      // CaseFormat doesn't have a format for names separated by dots, so we transform
+      // the dots into dashes. Then we can use the regular CaseFormat transformation
+      // to camel case instead of having to write our own.
+      String packageNameWithDashes = packageName.replace('.', '-');
+      return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, packageNameWithDashes);
+    }
+
+    /**
+     * Compute the name of the def prefix from the package name. This converts the dot-separated
+     * package name to uppercase with underscores, so foo.bar becomes FOO_BAR_.
+     *
+     * @param packageName the @provide package name
+     * @return the converted def prefix
+     */
+    private String getDefPrefixFromDottedName(String packageName) {
+      return packageName.replace('.', '_').toUpperCase() + "_";
     }
   }
 

@@ -67,35 +67,39 @@ public class CreateComponentNodes extends DefaultTreeVisitor
         return;
       }
       List<CssValueNode> params = node.getParameters();
+      CssNode nameNode;
+      CssLiteralNode parentNode = null;
       int paramSize = params.size();
       if (paramSize == 0) {
-        reportError("@" + name + " without name", node);
-        return;
-      }
-      CssNode nameNode = params.get(0);
-      if (!(nameNode instanceof CssLiteralNode)) {
-        reportError("@" + name + " without a valid literal as name", node);
-        return;
-      }
-      CssLiteralNode parentNode = null;
-      if (paramSize == 1) {
-        // OK
-      } else if (paramSize == 3) {
-        CssNode extendNode = params.get(1);
-        if (!(extendNode instanceof CssLiteralNode)
-            || !((CssLiteralNode) extendNode).getValue().equals("extends")) {
-          reportError("@" + name + " with invalid second parameter (expects 'extends')", node);
-          return;
-        }
-        CssNode parentCssNode = params.get(2);
-        if (!(parentCssNode instanceof CssLiteralNode)) {
-          reportError("@" + name + " with invalid literal as parent name", node);
-          return;
-        }
-        parentNode = (CssLiteralNode) parentCssNode;
+        // Use a sentinel value in the name field to indicate that the component name
+        // is implicit, and should be derived from the package name.
+        nameNode = new CssLiteralNode(
+            CssComponentNode.IMPLICIT_NODE_NAME, node.getSourceCodeLocation());
       } else {
-        reportError("@" + name + " with invalid number of parameters", node);
-        return;
+        nameNode = params.get(0);
+        if (!(nameNode instanceof CssLiteralNode)) {
+          reportError("@" + name + " without a valid literal as name", node);
+          return;
+        }
+        if (paramSize == 1) {
+          // OK
+        } else if (paramSize == 3) {
+          CssNode extendNode = params.get(1);
+          if (!(extendNode instanceof CssLiteralNode)
+              || !((CssLiteralNode) extendNode).getValue().equals("extends")) {
+            reportError("@" + name + " with invalid second parameter (expects 'extends')", node);
+            return;
+          }
+          CssNode parentCssNode = params.get(2);
+          if (!(parentCssNode instanceof CssLiteralNode)) {
+            reportError("@" + name + " with invalid literal as parent name", node);
+            return;
+          }
+          parentNode = (CssLiteralNode) parentCssNode;
+        } else {
+          reportError("@" + name + " with invalid number of parameters", node);
+          return;
+        }
       }
       Preconditions.checkState(node.getBlock() instanceof CssBlockNode);
       CssComponentNode comp = new CssComponentNode(
