@@ -20,11 +20,21 @@ import javax.annotation.Nullable;
 
 public class CssComponentNode extends CssAtRuleNode {
 
+  /** Indicates how we want to construct the prefix strings for this component. */
+  public enum PrefixStyle {
+    /** Means use the name as-is without any transformation. */
+    LITERAL,
+
+    /** Means case-convert the name before use. */
+    CASE_CONVERT,
+  }
+
   // Sentinel value used to indicate that the node name should be derived
   // from the @provide package name.
   public static final String IMPLICIT_NODE_NAME = "$package";
 
   private final CssLiteralNode parentName;
+  private final PrefixStyle prefixStyle;
 
   /**
    * Constructor of a component.
@@ -35,11 +45,12 @@ public class CssComponentNode extends CssAtRuleNode {
    * @param block The body of the component
    */
   public CssComponentNode(CssLiteralNode name, @Nullable CssLiteralNode parentName,
-                          boolean isAbstract, CssBlockNode block) {
+                          boolean isAbstract, PrefixStyle prefixStyle, CssBlockNode block) {
     super(isAbstract ? CssAtRuleNode.Type.ABSTRACT_COMPONENT : CssAtRuleNode.Type.COMPONENT,
           name,
           block);
     this.parentName = parentName;
+    this.prefixStyle = prefixStyle;
   }
 
   /**
@@ -50,6 +61,7 @@ public class CssComponentNode extends CssAtRuleNode {
   public CssComponentNode(CssComponentNode node) {
     super(node);
     this.parentName = node.parentName;
+    this.prefixStyle = node.prefixStyle;
   }
 
   @Override
@@ -69,6 +81,11 @@ public class CssComponentNode extends CssAtRuleNode {
   public boolean isImplicitlyNamed() {
     // Test against the exact string instance.
     return getName().getValue() == IMPLICIT_NODE_NAME;
+  }
+
+  /** Return how the prefix strings should be handled. */
+  public PrefixStyle getPrefixStyle() {
+    return prefixStyle;
   }
 
   /**

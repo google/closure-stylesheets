@@ -205,7 +205,16 @@ public class ProcessComponentsTest extends PassesTestBase {
       topComponentInputRules,
       ImmutableList.of("}")));
 
-  private final String namelessComponentOutput =
+  private final ImmutableList<String> stringNamedComponentPrefixInput = ImmutableList.of(
+      "@component \"some.example.package\" {");
+
+  private final String stringNamedComponentInput = joinNl(Iterables.concat(
+      stringNamedComponentPrefixInput,
+      topComponentInputConstants,
+      topComponentInputRules,
+      ImmutableList.of("}")));
+
+  private final String camelCasedComponentOutput =
       "@def SOME_EXAMPLE_PACKAGE_SOME_COLOR [[black]];" +
       "@def SOME_EXAMPLE_PACKAGE_OTHER_BG_COLOR [[GLOBAL_COLOR]];" +
       "@def SOME_EXAMPLE_PACKAGE_OTHER_COLOR [someColorFunction(" +
@@ -353,7 +362,11 @@ public class ProcessComponentsTest extends PassesTestBase {
   }
 
   public void testImplicitlyNamed() throws Exception {
-    testTreeConstruction(namelessComponentInput, "[" + namelessComponentOutput + "]");
+    testTreeConstruction(namelessComponentInput, "[" + camelCasedComponentOutput + "]");
+  }
+
+  public void testStringNamed() throws Exception {
+    testTreeConstruction(stringNamedComponentInput, "[" + camelCasedComponentOutput + "]");
   }
 
   public void testImplicitlyNamedNoPackageError() throws Exception {

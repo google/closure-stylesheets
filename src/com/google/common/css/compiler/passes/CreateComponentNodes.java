@@ -22,8 +22,10 @@ import com.google.common.css.compiler.ast.CssAtRuleNode;
 import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssComponentNode;
+import com.google.common.css.compiler.ast.CssComponentNode.PrefixStyle;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNode;
+import com.google.common.css.compiler.ast.CssStringNode;
 import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
@@ -70,14 +72,22 @@ public class CreateComponentNodes extends DefaultTreeVisitor
       CssNode nameNode;
       CssLiteralNode parentNode = null;
       int paramSize = params.size();
+      CssComponentNode.PrefixStyle prefixStyle = PrefixStyle.LITERAL;
       if (paramSize == 0) {
         // Use a sentinel value in the name field to indicate that the component name
         // is implicit, and should be derived from the package name.
+        prefixStyle = PrefixStyle.CASE_CONVERT;
         nameNode = new CssLiteralNode(
             CssComponentNode.IMPLICIT_NODE_NAME, node.getSourceCodeLocation());
       } else {
         nameNode = params.get(0);
-        if (!(nameNode instanceof CssLiteralNode)) {
+        if (nameNode instanceof CssStringNode) {
+          // CssValueNodes require that the name be a literal node, so if it's a
+          // string convert it into a literal.
+          prefixStyle = PrefixStyle.CASE_CONVERT;
+          nameNode = new CssLiteralNode(((CssStringNode) nameNode).getValue(),
+              nameNode.getSourceCodeLocation());
+        } else if (!(nameNode instanceof CssLiteralNode)) {
           reportError("@" + name + " without a valid literal as name", node);
           return;
         }
@@ -106,6 +116,7 @@ public class CreateComponentNodes extends DefaultTreeVisitor
           (CssLiteralNode) nameNode,
           parentNode,
           name.equals(abstractComponentName),
+          prefixStyle,
           (CssBlockNode) node.getBlock());
       comp.setComments(node.getComments());
       comp.setSourceCodeLocation(node.getSourceCodeLocation());

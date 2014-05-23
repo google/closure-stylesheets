@@ -267,9 +267,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
         currentName = Iterables.getOnlyElement(provideNodes).getProvide();
       }
       this.isAbstract = current.isAbstract();
-      // TODO(user): Allow this behavior to work with any component name that is
-      // a quoted string.
-      if (current.isImplicitlyNamed()) {
+      if (current.getPrefixStyle() == CssComponentNode.PrefixStyle.CASE_CONVERT) {
         this.classPrefix = getClassPrefixFromDottedName(currentName);
         this.defPrefix = getDefPrefixFromDottedName(currentName);
       } else {
