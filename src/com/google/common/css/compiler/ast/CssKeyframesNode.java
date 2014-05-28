@@ -38,10 +38,6 @@ public class CssKeyframesNode extends CssAtRuleNode implements ChunkAware {
     return new CssKeyframesNode(this);
   }
 
-  public boolean isOkWithoutProcessing() {
-   return true;
-  }
-
   /**
    * For debugging only.
    */

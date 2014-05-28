@@ -521,7 +521,6 @@ public class GssFunctions {
       CssValueNode arg3 = args.get(2);
       CssValueNode arg4 = args.get(3);
 
-      CssHexColorNode hexColor = null;
       if (!(arg1 instanceof CssHexColorNode
           || arg1 instanceof CssLiteralNode)) {
         String message =

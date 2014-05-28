@@ -227,10 +227,6 @@ public abstract class CssNode {
     this.shouldBeFlipped = shouldBeFlipped;
   }
 
-  <T extends CssNode> List<T> newListCopy(List<T> list) {
-    return Lists.newArrayList(list);
-  }
-
   <T extends CssNode> List<T> copyToList(List<T> list) {
     return Lists.newArrayList(list);
   }

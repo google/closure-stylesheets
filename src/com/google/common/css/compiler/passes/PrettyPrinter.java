@@ -18,7 +18,6 @@ package com.google.common.css.compiler.passes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.base.Joiner;
 import com.google.common.css.compiler.ast.CssAtRuleNode.Type;
 import com.google.common.css.compiler.ast.CssAttributeSelectorNode;
 import com.google.common.css.compiler.ast.CssBlockNode;
@@ -115,22 +114,6 @@ public class PrettyPrinter extends DefaultTreeVisitor
       sb.append(" ");
     }
     return true;
-  }
-
-  private void appendCompositeValueNode(CssCompositeValueNode c) {
-    Joiner.on(c.getOperator().getOperatorName()).appendTo(sb, c.getValues());
-  }
-
-  /**
-   * This is necessary because the parser transform '(' ident ')' into a
-   * boolean expression node and only stores the identifier itself.
-   * For example: {@code @media all and (color)}
-   */
-  private void appendMediaParameterWithParentheses(CssValueNode node) {
-    // TODO(fbenz): Try to avoid the special handling of this case.
-    sb.append("(");
-    sb.append(node.getValue());
-    sb.append(")");
   }
 
   @Override

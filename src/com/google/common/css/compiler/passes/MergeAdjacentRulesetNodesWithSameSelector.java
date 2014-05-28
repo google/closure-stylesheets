@@ -86,7 +86,6 @@ public class MergeAdjacentRulesetNodesWithSameSelector
       }
 
       CssRulesetNode currentRule = (CssRulesetNode) node;
-      boolean canMerge = true;
 
       // if skipping is on and the rule contains a property from the set : skip
       if (canModifyRuleset(currentRule)) {
