@@ -43,6 +43,15 @@ public enum OutputRenamingMapFormat {
   CLOSURE_COMPILED("goog.setCssNameMapping(%s);\n"),
 
   /**
+   * Writes the mapping as JSON, passed as an argument to
+   * {@code goog.setCssNameMapping()} using the 'BY_WHOLE' mapping style.
+   * Designed for use with the Closure Library in compiled mode where the CSS
+   * name substitutions are taken as-is, which allows, e.g., using
+   * {@code SimpleSubstitutionMap} with class names containing hyphens.
+   */
+  CLOSURE_COMPILED_BY_WHOLE("goog.setCssNameMapping(%s, 'BY_WHOLE');\n"),
+
+  /**
    * Before writing the mapping as CLOSURE_COMPILED, split the css name maps
    * by hyphens and write out each piece individually. see
    * {@code CLOSURE_COMPILED}
@@ -61,14 +70,14 @@ public enum OutputRenamingMapFormat {
           newSplitRenamingMap.put(parts.next(), partsNew.next());
         }
         if (parts.hasNext()) {
-          throw new AssertionError("Not all parts of the original class " +
-              "name were output. Class: " + entry.getKey() + " Next Part:" +
-              parts.next());
+          throw new AssertionError("Not all parts of the original class "
+              + "name were output. Class: " + entry.getKey() + " Next Part:"
+              + parts.next());
         }
         if (partsNew.hasNext()) {
-          throw new AssertionError("Not all parts of the renamed class were " +
-              "output. Class: " + entry.getKey() + " Renamed Class: " +
-              entry.getValue() + " Next Part:" + partsNew.next());
+          throw new AssertionError("Not all parts of the renamed class were "
+              + "output. Class: " + entry.getKey() + " Renamed Class: "
+              + entry.getValue() + " Next Part:" + partsNew.next());
         }
       }
       OutputRenamingMapFormat.CLOSURE_COMPILED.writeRenamingMap(
@@ -101,7 +110,7 @@ public enum OutputRenamingMapFormat {
       // comment: http://goo.gl/6hsrN. As noted on the Stack Overflow thread,
       // the timestamp results in unnecessary diffs between runs. Further, those
       // who are using a language other than Java to parse this file should not
-      // have to worry about adding support for comments. 
+      // have to worry about adding support for comments.
       for (Map.Entry<String, String> entry : renamingMap.entrySet()) {
         renamingMapWriter.format("%s=%s\n", entry.getKey(), entry.getValue());
       }
@@ -152,5 +161,5 @@ public enum OutputRenamingMapFormat {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     renamingMapWriter.write(String.format(formatString,
         gson.toJson(properties)));
-  }  
+  }
 }
