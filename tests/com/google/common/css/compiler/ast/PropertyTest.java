@@ -80,4 +80,26 @@ public class PropertyTest extends TestCase {
     assertEquals(ImmutableSet.of("-moz-border-radius"),
         mozBorderRadiusTopLeft.getShorthands());
   }
+
+  public void testCustomBorderProperty() {
+    Property borderHeight = Property.byName("border-height");
+    assertFalse(borderHeight.isRecognizedProperty());
+    assertEquals(ImmutableSet.of(), borderHeight.getShorthands());
+
+    Property borderLeftHeight = Property.byName("border-left-height");
+    assertFalse(borderLeftHeight.isRecognizedProperty());
+    assertEquals(ImmutableSet.of(), borderHeight.getShorthands());
+
+    Property borderRightHeight = Property.byName("border-right-height");
+    assertFalse(borderRightHeight.isRecognizedProperty());
+    assertEquals(ImmutableSet.of(), borderHeight.getShorthands());
+
+    Property borderTopHeight = Property.byName("border-top-height");
+    assertFalse(borderTopHeight.isRecognizedProperty());
+    assertEquals(ImmutableSet.of(), borderHeight.getShorthands());
+
+    Property borderBottomHeight = Property.byName("border-bottom-height");
+    assertFalse(borderBottomHeight.isRecognizedProperty());
+    assertEquals(ImmutableSet.of(), borderHeight.getShorthands());
+  }
 }

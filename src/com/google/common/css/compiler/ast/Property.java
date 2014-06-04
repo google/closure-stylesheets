@@ -794,7 +794,8 @@ public final class Property {
 
   private static Property createUserDefinedProperty(String name) {
     Preconditions.checkArgument(!NAME_TO_PROPERTY_MAP.containsKey(name));
-    Builder builder = builder(name);
+    Builder builder = builder(name)
+        .setShorthands(ImmutableSet.<String>of());
     return builder.build();
   }
 
@@ -922,8 +923,7 @@ public final class Property {
   @VisibleForTesting
   static final class Builder {
     private final String name;
-    private final Set<String> shorthands;
-    private final String partition;
+    private Set<String> shorthands;
     private Vendor vendor;
     private boolean hasPositionalParameters;
     private boolean isSvgOnly;
@@ -932,8 +932,7 @@ public final class Property {
     private Builder(String name) {
       Preconditions.checkNotNull(name);
       this.name = name;
-      this.shorthands = computeShorthandPropertiesFor(name);
-      this.partition = Iterables.getFirst(this.shorthands, name);
+      this.shorthands = null;
       this.vendor = Vendor.parseProperty(name);
       this.hasPositionalParameters = false;
       this.isSvgOnly = false;
@@ -941,10 +940,14 @@ public final class Property {
     }
 
     public Property build() {
+      if (this.shorthands == null) {
+        this.shorthands = computeShorthandPropertiesFor(this.name);
+      }
+      String partition = Iterables.getFirst(this.shorthands, name);
       return new Property(
           this.name,
           this.shorthands,
-          this.partition,
+          partition,
           this.vendor,
           this.hasPositionalParameters,
           this.isSvgOnly,
@@ -967,6 +970,11 @@ public final class Property {
      */
     public Builder isSvgOnly() {
       this.isSvgOnly = true;
+      return this;
+    }
+
+    public Builder setShorthands(Set<String> shorthands) {
+      this.shorthands = shorthands;
       return this;
     }
 

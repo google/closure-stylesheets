@@ -786,4 +786,23 @@ public class GssParserTest extends TestCase {
       }
     }
   }
+
+  public void testCustomBorderProperty() throws Exception {
+    testTree(
+        "a { border-height: 1em; }",
+        "[[a]{[border-height:[[1em]];]}]");
+    testTree(
+        "a { border-left-height: 1em; }",
+        "[[a]{[border-left-height:[[1em]];]}]");
+    testTree(
+        "a { border-right-height: 1em; }",
+        "[[a]{[border-right-height:[[1em]];]}]");
+    testTree(
+        "a { border-top-height: 1em; }",
+        "[[a]{[border-top-height:[[1em]];]}]");
+    testTree(
+        "a { border-bottom-height: 1em; }",
+        "[[a]{[border-bottom-height:[[1em]];]}]");
+  }
+
 }
