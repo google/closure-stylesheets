@@ -85,9 +85,6 @@ public class GssFunctions {
    */
   private static final String DECIMAL_FORMAT = "#.########";
 
-  /** All four corners corner parameter value. */
-  private static final String ALL_FOUR = "af";
-
   /**
    * This class encapsulates results of background definition calculation and
    * is used to build either a list of {@link CssValueNode} instances or a string that
@@ -138,218 +135,6 @@ public class GssFunctions {
           new CssNumericNode(positionV, positionVUnit, location));
     }
   }
-
-  /**
-   * Implementation of the roundedCornerImage GSS function. The function
-   * generates the image for a rounded corner corresponding to the following
-   * arguments:
-   * <ol>
-   *   <li><b>corner color</b>: the color of the rounded part of the image,
-   *     probably the same color as the border of the container.
-   *   <li><b>corner radius</b>: the radius of the rounded part of the
-   *     image. The image will actually have this as its height and width
-   *     as well.
-   *   <li><b>corner position</b>: where this image is going to appear.
-   *     Valid values are:
-   *     <ul>
-   *       <li> tl - top left
-   *       <li> tr - top right
-   *       <li> bl - bottom left
-   *       <li> br - bottom right
-   *     </ul>
-   *   <li><b>isIE6</b>: 1 if the browser is IE6, 0 otherwise.
-   */
-  public abstract static class RoundedCornerImage
-      implements GssFunction {
-
-    /**
-     * Returns the number of expected arguments of this GSS function, which is
-     * 4 as documented in {@link RoundedCornerImage}.
-     *
-     * @return 4
-     */
-    @Override
-    public Integer getNumExpectedArguments() {
-      return 4;
-    }
-
-    /**
-     * Returns the rounded corner image corresponding to the arguments
-     * documented in {@link RoundedCornerImage}.
-     *
-     * @param args The list of arguments
-     * @return The image of the rounded corner
-     */
-    @Override
-    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
-        ErrorManager errorManager) throws GssFunctionException {
-
-      CssValueNode arg1 = args.get(0);
-      CssValueNode arg2 = args.get(1);
-      CssValueNode arg3 = args.get(2);
-      CssValueNode arg4 = args.get(3);
-
-      String imgColor = getColorFromNode(arg1, errorManager);
-      CssNumericNode sizeNode = getSizeNode(arg2, errorManager);
-      CssLiteralNode cornerNameNode = getCornerNode(arg3, errorManager);
-      CssNumericNode browserInfoNode = getBrowserInfo(arg4, errorManager);
-
-      // We don't need the 'px' part of the size of the image
-      String imgSize = sizeNode.getNumericPart();
-      String units = sizeNode.getUnit();
-
-      String cornerId = cornerNameNode.getValue();
-      String browserInfo = browserInfoNode.getNumericPart();
-
-      ImageBackground results = roundedCornerBackground(
-          imgColor, imgSize, units, cornerId, browserInfo);
-      return results.toNodes(arg1.getSourceCodeLocation());
-    }
-
-    @Override
-    public String getCallResultString(List<String> args)
-        throws GssFunctionException {
-
-      String imgColor = getColor(args.get(0));
-      String imgSizeWithUnits = args.get(1);
-      String cornerId = args.get(2);
-      String browserInfo = args.get(3);
-
-      return roundedCornerBackground(
-          imgColor, imgSizeWithUnits, cornerId, browserInfo);
-    }
-
-    protected String roundedCornerBackground(
-        String imgColor, String imgSizeWithUnits, String cornerId,
-        String browserInfo)
-        throws GssFunctionException {
-      Size sizeWithUnits = parseSize(imgSizeWithUnits,
-          /* isUnitOptional */ false);
-      return roundedCornerBackground(imgColor, sizeWithUnits.size,
-          sizeWithUnits.units, cornerId, browserInfo).toString();
-    }
-
-    private ImageBackground roundedCornerBackground(
-        String imgColor, String imgSize, String units, String cornerId,
-        String browserInfo) {
-
-      boolean isIE6 = parseBoolean(browserInfo);
-      String urlArg = makeRoundedCornersUrl(imgColor, imgSize, isIE6);
-      return new ImageBackground(urlArg, cornerId, imgSize, units);
-    }
-
-    protected abstract String makeRoundedCornersUrl(
-        String imgColor, String imgSize, boolean isIE6);
-
-  }
-
-  /**
-   * Implementation of the roundedCornerImage GSS function. The function
-   * generates the image for a rounded corner corresponding to the following
-   * arguments:
-   * <ol>
-   *   <li><b>corner color</b>: the color of the rounded part of the image,
-   *     probably the same color as the border of the container.
-   *   <li><b>corner radius</b>: the radius of the rounded part of the
-   *     image. The image will actually have this as its height and width
-   *     as well.
-   *   <li><b>corner position</b>: where this image is going to appear.
-   *     Valid values are:
-   *     <ul>
-   *       <li> tl - top left
-   *       <li> tr - top right
-   *       <li> bl - bottom left
-   *       <li> br - bottom right
-   *     </ul>
-   *   <li><b>alpha</b>: the alpha channel for this rounded corner.
-   *
-   * <p>
-   * No IE6 argument is required since IE6 does not support > 1-bit alpha.
-   */
-  public abstract static class
-      SemiTransparentRoundedCornerImage implements GssFunction {
-
-    /**
-     * Returns the number of expected arguments of this GSS function, which is
-     * 4 as documented in {@link SemiTransparentRoundedCornerImage}.
-     *
-     * @return 4
-     */
-    @Override
-    public Integer getNumExpectedArguments() {
-      return 4;
-    }
-
-    /**
-     * Returns the rounded corner image corresponding to the arguments
-     * documented in {@link SemiTransparentRoundedCornerImage}.
-     *
-     * @param args The list of arguments
-     * @return The image of the rounded corner
-     */
-    @Override
-    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
-        ErrorManager errorManager) throws GssFunctionException {
-
-      CssValueNode arg1 = args.get(0);
-      CssValueNode arg2 = args.get(1);
-      CssValueNode arg3 = args.get(2);
-      CssValueNode arg4 = args.get(3);
-
-      String imgColor = getColorFromNode(arg1, errorManager);
-      CssNumericNode sizeNode = getSizeNode(arg2, errorManager);
-      CssLiteralNode cornerNameNode = getCornerNode(arg3, errorManager);
-      String alphaChannel = arg4.toString();
-
-      // We don't need the 'px' part of the size of the image
-      String imgSize = sizeNode.getNumericPart();
-      String units = sizeNode.getUnit();
-
-      String cornerId = cornerNameNode.getValue();
-
-      return semiTransparentRoundedCornerImage(
-          imgColor, imgSize, units, cornerId, alphaChannel)
-              .toNodes(arg1.getSourceCodeLocation());
-    }
-
-    @Override
-    public String getCallResultString(List<String> args)
-        throws GssFunctionException {
-
-      String imgColor = getColor(args.get(0));
-      String imgSizeWithUnits = args.get(1);
-      String cornerId = args.get(2);
-      String alphaChannel = args.get(3);
-
-      return semiTransparentRoundedCornerImage(
-          imgColor, imgSizeWithUnits, cornerId, alphaChannel);
-    }
-
-    protected String semiTransparentRoundedCornerImage(
-        String imgColor, String imgSizeWithUnits, String cornerId,
-        String alphaChannel) throws GssFunctionException {
-      Size sizeWithUnits = parseSize(imgSizeWithUnits,
-          /* isUnitOptional */ false);
-      return semiTransparentRoundedCornerImage(imgColor, sizeWithUnits.size,
-          sizeWithUnits.units, cornerId, alphaChannel).toString();
-    }
-
-    private ImageBackground semiTransparentRoundedCornerImage(
-        String imgColor, String imgSize, String units, String cornerId,
-        String alphaChannel) {
-
-      String fullImageColor = imgColor + alphaChannel;
-      String urlArg = makeRoundedCornersUrl(
-          fullImageColor, imgSize, false /* isIE6 */);
-
-      return new ImageBackground(urlArg, cornerId, imgSize, units);
-    }
-
-    protected abstract String makeRoundedCornersUrl(
-        String imgColor, String imgSize, boolean isIE6);
-
-  }
-
 
   /**
    * Base implementation of the color blending GSS function. Returns a color
@@ -1338,11 +1123,6 @@ public class GssFunctions {
   }
 
   private static CssNumericNode getSizeNode(CssValueNode valueNode,
-      ErrorManager errorManager) throws GssFunctionException {
-    return getSizeNode(valueNode, errorManager, false /* isUnitOptional */);
-  }
-
-  private static CssNumericNode getSizeNode(CssValueNode valueNode,
       ErrorManager errorManager, boolean isUnitOptional)
       throws GssFunctionException {
     SourceCodeLocation location = valueNode.getSourceCodeLocation();
@@ -1370,16 +1150,6 @@ public class GssFunctions {
     }
   }
 
-  private static CssLiteralNode getCornerNode(CssValueNode valueNode,
-      ErrorManager errorManager) throws GssFunctionException {
-    if (valueNode instanceof CssLiteralNode) {
-      return (CssLiteralNode)valueNode;
-    }
-    String message = "Corner name must be an identifier; was: "
-            + valueNode.toString();
-    throw error(valueNode, message, errorManager);
-  }
-
   private static String getColorFromNode(CssValueNode arg,
       ErrorManager errorManager) throws GssFunctionException {
     // Note: we can expect CssHexColorNode or a CssLiteralNode (for
@@ -1399,19 +1169,6 @@ public class GssFunctions {
       return color.substring(1);
     }
     return color;
-  }
-
-  private static CssNumericNode getBrowserInfo(CssValueNode arg,
-      ErrorManager errorManager) throws GssFunctionException {
-    if (arg instanceof CssNumericNode) {
-      CssNumericNode node = (CssNumericNode)arg;
-      if (node.getUnit().equals(CssNumericNode.NO_UNITS)) {
-        return node;
-      }
-    }
-    String message = "Browser info must be a numeric value; was: "
-        + arg.toString();
-    throw error(arg, message, errorManager);
   }
 
   /**

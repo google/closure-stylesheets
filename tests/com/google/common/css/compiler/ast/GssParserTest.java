@@ -274,13 +274,6 @@ public class GssParserTest extends TestCase {
     );
   }
 
-  public void testParsingDef2() throws Exception {
-    testValid("@def NOTIFY_TOP_LEFT_CORNER_BG\n" +
-        "roundedCornerImage(NOTIFY_BG_COLOR,\n" +
-        "NOTIFY_TOP_BORDER_HEIGHT, RC_TOP_LEFT, IE6_FLAG);"
-    );
-  }
-
   public void testParsingDef3() throws Exception {
     testValid("@def A_B /* @default */ inherit;");
   }
@@ -778,7 +771,7 @@ public class GssParserTest extends TestCase {
       "@list l0 {mso-list-id:792754432;]"};
     for (String css : samples) {
       try {
-        CssTree t = parse(css);
+        parse(css);
         fail("The compiler should only accept complete @list rules, not "
             + css);
       } catch (GssParserException e) {
