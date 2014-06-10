@@ -28,6 +28,7 @@ import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.CssAtRuleNode;
 import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
+import com.google.common.css.compiler.ast.CssCombinatorNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssComponentNode;
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
@@ -65,6 +66,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
   private final Map<String, T> fileToChunk;
   private final List<CssProvideNode> provideNodes = Lists.newArrayList();
   private SourceCode lastFile = null;
+  private boolean legacyMode = true;
 
   /**
    * Creates a new pass to process components for the given visit
@@ -86,6 +88,15 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     this.visitController = visitController;
     this.errorManager = errorManager;
     this.fileToChunk = fileToChunk;
+  }
+
+  /**
+   * Set whether to enable legacy behavior of prefixing all class refiners
+   * instead of only prefixing the first class refiner with a selector.
+   * This will be removed once the appropriate GSS files have been updated.
+   */
+  public void setLegacyMode(boolean legacyMode) {
+    this.legacyMode = legacyMode;
   }
 
   @Override
@@ -126,6 +137,19 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     visitController.replaceCurrentBlockChildWith(transformAllNodes(node), false);
     components.put(name, node);
     return false;
+  }
+
+  @Override
+  public boolean enterClassSelector(CssClassSelectorNode node) {
+    // Note that this works because enterComponent, above, returns false -
+    // this visitor never sees class selectors inside components (the other
+    // visitor does).
+    if (node.isComponentScoped()) {
+      reportError("'%' prefix for class selectors may only be used in the scope of an @component",
+          node);
+      return false;
+    }
+    return true;
   }
 
   private void reportError(String message, CssNode node) {
@@ -195,7 +219,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     CssTree tree = new CssTree(
         target.getSourceCodeLocation().getSourceCode(), new CssRootNode(copyBlock));
     new TransformNodes(constants, target, target != source,
-        tree.getMutatingVisitController(), errorManager, provideNodes).runPass();
+        tree.getMutatingVisitController(), errorManager, provideNodes, legacyMode).runPass();
     if (fileToChunk != null) {
       T chunk = MapChunkAwareNodesToChunk.getChunk(target, fileToChunk);
       new SetChunk(tree, chunk).runPass();
@@ -253,14 +277,18 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     private final String defPrefix;
     private final String parentName;
     private final SourceCodeLocation sourceCodeLocation;
+    private final boolean legacyMode;
+    private int inCombinator;
+    private boolean firstClassSelector;
 
     public TransformNodes(Set<String> constants, CssComponentNode current, boolean inAncestorBlock,
         MutatingVisitController visitController, ErrorManager errorManager,
-        List<CssProvideNode> provideNodes) {
+        List<CssProvideNode> provideNodes, boolean legacyMode) {
       this.componentConstants = constants;
       this.inAncestorBlock = inAncestorBlock;
       this.visitController = visitController;
       this.errorManager = errorManager;
+      this.legacyMode = legacyMode;
 
       String currentName = current.getName().getValue();
       if (current.isImplicitlyNamed()) {
@@ -297,12 +325,42 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     }
 
     @Override
+    public boolean enterCombinator(CssCombinatorNode combinator) {
+      inCombinator++;
+      return true;
+    }
+
+    @Override
+    public void leaveCombinator(CssCombinatorNode combinator) {
+      inCombinator--;
+    }
+
+    @Override
+    public boolean enterSelector(CssSelectorNode selector) {
+      // Only reset the 'first selector' flag if we're not in a combinator.
+      // Otherwise, keep the same flag value (which may or may not have been set
+      // depending on whether we saw a class selector in an earlier refiner list.)
+      if (inCombinator == 0) {
+        firstClassSelector = true;
+      }
+      return true;
+    }
+
+    @Override
+    public void leaveSelector(CssSelectorNode selector) {
+      firstClassSelector = false;
+    }
+
+    @Override
     public boolean enterClassSelector(CssClassSelectorNode node) {
       Preconditions.checkState(!isAbstract);
-      CssClassSelectorNode newNode = new CssClassSelectorNode(
-          classPrefix + node.getRefinerName(),
-          node.getSourceCodeLocation());
-      visitController.replaceCurrentBlockChildWith(ImmutableList.of(newNode), false);
+      if (firstClassSelector || node.isComponentScoped() || legacyMode) {
+        CssClassSelectorNode newNode = new CssClassSelectorNode(
+            classPrefix + node.getRefinerName(),
+            node.getSourceCodeLocation());
+        visitController.replaceCurrentBlockChildWith(ImmutableList.of(newNode), false);
+      }
+      firstClassSelector = false;
       return true;
     }
 

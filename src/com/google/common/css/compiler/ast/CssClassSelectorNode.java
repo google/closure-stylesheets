@@ -26,14 +26,29 @@ import com.google.common.css.compiler.ast.CssSelectorNode.Specificity;
  * @author fbenz@google.com (Florian Benz)
  */
 public class CssClassSelectorNode extends CssRefinerNode {
-  public CssClassSelectorNode(String refinerName,
+  private final boolean componentScoped;
+
+  public CssClassSelectorNode(String refinerName, boolean componentScoped,
       SourceCodeLocation sourceCodeLocation) {
     super(Refiner.CLASS, refinerName, sourceCodeLocation);
+    this.componentScoped = componentScoped;
+  }
+
+  public CssClassSelectorNode(String refinerName, SourceCodeLocation sourceCodeLocation) {
+    this(refinerName, false, sourceCodeLocation);
   }
 
   protected CssClassSelectorNode(CssClassSelectorNode node) {
-    this(node.refinerName, node.getSourceCodeLocation());
+    this(node.refinerName, node.componentScoped, node.getSourceCodeLocation());
     this.setComments(node.getComments());
+  }
+
+  /**
+   * Returns {@code true} if this class selector was prefixed with a percent-sign, indicating that
+   * it should be prefixed with the current @component's class prefix.
+   */
+  public boolean isComponentScoped() {
+    return componentScoped;
   }
 
   @Override

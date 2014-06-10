@@ -284,8 +284,8 @@ public class GssParserCC {
     }
 
     public CssClassSelectorNode buildClassSelectorNode(String name,
-        SourceCodeLocation location, List<Token> tokens) {
-      CssClassSelectorNode node = new CssClassSelectorNode(name, location);
+        SourceCodeLocation location, boolean isComponentScoped, List<Token> tokens) {
+      CssClassSelectorNode node = new CssClassSelectorNode(name, isComponentScoped, location);
       attachComments(tokens, node);
       return node;
     }
@@ -750,13 +750,15 @@ CssClassSelectorNode className() :
 {
   Token t;
   List<Token> tokens = Lists.newArrayList();
+  boolean isComponentScoped = false;
 }
 {
   t = <DOT> { tokens.add(t); }
+  ( <PERCENT> { isComponentScoped = true; } )?
   t = <IDENTIFIER>
   {
     tokens.add(t);
-    return nodeBuilder.buildClassSelectorNode(t.image, this.getLocation(),
+    return nodeBuilder.buildClassSelectorNode(t.image, this.getLocation(), isComponentScoped,
         tokens);
   }
 }

@@ -72,14 +72,15 @@ public class ProcessComponentsTest extends PassesTestBase {
 
 
   private final ImmutableList<String> topComponentInputRules = ImmutableList.of(
-      "  .CSS_SOME_CLASS, .CSS_SOME_OTHER_CLASS {",
+      "  .CSS_SOME_CLASS.CSS_SOME_VARIATION, .CSS_SOME_OTHER_CLASS {",
       "    color: SOME_COLOR;",
       "    background-color: OTHER_BG_COLOR;",
       "    width: 100px;",
       "    border-color: someColorFunction(SOME_COLOR, OTHER_BG_COLOR);",
-      "  }");
+      "  }"
+      );
   private final String topComponentOutputRulesTemplate =
-      "[.CSS_TOP-CSS_SOME_CLASS,.CSS_TOP-CSS_SOME_OTHER_CLASS]{" +
+      "[.CSS_TOP-CSS_SOME_CLASS.CSS_SOME_VARIATION,.CSS_TOP-CSS_SOME_OTHER_CLASS]{" +
       "[color:[[CSS_TOP__SOME_COLOR]];" +
       "background-color:[[CSS_TOP__OTHER_BG_COLOR]];" +
       "width:[[100px]];" +
@@ -124,7 +125,7 @@ public class ProcessComponentsTest extends PassesTestBase {
       "@def CSS_CHILD__SOME_COLOR [[CSS_TOP__SOME_COLOR]];" +
       "@def CSS_CHILD__OTHER_BG_COLOR [[CSS_TOP__OTHER_BG_COLOR]];" +
       "@def CSS_CHILD__OTHER_COLOR [[CSS_TOP__OTHER_COLOR]];" +
-      "[.CSS_CHILD-CSS_SOME_CLASS,.CSS_CHILD-CSS_SOME_OTHER_CLASS]{" +
+      "[.CSS_CHILD-CSS_SOME_CLASS.CSS_SOME_VARIATION,.CSS_CHILD-CSS_SOME_OTHER_CLASS]{" +
       "[color:[[CSS_CHILD__SOME_COLOR]];" +
       "background-color:[[CSS_CHILD__OTHER_BG_COLOR]];" +
       "width:[[100px]];" +
@@ -147,7 +148,8 @@ public class ProcessComponentsTest extends PassesTestBase {
       "@def CSS_GRAND_CHILD__SOME_COLOR [[CSS_CHILD__SOME_COLOR]];" +
       "@def CSS_GRAND_CHILD__OTHER_BG_COLOR [[CSS_CHILD__OTHER_BG_COLOR]];" +
       "@def CSS_GRAND_CHILD__OTHER_COLOR [[CSS_CHILD__OTHER_COLOR]];" +
-      "[.CSS_GRAND_CHILD-CSS_SOME_CLASS,.CSS_GRAND_CHILD-CSS_SOME_OTHER_CLASS]{" +
+      "[.CSS_GRAND_CHILD-CSS_SOME_CLASS.CSS_SOME_VARIATION," +
+          ".CSS_GRAND_CHILD-CSS_SOME_OTHER_CLASS]{" +
       "[color:[[CSS_GRAND_CHILD__SOME_COLOR]];" +
       "background-color:[[CSS_GRAND_CHILD__OTHER_BG_COLOR]];" +
       "width:[[100px]];" +
@@ -219,12 +221,102 @@ public class ProcessComponentsTest extends PassesTestBase {
       "@def SOME_EXAMPLE_PACKAGE_OTHER_BG_COLOR [[GLOBAL_COLOR]];" +
       "@def SOME_EXAMPLE_PACKAGE_OTHER_COLOR [someColorFunction(" +
           "SOME_EXAMPLE_PACKAGE_SOME_COLOR,SOME_EXAMPLE_PACKAGE_OTHER_BG_COLOR)];" +
-      "[.someExamplePackageCSS_SOME_CLASS,.someExamplePackageCSS_SOME_OTHER_CLASS]{" +
+      "[.someExamplePackageCSS_SOME_CLASS.CSS_SOME_VARIATION," +
+          ".someExamplePackageCSS_SOME_OTHER_CLASS]{" +
       "[color:[[SOME_EXAMPLE_PACKAGE_SOME_COLOR]];" +
       "background-color:[[SOME_EXAMPLE_PACKAGE_OTHER_BG_COLOR]];" +
       "width:[[100px]];" +
       "border-color:[someColorFunction(" +
           "SOME_EXAMPLE_PACKAGE_SOME_COLOR,SOME_EXAMPLE_PACKAGE_OTHER_BG_COLOR)];]}";
+
+  // This tests a bunch of permutations. The naming convention of the class selector
+  // (PREFIX vs NO_PREFIX) indicates whether we expect the selector to be prefixed
+  // in the output.
+  private final ImmutableList<String> prefixingTestInputRules = ImmutableList.of(
+      "  .PREFIX_A1.NO_PREFIX_A2,",     // Complex selector
+      "  .PREFIX_B1 .NO_PREFIX_B2,",    // Descendant combinator
+      "  .PREFIX_C1 > .NO_PREFIX_C2,",  // Child combinator
+      "  TD.PREFIX_D1.NO_PREFIX_D2,",   // Element refiner before class refiner
+      "  TD.PREFIX_E1 .NO_PREFIX_E2,",  // Element refiner with combinator
+      "  TD.PREFIX_F1 TD.NO_PREFIX_F2,", // Multiple element refiners
+      "  #X.PREFIX_G1.NO_PREFIX_G2,",   // ID refiner
+      "  #X.PREFIX_H1 .NO_PREFIX_H2,",  // ID refiner with combinator
+      "  .PREFIX_I1.%PREFIX_I2,",       // Explicit scoped with complex selector
+      "  .PREFIX_J1 .%PREFIX_J2,",      // Explicit scoped with descendant combinator
+      "  .PREFIX_K1 > .%PREFIX_K2,",    // Explicit scoped with child combinator
+      "  TD.PREFIX_L1.%PREFIX_L2,",     // Explicit scoped with element refiner
+      "  TD.PREFIX_M1 .%PREFIX_M2,",    // Explicit scoped with element refiner and combinator
+      "  TD.PREFIX_N1 TD.%PREFIX_N2,",  // Explicit scoped with multiple element refiners
+      "  #X.PREFIX_O1.%PREFIX_O2,",     // Explicit scoped with ID refiner
+      "  #X.PREFIX_P1 .%PREFIX_P2,",    // Explicit scoped with ID refiner and combinator
+      "  TD .PREFIX_Q1.NO_PREFIX_Q2,",  // First class refiner not in first refiner list
+      "  TD > .PREFIX_R1.NO_PREFIX_R2,", // First class refiner not in first selector
+      "  .PREFIX_S1.%PREFIX_S2>.%PREFIX_S3,", // Percent and combo
+      "  .PREFIX_T1.%PREFIX_T2.NO_PREFIX_T3.%PREFIX_T4,", //
+      "  .%PREFIX_U1.NO_PREFIX_U2",    // Redundant opt-in
+      "  {",
+      "    color: SOME_COLOR;",
+      "  }"
+      );
+
+  private final String prefixingTestComponentInput = joinNl(Iterables.concat(
+      namelessComponentPrefixInput,
+      prefixingTestInputRules,
+      ImmutableList.of("}")));
+
+  // This could have been done using a regex, but I think spelling it out like this makes
+  // errors easier to diagnose.
+  private final String prefixingTestComponentOutput =
+      "[.someExamplePackagePREFIX_A1.NO_PREFIX_A2," +
+      ".someExamplePackagePREFIX_B1 .NO_PREFIX_B2," +
+      ".someExamplePackagePREFIX_C1>.NO_PREFIX_C2," +
+      "TD.someExamplePackagePREFIX_D1.NO_PREFIX_D2," +
+      "TD.someExamplePackagePREFIX_E1 .NO_PREFIX_E2," +
+      "TD.someExamplePackagePREFIX_F1 TD.NO_PREFIX_F2," +
+      "#X.someExamplePackagePREFIX_G1.NO_PREFIX_G2," +
+      "#X.someExamplePackagePREFIX_H1 .NO_PREFIX_H2," +
+      ".someExamplePackagePREFIX_I1.someExamplePackagePREFIX_I2," +
+      ".someExamplePackagePREFIX_J1 .someExamplePackagePREFIX_J2," +
+      ".someExamplePackagePREFIX_K1>.someExamplePackagePREFIX_K2," +
+      "TD.someExamplePackagePREFIX_L1.someExamplePackagePREFIX_L2," +
+      "TD.someExamplePackagePREFIX_M1 .someExamplePackagePREFIX_M2," +
+      "TD.someExamplePackagePREFIX_N1 TD.someExamplePackagePREFIX_N2," +
+      "#X.someExamplePackagePREFIX_O1.someExamplePackagePREFIX_O2," +
+      "#X.someExamplePackagePREFIX_P1 .someExamplePackagePREFIX_P2," +
+      "TD .someExamplePackagePREFIX_Q1.NO_PREFIX_Q2," +
+      "TD>.someExamplePackagePREFIX_R1.NO_PREFIX_R2," +
+      ".someExamplePackagePREFIX_S1.someExamplePackagePREFIX_S2>.someExamplePackagePREFIX_S3," +
+      ".someExamplePackagePREFIX_T1.someExamplePackagePREFIX_T2" +
+          ".NO_PREFIX_T3.someExamplePackagePREFIX_T4," +
+      ".someExamplePackagePREFIX_U1.NO_PREFIX_U2]{" +
+      "[color:[[SOME_COLOR]];]}";
+
+  private final String prefixingTestComponentOutputLegacyMode =
+      "[.someExamplePackagePREFIX_A1.someExamplePackageNO_PREFIX_A2," +
+      ".someExamplePackagePREFIX_B1 .someExamplePackageNO_PREFIX_B2," +
+      ".someExamplePackagePREFIX_C1>.someExamplePackageNO_PREFIX_C2," +
+      "TD.someExamplePackagePREFIX_D1.someExamplePackageNO_PREFIX_D2," +
+      "TD.someExamplePackagePREFIX_E1 .someExamplePackageNO_PREFIX_E2," +
+      "TD.someExamplePackagePREFIX_F1 TD.someExamplePackageNO_PREFIX_F2," +
+      "#X.someExamplePackagePREFIX_G1.someExamplePackageNO_PREFIX_G2," +
+      "#X.someExamplePackagePREFIX_H1 .someExamplePackageNO_PREFIX_H2," +
+      ".someExamplePackagePREFIX_I1.someExamplePackagePREFIX_I2," +
+      ".someExamplePackagePREFIX_J1 .someExamplePackagePREFIX_J2," +
+      ".someExamplePackagePREFIX_K1>.someExamplePackagePREFIX_K2," +
+      "TD.someExamplePackagePREFIX_L1.someExamplePackagePREFIX_L2," +
+      "TD.someExamplePackagePREFIX_M1 .someExamplePackagePREFIX_M2," +
+      "TD.someExamplePackagePREFIX_N1 TD.someExamplePackagePREFIX_N2," +
+      "#X.someExamplePackagePREFIX_O1.someExamplePackagePREFIX_O2," +
+      "#X.someExamplePackagePREFIX_P1 .someExamplePackagePREFIX_P2," +
+      "TD .someExamplePackagePREFIX_Q1.someExamplePackageNO_PREFIX_Q2," +
+      "TD>.someExamplePackagePREFIX_R1.someExamplePackageNO_PREFIX_R2," +
+      ".someExamplePackagePREFIX_S1.someExamplePackagePREFIX_S2>.someExamplePackagePREFIX_S3," +
+      ".someExamplePackagePREFIX_T1.someExamplePackagePREFIX_T2" +
+          ".someExamplePackageNO_PREFIX_T3.someExamplePackagePREFIX_T4," +
+      ".someExamplePackagePREFIX_U1.someExamplePackageNO_PREFIX_U2]{" +
+      "[color:[[SOME_COLOR]];]}";
+
+  private boolean legacyMode = false;
 
   @Override
   protected void runPass() {
@@ -234,8 +326,10 @@ public class ProcessComponentsTest extends PassesTestBase {
     new CreateConditionalNodes(tree.getMutatingVisitController(), errorManager).runPass();
     new CheckDependencyNodes(tree.getMutatingVisitController(), errorManager).runPass();
     new CreateComponentNodes(tree.getMutatingVisitController(), errorManager).runPass();
-    new ProcessComponents<String>(
-        tree.getMutatingVisitController(), errorManager, FILE_TO_CHUNK).runPass();
+    ProcessComponents<String> processComponentsPass = new ProcessComponents<String>(
+        tree.getMutatingVisitController(), errorManager, FILE_TO_CHUNK);
+    processComponentsPass.setLegacyMode(legacyMode);
+    processComponentsPass.runPass();
   }
 
   protected void testTreeConstructionWithResolve(
@@ -388,6 +482,16 @@ public class ProcessComponentsTest extends PassesTestBase {
         "@provide \"some.example.package\";\n" +
         "@provide \"another.example.package\";\n",
         "[]");
+  }
+
+  public void testPrefixingRules() throws Exception {
+    testTreeConstruction(prefixingTestComponentInput, "[" + prefixingTestComponentOutput + "]");
+  }
+
+  public void testPrefixingRulesLegacyMode() throws Exception {
+    legacyMode = true;
+    testTreeConstruction(prefixingTestComponentInput,
+        "[" + prefixingTestComponentOutputLegacyMode + "]");
   }
 
   private String joinNl(Iterable<String> lines) {
