@@ -550,6 +550,7 @@ public final class Property {
         builder("-webkit-animation-name"),
         builder("-webkit-animation-play-state"),
         builder("-webkit-animation-timing-function"),
+        builder("-webkit-app-region"),
         builder("-webkit-appearance"),
         builder("-webkit-aspect-ratio"),
         builder("-webkit-backface-visibility"),
