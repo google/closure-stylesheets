@@ -66,7 +66,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
   private final Map<String, T> fileToChunk;
   private final List<CssProvideNode> provideNodes = Lists.newArrayList();
   private SourceCode lastFile = null;
-  private boolean legacyMode = true;
+  private boolean legacyMode = false;
 
   /**
    * Creates a new pass to process components for the given visit
