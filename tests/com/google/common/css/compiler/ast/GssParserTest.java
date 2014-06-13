@@ -252,6 +252,16 @@ public class GssParserTest extends TestCase {
     testValid("a { x: f(1, 2, 3) }");
   }
 
+  public void testParsingFilterFunctions() throws Exception {
+    testValid("a { filter: drop-shadow(1 2 3) custom(1 2 3);"
+              + "filter: drop-shadow(1, 2, 3) custom(1, 2, 3);}");
+  }
+
+  public void testParsingWebkitFilterFunctions() throws Exception {
+    testValid("a { filter: -webkit-drop-shadow(1 2) -webkit-custom(1 2);"
+              + "filter: -webkit-drop-shadow(1, 2) -webkit-custom(1, 2);}");
+  }
+
   public void testParsingAt1() throws Exception {
     testValid("@import url('http://test.com/test.css');");
   }
