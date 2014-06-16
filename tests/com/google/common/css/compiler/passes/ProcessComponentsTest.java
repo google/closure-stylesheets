@@ -291,33 +291,6 @@ public class ProcessComponentsTest extends PassesTestBase {
       ".someExamplePackagePREFIX_U1.NO_PREFIX_U2]{" +
       "[color:[[SOME_COLOR]];]}";
 
-  private final String prefixingTestComponentOutputLegacyMode =
-      "[.someExamplePackagePREFIX_A1.someExamplePackageNO_PREFIX_A2," +
-      ".someExamplePackagePREFIX_B1 .someExamplePackageNO_PREFIX_B2," +
-      ".someExamplePackagePREFIX_C1>.someExamplePackageNO_PREFIX_C2," +
-      "TD.someExamplePackagePREFIX_D1.someExamplePackageNO_PREFIX_D2," +
-      "TD.someExamplePackagePREFIX_E1 .someExamplePackageNO_PREFIX_E2," +
-      "TD.someExamplePackagePREFIX_F1 TD.someExamplePackageNO_PREFIX_F2," +
-      "#X.someExamplePackagePREFIX_G1.someExamplePackageNO_PREFIX_G2," +
-      "#X.someExamplePackagePREFIX_H1 .someExamplePackageNO_PREFIX_H2," +
-      ".someExamplePackagePREFIX_I1.someExamplePackagePREFIX_I2," +
-      ".someExamplePackagePREFIX_J1 .someExamplePackagePREFIX_J2," +
-      ".someExamplePackagePREFIX_K1>.someExamplePackagePREFIX_K2," +
-      "TD.someExamplePackagePREFIX_L1.someExamplePackagePREFIX_L2," +
-      "TD.someExamplePackagePREFIX_M1 .someExamplePackagePREFIX_M2," +
-      "TD.someExamplePackagePREFIX_N1 TD.someExamplePackagePREFIX_N2," +
-      "#X.someExamplePackagePREFIX_O1.someExamplePackagePREFIX_O2," +
-      "#X.someExamplePackagePREFIX_P1 .someExamplePackagePREFIX_P2," +
-      "TD .someExamplePackagePREFIX_Q1.someExamplePackageNO_PREFIX_Q2," +
-      "TD>.someExamplePackagePREFIX_R1.someExamplePackageNO_PREFIX_R2," +
-      ".someExamplePackagePREFIX_S1.someExamplePackagePREFIX_S2>.someExamplePackagePREFIX_S3," +
-      ".someExamplePackagePREFIX_T1.someExamplePackagePREFIX_T2" +
-          ".someExamplePackageNO_PREFIX_T3.someExamplePackagePREFIX_T4," +
-      ".someExamplePackagePREFIX_U1.someExamplePackageNO_PREFIX_U2]{" +
-      "[color:[[SOME_COLOR]];]}";
-
-  private boolean legacyMode = false;
-
   @Override
   protected void runPass() {
     new CreateDefinitionNodes(tree.getMutatingVisitController(), errorManager).runPass();
@@ -328,7 +301,6 @@ public class ProcessComponentsTest extends PassesTestBase {
     new CreateComponentNodes(tree.getMutatingVisitController(), errorManager).runPass();
     ProcessComponents<String> processComponentsPass = new ProcessComponents<String>(
         tree.getMutatingVisitController(), errorManager, FILE_TO_CHUNK);
-    processComponentsPass.setLegacyMode(legacyMode);
     processComponentsPass.runPass();
   }
 
@@ -486,12 +458,6 @@ public class ProcessComponentsTest extends PassesTestBase {
 
   public void testPrefixingRules() throws Exception {
     testTreeConstruction(prefixingTestComponentInput, "[" + prefixingTestComponentOutput + "]");
-  }
-
-  public void testPrefixingRulesLegacyMode() throws Exception {
-    legacyMode = true;
-    testTreeConstruction(prefixingTestComponentInput,
-        "[" + prefixingTestComponentOutputLegacyMode + "]");
   }
 
   private String joinNl(Iterable<String> lines) {

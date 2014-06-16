@@ -66,7 +66,6 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
   private final Map<String, T> fileToChunk;
   private final List<CssProvideNode> provideNodes = Lists.newArrayList();
   private SourceCode lastFile = null;
-  private boolean legacyMode = false;
 
   /**
    * Creates a new pass to process components for the given visit
@@ -88,15 +87,6 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     this.visitController = visitController;
     this.errorManager = errorManager;
     this.fileToChunk = fileToChunk;
-  }
-
-  /**
-   * Set whether to enable legacy behavior of prefixing all class refiners
-   * instead of only prefixing the first class refiner with a selector.
-   * This will be removed once the appropriate GSS files have been updated.
-   */
-  public void setLegacyMode(boolean legacyMode) {
-    this.legacyMode = legacyMode;
   }
 
   @Override
@@ -219,7 +209,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     CssTree tree = new CssTree(
         target.getSourceCodeLocation().getSourceCode(), new CssRootNode(copyBlock));
     new TransformNodes(constants, target, target != source,
-        tree.getMutatingVisitController(), errorManager, provideNodes, legacyMode).runPass();
+        tree.getMutatingVisitController(), errorManager, provideNodes).runPass();
     if (fileToChunk != null) {
       T chunk = MapChunkAwareNodesToChunk.getChunk(target, fileToChunk);
       new SetChunk(tree, chunk).runPass();
@@ -277,18 +267,16 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     private final String defPrefix;
     private final String parentName;
     private final SourceCodeLocation sourceCodeLocation;
-    private final boolean legacyMode;
     private int inCombinator;
     private boolean firstClassSelector;
 
     public TransformNodes(Set<String> constants, CssComponentNode current, boolean inAncestorBlock,
         MutatingVisitController visitController, ErrorManager errorManager,
-        List<CssProvideNode> provideNodes, boolean legacyMode) {
+        List<CssProvideNode> provideNodes) {
       this.componentConstants = constants;
       this.inAncestorBlock = inAncestorBlock;
       this.visitController = visitController;
       this.errorManager = errorManager;
-      this.legacyMode = legacyMode;
 
       String currentName = current.getName().getValue();
       if (current.isImplicitlyNamed()) {
@@ -354,7 +342,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     @Override
     public boolean enterClassSelector(CssClassSelectorNode node) {
       Preconditions.checkState(!isAbstract);
-      if (firstClassSelector || node.isComponentScoped() || legacyMode) {
+      if (firstClassSelector || node.isComponentScoped()) {
         CssClassSelectorNode newNode = new CssClassSelectorNode(
             classPrefix + node.getRefinerName(),
             node.getSourceCodeLocation());
