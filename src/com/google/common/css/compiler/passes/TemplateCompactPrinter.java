@@ -37,8 +37,10 @@ import com.google.common.css.compiler.ast.CssValueNode;
  */
 public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
 
-  public static final char REFERENCE_START = '$';
-  public static final char REFERENCE_END = '^';
+  public static final char REFERENCE_START = '\u0123';
+  public static final char REFERENCE_END = '\u0122';
+  public static final char REFERENCE_START_OLD = '$';
+  public static final char REFERENCE_END_OLD = '^';
 
   public static final char DECLARATION_START = '\u0105';
   public static final char DECLARATION_END = '\u0104';
@@ -69,9 +71,9 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   @Override
   protected void appendValueNode(CssValueNode node) {
     if (node instanceof CssConstantReferenceNode) {
-      sb.append(REFERENCE_START);
+      sb.append(REFERENCE_START_OLD);
       super.appendValueNode(node);
-      sb.append(REFERENCE_END);
+      sb.append(REFERENCE_END_OLD);
     } else {
       super.appendValueNode(node);
     }
