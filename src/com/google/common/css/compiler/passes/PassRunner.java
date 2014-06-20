@@ -174,7 +174,7 @@ public class PassRunner {
     // Rename class names
     if (recordingSubstitutionMap != null) {
       new CssClassRenaming(
-          cssTree.getMutatingVisitController(),
+          cssTree.getMutatingVisitController(), job.includedClassesInRenaming,
           recordingSubstitutionMap, null).runPass();
     }
   }

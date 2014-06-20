@@ -57,6 +57,7 @@ public class JobDescriptionBuilder {
   private boolean processDependencies;
   private String cssRenamingPrefix;
   private List<String> excludedClassesFromRenaming;
+  private List<String> includedClassesInRenaming;
   private GssFunctionMapProvider gssFunctionMapProvider;
   private SubstitutionMapProvider cssSubstitutionMapProvider;
   private OutputRenamingMapFormat outputRenamingMapFormat;
@@ -86,6 +87,7 @@ public class JobDescriptionBuilder {
     this.processDependencies = false;
     this.cssRenamingPrefix = "";
     this.excludedClassesFromRenaming = Lists.newArrayList();
+    this.includedClassesInRenaming = Lists.newArrayList();
     this.gssFunctionMapProvider = null;
     this.cssSubstitutionMapProvider = null;
     this.outputRenamingMapFormat = OutputRenamingMapFormat.JSCOMP_VARIABLE_MAP;
@@ -116,6 +118,8 @@ public class JobDescriptionBuilder {
     this.cssRenamingPrefix = jobToCopy.cssRenamingPrefix;
     setExcludedClassesFromRenaming(
         ImmutableList.copyOf(jobToCopy.excludedClassesFromRenaming));
+    setIncludedClassesInRenaming(
+        ImmutableList.copyOf(jobToCopy.includedClassesInRenaming));
     this.gssFunctionMapProvider = jobToCopy.gssFunctionMapProvider;
     this.cssSubstitutionMapProvider = jobToCopy.cssSubstitutionMapProvider;
     this.outputRenamingMapFormat = jobToCopy.outputRenamingMapFormat;
@@ -184,6 +188,15 @@ public class JobDescriptionBuilder {
     Preconditions.checkArgument(!excludedClassesFromRenaming.contains(null));
     this.excludedClassesFromRenaming =
         Lists.newArrayList(excludedClassesFromRenaming);
+    return this;
+  }
+
+  public JobDescriptionBuilder setIncludedClassesInRenaming(
+      List<String> includedClassesInRenaming) {
+    checkJobIsNotAlreadyCreated();
+    Preconditions.checkState(this.includedClassesInRenaming.isEmpty());
+    Preconditions.checkArgument(!includedClassesInRenaming.contains(null));
+    this.includedClassesInRenaming = includedClassesInRenaming;
     return this;
   }
 
@@ -380,8 +393,8 @@ public class JobDescriptionBuilder {
         allowUnrecognizedProperties, allowedUnrecognizedProperties, vendor,
         allowKeyframes, allowWebkitKeyframes, processDependencies,
         allowedAtRules, cssRenamingPrefix, excludedClassesFromRenaming,
-        gssFunctionMapProvider, cssSubstitutionMapProvider,
-        outputRenamingMapFormat);
+        includedClassesInRenaming, gssFunctionMapProvider,
+        cssSubstitutionMapProvider, outputRenamingMapFormat);
     return job;
   }
 }

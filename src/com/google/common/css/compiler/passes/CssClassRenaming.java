@@ -24,6 +24,8 @@ import com.google.common.css.compiler.ast.CssIdSelectorNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 
+import java.util.List;
+
 /**
  * Compiler pass that does CSS class renaming given a renaming map.
  * 
@@ -34,12 +36,15 @@ public class CssClassRenaming extends DefaultTreeVisitor
     implements CssCompilerPass {
 
   private final MutatingVisitController visitController;
+  private final List<String> extraClassNames;
   private final SubstitutionMap cssClassRenamingMap;
   private final SubstitutionMap elementIdMap;
 
   public CssClassRenaming(MutatingVisitController visitController,
-      SubstitutionMap cssClassRenamingMap, SubstitutionMap elementIdMap) {
+      List<String> extraClassNames, SubstitutionMap cssClassRenamingMap,
+      SubstitutionMap elementIdMap) {
     this.visitController = visitController;
+    this.extraClassNames = extraClassNames;
     this.cssClassRenamingMap = cssClassRenamingMap;
     this.elementIdMap = elementIdMap;
   }
@@ -79,5 +84,10 @@ public class CssClassRenaming extends DefaultTreeVisitor
   @Override
   public void runPass() {
     visitController.startVisit(this);
+    for (String className : extraClassNames) {
+      if (cssClassRenamingMap != null) {
+        cssClassRenamingMap.get(className);
+      }
+    }
   }
 }

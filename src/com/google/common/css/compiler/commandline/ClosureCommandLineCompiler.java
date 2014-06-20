@@ -154,6 +154,11 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         "Pass the compiler a list of CSS class names that shoudn't be renamed.")
     private List<String> excludedClassesFromRenaming = Lists.newArrayList();
 
+    @Option(name = "--included-classes-in-renaming", usage =
+        "Pass the compiler a list of CSS class names that should be renamed"
+        + " even if their style is empty.")
+    private List<String> includedClassesInRenaming = Lists.newArrayList();
+
     // For enum values, args4j automatically lists all possible values when it
     // prints the usage information for the flag, so including them in the usage
     // message defined here would be redundant.
@@ -199,6 +204,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setAllowWebkitKeyframes(true);
       builder.setProcessDependencies(true);
       builder.setExcludedClassesFromRenaming(excludedClassesFromRenaming);
+      builder.setIncludedClassesInRenaming(includedClassesInRenaming);
       builder.setSimplifyCss(true);
       builder.setEliminateDeadStyles(true);
       builder.setCssSubstitutionMapProvider(renamingType
