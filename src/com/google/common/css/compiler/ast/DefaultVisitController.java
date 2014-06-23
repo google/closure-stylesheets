@@ -371,6 +371,8 @@ class DefaultVisitController implements MutatingVisitController {
 
     private boolean visitedChildren = false;
 
+    private boolean shouldVisitChildren = true;
+
     RootVisitImportBlockState(CssRootNode root, CssImportBlockNode block) {
       this.root = root;
       this.block = block;
@@ -379,7 +381,7 @@ class DefaultVisitController implements MutatingVisitController {
     @Override
     public void doVisit() {
       if (!visitedChildren) {
-        visitor.enterImportBlock(block);
+        shouldVisitChildren = visitor.enterImportBlock(block);
       } else {
         visitor.leaveImportBlock(block);
       }
@@ -387,9 +389,8 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void transitionToNextState() {
-      if (!visitedChildren) {
-        stateStack.push(
-            new VisitImportBlockChildrenState(block));
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitImportBlockChildrenState(block));
         visitedChildren = true;
       } else {
         stateStack.transitionTo(
@@ -424,8 +425,9 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      visitor.enterImportRule(node);
-      visitor.leaveImportRule(node);
+      if (visitor.enterImportRule(node)) {
+        visitor.leaveImportRule(node);
+      }
     }
 
     @Override
