@@ -19,9 +19,13 @@ package com.google.common.css.compiler.passes;
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssFontFaceNode;
+import com.google.common.css.compiler.ast.CssImportRuleNode;
 import com.google.common.css.compiler.ast.CssKeyframeRulesetNode;
+import com.google.common.css.compiler.ast.CssMediaRuleNode;
+import com.google.common.css.compiler.ast.CssPageRuleNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssTree;
+import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 
 /**
@@ -39,6 +43,7 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
 
   public static final char REFERENCE_START = '\u0123';
   public static final char REFERENCE_END = '\u0122';
+
   public static final char REFERENCE_START_OLD = '$';
   public static final char REFERENCE_END_OLD = '^';
 
@@ -47,16 +52,6 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
 
   public static final char RULE_START = '\u0118';
   public static final char RULE_END = '\u0119';
-
-  // TODO(reinerp): Add delimiters RULE_GROUP_START, RULE_GROUP_END
-  // for @keyframes and @media rule groups, so that the TemplateStylesheetLinker
-  // can drop empty @keyframes{} clauses.
-
-  /**
-   * Whether currently visited rule has any selectors that belong to the
-   * printed chunk and should be printed.
-   */
-  private boolean printRule = false;
 
   /**
    * Create a template printer for a given chunk.
@@ -71,9 +66,9 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   @Override
   protected void appendValueNode(CssValueNode node) {
     if (node instanceof CssConstantReferenceNode) {
-      sb.append(REFERENCE_START_OLD);
+      sb.append(REFERENCE_START);
       super.appendValueNode(node);
-      sb.append(REFERENCE_END_OLD);
+      sb.append(REFERENCE_END);
     } else {
       super.appendValueNode(node);
     }
@@ -93,53 +88,119 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
 
   @Override
   public boolean enterRuleset(CssRulesetNode ruleset) {
-    printRule = super.enterRuleset(ruleset);
-    if (printRule) {
+    boolean printRuleset = super.enterRuleset(ruleset);
+    if (printRuleset) {
       sb.append(RULE_START);
     }
-    return printRule;
+    return printRuleset;
   }
 
   @Override
   public void leaveRuleset(CssRulesetNode ruleset) {
-    if (printRule) {
-      sb.append(RULE_END);
-    }
+    // only called if enterRuleset returns true
+    sb.append(RULE_END);
     super.leaveRuleset(ruleset);
   }
 
   @Override
-  public boolean enterFontFace(CssFontFaceNode cssFontFaceNode) {
-    printRule = super.enterFontFace(cssFontFaceNode);
-    if (printRule) {
-      sb.append(RULE_START);
+  public boolean enterMediaRule(CssMediaRuleNode media) {
+    sb.append(RULE_START);
+    boolean printMediaRule = super.enterMediaRule(media);
+    if (!printMediaRule) {
+      deleteLastCharIfCharIs(RULE_START);
     }
-    return printRule;
+    return printMediaRule;
+  }
+
+  @Override
+  public void leaveMediaRule(CssMediaRuleNode media) {
+    // only called if enterMediaRule returns true
+    super.leaveMediaRule(media);
+    sb.append(RULE_END);
+  }
+
+  @Override
+  public boolean enterFontFace(CssFontFaceNode cssFontFaceNode) {
+    sb.append(RULE_START);
+    boolean printFontFace = super.enterFontFace(cssFontFaceNode);
+    if (!printFontFace) {
+      deleteLastCharIfCharIs(RULE_START);
+    }
+    return printFontFace;
   }
 
   @Override
   public void leaveFontFace(CssFontFaceNode cssFontFaceNode) {
-    if (printRule) {
-      sb.append(RULE_END);
-    }
+    // only called if enterFontFace returns true
     super.leaveFontFace(cssFontFaceNode);
+    sb.append(RULE_END);
   }
 
   @Override
   public boolean enterKeyframeRuleset(CssKeyframeRulesetNode ruleset) {
-    printRule = super.enterKeyframeRuleset(ruleset);
-    if (printRule) {
-      sb.append(RULE_START);
+    sb.append(RULE_START);
+    boolean printKeyframeRuleset = super.enterKeyframeRuleset(ruleset);
+    if (!printKeyframeRuleset) {
+      deleteLastCharIfCharIs(RULE_START);
     }
-    return printRule;
+    return printKeyframeRuleset;
   }
 
   @Override
   public void leaveKeyframeRuleset(CssKeyframeRulesetNode ruleset) {
-    if (printRule) {
-      sb.append(RULE_END);
-    }
+    // only called if enterKeyframeRuleset returns true
     super.leaveKeyframeRuleset(ruleset);
+    sb.append(RULE_END);
+  }
+
+  @Override
+  public boolean enterPageRule(CssPageRuleNode node) {
+    sb.append(RULE_START);
+    boolean printPageRule = super.enterPageRule(node);
+    if (!printPageRule) {
+      deleteLastCharIfCharIs(RULE_START);
+    }
+    return printPageRule;
+  }
+
+  @Override
+  public void leavePageRule(CssPageRuleNode node) {
+    // only called if enterPageRule returns true
+    super.leavePageRule(node);
+    sb.append(RULE_END);
+  }
+
+  @Override
+  public boolean enterUnknownAtRule(CssUnknownAtRuleNode node) {
+    sb.append(RULE_START);
+    boolean printUnknownAtRule = super.enterUnknownAtRule(node);
+    if (!printUnknownAtRule) {
+      deleteLastCharIfCharIs(RULE_START);
+    }
+    return printUnknownAtRule;
+  }
+
+  @Override
+  public void leaveUnknownAtRule(CssUnknownAtRuleNode node) {
+    // only called if enterUnknownAtRule returns true
+    super.leaveUnknownAtRule(node);
+    sb.append(RULE_END);
+  }
+
+  @Override
+  public boolean enterImportRule(CssImportRuleNode node) {
+    sb.append(RULE_START);
+    boolean printImportRule = super.enterImportRule(node);
+    if (!printImportRule) {
+      deleteLastCharIfCharIs(RULE_START);
+    }
+    return printImportRule;
+  }
+
+  @Override
+  public void leaveImportRule(CssImportRuleNode node) {
+    super.leaveImportRule(node);
+    sb.append(RULE_END);
   }
 
   @Override

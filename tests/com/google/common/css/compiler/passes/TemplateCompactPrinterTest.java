@@ -39,8 +39,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
         + rS + "a#a{}" + rE
         + rS + "a#a b{}" + rE
         + rS + "b+i{}" + rE
-        + "@media print{" + rS + "foo{}" + rE + "}"
-        + "@font-face" + rS + "{" + dS
+        + rS + "@media print{" + rS + "foo{}" + rE + "}" + rE
+        + rS + "@font-face" + "{" + dS
         + "font-family:'Roboto'" + dE + "}" + rE);
     assertTemplateOutput("bar",
         rS + ".bar{}" + rE
