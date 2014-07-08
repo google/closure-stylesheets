@@ -62,7 +62,7 @@ public class GssParserCC {
         "(?:-(?:O|MOZ|WEBKIT|MS)-)?(?:REPEATING-)?(?:LINEAR|RADIAL)-GRADIENT"
         + "|(?:-(?:O|MOZ|WEBKIT|MS)-)?IMAGE-SET"
         + "|RECT|-KHTML-GRADIENT|-WEBKIT-GRADIENT|(?:-WEBKIT-)?DROP-SHADOW"
-        + "|(?:-WEBKIT-)?CUSTOM",
+        + "|(?:-WEBKIT-)?CUSTOM|LOCAL",
         Pattern.CASE_INSENSITIVE);
 
   private static final Set<String> URL_FUNCTIONS = ImmutableSet.of(

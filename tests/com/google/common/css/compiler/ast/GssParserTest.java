@@ -262,6 +262,11 @@ public class GssParserTest extends TestCase {
               + "filter: -webkit-drop-shadow(1, 2) -webkit-custom(1, 2);}");
   }
 
+  public void testParsingLocalFunctions() throws Exception {
+    testValid("@font-face { src: local(Gentium), url(Gentium.woff);"
+              + "src: local(Gentium Bold), local(Gentium-Bold), url(GentiumBold.woff);}");
+  }
+
   public void testParsingAt1() throws Exception {
     testValid("@import url('http://test.com/test.css');");
   }
