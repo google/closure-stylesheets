@@ -105,7 +105,19 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
 
   @Override
   public boolean enterComponent(CssComponentNode node) {
+    SourceCode sourceCode = node.getSourceCodeLocation().getSourceCode();
+    if (sourceCode != lastFile) {
+      provideNodes.clear();
+      lastFile = sourceCode;
+    }
     String name = node.getName().getValue();
+    if (node.isImplicitlyNamed()) {
+      if (provideNodes.size() != 1) {
+        reportError("implicitly-named @components require a single @provide declaration ", node);
+        return false;
+      }
+      name = Iterables.getOnlyElement(provideNodes).getProvide();
+    }
     if (components.containsKey(name)) {
       reportError("cannot redefine component in chunk ", node);
       return false;
@@ -113,15 +125,6 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     CssLiteralNode parentName = node.getParentName();
     if ((parentName != null) && !components.containsKey(parentName.getValue())) {
       reportError("parent component is undefined in chunk ", node);
-      return false;
-    }
-    SourceCode sourceCode = node.getSourceCodeLocation().getSourceCode();
-    if (sourceCode != lastFile) {
-      provideNodes.clear();
-      lastFile = sourceCode;
-    }
-    if (node.isImplicitlyNamed() && provideNodes.size() != 1) {
-      reportError("implicitly-named @components require a single @provide declaration ", node);
       return false;
     }
     visitController.replaceCurrentBlockChildWith(transformAllNodes(node), false);

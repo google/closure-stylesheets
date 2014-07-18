@@ -449,6 +449,27 @@ public class ProcessComponentsTest extends PassesTestBase {
         "implicitly-named @components require a single @provide declaration " + TEST_CHUNK);
   }
 
+  public void testImplicitlyNamedMultipleComponents() throws Exception {
+    parseAndRun(ImmutableMap.<String, String>of(
+        "file1",
+        "@provide \"some.example.package\";\n" +
+        "@component { }",
+        "file2",
+        "@provide \"another.example.package\";\n" +
+        "@component { }"));
+  }
+
+  public void testImplicitlyNamedMultipleComponentsPackageError() throws Exception {
+    parseAndRun(ImmutableMap.<String, String>of(
+        "file1",
+        "@provide \"some.example.package\";\n" +
+        "@component { }",
+        "file2",
+        "@provide \"some.example.package\";\n" +
+        "@component { }"),
+        "cannot redefine component in chunk chunk2");
+  }
+
   public void testMultiplePackageWithNoComponentError() throws Exception {
     testTreeConstruction(
         "@provide \"some.example.package\";\n" +
