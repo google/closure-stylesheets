@@ -383,6 +383,7 @@ public final class Property {
         builder("-ms-grid-row-align"),
         builder("-ms-grid-row-span"),
         builder("-ms-grid-rows"),
+        builder("-ms-high-contrast-adjust"),
         builder("-ms-ime-mode"),
         builder("-ms-interpolation-mode"),
         builder("-ms-justify-content"),
