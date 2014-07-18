@@ -743,6 +743,7 @@ public final class Property {
         builder("-webkit-wrap-through"),
         builder("white-space"),
         builder("windows"),
+        builder("will-change"),
         builder("width"),
         builder("word-break"),
         builder("word-spacing"),
