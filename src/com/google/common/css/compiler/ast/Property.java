@@ -66,6 +66,7 @@ public final class Property {
         builder("animation-play-state"),
         builder("animation-timing-function"),
         builder("azimuth"),
+        builder("backface-visibility"),
         builder("background-attachment"),
         builder("background-clip"),
         builder("background-color"),
