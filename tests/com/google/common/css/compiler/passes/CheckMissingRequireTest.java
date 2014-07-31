@@ -177,4 +177,25 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     errorManager.generateReport();
     assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
   }
+
+  public void testMissingOverrideDefNamespace() throws GssParserException {
+    String base =  ""
+        + "@provide 'oz.base';"
+        + "@def OZ_BASE_COLOR     #fff;";
+    String streamitem =  ""
+        + "@provide 'oz.streamitem';"
+        + "@require 'foo.bar';"
+        + "/* @overrideDef {oz.base} */ @def OZ_BASE_COLOR  #ffe;";
+
+    ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
+        "base.gss", base,
+        "streamitem.gss", streamitem);
+    parseAndBuildTree(fileNameToGss);
+    String[] expectedMessages = {"Missing @require for @overrideDef"};
+    TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
+    runPasses(errorManager);
+    errorManager.generateReport();
+    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+  }
+
 }

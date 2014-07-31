@@ -21,6 +21,7 @@ import com.google.common.collect.Sets;
 import com.google.common.css.compiler.ast.CssCommentNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
+import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssMixinNode;
 import com.google.common.css.compiler.ast.CssRefinerNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
@@ -52,8 +53,11 @@ import java.util.regex.Pattern;
 public final class CheckMissingRequire extends DefaultTreeVisitor implements CssCompilerPass {
   private static final Logger logger = Logger.getLogger(CheckMissingRequire.class.getName());
 
-  private static final Pattern OVERRIDE_REGEX = Pattern.compile(
+  private static final Pattern OVERRIDE_SELECTOR_REGEX = Pattern.compile(
       "/\\*\\s+@overrideSelector\\s+\\{(.*)\\}\\s+\\*/");
+
+  private static final Pattern OVERRIDE_DEF_REGEX = Pattern.compile(
+      "/\\*\\s+@overrideDef\\s+\\{(.*)\\}\\s+\\*/");
 
   private final MutatingVisitController visitController;
   private final ErrorManager errorManager;
@@ -162,7 +166,7 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
     String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
     for (CssRefinerNode refiner : node.getRefiners().getChildren()) {
       for (CssCommentNode comment : refiner.getComments()) {
-        Matcher matcher = OVERRIDE_REGEX.matcher(comment.getValue());
+        Matcher matcher = OVERRIDE_SELECTOR_REGEX.matcher(comment.getValue());
         if (matcher.find()) {
           String overrideNamespace = matcher.group(1);
           List<String> requires = filenameRequireMap.get(filename);
@@ -178,6 +182,37 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
             errorManager.report(new GssError(error, node.getSourceCodeLocation()));
             return true;
           }
+        }
+      }
+    }
+    return true;
+  }
+
+  /*
+   * Check whether @overrideDef namespaces are @require'd.
+   */
+  @Override
+  public boolean enterDefinition(CssDefinitionNode node) {
+    if (node.getSourceCodeLocation() == null) {
+      // Cannot enforce provide / require without source location.
+      return true;
+    }
+    String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
+    for (CssCommentNode comment : node.getComments()) {
+      Matcher matcher = OVERRIDE_DEF_REGEX.matcher(comment.getValue());
+      if (matcher.find()) {
+        String overrideNamespace = matcher.group(1);
+        List<String> requires = filenameRequireMap.get(filename);
+        if (requires == null || requires.size() == 0) {  // ignore old format @require
+          continue;
+        }
+        Set<String> requireNamespaceSet = Sets.newHashSet(requires);
+        if (!requireNamespaceSet.contains(overrideNamespace)) {
+          String error = "Missing @require for @overrideDef {"
+              + overrideNamespace + "}. Please @require this namespace in file: "
+              + filename + ".\n";
+          errorManager.report(new GssError(error, node.getSourceCodeLocation()));
+          return true;
         }
       }
     }
