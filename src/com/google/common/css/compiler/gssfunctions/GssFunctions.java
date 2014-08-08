@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.css.SourceCodeLocation;
+import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssFunctionArgumentsNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssHexColorNode;
@@ -42,6 +43,8 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /**
  * Container for common GSS functions.
@@ -72,6 +75,7 @@ public class GssFunctions {
         .put("addHsbToCssColor", new AddHsbToCssColor())
         .put("makeContrastingColor", new MakeContrastingColor())
         .put("adjustBrightness", new AdjustBrightness())
+        .put("makeTranslucent", new MakeTranslucent())
 
         // Logic functions.
         .put("selectFrom", new SelectFrom())
@@ -1070,6 +1074,67 @@ public class GssFunctions {
           + otherColorHsb[componentIdx] * (1f - sourceSimilarity);
     }
   }
+
+  /**
+   * Takes an input color and sets its alpha component without affecting
+   * the RGB components.
+   * Usage: makeTranslucent(existingColor, alphaValue);
+   */
+  public static class MakeTranslucent implements GssFunction {
+    @Override
+    public Integer getNumExpectedArguments() {
+      return 2;
+    }
+
+    @Override
+    public List<CssValueNode> getCallResultNodes(
+        List<CssValueNode> args, ErrorManager errorManager) {
+      CssValueNode arg1 = args.get(0);
+      CssValueNode arg2 = args.get(1);
+
+      String color = arg1.getValue();
+      String alpha = arg2.toString();
+
+      return ImmutableList.of(makeTranslucent(
+          color, alpha, arg1.getSourceCodeLocation()));
+    }
+
+    @Override
+    public String getCallResultString(List<String> args) {
+      return makeTranslucent(args.get(0), args.get(1), null).getValue();
+    }
+
+    protected CssValueNode makeTranslucent(
+        String inputColorStr, String alphaStr,
+        @Nullable SourceCodeLocation sourceCodeLocation) {
+      Color inputColor = ColorParser.parseAny(inputColorStr);
+      double alpha = Math.min(1.0, Math.max(0, Float.parseFloat(alphaStr)));
+
+      float[] rgb = inputColor.getRGBColorComponents(null);
+      Color outputColor = new Color(rgb[0], rgb[1], rgb[2], (float) alpha);
+
+      List<CssValueNode> argList = ImmutableList.<CssValueNode>of(
+          new CssLiteralNode(
+              Integer.toString(outputColor.getRed()), sourceCodeLocation),
+          new CssLiteralNode(
+              Integer.toString(outputColor.getGreen()), sourceCodeLocation),
+          new CssLiteralNode(
+              Integer.toString(outputColor.getBlue()), sourceCodeLocation),
+          new CssLiteralNode(
+              new DecimalFormat("#.###").format(outputColor.getAlpha() / 255f),
+              sourceCodeLocation));
+      CssValueNode argsValue = new CssCompositeValueNode(
+          argList, CssCompositeValueNode.Operator.COMMA,
+          sourceCodeLocation);
+      CssFunctionNode result = new CssFunctionNode(
+          CssFunctionNode.Function.byName("rgba"),
+          sourceCodeLocation);
+      result.setArguments(new CssFunctionArgumentsNode(
+          ImmutableList.of(argsValue)));
+      return result;
+    }
+  }
+
 
   /**
    * Allows the equivalent of the ternary operator in GSS, using three
