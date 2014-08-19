@@ -331,7 +331,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   public void leavePseudoClass(CssPseudoClassNode node) {
     if (node.getFunctionType() == FunctionType.NOT) {
       deleteEndingIfEndingIs(", ");
-      sb.append(") ");
+      sb.append(")");
     }
   }
 
