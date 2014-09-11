@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author dgajda@google.com (Damian Gajda)
  */
-class StringCharStream implements CharStream {
+public class StringCharStream implements CharStream {
 
   /** The input string. */
   private final String input;
@@ -48,12 +48,11 @@ class StringCharStream implements CharStream {
    * numbers are 1 based.
    */
   private int[] lineToCharIndex;
-  
 
   /**
    * Creates a character stream for a given string.
-   * 
-   * @param inputString input string for this stream 
+   *
+   * @param inputString input string for this stream
    */
   public StringCharStream(String inputString) {
     input = inputString;
@@ -97,8 +96,7 @@ class StringCharStream implements CharStream {
   /**
    * @return index of last read character
    */
-  @VisibleForTesting
-  int getCharIndex() {
+  public int getCharIndex() {
     return charPos;
   }
 
