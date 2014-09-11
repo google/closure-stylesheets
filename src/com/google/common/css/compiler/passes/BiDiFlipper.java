@@ -36,6 +36,7 @@ import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ import java.util.regex.Pattern;
 public class BiDiFlipper extends DefaultTreeVisitor
     implements CssCompilerPass {
 
+  private final DecimalFormat percentFormatter = new DecimalFormat("#.########");
   private final MutatingVisitController visitController;
 
   boolean shouldSwapLeftRightInUrl;
@@ -340,8 +342,9 @@ public class BiDiFlipper extends DefaultTreeVisitor
 
     CssNumericNode numericNode = (CssNumericNode) valueNode;
     String oldPercentageValue = numericNode.getNumericPart();
+    double newPercentValue = 100 - Double.parseDouble(oldPercentageValue);
     CssValueNode newNumericNode = new CssNumericNode(
-        String.valueOf(100 - Integer.parseInt(oldPercentageValue)), "%");
+        percentFormatter.format(newPercentValue), "%");
 
     return newNumericNode;
   }

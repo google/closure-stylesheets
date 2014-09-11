@@ -193,4 +193,42 @@ public class BiDiFlipperTest extends TestCase {
         + "-moz-border-radius-topright:[3px]"
         + "]}]");
   }
+
+  public void testSubPercentValues() {
+    // background-position-x: 1.12345678%;
+    CssPropertyNode prop1 = new CssPropertyNode("background-position-x", null);
+    CssPropertyValueNode value1 = new CssPropertyValueNode();
+    BackDoorNodeMutation.addChildToBack(value1, new CssNumericNode("1.12345678", "%"));
+
+    // -ms-background-position-x: 2.5%;
+    CssPropertyNode prop2 = new CssPropertyNode("-ms-background-position-x", null);
+    CssPropertyValueNode value2 = new CssPropertyValueNode();
+    BackDoorNodeMutation.addChildToBack(value2, new CssNumericNode("2.5", "%"));
+
+    CssDeclarationNode decl1 = new CssDeclarationNode(prop1);
+    decl1.setPropertyValue(value1);
+    CssDeclarationNode decl2 = new CssDeclarationNode(prop2);
+    decl2.setPropertyValue(value2);
+
+    CssRulesetNode ruleset = new CssRulesetNode();
+    CssSelectorNode sel = new CssSelectorNode("foo", null);
+    ruleset.addSelector(sel);
+    ruleset.addDeclaration(decl1);
+    ruleset.addDeclaration(decl2);
+
+    CssBlockNode body = new CssBlockNode(false);
+    BackDoorNodeMutation.addChildToBack(body, ruleset);
+
+    CssRootNode root = new CssRootNode(body);
+    CssTree tree = new CssTree(null, root);
+
+    BiDiFlipper pass = new BiDiFlipper(tree.getMutatingVisitController(),
+                                       true, true);
+    pass.runPass();
+    assertEquals(tree.getRoot().getBody().toString(),
+        "[[foo]{["
+        + "background-position-x:[98.87654322%], "
+        + "-ms-background-position-x:[97.5%]"
+        + "]}]");
+  }
 }
