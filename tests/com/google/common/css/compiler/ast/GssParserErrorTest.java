@@ -17,8 +17,12 @@
 package com.google.common.css.compiler.ast;
 
 import com.google.common.css.SourceCode;
+import com.google.testing.util.MoreAsserts;
 
 import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Unit tests for error handling of {@link GssParser}.
@@ -180,8 +184,93 @@ public class GssParserErrorTest extends TestCase {
         + "}",
         1, 72,
         "div {d:-invalid-gradient(bottom left, red 20px, yellow, green,"
-        +"blue 90%);}",
+        + "blue 90%);}",
         "                                                                "
         + "       ^");
+  }
+
+  /**
+   * Tests for error handling below
+   */
+
+  private void testErrorHandling(String input, String expected, String... errors)
+      throws GssParserException {
+    GssParser parser = new GssParser(new SourceCode("test", input));
+    CssTree tree = parser.parse(true);
+    assertNotNull(tree);
+    CssRootNode root = tree.getRoot();
+    assertNotNull(root);
+    assertEquals(expected, root.toString());
+    List<String> handledErrors = new ArrayList<>(parser.getHandledErrors().size());
+    for (GssParserException e : parser.getHandledErrors()) {
+      handledErrors.add(e.getMessage());
+    }
+    MoreAsserts.assertContentsInOrder(handledErrors, (Object[]) errors);
+  }
+
+  public void testDeclarationErrorHandling() throws GssParserException {
+    testErrorHandling("a { b: c,,; d: e }", "[[a]{[d:[e]]}]",
+        "Parse error in test at line 1 column 10:\n"
+        + "a { b: c,,; d: e }\n"
+        + "         ^\n");
+    testErrorHandling("a { b: c: d; e: f }", "[[a]{[e:[f]]}]",
+        "Parse error in test at line 1 column 10:\n"
+        + "a { b: c: d; e: f }\n"
+        + "         ^\n");
+    testErrorHandling("a { b: c; @at d: e; f: g }", "[[a]{[b:[c], f:[g]]}]",
+        "Parse error in test at line 1 column 17:\n"
+        + "a { b: c; @at d: e; f: g }\n"
+        + "                ^\n");
+  }
+
+  public void testSelectorErrorHandling() throws GssParserException {
+    testErrorHandling("a>>b { b: c } d { e: f }", "[[d]{[e:[f]]}]",
+        "Parse error in test at line 1 column 2:\n"
+        + "a>>b { b: c } d { e: f }\n"
+        + " ^\n");
+    testErrorHandling("a @ b { c: d } e {}", "[[e]{[]}]",
+        "Parse error in test at line 1 column 3:\n"
+        + "a @ b { c: d } e {}\n"
+        + "  ^\n");
+    // No error; braces within quoted string are correctly parsed
+    testErrorHandling("a{b:\"{,}\"}", "[[a]{[b:[\"{,}\"]]}]");
+  }
+
+  public void testAtRuleErrorHandling() throws GssParserException {
+    testErrorHandling("@a b (,,); c { d: e }", "[[c]{[d:[e]]}]",
+        "Parse error in test at line 1 column 7:\n"
+        + "@a b (,,); c { d: e }\n"
+        + "      ^\n");
+    testErrorHandling("@a { b,,{} c { d:: e; f: g } } h { i: j }",
+        "[@a[]{[[c]{[f:[g]]}]}, [h]{[i:[j]]}]",
+        "Parse error in test at line 1 column 8:\n"
+        + "@a { b,,{} c { d:: e; f: g } } h { i: j }\n"
+        + "       ^\n",
+        "Parse error in test at line 1 column 18:\n"
+        + "@a { b,,{} c { d:: e; f: g } } h { i: j }\n"
+        + "                 ^\n");
+  }
+
+  public void testMatcingBraces() throws GssParserException {
+    // Inner closed block ignored
+    testErrorHandling("a{ b{} } c{}", "[[a]{[]}, [c]{[]}]",
+        "Parse error in test at line 1 column 5:\n"
+        + "a{ b{} } c{}\n"
+        + "    ^\n");
+    // Inner nested blocks ignored as well
+    testErrorHandling("a{([b])} c{}", "[[c]{[]}]",
+        "Parse error in test at line 1 column 3:\n"
+        + "a{([b])} c{}\n"
+        + "  ^\n");
+    // Unmatched left brace consume until EOF
+    testErrorHandling("a{([b)]} c{}", "[]",
+        "Parse error in test at line 1 column 3:\n"
+        + "a{([b)]} c{}\n"
+        + "  ^\n");
+    // Unmatched right brace ignored
+    testErrorHandling("a{ (}) } b{}", "[[b]{[]}]",
+        "Parse error in test at line 1 column 4:\n"
+        + "a{ (}) } b{}\n"
+        + "   ^\n");
   }
 }

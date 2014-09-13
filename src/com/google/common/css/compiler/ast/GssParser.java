@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.ast;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.css.SourceCode;
 
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 public class GssParser {
 
   private final List<SourceCode> sources;
+  private List<GssParserException> handledErrors = ImmutableList.of();
 
   public GssParser(List<SourceCode> sources) {
     this.sources = sources;
@@ -38,13 +40,24 @@ public class GssParser {
   }
 
   public CssTree parse() throws GssParserException {
+    return parse(false);
+  }
+
+  public CssTree parse(boolean errorHandling) throws GssParserException {
     SourceCode globalSourceCode = new SourceCode("global", null);
     CssBlockNode globalBlock =
         new CssBlockNode(false /* isEnclosedWithBraces */);
     CssTree tree = new CssTree(globalSourceCode, new CssRootNode(globalBlock));
+    handledErrors = Lists.newArrayList();
     for (SourceCode source : sources) {
-      new GssParserCC(globalBlock, source).parse();
+      GssParserCC parser = new GssParserCC(globalBlock, source, errorHandling);
+      parser.parse();
+      handledErrors.addAll(parser.getHandledErrors());
     }
     return tree;
+  }
+
+  public List<GssParserException> getHandledErrors() {
+    return handledErrors;
   }
 }
