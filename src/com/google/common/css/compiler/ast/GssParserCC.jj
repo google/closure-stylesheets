@@ -573,6 +573,7 @@ PARSER_END(GssParserCC)
   | < WPLUS: <W> <PLUS> >
   | < WGREATER: <W> <GREATER> >
   | < WTILDE: <W> <TILDE> >
+  | < WDEEP: <W> <SLASH> "deep" <SLASH> >
 
   | < #ALPHA: ["a"-"z","A"-"Z"] >
 
@@ -1011,7 +1012,7 @@ CssSelectorNode simpleSelector() :
     ( ( n = id()
       | n = className()
       | n = attribute()
-      | n = pseudo() )   { refiners.addChildToBack(n); }
+      | n = pseudo()) { refiners.addChildToBack(n); }
     )+
   )
   {
@@ -1037,19 +1038,17 @@ Token elementName() :
 }
 
 // combinator
-//   : [ '+' S* ] | [ '>' S* ] | [ '~' S* ] | S+
+//   : [ '+' S* ] | [ '>' S* ] | [ '~' S* ] | [ WDEEP S*] | S+
 //   ;
 CssCombinatorNode combinator() :
 {
   Token t;
-  SourceCodeLocation location = null;
   List<Token> tokens = Lists.newArrayList();
 }
 {
   // it doesn't work if the "( <S> )*"are after the { ... } part
   ( t = <WPLUS> ( <S> )*
     {
-      location = getLocation(t);
       tokens.add(t);
       return nodeBuilder.buildCombinatorNode(
           CssCombinatorNode.Combinator.ADJACENT_SIBLING, this.getLocation(),
@@ -1059,7 +1058,6 @@ CssCombinatorNode combinator() :
   |
   ( t = <WGREATER> ( <S> )*
     {
-      location = getLocation(t);
       tokens.add(t);
       return nodeBuilder.buildCombinatorNode(
           CssCombinatorNode.Combinator.CHILD, this.getLocation(), tokens);
@@ -1068,11 +1066,18 @@ CssCombinatorNode combinator() :
   |
   ( t = <WTILDE> ( <S> )*
     {
-      location = getLocation(t);
       tokens.add(t);
       return nodeBuilder.buildCombinatorNode(
           CssCombinatorNode.Combinator.GENERAL_SIBLING, this.getLocation(),
           tokens);
+    }
+  )
+  |
+  ( t = <WDEEP> ( <S> )*
+    {
+      tokens.add(t);
+      return nodeBuilder.buildCombinatorNode(
+          CssCombinatorNode.Combinator.DEEP, this.getLocation(), tokens);
     }
   )
   |

@@ -162,6 +162,11 @@ public class GssParserTest extends TestCase {
              "[[.a]{[d:[[e][[f],[g]][h]];]}]");
   }
 
+  public void testAst24() throws Exception {
+    testTree("a~b/deep/c { d: e }",
+             "[[a~b/deep/c]{[d:[[e]];]}]");
+  }
+
   public void testParsingRules1() throws Exception {
     testValid("css_rule33 {\n" +
         "border: black ; /* comment */\n" +
@@ -222,6 +227,10 @@ public class GssParserTest extends TestCase {
 
   public void testParsingSelector6() throws Exception {
     testValid("a ~ b { x: y}");
+  }
+
+  public void testParsingSelector7() throws Exception {
+    testValid("a /deep/ b { x: y}");
   }
 
   public void testParsingExpr1() throws Exception {

@@ -19,6 +19,8 @@ package com.google.common.css.compiler.passes;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.css.compiler.ast.CssCombinatorNode;
+import com.google.common.css.compiler.ast.CssCombinatorNode.Combinator;
 import com.google.common.css.compiler.ast.CssPseudoClassNode;
 import com.google.common.css.compiler.ast.CssPseudoElementNode;
 import com.google.common.css.compiler.ast.CssRefinerNode;
@@ -48,6 +50,9 @@ import java.util.Set;
  *
  */
 public class StrictCss3 extends StrictCssBase {
+  private static final ImmutableSet<Combinator>
+      ALLOWED_COMBINATORS = ImmutableSet.of(Combinator.DESCENDANT,
+          Combinator.CHILD, Combinator.ADJACENT_SIBLING, Combinator.GENERAL_SIBLING);
   private static final ImmutableSet<String> PSEUDO_CLASSES = ImmutableSet.of(
       "root", "first-child", "last-child", "first-of-type", "last-of-type",
       "only-child", "only-of-type", "empty", "link", "visited", "active",
@@ -102,6 +107,9 @@ public class StrictCss3 extends StrictCssBase {
       "khz");
 
   @VisibleForTesting
+  static final String UNSUPPORTED_COMBINATOR_ERROR_MESSAGE =
+      "An unsupported combinator is used.";
+  @VisibleForTesting
   static final String UNSUPPORTED_PESUDO_CLASS_ERROR_MESSAGE =
       "An unsupported pseudo-class is used.";
   @VisibleForTesting
@@ -125,6 +133,19 @@ public class StrictCss3 extends StrictCssBase {
   @Override
   Set<String> getValidCssUnits() {
     return UNITS;
+  }
+
+  /**
+   * Ensures that the combinator '/deep/' (not strict CSS 3) is not used.
+   */
+  @Override
+  public boolean enterCombinator(CssCombinatorNode combinator) {
+    if (!ALLOWED_COMBINATORS.contains(combinator.getCombinatorType())) {
+      errorManager.report(new GssError(UNSUPPORTED_COMBINATOR_ERROR_MESSAGE,
+          combinator.getSourceCodeLocation()));
+      return false;
+    }
+    return true;
   }
 
   @Override

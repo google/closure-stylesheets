@@ -29,6 +29,7 @@ public class CssCombinatorNode extends CssNode {
    */
   public enum Combinator {
     DESCENDANT(" "),
+    DEEP("/deep/"),
     CHILD(">"),
     ADJACENT_SIBLING("+"),
     GENERAL_SIBLING("~");
