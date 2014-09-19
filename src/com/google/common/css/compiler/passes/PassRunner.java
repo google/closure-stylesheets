@@ -86,6 +86,8 @@ public class PassRunner {
     new ProcessKeyframes(cssTree.getMutatingVisitController(),
         errorManager, job.allowKeyframes || job.allowWebkitKeyframes,
         job.simplifyCss).runPass();
+    new CreateVendorPrefixedKeyframes(cssTree.getMutatingVisitController(),
+        errorManager).runPass();
     new ProcessRefiners(cssTree.getMutatingVisitController(), errorManager,
         job.simplifyCss).runPass();
 
