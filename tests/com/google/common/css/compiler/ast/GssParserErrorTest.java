@@ -200,12 +200,12 @@ public class GssParserErrorTest extends TestCase {
     assertNotNull(tree);
     CssRootNode root = tree.getRoot();
     assertNotNull(root);
-    assertEquals(expected, root.toString());
     List<String> handledErrors = new ArrayList<>(parser.getHandledErrors().size());
     for (GssParserException e : parser.getHandledErrors()) {
       handledErrors.add(e.getMessage());
     }
     MoreAsserts.assertContentsInOrder(handledErrors, (Object[]) errors);
+    assertEquals(expected, root.toString());
   }
 
   public void testDeclarationErrorHandling() throws GssParserException {
@@ -249,9 +249,25 @@ public class GssParserErrorTest extends TestCase {
         "Parse error in test at line 1 column 18:\n"
         + "@a { b,,{} c { d:: e; f: g } } h { i: j }\n"
         + "                 ^\n");
+    testErrorHandling("@a (b;) { c {} } d {}", "[[d]{[]}]",
+        "Parse error in test at line 1 column 6:\n"
+        + "@a (b;) { c {} } d {}\n"
+        + "     ^\n");
+    testErrorHandling("@a (b:c[]) { d[;}] {} e {} } f {}", "[[f]{[]}]",
+        "Parse error in test at line 1 column 8:\n"
+        + "@a (b:c[]) { d[;}] {} e {} } f {}\n"
+        + "       ^\n");
+    testErrorHandling("a { @b { c, {} d {} } e: f }", "[[a]{[@b[]{[]}, e:[f]]}]",
+        "Parse error in test at line 1 column 11:\n"
+        + "a { @b { c, {} d {} } e: f }\n"
+        + "          ^\n");
+    testErrorHandling("a[b=] { c {} } d {}", "[[d]{[]}]",
+        "Parse error in test at line 1 column 5:\n"
+        + "a[b=] { c {} } d {}\n"
+        + "    ^\n");
   }
 
-  public void testMatcingBraces() throws GssParserException {
+  public void testMatchingBraces() throws GssParserException {
     // Inner closed block ignored
     testErrorHandling("a{ b{} } c{}", "[[a]{[]}, [c]{[]}]",
         "Parse error in test at line 1 column 5:\n"

@@ -713,17 +713,14 @@ CssRulesetNode ruleSet() :
 }
 {
   try {
-    selectors = selectorList()
-    t = <LEFTBRACE> { tokens.add(t); }
-  } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
-    handledErrors.add(new GssParserException(getLocation(token.next), e));
-    if (skipComponentValuesToAfter(LEFTBRACE) == LEFTBRACE) {
-      skipComponentValuesToAfter(RIGHTBRACE);
+    try {
+      selectors = selectorList()
+      t = <LEFTBRACE> { tokens.add(t); }
+    } catch (ParseException e) {
+      if (!enableErrorRecovery) throw e;
+      skipComponentValuesToAfter(LEFTBRACE);
+      throw e;
     }
-    return null;
-  }
-  try {
     declarations = styleDeclaration()
     t = <RIGHTBRACE> { tokens.add(t); }
     {
@@ -733,9 +730,8 @@ CssRulesetNode ruleSet() :
     }
   } catch (ParseException e) {
     if (!enableErrorRecovery) throw e;
-    handledErrors.add(new GssParserException(getLocation(token.next), e));
     skipComponentValuesToAfter(RIGHTBRACE);
-    return null;
+    throw e;
   }
 }
 
@@ -942,11 +938,12 @@ CssAttributeSelectorNode attribute() :
 }
 {
   t = <LEFTSQUARE> { beginLocation = this.getLocation(); tokens.add(t); }
-  ( <S> )*
-  t = <IDENTIFIER> { attribute = t.image; tokens.add(t); }
-  ( <S> )*
-  (
-    (   t = <EQUALS>    { tokens.add(t);
+  try {
+    ( <S> )*
+    t = <IDENTIFIER> { attribute = t.image; tokens.add(t); }
+    ( <S> )*
+    (
+      ( t = <EQUALS>    { tokens.add(t);
             matchType = CssAttributeSelectorNode.MatchType.EXACT; }
       | t = <TILDE_EQUALS>  { tokens.add(t);
             matchType = CssAttributeSelectorNode.MatchType.ONE_WORD; }
@@ -958,16 +955,22 @@ CssAttributeSelectorNode attribute() :
             matchType = CssAttributeSelectorNode.MatchType.CONTAINS; }
       | t = <PIPE_EQUALS> { tokens.add(t);
             matchType = CssAttributeSelectorNode.MatchType.EXACT_OR_DASH; }
-    )
-    ( <S> )*
-    (
-        t = <IDENTIFIER> { idNode = new CssLiteralNode(t.image, this.getLocation());
-            tokens.add(t); }
+      )
+      ( <S> )*
+      ( t = <IDENTIFIER> {
+          idNode = new CssLiteralNode(t.image, this.getLocation());
+          tokens.add(t);
+        }
       | stringNode = string()
-    )
-    ( <S> )*
-  )?
-  t = <RIGHTSQUARE> { tokens.add(t); }
+      )
+      ( <S> )*
+    )?
+    t = <RIGHTSQUARE> { tokens.add(t); }
+  } catch (ParseException e) {
+    if (!enableErrorRecovery) throw e;
+    skipComponentValuesToAfter(RIGHTSQUARE);
+    throw e;
+  }
 
   {
     SourceCodeLocation endLocation = this.getLocation();
@@ -1107,46 +1110,53 @@ CssDeclarationBlockNode styleDeclaration() :
   CssNode decl;
 }
 {
-  ( <S> )*
-  ( decl = standardDeclaration()
-    {
-      if (decl != null) {
+  try {
+    ( <S> )*
+    ( decl = standardDeclaration()
+      {
         block.addChildToBack(decl);
       }
-    }
-  )?
-  ( <S> )*
+    )?
+    ( <S> )*
+  } catch (ParseException e) {
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
+    handledErrors.add(new GssParserException(getLocation(e.currentToken.next), e));
+  }
   (
-    (
-      decl = innerAtRule() {
-        if (decl != null) {
-          block.addChildToBack(decl);
-        }
-      }
-      ( <S> )*
+    try {
       (
-        decl = standardDeclaration()
-        {
-           if (decl != null) {
-             block.addChildToBack(decl);
-           }
+        try {
+          decl = innerAtRule() {
+            block.addChildToBack(decl);
+          }
+        } catch (ParseException e) {
+          if (!enableErrorRecovery || e.currentToken == null) throw e;
+          handledErrors.add(new GssParserException(getLocation(e.currentToken.next), e));
         }
-      )?
-    )
-  |
-    ( <SEMICOLON>
-      ( <S> )*
-      // The last declaration within a block not necessarily has a semicolon
-      // at the end.
-      (
-        decl = standardDeclaration()
-        {
-           if (decl != null) {
-             block.addChildToBack(decl);
-           }
-        }
-      )?
-    )
+        ( <S> )*
+        (
+          decl = standardDeclaration()
+          {
+            block.addChildToBack(decl);
+          }
+        )?
+      )
+      |
+      ( <SEMICOLON>
+        ( <S> )*
+        // The last declaration within a block not necessarily has a semicolon
+        // at the end.
+        (
+          decl = standardDeclaration()
+          {
+            block.addChildToBack(decl);
+          }
+        )?
+      )
+    } catch (ParseException e) {
+      if (!enableErrorRecovery || e.currentToken == null) throw e;
+      handledErrors.add(new GssParserException(getLocation(e.currentToken.next), e));
+    }
   )*
   { return block; }
 }
@@ -1187,9 +1197,8 @@ CssDeclarationNode standardDeclaration() :
     }
   } catch (ParseException e) {
     if (!enableErrorRecovery) throw e;
-    handledErrors.add(new GssParserException(getLocation(token.next), e));
     skipComponentValuesToBefore(RIGHTBRACE, SEMICOLON);
-    return null;
+    throw e;
   }
 }
 
@@ -1327,18 +1336,25 @@ CssValueNode term() :
       ( LOOKAHEAD({getToken(1).kind == LEFTROUND
             && (getToken(3).kind == COLON || getToken(4).kind == COLON)})
         t = <LEFTROUND>  { tokens.add(t); }
-        ( <S> )?
-        t = <IDENTIFIER> { tokens.add(t); }
-        t = <COLON>      { tokens.add(t); }
-        ( <S> )*
-        (  ( t = <NUMBER> { tokens.add(t); }
-             ( (dim = <IDENTIFIER> ) { tokens.add(dim); } )?
-           )
-          |
-           ( t = <IDENTIFIER> { tokens.add(t); } )
-        )
-        ( <S> )*
-        t = <RIGHTROUND> { tokens.add(t); } )
+        try {
+          ( <S> )?
+          t = <IDENTIFIER> { tokens.add(t); }
+          t = <COLON>      { tokens.add(t); }
+          ( <S> )*
+          (  ( t = <NUMBER> { tokens.add(t); }
+               ( (dim = <IDENTIFIER> ) { tokens.add(dim); } )?
+             )
+            |
+             ( t = <IDENTIFIER> { tokens.add(t); } )
+          )
+          ( <S> )*
+          t = <RIGHTROUND> { tokens.add(t); }
+        } catch (ParseException e) {
+          if (!enableErrorRecovery) throw e;
+          skipComponentValuesToAfter(RIGHTROUND);
+          throw e;
+        }
+      )
     | LOOKAHEAD({getToken(1).kind == URI}) function = uri()
     | t = hexcolor()   { tokens.add(t); hexcolor = true; }
     | function = calc()
@@ -1510,10 +1526,16 @@ CssBooleanExpressionNode parenthesized_term() :
 }
 {
   t = <LEFTROUND> { tokens.add(t); }
-  ( <S> )*
-  node = extended_term()
-  t = <RIGHTROUND> { tokens.add(t); }
-  ( <S> )*
+  try {
+    ( <S> )*
+    node = extended_term()
+    t = <RIGHTROUND> { tokens.add(t); }
+    ( <S> )*
+  } catch (ParseException e) {
+    if (!enableErrorRecovery) throw e;
+    skipComponentValuesToAfter(RIGHTROUND);
+    throw e;
+  }
   {
     nodeBuilder.attachComments(tokens, node);
     return node;
@@ -1719,8 +1741,14 @@ String unit() :
     )
     | (
         <LEFTROUND> { content.append("("); }
-        (<S>)* sum = sum() {content.append(sum);} (<S>)*
-        <RIGHTROUND> { content.append(")"); }
+        try {
+          (<S>)* sum = sum() {content.append(sum);} (<S>)*
+          <RIGHTROUND> { content.append(")"); }
+        } catch (ParseException e) {
+          if (!enableErrorRecovery) throw e;
+          skipComponentValuesToAfter(RIGHTROUND);
+          throw e;
+        }
       )
     | (math = calc() {content.append(math.getValue());})
   )
@@ -1815,34 +1843,42 @@ CssAtRuleNode at_rule() :
     }
     ( <S> )*
     ( ( v = composite_term() | v = extended_term() ) { parameters.add(v); } ( <S> )* )*
-    ( ( t = <LEFTBRACE> { tokens.add(t); }
-        ( <S> )*
-        try {
-          block = block(true)
-          t = <RIGHTBRACE> { tokens.add(t); }
-        } catch (ParseException e) {
-          if (!enableErrorRecovery) throw e;
-          handledErrors.add(new GssParserException(getLocation(token.next), e));
-          skipComponentValuesToAfter(RIGHTBRACE);
-          return null;
-        }
-      )
-      |
-      t = <SEMICOLON> { tokens.add(t); }
-    )
-    {
-      SourceCodeLocation endLocation = getLocation(t);
-      CssAtRuleNode at = nodeBuilder.buildUnknownAtRuleNode(name, block,
-          this.mergeLocations(beginLocation, endLocation), parameters, tokens);
-      return at;
-    }
   } catch (ParseException e) {
     if (!enableErrorRecovery) throw e;
-    handledErrors.add(new GssParserException(getLocation(token.next), e));
     if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
       skipComponentValuesToAfter(RIGHTBRACE);
     }
-    return null;
+    throw e;
+  }
+  ( ( t = <LEFTBRACE> { tokens.add(t); }
+      try {
+        ( <S> )*
+        block = block(true)
+        t = <RIGHTBRACE> { tokens.add(t); }
+      } catch (ParseException e) {
+        if (!enableErrorRecovery) throw e;
+        skipComponentValuesToAfter(RIGHTBRACE);
+        throw e;
+      }
+    )
+    |
+    t = <SEMICOLON> { tokens.add(t); }
+    |
+    {
+      ParseException e = generateParseException();
+      if (enableErrorRecovery) {
+        if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
+          skipComponentValuesToAfter(RIGHTBRACE);
+        }
+      }
+      throw e;
+    }
+  )
+  {
+    SourceCodeLocation endLocation = getLocation(t);
+    CssAtRuleNode at = nodeBuilder.buildUnknownAtRuleNode(name, block,
+        this.mergeLocations(beginLocation, endLocation), parameters, tokens);
+    return at;
   }
 }
 
@@ -1870,45 +1906,70 @@ CssAtRuleNode atRuleWithDeclBlock() :
   List<Token> pseudoPageTokens = Lists.newArrayList();
 }
 {
-  t = <ATRULESWITHDECLBLOCK>
-  {
-    beginLocation = this.getLocation(t);
-    name = new CssLiteralNode(t.image.substring(1), beginLocation);
-    tokens.add(t);
-  }
-  ( <S> )*
-  (
-    v = atFunction() { parameters.add(v); }
-  |
+  try {
+    t = <ATRULESWITHDECLBLOCK>
+    {
+      beginLocation = this.getLocation(t);
+      name = new CssLiteralNode(t.image.substring(1), beginLocation);
+      tokens.add(t);
+    }
+    ( <S> )*
     (
-      // This is needed for @page (e.g. @page :left {} and @page bla:first {}).
-      LOOKAHEAD({getToken(1).kind == COLON || getToken(2).kind == COLON})
-      ( t = <IDENTIFIER> {
+      v = atFunction() { parameters.add(v); }
+    |
+      (
+        // This is needed for @page (e.g. @page :left {} and @page bla:first {}).
+        LOOKAHEAD({getToken(1).kind == COLON || getToken(2).kind == COLON})
+        ( t = <IDENTIFIER> {
+            pseudoPageTokens.add(t);
+            v = nodeBuilder.buildLiteralNode(t.image, getLocation(t), pseudoPageTokens);
+            parameters.add(v);
+            pseudoPageTokens.clear();
+          }
+        )?
+        t = <COLON> { pseudoPageTokens.add(t); }
+        t = <IDENTIFIER> {
           pseudoPageTokens.add(t);
-          v = nodeBuilder.buildLiteralNode(t.image, getLocation(t), pseudoPageTokens);
+          v = nodeBuilder.buildLiteralNode(":" + t.image, getLocation(t), pseudoPageTokens);
           parameters.add(v);
-          pseudoPageTokens.clear();
         }
-      )?
-      t = <COLON> { pseudoPageTokens.add(t); }
-      t = <IDENTIFIER> {
-        pseudoPageTokens.add(t);
-        v = nodeBuilder.buildLiteralNode(":" + t.image, getLocation(t), pseudoPageTokens);
-        parameters.add(v);
-      }
-      ( <S> )*
+        ( <S> )*
+      )
+    |
+      ( ( v = composite_term() | v = extended_term() ) { parameters.add(v); }
+        ( <S> )*
+      )*
     )
-  |
-    ( ( v = composite_term() | v = extended_term() ) { parameters.add(v); }
-      ( <S> )*
-    )*
-  )
+  } catch (ParseException e) {
+    if (!enableErrorRecovery) throw e;
+    if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
+      skipComponentValuesToAfter(RIGHTBRACE);
+    }
+    throw e;
+  }
   ( ( t = <LEFTBRACE>  { tokens.add(t); }
-      ( <S> )* block = styleDeclaration()
-      t = <RIGHTBRACE> { tokens.add(t);}
+      try {
+        ( <S> )* block = styleDeclaration()
+        t = <RIGHTBRACE> { tokens.add(t); }
+      } catch (ParseException e) {
+        if (!enableErrorRecovery) throw e;
+        skipComponentValuesToAfter(RIGHTBRACE);
+        throw e;
+      }
     )
     |
-    t = <SEMICOLON> { tokens.add(t);} )
+    t = <SEMICOLON> { tokens.add(t); }
+    |
+    {
+      ParseException e = generateParseException();
+      if (enableErrorRecovery) {
+        if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
+          skipComponentValuesToAfter(RIGHTBRACE);
+        }
+      }
+      throw e;
+    }
+  )
   {
     SourceCodeLocation endLocation = getLocation(t);
     CssAtRuleNode at = nodeBuilder.buildUnknownAtRuleNode(name, block,
@@ -1971,25 +2032,42 @@ CssAtRuleNode innerAtRule() :
         ( <S> )*
       )*
     )
-    (
-      ( t = <LEFTBRACE>  { tokens.add(t); }
-        ( <S> )* block = styleDeclaration()
-        t = <RIGHTBRACE> { tokens.add(t); }
-      )
-    |
-      t = <SEMICOLON> { tokens.add(t);}
-    )
-    {
-      SourceCodeLocation endLocation = getLocation(t);
-      CssAtRuleNode at = nodeBuilder.buildUnknownAtRuleNode(name, block,
-          this.mergeLocations(beginLocation, endLocation), parameters, tokens);
-      return at;
-    }
   } catch (ParseException e) {
     if (!enableErrorRecovery) throw e;
-    handledErrors.add(new GssParserException(getLocation(token.next), e));
-    skipComponentValuesToAfter(SEMICOLON, RIGHTBRACE);
-    return null;
+    if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
+      skipComponentValuesToAfter(RIGHTBRACE);
+    }
+    throw e;
+  }
+  (
+    ( t = <LEFTBRACE>  { tokens.add(t); }
+      try {
+        ( <S> )* block = styleDeclaration()
+        t = <RIGHTBRACE> { tokens.add(t); }
+      } catch (ParseException e) {
+        if (!enableErrorRecovery) throw e;
+        skipComponentValuesToAfter(RIGHTBRACE);
+        throw e;
+      }
+    )
+  |
+    t = <SEMICOLON> { tokens.add(t); }
+  |
+    {
+      ParseException e = generateParseException();
+      if (enableErrorRecovery) {
+        if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
+          skipComponentValuesToAfter(RIGHTBRACE);
+        }
+      }
+      throw e;
+    }
+  )
+  {
+    SourceCodeLocation endLocation = getLocation(t);
+    CssAtRuleNode at = nodeBuilder.buildUnknownAtRuleNode(name, block,
+        this.mergeLocations(beginLocation, endLocation), parameters, tokens);
+    return at;
   }
 }
 
@@ -2009,25 +2087,39 @@ CssAtRuleNode webkit_keyframes_rule() :
   List<Token> tokens = Lists.newArrayList();
 }
 {
-  t = <WEBKITKEYFRAMES>
-  {
-    beginLocation = this.getLocation(t);
-    name = new CssLiteralNode(t.image.substring(1), beginLocation);
-    tokens.add(t);
+  try {
+    t = <WEBKITKEYFRAMES>
+    {
+      beginLocation = this.getLocation(t);
+      name = new CssLiteralNode(t.image.substring(1), beginLocation);
+      tokens.add(t);
+    }
+    ( <S> )*
+    t = <IDENTIFIER>
+    {
+      List<Token> identifierTokens = Lists.newArrayList();
+      identifierTokens.add(t);
+      CssLiteralNode l =
+        nodeBuilder.buildLiteralNode(t.image, getLocation(t), identifierTokens);
+      parameters.add(l);
+    }
+    ( <S> )*
+  } catch (ParseException e) {
+    if (!enableErrorRecovery) throw e;
+    if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
+      skipComponentValuesToAfter(RIGHTBRACE);
+    }
+    throw e;
   }
-  ( <S> )*
-  t = <IDENTIFIER>
-  {
-    List<Token> identifierTokens = Lists.newArrayList();
-    identifierTokens.add(t);
-    CssLiteralNode l =
-      nodeBuilder.buildLiteralNode(t.image, getLocation(t), identifierTokens);
-    parameters.add(l);
-  }
-  ( <S> )*
   ( t = <LEFTBRACE>  { tokens.add(t); }
+    try {
       ( <S> )* block = webkit_keyframes_block()
       t = <RIGHTBRACE> { tokens.add(t);}
+    } catch (ParseException e) {
+      if (!enableErrorRecovery) throw e;
+      skipComponentValuesToAfter(RIGHTBRACE);
+      throw e;
+    }
   )
   {
     SourceCodeLocation endLocation = getLocation(t);
@@ -2067,10 +2159,24 @@ CssKeyframeRulesetNode webkit_keyframe_ruleSet() :
   List<Token> tokens = Lists.newArrayList();
 }
 {
-  keys = keyList()
-  t = <LEFTBRACE> { tokens.add(t); }
-  declarations = styleDeclaration()
-  t = <RIGHTBRACE> { tokens.add(t); }
+  try {
+    keys = keyList()
+    t = <LEFTBRACE> { tokens.add(t); }
+  } catch (ParseException e) {
+    if (!enableErrorRecovery) throw e;
+    if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
+      skipComponentValuesToAfter(RIGHTBRACE);
+    }
+    throw e;
+  }
+  try {
+    declarations = styleDeclaration()
+    t = <RIGHTBRACE> { tokens.add(t); }
+  } catch (ParseException e) {
+    if (!enableErrorRecovery) throw e;
+    skipComponentValuesToAfter(RIGHTBRACE);
+    throw e;
+  }
   {
     CssKeyframeRulesetNode ruleSet =
         nodeBuilder.buildKeyframeRulesetNode(declarations, keys, tokens);
@@ -2145,15 +2251,18 @@ CssBlockNode block(boolean isEnclosedWithBraces) :
       block = globalBlock;
     }
   }
-  ( ( n = ruleSet()
-    | LOOKAHEAD( <ATLIST> ) n = atRuleWithCrazySyntax()
-    | n = at_rule()
-    | n = webkit_keyframes_rule()
-    | n = atRuleWithDeclBlock()
-    ) {
-      if (n != null) {
+  ( try {
+      ( n = ruleSet()
+      | LOOKAHEAD( <ATLIST> ) n = atRuleWithCrazySyntax()
+      | n = at_rule()
+      | n = webkit_keyframes_rule()
+      | n = atRuleWithDeclBlock()
+      ) {
         block.addChildToBack(n);
       }
+    } catch (ParseException e) {
+      if (!enableErrorRecovery || e.currentToken == null) throw e;
+      handledErrors.add(new GssParserException(getLocation(e.currentToken.next), e));
     }
     ( <S> | <CDO> | <CDC> )*
   )*
