@@ -1257,9 +1257,23 @@ public class GssFunctions {
     }
   }
 
+  /**
+   * Helper class for checking if a size string contains units. This class is equivalent to
+   * {@link CharMatcher#JAVA_LETTER} except that it also accepts {@code %}.
+   */
+  private static final CharMatcher UNIT_MATCHER = new CharMatcher() {
+    @Override public boolean matches(char c) {
+      return Character.isLetter(c) || c == '%';
+    }
+
+    @Override public String toString() {
+      return "GssFunctions.UNIT_MATCHER";
+    }
+  };
+
   private static Size parseSize(String sizeWithUnits, boolean isUnitOptional)
       throws GssFunctionException {
-    int unitIndex = CharMatcher.JAVA_LETTER.indexIn(sizeWithUnits);
+    int unitIndex = UNIT_MATCHER.indexIn(sizeWithUnits);
     String size = unitIndex > 0 ?
         sizeWithUnits.substring(0, unitIndex) : sizeWithUnits;
     String units = unitIndex > 0 ?
