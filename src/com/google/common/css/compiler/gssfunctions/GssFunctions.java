@@ -445,53 +445,6 @@ public class GssFunctions {
   }
 
   /**
-   * Implementation of the semiTransparentBackgroundColor function. Takes
-   * two arguments: the color and the alpha value, both in hexadecimal format.
-   * This is implemented with two arguments so that the alpha value can be
-   * reused for rounded corners.
-   */
-  public abstract static class SemiTransparentBackgroundColor
-      implements GssFunction {
-
-    @Override
-    public Integer getNumExpectedArguments() {
-      return 2;
-    }
-
-    /**
-     * Returns the semi-transparent image corresponding to the arguments
-     * documented in {@link SemiTransparentBackgroundColor}.
-     *
-     * @param args The list of arguments
-     * @return The image of the rounded corner
-     */
-    @Override
-    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
-        ErrorManager errorManager) throws GssFunctionException {
-      CssValueNode arg1 = args.get(0);
-      CssValueNode arg2 = args.get(1);
-
-      String color = getColorFromNode(arg1, errorManager);
-      String alphaChannel = arg2.toString();
-
-      String urlArg = semiTransparentBackgroundUrl(color, alphaChannel);
-      SourceCodeLocation location = arg1.getSourceCodeLocation();
-
-      return ImmutableList.of((CssValueNode)createUrlNode(urlArg, location));
-    }
-
-    @Override
-    public String getCallResultString(List<String> args) {
-      return createUrl(semiTransparentBackgroundUrl(
-          getColor(args.get(0)), args.get(1)));
-    }
-
-    protected abstract String semiTransparentBackgroundUrl(
-        String color, String alphaChannel);
-  }
-
-
-  /**
    * Implementation of the makeMutedColor GSS function. This is intended to
    * generate a muted flavor of a text or link color. Takes three arguments: the
    * background color over which this text or link will appear, and the text or
@@ -1213,27 +1166,6 @@ public class GssFunctions {
         throw error(message, errorManager, location);
       }
     }
-  }
-
-  private static String getColorFromNode(CssValueNode arg,
-      ErrorManager errorManager) throws GssFunctionException {
-    // Note: we can expect CssHexColorNode or a CssLiteralNode (for
-    // example "white"), but not functions (like "rgb(x,y,z)").
-    if (arg instanceof CssHexColorNode) {
-      return arg.getValue().substring(1); // cut the "#"
-    } else if (arg instanceof CssLiteralNode) {
-      return arg.getValue();
-    }
-    String message = "First argument must be a CssHexColorNode or "
-        + "LiteralNode containing a color name";
-    throw error(arg, message, errorManager);
-  }
-
-  private static String getColor(String color) {
-    if (color.charAt(0) == '#') {
-      return color.substring(1);
-    }
-    return color;
   }
 
   /**
