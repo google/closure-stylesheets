@@ -348,7 +348,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
       if (firstClassSelector || node.isComponentScoped()) {
         CssClassSelectorNode newNode = new CssClassSelectorNode(
             classPrefix + node.getRefinerName(),
-            node.getSourceCodeLocation());
+            inAncestorBlock ? sourceCodeLocation : node.getSourceCodeLocation());
         visitController.replaceCurrentBlockChildWith(ImmutableList.of(newNode), false);
       }
       firstClassSelector = false;
@@ -363,7 +363,9 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
         return true;
       }
       String defName = node.getName().getValue();
-      CssLiteralNode newDefLit = new CssLiteralNode(defPrefix + defName);
+      CssLiteralNode newDefLit =
+          new CssLiteralNode(defPrefix + defName,
+              inAncestorBlock ? sourceCodeLocation : node.getSourceCodeLocation());
       CssDefinitionNode newNode;
       // When copying the ancestor block, we want to replace definition values
       // with a reference to the constant emitted when the parent component was
@@ -376,7 +378,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
         String parentRefName = defName.startsWith(parentRefPrefix)
             ? defName : parentRefPrefix + defName;
         CssConstantReferenceNode parentRefNode =
-            new CssConstantReferenceNode(parentRefName);
+            new CssConstantReferenceNode(parentRefName, sourceCodeLocation);
         newNode = new CssDefinitionNode(ImmutableList.<CssValueNode>of(parentRefNode),
             newDefLit, sourceCodeLocation);
       } else {
@@ -396,7 +398,8 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
           // component tree.
           && componentConstants.contains(node.getValue())) {
         CssConstantReferenceNode newNode =
-            new CssConstantReferenceNode(defPrefix + node.getValue());
+            new CssConstantReferenceNode(defPrefix + node.getValue(),
+                inAncestorBlock ? sourceCodeLocation : node.getSourceCodeLocation());
         visitController.replaceCurrentBlockChildWith(ImmutableList.of(newNode), false);
       }
       return true;

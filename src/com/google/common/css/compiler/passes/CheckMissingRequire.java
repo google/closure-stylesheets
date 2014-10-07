@@ -90,10 +90,6 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
   @Override
   public boolean enterValueNode(CssValueNode node) {
     if (node instanceof CssConstantReferenceNode) {
-      if (node.getSourceCodeLocation() == null) {
-        // Cannot enforce provide / require for generated GSS components.
-        return true;
-      }
       CssConstantReferenceNode reference = (CssConstantReferenceNode) node;
       String filename = reference.getSourceCodeLocation().getSourceCode().getFileName();
       List<String> provides = defProvideMap.get(reference.getValue());
@@ -118,10 +114,6 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
 
   @Override
   public boolean enterMixin(CssMixinNode node) {
-    if (node.getSourceCodeLocation() == null) {
-      // Cannot enforce provide / require for generated GSS components.
-      return true;
-    }
     String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
     List<String> provides = defmixinProvideMap.get(node.getDefinitionName());
     // Remove this after switching to the new syntax.
@@ -159,10 +151,6 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
    */
   @Override
   public boolean enterSelector(CssSelectorNode node) {
-    if (node.getSourceCodeLocation() == null) {
-      // Cannot enforce provide / require for generated GSS components.
-      return true;
-    }
     String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
     for (CssRefinerNode refiner : node.getRefiners().getChildren()) {
       for (CssCommentNode comment : refiner.getComments()) {
@@ -193,10 +181,6 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
    */
   @Override
   public boolean enterDefinition(CssDefinitionNode node) {
-    if (node.getSourceCodeLocation() == null) {
-      // Cannot enforce provide / require without source location.
-      return true;
-    }
     String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
     for (CssCommentNode comment : node.getComments()) {
       Matcher matcher = OVERRIDE_DEF_REGEX.matcher(comment.getValue());

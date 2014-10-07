@@ -24,8 +24,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
+import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
+import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
@@ -479,6 +482,41 @@ public class ProcessComponentsTest extends PassesTestBase {
 
   public void testPrefixingRules() throws Exception {
     testTreeConstruction(prefixingTestComponentInput, "[" + prefixingTestComponentOutput + "]");
+  }
+
+  public void testComponentDefsSourceCodeLocation() throws Exception {
+    CssTree tree = parseAndRun(ImmutableMap.of(
+        FILE1,
+        joinNl(ImmutableList.of(
+            "@provide \"some.example.package\";",
+            "@component PARENT {",
+            "  @def BASE_COLOR red;",
+            "}")),
+        FILE2,
+        joinNl(ImmutableList.of(
+            "@require \"some.example.package\";",
+            "@provide \"another.example.package\";",
+            "@component CHILD extends PARENT {",
+            "  @def SPECIFIC_COLOR blue;",
+            "  @def DERIVED_COLOR BASE_COLOR;",
+            "  .Foo { background-color: DERIVED_COLOR; color: SPECIFIC_COLOR; }",
+            "}"))));
+    final ImmutableMap.Builder<String, String> foundDefs = ImmutableMap.builder();
+    tree.getVisitController().startVisit(new DefaultTreeVisitor() {
+      @Override
+      public boolean enterDefinition(CssDefinitionNode node) {
+        String defName = node.getName().toString();
+        String sourceFileName = node.getSourceCodeLocation().getSourceCode().getFileName();
+        foundDefs.put(defName, sourceFileName);
+        return true;
+      }
+    });
+    ImmutableMap<String, String> expectedDefs = ImmutableMap.of(
+        "PARENT__BASE_COLOR", FILE1,
+        "CHILD__BASE_COLOR", FILE2,
+        "CHILD__SPECIFIC_COLOR", FILE2,
+        "CHILD__DERIVED_COLOR", FILE2);
+    assertEquals(expectedDefs, foundDefs.build());
   }
 
   private String joinNl(Iterable<String> lines) {

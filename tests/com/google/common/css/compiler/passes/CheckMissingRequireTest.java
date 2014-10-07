@@ -36,6 +36,8 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     l.add(new CreateDefinitionNodes(tree.getMutatingVisitController(), errorMgr));
     l.add(new CreateConstantReferences(tree.getMutatingVisitController()));
     l.add(new CheckDependencyNodes(tree.getMutatingVisitController(), errorMgr));
+    l.add(new CreateComponentNodes(tree.getMutatingVisitController(), errorMgr));
+    l.add(new ProcessComponents<Object>(tree.getMutatingVisitController(), errorMgr, null));
     for (CssCompilerPass pass : l) {
       pass.runPass();
     }
@@ -53,17 +55,26 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
 
   public void testBaseCase1() throws GssParserException {
     String base =  ""
-        + "@provide 'oz.base';"
+        + "@provide 'foo.base';"
         + "@def OZ_BASE_COLOR     #fff;";
     String streamitem =  ""
-        + "@provide 'oz.streamitem';"
-        + "@require 'oz.base';"
+        + "@provide 'foo.streamitem';"
+        + "@require 'foo.base';"
         + ".nav {"
-        + "  color: OZ_BASE_COLOR;"
+        + "  color: FOO_BASE_COLOR;"
+        + "}";
+    String streamcomponent = ""
+        + "@provide 'foo.streamcomponent';"
+        + "@require 'foo.base';"
+        + "@component {"
+        + "  .nav {"
+        + "    color: FOO_BASE_COLOR;"
+        + "  }"
         + "}";
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
         "base.gss", base,
-        "streamitem.gss", streamitem);
+        "streamitem.gss", streamitem,
+        "streamcomponent.gss", streamcomponent);
 
     parseAndBuildTree(fileNameToGss);
     String[] expectedMessages = {};
@@ -75,9 +86,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
 
   public void testBaseCase2() throws GssParserException {
     String base =  ""
-        + "@provide 'oz.base';"
-        + "@def OZ_BASE_COLOR     #fff;"
-        + "@def OZ_BASE_BG_COLOR  OZ_BASE_COLOR;";
+        + "@provide 'foo.base';"
+        + "@def FOO_BASE_COLOR     #fff;"
+        + "@def FOO_BASE_BG_COLOR  FOO_BASE_COLOR;";
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of("base.gss", base);
 
     parseAndBuildTree(fileNameToGss);
@@ -90,19 +101,66 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
 
   public void testMissingRequire() throws GssParserException {
     String base =  ""
-        + "@provide 'oz.base';"
-        + "@def OZ_BASE_COLOR     #fff;";
+        + "@provide 'foo.base';"
+        + "@def FOO_BASE_COLOR     #fff;";
     String streamitem =  ""
-        + "@provide 'oz.streamitem';"
+        + "@provide 'foo.streamitem';"
         + ".nav {"
-        + "  color: OZ_BASE_COLOR;"
+        + "  color: FOO_BASE_COLOR;"
         + "}";
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
         "base.gss", base,
         "streamitem.gss", streamitem);
 
     parseAndBuildTree(fileNameToGss);
-    String[] expectedMessages = {"Missing @require for constant OZ_BASE_COLOR."};
+    String[] expectedMessages = {"Missing @require for constant FOO_BASE_COLOR."};
+    TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
+    runPasses(errorManager);
+    errorManager.generateReport();
+    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+  }
+
+  public void testMissingRequireFromComponent() throws GssParserException {
+    String base =  ""
+        + "@provide 'foo.base';"
+        + "@def FOO_BASE_COLOR     #fff;";
+    String streamitem =  ""
+        + "@provide 'foo.streamitem';"
+        + "@component {"
+        + "  @def NAV_COLOR  FOO_BASE_COLOR;"
+        + "  .nav {"
+        + "    color: NAV_COLOR;"
+        + "  }"
+        + "}";
+    ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
+        "base.gss", base,
+        "streamitem.gss", streamitem);
+
+    parseAndBuildTree(fileNameToGss);
+    String[] expectedMessages = {"Missing @require for constant FOO_BASE_COLOR."};
+    TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
+    runPasses(errorManager);
+    errorManager.generateReport();
+    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+  }
+
+  public void testMissingRequireOfComponent() throws GssParserException {
+    String basecomponent =  ""
+        + "@provide 'foo.basecomponent';"
+        + "@component {"
+        + "  @def COLOR     #fff;"
+        + "}";
+    String streamitem =  ""
+        + "@provide 'foo.streamitem';"
+        + ".nav {"
+        + "  color: FOO_BASECOMPONENT_COLOR;"
+        + "}";
+    ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
+        "basecomponent.gss", basecomponent,
+        "streamitem.gss", streamitem);
+
+    parseAndBuildTree(fileNameToGss);
+    String[] expectedMessages = {"Missing @require for constant FOO_BASECOMPONENT_COLOR."};
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
@@ -111,18 +169,18 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
 
   public void testMissingRequireInDef() throws GssParserException {
     String base =  ""
-        + "@provide 'oz.base';"
-        + "@def OZ_BASE_COLOR     #fff;";
+        + "@provide 'foo.base';"
+        + "@def FOO_BASE_COLOR     #fff;";
     String streamitem =  ""
-        + "@provide 'oz.streamitem';"
-        + "@def OZ_STREAM_ITEM_COLOR  OZ_BASE_COLOR;"
-        + "@def OZ_BASE_FONT_SIZE     10px;";
+        + "@provide 'foo.streamitem';"
+        + "@def FOO_STREAM_ITEM_COLOR  FOO_BASE_COLOR;"
+        + "@def FOO_BASE_FONT_SIZE     10px;";
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
         "base.gss", base,
         "streamitem.gss", streamitem);
 
     parseAndBuildTree(fileNameToGss);
-    String[] expectedMessages = {"Missing @require for constant OZ_BASE_COLOR."};
+    String[] expectedMessages = {"Missing @require for constant FOO_BASE_COLOR."};
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
@@ -131,17 +189,17 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
 
   public void testMissingRequireDefMixin() throws GssParserException {
     String base =  ""
-        + "@provide 'oz.base';"
-        + "@def OZ_BASE_COLOR     #fff;"
+        + "@provide 'foo.base';"
+        + "@def FOO_BASE_COLOR     #fff;"
         + "@defmixin background_color(FALLBACK_BG_COLOR) {"
         + "  background-color: FALLBACK_BG_COLOR;"
         + "}";
     String streamitem =  ""
-        + "@provide 'oz.streamitem';"
-        + "@def OZ_OVERLAY_BG_COLOR  #fff;"
-        + "@def OZ_OVERLAY_OPAQUE_BG_COLOR  #fee;"
+        + "@provide 'foo.streamitem';"
+        + "@def FOO_OVERLAY_BG_COLOR  #fff;"
+        + "@def FOO_OVERLAY_OPAQUE_BG_COLOR  #fee;"
         + ".ozStreamOverlay {"
-        + "@mixin background_color(OZ_OVERLAY_BG_COLOR, OZ_OVERLAY_OPAQUE_BG_COLOR);"
+        + "@mixin background_color(FOO_OVERLAY_BG_COLOR, FOO_OVERLAY_OPAQUE_BG_COLOR);"
         + "}";
 
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
@@ -158,13 +216,13 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
 
   public void testMissingOverrideSelectorNamespace() throws GssParserException {
     String base =  ""
-        + "@provide 'oz.base';"
-        + "@def OZ_BASE_COLOR     #fff;";
+        + "@provide 'foo.base';"
+        + "@def FOO_BASE_COLOR     #fff;";
     String streamitem =  ""
-        + "@provide 'oz.streamitem';"
-        + "@require 'oz.base';"
-        + "/* @overrideSelector {oz.foo} */ .nav {"
-        + "  color: OZ_BASE_COLOR;"
+        + "@provide 'foo.streamitem';"
+        + "@require 'foo.base';"
+        + "/* @overrideSelector {foo.foo} */ .nav {"
+        + "  color: FOO_BASE_COLOR;"
         + "}";
 
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
@@ -180,12 +238,12 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
 
   public void testMissingOverrideDefNamespace() throws GssParserException {
     String base =  ""
-        + "@provide 'oz.base';"
-        + "@def OZ_BASE_COLOR     #fff;";
+        + "@provide 'foo.base';"
+        + "@def FOO_BASE_COLOR     #fff;";
     String streamitem =  ""
-        + "@provide 'oz.streamitem';"
+        + "@provide 'foo.streamitem';"
         + "@require 'foo.bar';"
-        + "/* @overrideDef {oz.base} */ @def OZ_BASE_COLOR  #ffe;";
+        + "/* @overrideDef {foo.base} */ @def FOO_BASE_COLOR  #ffe;";
 
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
         "base.gss", base,
