@@ -56,7 +56,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
   public void testBaseCase1() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
-        + "@def OZ_BASE_COLOR     #fff;";
+        + "@def FOO_BASE_COLOR     #fff;";
     String streamitem =  ""
         + "@provide 'foo.streamitem';"
         + "@require 'foo.base';"
@@ -198,7 +198,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         + "@provide 'foo.streamitem';"
         + "@def FOO_OVERLAY_BG_COLOR  #fff;"
         + "@def FOO_OVERLAY_OPAQUE_BG_COLOR  #fee;"
-        + ".ozStreamOverlay {"
+        + ".fooStreamOverlay {"
         + "@mixin background_color(FOO_OVERLAY_BG_COLOR, FOO_OVERLAY_OPAQUE_BG_COLOR);"
         + "}";
 
