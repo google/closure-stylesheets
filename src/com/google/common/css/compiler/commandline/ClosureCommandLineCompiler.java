@@ -172,6 +172,10 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         usage = "Add a prefix to all renamed css class names.")
     private String cssRenamingPrefix = "";
 
+    @Option(name = "--preserve-comments", usage =
+        "Preserve comments from sources into pretty printed output css.")
+    private boolean preserveComments = false;
+
     /**
      * All remaining arguments are considered input CSS files.
      */
@@ -204,6 +208,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setCssSubstitutionMapProvider(renamingType
           .getCssSubstitutionMapProvider());
       builder.setCssRenamingPrefix(cssRenamingPrefix);
+      builder.setPreserveComments(preserveComments);
       builder.setOutputRenamingMapFormat(outputRenamingMapFormat);
 
       GssFunctionMapProvider gssFunctionMapProvider =

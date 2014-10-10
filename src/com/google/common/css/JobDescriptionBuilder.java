@@ -60,6 +60,7 @@ public class JobDescriptionBuilder {
   private GssFunctionMapProvider gssFunctionMapProvider;
   private SubstitutionMapProvider cssSubstitutionMapProvider;
   private OutputRenamingMapFormat outputRenamingMapFormat;
+  private boolean preserveComments;
 
   private JobDescription job = null;
 
@@ -365,6 +366,16 @@ public class JobDescriptionBuilder {
   }
 
 
+  public JobDescriptionBuilder setPreserveComments(boolean preserve) {
+    checkJobIsNotAlreadyCreated();
+    this.preserveComments = preserve;
+    return this;
+  }
+
+  public JobDescriptionBuilder preserveComments() {
+    return setPreserveComments(true);
+  }
+
   public JobDescription getJobDescription() {
     if (job != null) {
       return job;
@@ -381,7 +392,7 @@ public class JobDescriptionBuilder {
         allowKeyframes, allowWebkitKeyframes, processDependencies,
         allowedAtRules, cssRenamingPrefix, excludedClassesFromRenaming,
         gssFunctionMapProvider, cssSubstitutionMapProvider,
-        outputRenamingMapFormat);
+        outputRenamingMapFormat, preserveComments);
     return job;
   }
 }

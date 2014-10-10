@@ -23,7 +23,9 @@ import com.google.common.css.compiler.ast.CssAttributeSelectorNode;
 import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
 import com.google.common.css.compiler.ast.CssCombinatorNode;
+import com.google.common.css.compiler.ast.CssCommentNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssComponentNode;
 import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
 import com.google.common.css.compiler.ast.CssConditionalRuleNode;
@@ -39,12 +41,19 @@ import com.google.common.css.compiler.ast.CssKeyNode;
 import com.google.common.css.compiler.ast.CssKeyframeRulesetNode;
 import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
+import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
+import com.google.common.css.compiler.ast.CssMixinNode;
+import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssPageRuleNode;
 import com.google.common.css.compiler.ast.CssPageSelectorNode;
+import com.google.common.css.compiler.ast.CssPropertyValueNode;
+import com.google.common.css.compiler.ast.CssProvideNode;
 import com.google.common.css.compiler.ast.CssPseudoClassNode;
 import com.google.common.css.compiler.ast.CssPseudoClassNode.FunctionType;
 import com.google.common.css.compiler.ast.CssPseudoElementNode;
 import com.google.common.css.compiler.ast.CssRefinerNode;
+import com.google.common.css.compiler.ast.CssRequireNode;
+import com.google.common.css.compiler.ast.CssRootNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorListNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
@@ -71,6 +80,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   private String indent = "";
   private final VisitController visitController;
   private boolean stripQuotes = false;
+  private boolean preserveComments = false;
 
   public PrettyPrinter(VisitController visitController) {
     this.visitController = visitController;
@@ -84,8 +94,21 @@ public class PrettyPrinter extends DefaultTreeVisitor
     this.stripQuotes = stripQuotes;
   }
 
+  /**
+   * Whether comments in the CSS nodes are preserved in the pretty printed
+   * output.
+   * <p>Note: Comments layout is not guaranteed, since detailed position
+   * information in the input files is not preserved by the parser. Line breaks
+   * are added after every comment with current identation as best effort.</p>
+   */
+  public PrettyPrinter setPreserveComments(boolean preserve) {
+    this.preserveComments = preserve;
+    return this;
+  }
+
   @Override
   public boolean enterImportRule(CssImportRuleNode node) {
+    maybeAppendComments(node);
     sb.append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
       sb.append(" ");
@@ -108,6 +131,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterMediaRule(CssMediaRuleNode node) {
+    maybeAppendComments(node);
     sb.append(node.getType().toString());
     if (node.getParameters().size() > 0
         || (node.getType().hasBlock() && node.getBlock() != null)) {
@@ -121,6 +145,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterPageRule(CssPageRuleNode node) {
+    maybeAppendComments(node);
     sb.append(node.getType().toString());
     sb.append(' ');
     for (CssValueNode param : node.getParameters()) {
@@ -134,6 +159,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterPageSelector(CssPageSelectorNode node) {
+    maybeAppendComments(node);
     sb.append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
       sb.append(" ");
@@ -144,12 +170,14 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterFontFace(CssFontFaceNode node) {
+    maybeAppendComments(node);
     sb.append(node.getType().toString());
     return true;
   }
 
   @Override
   public boolean enterDefinition(CssDefinitionNode node) {
+    maybeAppendComments(node);
     sb.append(indent);
     sb.append(node.getType());
     sb.append(" ");
@@ -168,12 +196,14 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterRuleset(CssRulesetNode ruleset) {
+    maybeAppendComments(ruleset);
     sb.append(indent);
     return true;
   }
 
   @Override
   public boolean enterKeyframeRuleset(CssKeyframeRulesetNode ruleset) {
+    maybeAppendComments(ruleset);
     sb.append(indent);
     return true;
   }
@@ -182,6 +212,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   //     this.
   @Override
   public boolean enterDeclarationBlock(CssDeclarationBlockNode block) {
+    maybeAppendComments(block);
     deleteEndingIfEndingIs(" ");
     sb.append(" {\n");
     indent += "  ";
@@ -197,6 +228,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterBlock(CssBlockNode block) {
+    maybeAppendComments(block);
     if (block.getParent() instanceof CssUnknownAtRuleNode
         || block.getParent() instanceof CssMediaRuleNode) {
       sb.append("{\n");
@@ -215,6 +247,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterDeclaration(CssDeclarationNode declaration) {
+    maybeAppendComments(declaration);
     sb.append(indent);
     if (declaration.hasStarHack()) {
       sb.append('*');
@@ -232,6 +265,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterValueNode(CssValueNode node) {
+    maybeAppendComments(node);
     checkArgument(!(node instanceof CssCompositeValueNode));
 
     String v = node.toString();
@@ -251,6 +285,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterCompositeValueNodeOperator(CssCompositeValueNode parent) {
+    maybeAppendComments(parent);
     sb.append(parent.getOperator().getOperatorName());
     if (!parent.inFunArgs()) {
       sb.append(" ");
@@ -260,6 +295,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterFunctionNode(CssFunctionNode node) {
+    maybeAppendComments(node);
     sb.append(node.getFunctionName());
     sb.append("(");
     return true;
@@ -273,6 +309,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterArgumentNode(CssValueNode node) {
+    maybeAppendComments(node);
     String v = node.toString();
     if (stripQuotes
         && node.getParent().getParent() instanceof CssFunctionNode
@@ -286,6 +323,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterSelector(CssSelectorNode selector) {
+    maybeAppendComments(selector);
     String name = selector.getSelectorName();
     if (name != null) {
       sb.append(name);
@@ -300,18 +338,21 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterClassSelector(CssClassSelectorNode node) {
+    maybeAppendComments(node);
     appendRefiner(node);
     return true;
   }
 
   @Override
   public boolean enterIdSelector(CssIdSelectorNode node) {
+    maybeAppendComments(node);
     appendRefiner(node);
     return true;
   }
 
   @Override
   public boolean enterPseudoClass(CssPseudoClassNode node) {
+    maybeAppendComments(node);
     sb.append(node.getPrefix());
     sb.append(node.getRefinerName());
     switch (node.getFunctionType()) {
@@ -337,12 +378,14 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterPseudoElement(CssPseudoElementNode node) {
+    maybeAppendComments(node);
     appendRefiner(node);
     return true;
   }
 
   @Override
   public boolean enterAttributeSelector(CssAttributeSelectorNode node) {
+    maybeAppendComments(node);
     sb.append(node.getPrefix());
     sb.append(node.getAttributeName());
     sb.append(node.getMatchSymbol());
@@ -363,6 +406,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterCombinator(CssCombinatorNode combinator) {
     if (combinator != null) {
+      maybeAppendComments(combinator);
       sb.append(combinator.getCombinatorType().getCanonicalName());
     }
     return true;
@@ -385,6 +429,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterConditionalRule(CssConditionalRuleNode node) {
+    maybeAppendComments(node);
     if (node.getType() != Type.IF) {
       sb.append(" ");
     } else {
@@ -416,6 +461,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterUnknownAtRule(CssUnknownAtRuleNode node) {
+    maybeAppendComments(node);
     sb.append(indent);
     sb.append('@').append(node.getName().toString());
     if (node.getParameters().size() > 0
@@ -441,6 +487,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterKeyframesRule(CssKeyframesNode node) {
+    maybeAppendComments(node);
     sb.append(indent);
     sb.append('@').append(node.getName().toString());
     for (CssValueNode param : node.getParameters()) {
@@ -467,6 +514,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public boolean enterKey(CssKeyNode key) {
+    maybeAppendComments(key);
     String value = key.getKeyValue();
     if (value != null) {
       sb.append(value);
@@ -482,6 +530,70 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public void leaveKeyBlock(CssKeyListNode node) {
     deleteEndingIfEndingIs(", ");
+  }
+
+  @Override
+  public boolean enterProvideNode(CssProvideNode node) {
+    maybeAppendComments(node);
+    return true;
+  }
+
+  @Override
+  public boolean enterRequireNode(CssRequireNode node) {
+    maybeAppendComments(node);
+    return true;
+  }
+
+  @Override
+  public boolean enterComponent(CssComponentNode node) {
+    maybeAppendComments(node);
+    return true;
+  }
+
+  @Override
+  public boolean enterMixin(CssMixinNode node) {
+    maybeAppendComments(node);
+    return true;
+  }
+
+  @Override
+  public boolean enterConditionalBlock(CssConditionalBlockNode block) {
+    maybeAppendComments(block);
+    return true;
+  }
+
+  @Override
+  public boolean enterMixinDefinition(CssMixinDefinitionNode node) {
+    maybeAppendComments(node);
+    return true;
+  }
+
+  @Override
+  public boolean enterCompositeValueNode(CssCompositeValueNode value) {
+    maybeAppendComments(value);
+    return true;
+  }
+
+  @Override
+  public boolean enterPropertyValue(CssPropertyValueNode propertyValue) {
+    maybeAppendComments(propertyValue);
+    return true;
+  }
+
+  @Override
+  public boolean enterTree(CssRootNode root) {
+    maybeAppendComments(root);
+    return true;
+  }
+
+  private void maybeAppendComments(CssNode node) {
+    if (preserveComments && !node.getComments().isEmpty()) {
+      for (CssCommentNode c : node.getComments()) {
+        sb.append(indent);
+        sb.append(c.getValue());
+        sb.append("\n");
+      }
+    }
   }
 
   private void deleteEndingIfEndingIs(String s) {

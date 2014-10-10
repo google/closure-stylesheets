@@ -115,7 +115,9 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
     } else {
       PrettyPrinter prettyPrinterPass = new PrettyPrinter(cssTree
           .getVisitController());
-      prettyPrinterPass.runPass();
+      prettyPrinterPass
+          .setPreserveComments(job.preserveComments)
+          .runPass();
       result.append(prettyPrinterPass.getPrettyPrintedString());
     }
   }
