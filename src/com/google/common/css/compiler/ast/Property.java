@@ -306,6 +306,7 @@ public final class Property {
         builder("-moz-margin-start"),
         builder("-moz-opacity"),
         builder("-moz-orient"),
+        builder("-moz-osx-font-smoothing"),
         builder("-moz-outline-radius"),
         builder("-moz-outline-radius-bottomleft"),
         builder("-moz-outline-radius-bottomright"),
