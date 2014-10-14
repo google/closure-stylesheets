@@ -90,6 +90,7 @@ public class JobDescriptionBuilder {
     this.gssFunctionMapProvider = null;
     this.cssSubstitutionMapProvider = null;
     this.outputRenamingMapFormat = OutputRenamingMapFormat.JSCOMP_VARIABLE_MAP;
+    this.preserveComments = false;
   }
 
   public JobDescriptionBuilder copyFrom(JobDescription jobToCopy) {
@@ -120,6 +121,7 @@ public class JobDescriptionBuilder {
     this.gssFunctionMapProvider = jobToCopy.gssFunctionMapProvider;
     this.cssSubstitutionMapProvider = jobToCopy.cssSubstitutionMapProvider;
     this.outputRenamingMapFormat = jobToCopy.outputRenamingMapFormat;
+    this.preserveComments = jobToCopy.preserveComments;
     return this;
   }
 
