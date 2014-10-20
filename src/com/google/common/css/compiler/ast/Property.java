@@ -271,18 +271,14 @@ public final class Property {
         builder("-moz-border-start-style"),
         builder("-moz-border-start-width"),
         builder("-moz-border-top-colors"),
-        builder("-moz-box-align").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-moz-box-direction").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-moz-box-flex").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-moz-box-ordinal-group").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-moz-box-orient").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-moz-box-pack").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
+        // These deprecated flexbox properties are only supported for backwards compatibility.
+        builder("-moz-box-align"),
+        builder("-moz-box-direction"),
+        builder("-moz-box-flex"),
+        builder("-moz-box-ordinal-group"),
+        builder("-moz-box-orient"),
+        builder("-moz-box-pack"),
+        // End of deprecated flexbox properties.
         builder("-moz-box-shadow"),
         builder("-moz-box-sizing"),
         builder("-moz-column-count"),
@@ -354,22 +350,16 @@ public final class Property {
         builder("-ms-background-position-y"),
         builder("-ms-behavior"),
         builder("-ms-block-progression"),
-        builder("-ms-box-align").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-ms-box-direction").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-ms-box-flex").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-ms-box-line-progression").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-ms-box-lines").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-ms-box-ordinal-group").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-ms-box-orient").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-ms-box-pack").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
+        // These deprecated flexbox properties are only supported for backwards compatibility.
+        builder("-ms-box-align"),
+        builder("-ms-box-direction"),
+        builder("-ms-box-flex"),
+        builder("-ms-box-line-progression"),
+        builder("-ms-box-lines"),
+        builder("-ms-box-ordinal-group"),
+        builder("-ms-box-orient"),
+        builder("-ms-box-pack"),
+        // End of deprecated flexbox properties.
         builder("-ms-box-shadow"),
         builder("-ms-box-sizing"),
         builder("-ms-filter"),
@@ -586,24 +576,16 @@ public final class Property {
         builder("-webkit-border-top-left-radius"),
         builder("-webkit-border-top-right-radius"),
         builder("-webkit-border-vertical-spacing"),
-        builder("-webkit-box-align").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-webkit-box-direction").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-webkit-box-flex").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-webkit-box-flex-group").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-webkit-box-lines").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        builder("-webkit-box-ordinal-group").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
-        // This property should ideally trigger a warning since it's not part
-        // of the spec, but we'll allow it since there's no valid replacement
-        // when used with -webkit-line-clamp to ellipsize multiline text.
+        // These deprecated flexbox properties are only supported for backwards compatibility.
+        builder("-webkit-box-align"),
+        builder("-webkit-box-direction"),
+        builder("-webkit-box-flex"),
+        builder("-webkit-box-flex-group"),
+        builder("-webkit-box-lines"),
+        builder("-webkit-box-ordinal-group"),
         builder("-webkit-box-orient"),
-        builder("-webkit-box-pack").warn(
-            "The flexbox spec has changed and this property is no longer supported."),
+        builder("-webkit-box-pack"),
+        // End of deprecated flexbox properties.
         builder("-webkit-box-reflect"),
         builder("-webkit-box-shadow"),
         builder("-webkit-box-sizing"),
