@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.google.common.css.compiler.ast;
 
 import com.google.common.collect.ImmutableList;
@@ -22,27 +21,34 @@ import com.google.common.css.SourceCode;
 import java.util.List;
 
 /**
- * A wrapper around the JavaCC generated GSS parser.
- *
+ * Provides thread local GssParserCC instances.
  */
-public class GssParser extends AbstractGssParser {
+public class PerThreadGssParser extends AbstractGssParser {
 
-  private final List<SourceCode> sources;
+  private static final ThreadLocal<GssParserCC> THREAD_LOCAL_PARSERS =
+      new ThreadLocal<GssParserCC>() {
+        @Override
+        protected GssParserCC initialValue() {
+          return new GssParserCC(EMPTY_CHAR_STREAM);
+        }
+      };
   private ImmutableList<GssParserException> handledErrors = ImmutableList.of();
 
-  public GssParser(List<SourceCode> sources) {
-    this.sources = sources;
+  public CssTree parse(SourceCode source) throws GssParserException {
+    return parse(source, false);
   }
 
-  public GssParser(SourceCode source) {
-    this(ImmutableList.of(source));
+  public CssTree parse(List<SourceCode> sources) throws GssParserException {
+    return parse(sources, false);
   }
 
-  public CssTree parse() throws GssParserException {
-    return parse(false);
+  public CssTree parse(SourceCode source, boolean errorHandling)
+      throws GssParserException {
+    return parse(ImmutableList.of(source), errorHandling);
   }
 
-  public CssTree parse(boolean errorHandling) throws GssParserException {
+  public CssTree parse(List<SourceCode> sources, boolean errorHandling)
+      throws GssParserException {
     ParseResult result = parseInternal(sources, errorHandling);
     this.handledErrors = result.getHandledErrors();
     return result.getCssTree();
@@ -57,6 +63,6 @@ public class GssParser extends AbstractGssParser {
 
   @Override
   protected GssParserCC getParser() {
-    return new GssParserCC(EMPTY_CHAR_STREAM);
+    return THREAD_LOCAL_PARSERS.get();
   }
 }

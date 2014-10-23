@@ -74,7 +74,7 @@ public class GssParserCC {
 
   private CssBlockNode globalBlock;
   private SourceCode sourceCode;
-  private CssNodeBuilder nodeBuilder = new CssNodeBuilder();
+  private final CssNodeBuilder nodeBuilder = new CssNodeBuilder();
   private StringCharStream charStream;
 
   /**
@@ -83,12 +83,14 @@ public class GssParserCC {
    */
   private boolean enableErrorRecovery;
 
+
   /**
    * List of handled errors if error handling enabled.
    */
-  private List<GssParserException> handledErrors = Lists.newArrayList();
-  public List<GssParserException> getHandledErrors() {
-    return handledErrors;
+  private final List<GssParserException> handledErrors = Lists.newArrayList();
+
+  public ImmutableList<GssParserException> getHandledErrors() {
+    return ImmutableList.copyOf(handledErrors);
   }
 
   public GssParserCC(CssBlockNode globalBlock, SourceCode sourceCode) {
@@ -236,6 +238,29 @@ public class GssParserCC {
       start();
     } catch (ParseException e) {
       throw new GssParserException(this.getLocation(token.next), e);
+    }
+  }
+
+  /**
+   * Wrapper around {@code parse()} that (re-)initializes the parser and
+   * clears its state afterwards.
+
+   * @param globalBlock the place to store parsing result
+   * @param sourceCode the source code to parse
+   * @param errorHandling whether error handling is enabled
+   * @param parsingErrors the place to store errors occured during parsing
+   */
+  public void parse(CssBlockNode globalBlock,
+      SourceCode sourceCode,
+      boolean errorHandling,
+      ImmutableList.Builder<GssParserException> parsingErrors)
+      throws GssParserException {
+    try {
+      initialize(globalBlock, sourceCode, errorHandling);
+      parse();
+    } finally {
+      parsingErrors.addAll(handledErrors);
+      clearState();
     }
   }
 
@@ -473,6 +498,25 @@ public class GssParserCC {
       attachComments(tokens, at);
       return at;
     }
+  }
+
+  private void initialize(CssBlockNode globalBlock, SourceCode sourceCode,
+      boolean errorHandling) {
+    this.enableErrorRecovery = errorHandling;
+    this.sourceCode = sourceCode;
+    this.globalBlock = globalBlock;
+    this.handledErrors.clear();
+    StringCharStream charStream =
+        new StringCharStream(sourceCode.getFileContents());
+    this.charStream = charStream;
+    this.ReInit(charStream);
+  }
+
+  private void clearState() {
+    this.sourceCode = null;
+    this.globalBlock = null;
+    this.handledErrors.clear();
+    this.charStream = null;
   }
 }
 

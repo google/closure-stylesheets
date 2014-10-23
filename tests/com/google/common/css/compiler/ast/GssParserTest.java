@@ -23,6 +23,9 @@ import com.google.common.css.compiler.passes.testing.AstPrinter;
 
 import junit.framework.TestCase;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 /**
  * Unit tests for the {@link GssParser}.
  *
@@ -31,10 +34,7 @@ import junit.framework.TestCase;
 
 public class GssParserTest extends TestCase {
 
-  private CssTree parse(String gss) throws GssParserException {
-    GssParser parser = new GssParser(new SourceCode("test", gss));
-    return parser.parse();
-  }
+  private boolean reuseGssParser = false;
 
   private CssTree testValid(String gss) throws GssParserException {
     CssTree tree = parse(gss);
@@ -51,10 +51,10 @@ public class GssParserTest extends TestCase {
   }
 
   public void testManySources() throws Exception {
-    CssTree tree = new GssParser(ImmutableList.of(
+    CssTree tree = parse(ImmutableList.of(
         new SourceCode("test1", "a {}"),
         new SourceCode("test2", "@component c { x {y: z} }"),
-        new SourceCode("test3", "b {}"))).parse();
+        new SourceCode("test3", "b {}")));
     CssRootNode root = tree.getRoot();
     assertNotNull(root);
     assertEquals("[[a]{[]}@component [c]{[x]{[y:[[z]];]}}[b]{[]}]",
@@ -823,4 +823,34 @@ public class GssParserTest extends TestCase {
         "[[a]{[border-bottom-height:[[1em]];]}]");
   }
 
+  public void testAllCasesWithReuseableParser() throws Exception {
+    // Call all other test cases in one method to make sure the same thread
+    // local parser is reused.
+    reuseGssParser = true;
+    for (Method m : GssParserTest.class.getDeclaredMethods()) {
+      if (m.getName().startsWith("test")
+          && !m.getName().equals("testAllCasesWithReuseableParser")
+          && m.getParameterTypes().length == 0) {
+        // Run each test twice to run each test with a used parser.
+        m.invoke(this);
+        m.invoke(this);
+      }
+    }
+  }
+
+  private CssTree parse(List<SourceCode> sources) throws GssParserException {
+    CssTree tree;
+    if (reuseGssParser) {
+      GssParser parser = new GssParser(sources);
+      tree = parser.parse();
+    } else {
+      PerThreadGssParser parser = new PerThreadGssParser();
+      tree = parser.parse(sources);
+    }
+    return tree;
+  }
+
+  private CssTree parse(String gss) throws GssParserException {
+    return parse(ImmutableList.of(new SourceCode("test", gss)));
+  }
 }
