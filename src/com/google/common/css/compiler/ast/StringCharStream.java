@@ -30,6 +30,8 @@ import java.util.List;
  */
 public class StringCharStream implements CharStream {
 
+  private static final IOException END_OF_STREAM = new IOException();
+
   /** The input string. */
   private final String input;
   private final int length;
@@ -112,7 +114,7 @@ public class StringCharStream implements CharStream {
   @Override
   public char readChar() throws IOException {
     if (charPos + 1 == length) {
-      throw new IOException();
+      throw END_OF_STREAM;
     }
 
     if (lastChar == '\n') {
