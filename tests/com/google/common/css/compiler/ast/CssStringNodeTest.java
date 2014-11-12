@@ -82,18 +82,12 @@ public class CssStringNodeTest extends TestCase {
     for (String[] io : new String[][] {
         {"", ""},
         {"a", "a"},
-        // Under ant, we can't have supplementary characters in String literals
-        // {"¤", "\\a4"},
-        {"\u00a4", "\\a4"},
-        // {"ξ", "\\3be"},
-        {"\u03be", "\\3be"},
-        // {"ξe", "\\3be e"},
-        {"\u03bee", "\\3be e"},
-        // {"ξx", "\\3bex"},
-        {"\u03bex", "\\3bex"},
-        // {"唐", "\\5510"},
-        {"\u5510", "\\5510"},
-        //{"𠍱", "\\20371"}
+        {"¤", "\\a4"},
+        {"ξ", "\\3be"},
+        {"ξe", "\\3be e"},
+        {"ξx", "\\3bex"},
+        {"唐", "\\5510"},
+        {"𠍱", "\\20371"},
         {new String(
             new byte[] {(byte) 0xf0, (byte) 0xa0, (byte) 0x8d, (byte) 0xb1},
             UTF_8),
@@ -135,13 +129,11 @@ public class CssStringNodeTest extends TestCase {
 
       // (2) no CSS literal representation exists
       assertEquals(
-          // Under ant, we can't have supplementary characters in String literals
-          // but fyi "¤" <-> "\\a4"
           String.format(cssTemplate, "\\a4", type.getClass().getName()),
           CssStringNode.escape(
               type,
               CssStringNode.SHORT_ESCAPER,
-              String.format(stringTemplate, "\u00a4", type.getClass().getName())));
+              String.format(stringTemplate, "¤", type.getClass().getName())));
 
       // (3) HTML/SGML special character when using the HTML_ESCAPER
       assertEquals(
@@ -157,18 +149,12 @@ public class CssStringNodeTest extends TestCase {
     for (String[] io : new String[][] {
         {"", ""},
         {"a", "a"},
-        // Under ant, we can't have supplementary characters in String literals
-        // {"¤", "\\0000a4"},
-        {"\u00a4", "\\0000a4"},
-        // {"ξ", "\\0003be"},
-        {"\u03be", "\\0003be"},
-        // {"ξe", "\\0003bee"},
-        {"\u03bee", "\\0003bee"},
-        // {"ξx", "\\0003bex"},
-        {"\u03bex", "\\0003bex"},
-        // {"唐", "\\005510"},
-        {"\u5510", "\\005510"},
-        //{"𠍱", "\\020371"}
+        {"¤", "\\0000a4"},
+        {"ξ", "\\0003be"},
+        {"ξe", "\\0003bee"},
+        {"ξx", "\\0003bex"},
+        {"唐", "\\005510"},
+        {"𠍱", "\\020371"},
         {new String(
             new byte[] {(byte) 0xf0, (byte) 0xa0, (byte) 0x8d, (byte) 0xb1},
             UTF_8),
@@ -219,21 +205,14 @@ public class CssStringNodeTest extends TestCase {
         {"abc\\000041 ", "abcA"},
         {"abc\\000041  ", "abcA "},
         {"\\41x", "Ax"},
-        // {"\\0000a4", "¤"},
-        {"\\0000a4", "\u00a4"},
-        // {"\\0003be", "ξ"},
-        {"\\0003be", "\u03be"},
-        // {"\\0003bee", "ξe"},
-        {"\\0003bee", "\u03bee"},
-        // {"\\3be e", "ξe"},
-        {"\\3be e", "\u03bee"},
-        // {"\\0003be", "ξ"},
-        {"\\0003be", "\u03be"},
-        // {"\\3be z", "ξz"},
-        {"\\3be z", "\u03bez"},
-        // {"\\005510", "唐"},
-        {"\\005510", "\u5510"},
-        // {"\\020371", "𠍱"}
+        {"\\0000a4", "¤"},
+        {"\\0003be", "ξ"},
+        {"\\0003bee", "ξe"},
+        {"\\3be e", "ξe"},
+        {"\\0003be", "ξ"},
+        {"\\3be z", "ξz"},
+        {"\\005510", "唐"},
+        {"\\020371", "𠍱"},
         {"\\020371", new String(
             new byte[] {(byte) 0xf0, (byte) 0xa0, (byte) 0x8d, (byte) 0xb1},
             UTF_8)}}) {

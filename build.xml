@@ -16,6 +16,12 @@
   <property name="javadoc.dir"       value="${build.dir}/javadoc" />
   <property name="includeDebugInfo"  value="true" />
 
+  <presetdef name="css.javac">
+    <javac debug="${includeDebugInfo}"
+           encoding="UTF-8"
+           includeAntRuntime="false" />
+  </presetdef>
+
   <path id="classpath.path">
     <fileset dir="${lib.dir}">
       <include name="*.jar" />
@@ -38,12 +44,12 @@
           depends="javacc"
           description="compiles Java files for the CSS compiler library">
     <mkdir dir="${classes.dir}" />
-    <javac srcdir="${src.dir}:${java-genfiles.dir}"
+    <css.javac srcdir="${src.dir}:${java-genfiles.dir}"
            destdir="${classes.dir}"
            includeAntRuntime="false"
            debug="${includeDebugInfo}">
       <classpath refid="classpath.path" />
-    </javac>
+    </css.javac>
   </target>
 
   <target name="yyyymmdd">
@@ -89,15 +95,13 @@
           depends="compile"
           description="compile the JUnit tests">
     <mkdir dir="${testClasses.dir}" />
-    <javac srcdir="${tests.dir}"
-           destdir="${testClasses.dir}"
-           includeAntRuntime="false"
-           debug="${includeDebugInfo}">
+    <css.javac srcdir="${tests.dir}"
+           destdir="${testClasses.dir}">
       <classpath refid="classpath.path" />
       <classpath>
         <pathelement location="${classes.dir}" />
       </classpath>
-    </javac>
+    </css.javac>
   </target>
 
   <macrodef name="testing">
