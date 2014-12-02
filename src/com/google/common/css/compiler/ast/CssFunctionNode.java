@@ -82,6 +82,20 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "translateZ",
           "translate3d",
 
+          // Filter
+          // w3.org/TR/filter-effects-1/#FilterProperty
+          // "url" already in list
+          "blur",
+          "brightness",
+          "contrast",
+          "drop-shadow",
+          "grayscale",
+          "hue-rotate",
+          "invert",
+          "opacity",
+          "saturate",
+          "sepia",
+
           // Image-Set
           "image-set",
           "-moz-image-set",
