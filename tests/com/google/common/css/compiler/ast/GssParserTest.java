@@ -405,6 +405,22 @@ public class GssParserTest extends TestCase {
     testValid(".a { clip: rect(0 0 0 0);}");
   }
 
+  public void testEllipse() throws Exception {
+    testValid(".a { clip-path: ellipse(150px 300px at 50% 50%);}");
+  }
+
+  public void testInset() throws Exception {
+    testValid(".a { clip-path: inset(100px 100px 100px 100px);}");
+  }
+
+  public void testCircle() throws Exception {
+    testValid(".a { clip-path: circle(50% at right 5px bottom 10px);}");
+  }
+
+  public void testPolygon() throws Exception {
+    testValid(".a { clip-path: polygon(0 0, 0 300px, 300px 600px);}");
+  }
+
   public void testEqualAttribute() throws Exception {
     testValid("h1[foo=\"bar\"] {x : y}");
   }
