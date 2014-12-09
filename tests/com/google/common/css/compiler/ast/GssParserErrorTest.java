@@ -16,8 +16,9 @@
 
 package com.google.common.css.compiler.ast;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.SourceCode;
-import com.google.testing.util.MoreAsserts;
 
 import junit.framework.TestCase;
 
@@ -203,7 +204,7 @@ public class GssParserErrorTest extends TestCase {
     assertNotNull(tree);
     CssRootNode root = tree.getRoot();
     assertNotNull(root);
-    MoreAsserts.assertContentsInOrder(errorMessages, (Object[]) errors);
+    assertThat(errorMessages).containsExactly((Object[]) errors).inOrder();
     assertEquals(expected, root.toString());
   }
 

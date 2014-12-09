@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.passes;
 
 import static com.google.common.base.Predicates.alwaysTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
@@ -32,7 +33,6 @@ import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.testing.UtilityTestCase;
-import com.google.testing.util.MoreAsserts;
 
 import java.util.Map;
 
@@ -124,17 +124,19 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
     mappings = map.getMappings();
     assertEquals(10, mappings.size());
 
-    MoreAsserts.assertContentsInOrder(mappings.keySet(),
-        "zero",
-        "one",
-        "two",
-        "three",
-        "four",
-        "five",
-        "six",
-        "seven",
-        "eight",
-        "nine");
+    assertThat(mappings.keySet())
+        .containsExactly(
+            "zero",
+            "one",
+            "two",
+            "three",
+            "four",
+            "five",
+            "six",
+            "seven",
+            "eight",
+            "nine")
+        .inOrder();
   }
 
   private RecordingSubstitutionMap setupWithMap(RecordingSubstitutionMap map) {

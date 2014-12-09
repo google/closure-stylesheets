@@ -75,6 +75,7 @@
         <include name="args4j*.jar" />
         <include name="gson*.jar" />
         <include name="guava*.jar" />
+        <include name="truth*.jar" />
         <include name="jsr305.jar" />
       </zipgroupfileset>
       <manifest>

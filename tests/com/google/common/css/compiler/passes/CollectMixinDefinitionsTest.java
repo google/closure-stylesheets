@@ -16,10 +16,11 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
-import com.google.testing.util.MoreAsserts;
 
 import java.util.Map;
 
@@ -42,8 +43,7 @@ public class CollectMixinDefinitionsTest extends PassesTestBase {
         "@defmixin test2() {}",
         "@defmixin test3(PAR1) { color: PAR1; }"));
     assertNotNull(definitions);
-    MoreAsserts.assertContentsAnyOrder(definitions.keySet(), "test1", "test2",
-        "test3");
+    assertThat(definitions.keySet()).containsExactly("test1", "test2", "test3");
   }
 
   public void testDupilicateMixinDefinitionNames() throws GssParserException {
