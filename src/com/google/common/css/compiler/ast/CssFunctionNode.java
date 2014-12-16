@@ -75,6 +75,7 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "scaleX",
           "scaleY",
           "scaleZ",
+          "steps",
           "to",
           "translate",
           "translateX",
