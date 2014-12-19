@@ -22,6 +22,8 @@ import com.google.common.css.SourceCode;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
+import javax.annotation.Nullable;
+
 /**
  * A mutable abstract syntax tree that corresponds to a CSS input file.
  *
@@ -53,8 +55,9 @@ public class CssTree {
   /**
    * Constructor of a tree.
    *
-   * @param sourceCode
-   * @param root
+   * @param sourceCode the source location associated with the tree (probably
+   *     the start of the file)
+   * @param root the root node of the tree
    */
   public CssTree(SourceCode sourceCode, CssRootNode root) {
     this.root = root;
@@ -65,10 +68,26 @@ public class CssTree {
   /**
    * Constructor of a tree.
    *
-   * @param sourceCode
+   * @param sourceCode the source location associated with the tree (probably
+   *     the start of the file). Can be {@code null}.
    */
-  public CssTree(SourceCode sourceCode) {
+  public CssTree(@Nullable SourceCode sourceCode) {
     this(sourceCode, new CssRootNode());
+  }
+
+  /**
+   * Copy constructor. This also copies the ruleset nodes to remove. The
+   * collection of ruleset node to remove can be cleared if it is not desired
+   * without affecting the original tree.
+   *
+   * @param tree the tree to copy. Must not be {@code null}.
+   */
+  public CssTree(CssTree tree) {
+    root = tree.root.deepCopy();
+    sourceCode = tree.sourceCode;
+    rulesetNodesToRemove = new RulesetNodesToRemove();
+    rulesetNodesToRemove.rulesetNodes.addAll(
+        tree.rulesetNodesToRemove.rulesetNodes);
   }
 
   public CssRootNode getRoot() {

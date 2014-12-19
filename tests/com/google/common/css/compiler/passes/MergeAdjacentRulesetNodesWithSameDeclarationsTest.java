@@ -64,7 +64,7 @@ public class MergeAdjacentRulesetNodesWithSameDeclarationsTest
   }
 
   public void testEnterTree() {
-    CssTree tree = new CssTree(null);
+    CssTree tree = new CssTree((SourceCode) null);
     tree.getRulesetNodesToRemove().addRulesetNode(new CssRulesetNode());
     assertFalse(tree.getRulesetNodesToRemove().getRulesetNodes().isEmpty());
 

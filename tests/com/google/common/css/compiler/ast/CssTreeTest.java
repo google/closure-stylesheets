@@ -38,4 +38,18 @@ public class CssTreeTest extends TestCase {
     assertTrue(root.getImportRules().isEmpty());
     assertNotNull(root.getBody());
   }
+
+  public void testCopyConstructor() {
+    CssTree tree1 = new CssTree(new SourceCode("testfile", ""));
+    CssTree tree2 = new CssTree(tree1);
+
+    assertNotSame(tree1.getRoot(), tree2.getRoot());
+    assertNotSame(tree1.getRoot().getBody(), tree2.getRoot().getBody());
+    assertTrue(tree1.getRoot().getBody().isEmpty());
+    assertTrue(tree2.getRoot().getBody().isEmpty());
+    assertEquals(tree1.getSourceCode(), tree2.getSourceCode());
+
+    tree1.getRulesetNodesToRemove().addRulesetNode(new CssRulesetNode());
+    assertTrue(tree2.getRulesetNodesToRemove().getRulesetNodes().isEmpty());
+  }
 }

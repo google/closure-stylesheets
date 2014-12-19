@@ -21,6 +21,7 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
 import com.google.common.collect.Lists;
+import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.CssAttributeSelectorNode.MatchType;
 import com.google.common.css.compiler.ast.DefaultVisitController.RootVisitAfterChildrenState;
 import com.google.common.css.compiler.ast.DefaultVisitController.RootVisitBeforeChildrenState;
@@ -51,7 +52,7 @@ public class DefaultVisitControllerTest extends TestCase {
 
   public void testConstructor() {
     DefaultVisitController visitController = new DefaultVisitController(
-        new CssTree(null), false);
+        new CssTree((SourceCode) null), false);
 
     assertTrue(visitController.getStateStack().isEmpty());
   }
@@ -185,7 +186,7 @@ public class DefaultVisitControllerTest extends TestCase {
   }
 
   public void testStateStack() {
-    CssTree tree = new CssTree(null);
+    CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, false);
 
@@ -200,7 +201,7 @@ public class DefaultVisitControllerTest extends TestCase {
   }
 
   public void testRootVisitBeforeChildrenState() {
-    CssTree tree = new CssTree(null);
+    CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, false);
     RootVisitBeforeChildrenState state
@@ -216,7 +217,7 @@ public class DefaultVisitControllerTest extends TestCase {
   }
 
   public void testRootVisitCharsetState() {
-    CssTree tree = new CssTree(null);
+    CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, true);
     RootVisitCharsetState state
@@ -236,7 +237,7 @@ public class DefaultVisitControllerTest extends TestCase {
   }
 
   public void testRootVisitImportBlockState() {
-    CssTree tree = new CssTree(null);
+    CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, true);
     RootVisitImportBlockState state
@@ -258,7 +259,7 @@ public class DefaultVisitControllerTest extends TestCase {
   }
 
   public void testVisitImportBlockChildrenState() {
-    CssTree tree = new CssTree(null);
+    CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, true);
     visitController.visitor = new DefaultTreeVisitor();
@@ -285,7 +286,7 @@ public class DefaultVisitControllerTest extends TestCase {
   }
 
   public void testVisitImportRuleState() {
-    CssTree tree = new CssTree(null);
+    CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, true);
     visitController.visitor = new DefaultTreeVisitor();
@@ -300,7 +301,7 @@ public class DefaultVisitControllerTest extends TestCase {
   }
 
   public void testRootVisitBodyState() {
-    CssTree tree = new CssTree(null);
+    CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, true);
     visitController.visitor = new DefaultTreeVisitor();
