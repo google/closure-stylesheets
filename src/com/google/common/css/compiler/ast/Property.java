@@ -514,6 +514,7 @@ public final class Property {
         builder("top"),
         builder("transform"),
         builder("transform-origin"),
+        builder("transform-style"),
         builder("transition-delay"),
         builder("transition-duration"),
         builder("transition-property"),
