@@ -255,4 +255,11 @@ public class ProcessRefinersTest extends NewFunctionalTestBase {
     runParseB(0, "-23n+0");
     runParseB(0, "-21n-0");
   }
+
+  public void testLang() throws Exception {
+    simplifyCss = true;
+    parseAndRun("div :lang(en) {}");
+    assertEquals("div :lang(en){}",
+        compactPrintedResult);
+  }
 }
