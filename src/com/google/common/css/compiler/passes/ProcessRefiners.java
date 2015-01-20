@@ -86,7 +86,7 @@ public class ProcessRefiners extends DefaultTreeVisitor
   }
 
   private boolean handleLang(CssPseudoClassNode refiner) {
-    if (!refiner.getRefinerName().equals("lang")) {
+    if (!refiner.getRefinerName().equals("lang(")) {
       errorManager.report(new GssError(NOT_LANG_ERROR_MESSAGE,
           refiner.getSourceCodeLocation()));
       return false;
