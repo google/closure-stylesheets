@@ -95,6 +95,13 @@ public class GssError implements Comparable<GssError> {
   public MessageFormatArgs messageFormat() {
     if (location.isUnknown()) {
       return new MessageFormatArgs("{0} at unknown location", message);
+    } else if (location.getSourceCode().getFileName() == null) {
+      return new MessageFormatArgs(
+          "{0} at line {1} column {2}:\n{3}\n{4}^\n",
+          message,
+          location.getBeginLineNumber(),
+          location.getBeginIndexInLine(), getLine(),
+          Strings.repeat(" ", location.getBeginIndexInLine() - 1));
     } else {
       return new MessageFormatArgs(
           "{0} in {1} at line {2} column {3}:\n{4}\n{5}^\n",
