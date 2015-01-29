@@ -70,10 +70,20 @@ final class BrowserPrefixGenerator {
     builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("flex-grow")
         .isFunction(false)
+        .addExpandPropertyName("-webkit-box-flex")
         .addExpandPropertyName("box-flex")
         .addExpandPropertyName("-ms-flex-positive")
         .addExpandPropertyName("-webkit-flex-grow")
         .addExpandPropertyName("flex-grow")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("animation")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-animation")
+        .addExpandPropertyName("-moz-animation")
+        .addExpandPropertyName("-o-animation")
+        .addExpandPropertyName("animation")
         .build());
 
     return builder.build();
