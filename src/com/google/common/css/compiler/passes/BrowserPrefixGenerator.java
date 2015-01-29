@@ -67,6 +67,39 @@ final class BrowserPrefixGenerator {
         .addExpandPropertyValue("flex")
         .build());
 
+     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("flex-flow")
+        .isFunction(false)
+        .addExpandPropertyName("-ms-flex-flow")
+        .addExpandPropertyName("-webkit-flex-flow")
+        .addExpandPropertyName("flex-flow")
+        .build());
+
+     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("flex-direction")
+        .isFunction(false)
+        .addExpandPropertyName("-ms-flex-direction")
+        .addExpandPropertyName("-webkit-flex-direction")
+        .addExpandPropertyName("flex-direction")
+        .build());
+
+     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("flex-wrap")
+        .isFunction(false)
+        .addExpandPropertyName("-moz-flex-wrap")
+        .addExpandPropertyName("-ms-flex-wrap")
+        .addExpandPropertyName("-webkit-flex-wrap")
+        .addExpandPropertyName("flex-wrap")
+        .build());
+
+     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("flex")
+        .isFunction(false)
+        .addExpandPropertyName("-ms-flex")
+        .addExpandPropertyName("-webkit-flex")
+        .addExpandPropertyName("flex")
+        .build());
+
     builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("flex-grow")
         .isFunction(false)
@@ -75,6 +108,28 @@ final class BrowserPrefixGenerator {
         .addExpandPropertyName("-ms-flex-positive")
         .addExpandPropertyName("-webkit-flex-grow")
         .addExpandPropertyName("flex-grow")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("flex-shrink")
+        .isFunction(false)
+        .addExpandPropertyName("-ms-flex-shrink")
+        .addExpandPropertyName("-webkit-flex-shrink")
+        .addExpandPropertyName("flex-shrink")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("align-self")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-align-self")
+        .addExpandPropertyName("align-self")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("justify-content")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-justify-content")
+        .addExpandPropertyName("justify-content")
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
