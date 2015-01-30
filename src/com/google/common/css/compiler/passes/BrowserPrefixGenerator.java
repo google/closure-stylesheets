@@ -141,6 +141,67 @@ final class BrowserPrefixGenerator {
         .addExpandPropertyName("animation")
         .build());
 
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("animation-delay")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-animation-delay")
+        .addExpandPropertyName("-moz-animation-delay")
+        .addExpandPropertyName("-o-animation-delay")
+        .addExpandPropertyName("animation-delay")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("animation-direction")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-animation-direction")
+        .addExpandPropertyName("-moz-animation-direction")
+        .addExpandPropertyName("-o-animation-direction")
+        .addExpandPropertyName("animation-direction")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("animation-duration")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-animation-duration")
+        .addExpandPropertyName("-moz-animation-duration")
+        .addExpandPropertyName("-o-animation-duration")
+        .addExpandPropertyName("animation-duration")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("animation-fill-mode")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-animation-fill-mode")
+        .addExpandPropertyName("animation-fill-mode")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("animation-iteration-count")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-animation-iteration-count")
+        .addExpandPropertyName("-moz-animation-iteration-count")
+        .addExpandPropertyName("-o-animation-iteration-count")
+        .addExpandPropertyName("animation-iteration-count")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("animation-name")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-animation-name")
+        .addExpandPropertyName("-moz-animation-name")
+        .addExpandPropertyName("-o-animation-name")
+        .addExpandPropertyName("animation-name")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("animation-timing-function")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-animation-timing-function")
+        .addExpandPropertyName("-moz-animation-timing-function")
+        .addExpandPropertyName("-o-animation-timing-function")
+        .addExpandPropertyName("animation-timing-function")
+        .build());
+
     return builder.build();
   }
 }

@@ -116,26 +116,43 @@ class BrowserPrefixRule {
     List<String> expandPropertyValueList = Lists.newArrayList();
     private boolean isFunction = false;
 
+    /**
+     * Property name to match.
+     */
     Builder matchPropertyName(String propertyName) {
       this.matchPropertyName = propertyName;
       return this;
     }
 
+    /**
+     * Property value to match.
+     */
     Builder matchPropertyValue(String propertyValue) {
       this.matchPropertyValue = propertyValue;
       return this;
     }
 
+    /**
+     * Whether the property value to be *matched* is a function.
+     * For example the following is a function:
+     * background-image: linear-gradient(GRADIENT);
+     */
     Builder isFunction(boolean isFunction) {
       this.isFunction = isFunction;
       return this;
     }
 
+    /**
+     * Property name to add as expansion.
+     */
     Builder addExpandPropertyName(String propertyName) {
       expandPropertyNameList.add(propertyName);
       return this;
     }
 
+    /**
+     * Property value to add as expansion.
+     */
     Builder addExpandPropertyValue(String propertyValue) {
       expandPropertyValueList.add(propertyValue);
       return this;
