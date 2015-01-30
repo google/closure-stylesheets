@@ -352,6 +352,15 @@ final class BrowserPrefixGenerator {
         .addExpandPropertyName("transition-timing-function")
         .build());
 
+        builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("user-select")
+        .isFunction(false)
+         // Don't add user-select to expansion list as it is non-standard.
+        .addExpandPropertyName("-webkit-user-select")
+        .addExpandPropertyName("-moz-user-select")
+        .addExpandPropertyName("-ms-user-select")
+        .build());
+
     return builder.build();
   }
 }
