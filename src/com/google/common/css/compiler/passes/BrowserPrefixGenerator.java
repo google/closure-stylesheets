@@ -46,17 +46,6 @@ final class BrowserPrefixGenerator {
   private static ImmutableList<BrowserPrefixRule> buildExpansionRules() {
     ImmutableList.Builder<BrowserPrefixRule> builder = ImmutableList.builder();
     builder.add(new BrowserPrefixRule.Builder()
-        .matchPropertyName("background-image")
-        .matchPropertyValue("linear-gradient")
-        .isFunction(true)
-        .addExpandPropertyValue("-webkit-linear-gradient")
-        .addExpandPropertyValue("-moz-linear-gradient")
-        .addExpandPropertyValue("-ms-linear-gradient")
-        .addExpandPropertyValue("-o-linear-gradient")
-        .addExpandPropertyValue("linear-gradient")
-        .build());
-
-    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("display")
         .matchPropertyValue("flex")
         .isFunction(false)
@@ -200,6 +189,167 @@ final class BrowserPrefixGenerator {
         .addExpandPropertyName("-moz-animation-timing-function")
         .addExpandPropertyName("-o-animation-timing-function")
         .addExpandPropertyName("animation-timing-function")
+        .build());
+
+    // Useful for high resolution (retina) displays.
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("background-size")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-background-size")
+        .addExpandPropertyName("-moz-background-size")
+        .addExpandPropertyName("-o-background-size")
+        .addExpandPropertyName("background-size")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("backface-visibility")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-backface-visibility")
+        .addExpandPropertyName("-moz-backface-visibility")
+        .addExpandPropertyName("-o-backface-visibility")
+        .addExpandPropertyName("backface-visibility")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("border-radius")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-border-radius")
+        .addExpandPropertyName("-moz-border-radius")
+        .addExpandPropertyName("border-radius")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("box-shadow")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-box-shadow")
+        .addExpandPropertyName("-moz-box-shadow")
+        .addExpandPropertyName("box-shadow")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("box-sizing")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-box-sizing")
+        .addExpandPropertyName("-moz-box-sizing")
+        .addExpandPropertyName("box-sizing")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("background-image")
+        .matchPropertyValue("linear-gradient")
+        .isFunction(true)
+        .addExpandPropertyValue("-webkit-linear-gradient")
+        .addExpandPropertyValue("-moz-linear-gradient")
+        .addExpandPropertyValue("-ms-linear-gradient")
+        .addExpandPropertyValue("-o-linear-gradient")
+        .addExpandPropertyValue("linear-gradient")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("perspective")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-perspective")
+        .addExpandPropertyName("-moz-perspective")
+        .addExpandPropertyName("perspective")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("perspective-origin")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-perspective-origin")
+        .addExpandPropertyName("-moz-perspective-origin")
+        .addExpandPropertyName("perspective-origin")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("background-image")
+        .matchPropertyValue("radial-gradient")
+        .isFunction(true)
+        .addExpandPropertyValue("-webkit-radial-gradient")
+        .addExpandPropertyValue("-moz-radial-gradient")
+        .addExpandPropertyValue("-o-radial-gradient")
+        .addExpandPropertyValue("radial-gradient")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("perspective-origin")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-perspective-origin")
+        .addExpandPropertyName("-moz-perspective-origin")
+        .addExpandPropertyName("perspective-origin")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("transform")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-transform")
+        .addExpandPropertyName("-moz-transform")
+        .addExpandPropertyName("-ms-transform")
+        .addExpandPropertyName("-o-transform")
+        .addExpandPropertyName("transform")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("transform-origin")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-transform-origin")
+        .addExpandPropertyName("-moz-transform-origin")
+        .addExpandPropertyName("-ms-transform-origin")
+        .addExpandPropertyName("-o-transform-origin")
+        .addExpandPropertyName("transform-origin")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("transform-style")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-transform-style")
+        .addExpandPropertyName("-moz-transform-style")
+        .addExpandPropertyName("transform-style")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("transition")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-transition")
+        .addExpandPropertyName("-moz-transition")
+        .addExpandPropertyName("-o-transition")
+        .addExpandPropertyName("transition")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("transition-delay")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-transition-delay")
+        .addExpandPropertyName("-moz-transition-delay")
+        .addExpandPropertyName("-o-transition-delay")
+        .addExpandPropertyName("transition-delay")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("transition-duration")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-transition-duration")
+        .addExpandPropertyName("-moz-transition-duration")
+        .addExpandPropertyName("-o-transition-duration")
+        .addExpandPropertyName("transition-duration")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("transition-property")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-transition-property")
+        .addExpandPropertyName("-moz-transition-property")
+        .addExpandPropertyName("-o-transition-property")
+        .addExpandPropertyName("transition-property")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("transition-timing-function")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-transition-timing-function")
+        .addExpandPropertyName("-moz-transition-timing-function")
+        .addExpandPropertyName("-o-transition-timing-function")
+        .addExpandPropertyName("transition-timing-function")
         .build());
 
     return builder.build();
