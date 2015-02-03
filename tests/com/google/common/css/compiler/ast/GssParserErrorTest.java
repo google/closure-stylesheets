@@ -183,10 +183,23 @@ public class GssParserErrorTest extends TestCase {
         + "blue 90%);"
         + "}",
         1, 72,
-        "div {d:-invalid-gradient(bottom left, red 20px, yellow, green,"
-        + "blue 90%);}",
-        "                                                                "
-        + "       ^");
+        "div {d:-invalid-gradient(bottom left, red 20px, yellow, green,blue 90%);}",
+        "                                                                       ^");
+  }
+
+  public void testInvalidSpaceInArgumentList() {
+    // The parser marks the error at the semicolon because this is the token immediately following
+    // the last successfully-consumed production. This is not ideal because the error occurs within
+    // the argument list, but we validate the argument list after it is successfully parsed by the
+    // grammar.
+    testError("div { transform:rotate(180 deg); }",
+        1, 32,
+        "div { transform:rotate(180 deg); }",
+        "                               ^");
+    testError("div { background: rgba(255,0,0 1); }",
+        1, 34,
+        "div { background: rgba(255,0,0 1); }",
+        "                                 ^");
   }
 
   /**
@@ -288,6 +301,13 @@ public class GssParserErrorTest extends TestCase {
         "Parse error in test at line 1 column 4:\n"
         + "a{ (}) } b{}\n"
         + "   ^\n");
+  }
+
+  public void testErrorRecoveryWithInvalidArgumentList() throws GssParserException {
+    testErrorHandling("div { transform:rotate(180 deg); }", "[[div]{[]}]",
+        "Parse error in test at line 1 column 32:\n"
+        + "div { transform:rotate(180 deg); }\n"
+        + "                               ^\n");
   }
 
   // When porting this test to Junit4, please make necessary change to this

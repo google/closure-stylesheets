@@ -771,7 +771,7 @@ CssRulesetNode ruleSet() :
       selectors = selectorList()
       t = <LEFTBRACE> { tokens.add(t); }
     } catch (ParseException e) {
-      if (!enableErrorRecovery) throw e;
+      if (!enableErrorRecovery || e.currentToken == null) throw e;
       skipComponentValuesToAfter(LEFTBRACE);
       throw e;
     }
@@ -783,7 +783,7 @@ CssRulesetNode ruleSet() :
       return ruleSet;
     }
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     skipComponentValuesToAfter(RIGHTBRACE);
     throw e;
   }
@@ -1021,7 +1021,7 @@ CssAttributeSelectorNode attribute() :
     )?
     t = <RIGHTSQUARE> { tokens.add(t); }
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     skipComponentValuesToAfter(RIGHTSQUARE);
     throw e;
   }
@@ -1250,7 +1250,7 @@ CssDeclarationNode standardDeclaration() :
       return node;
     }
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     skipComponentValuesToBefore(RIGHTBRACE, SEMICOLON);
     throw e;
   }
@@ -1407,7 +1407,7 @@ CssValueNode term() :
           ( <S> )*
           t = <RIGHTROUND> { tokens.add(t); }
         } catch (ParseException e) {
-          if (!enableErrorRecovery) throw e;
+          if (!enableErrorRecovery || e.currentToken == null) throw e;
           skipComponentValuesToAfter(RIGHTROUND);
           throw e;
         }
@@ -1593,7 +1593,7 @@ CssBooleanExpressionNode parenthesized_term() :
     t = <RIGHTROUND> { tokens.add(t); }
     ( <S> )*
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     skipComponentValuesToAfter(RIGHTROUND);
     throw e;
   }
@@ -1686,7 +1686,7 @@ CssFunctionNode function() :
     } else if (FUNCTIONS_WITH_SPACE_SEP_OK.matcher(functionName).matches()) {
       addArgumentsWithSeparator(args, expr.childIterable(), expr.numChildren(), " ");
     } else {
-      throw new ParseException("invalid argument list");
+      throw generateParseException();
     }
     CssFunctionNode functionNode = nodeBuilder.buildFunctionNode(
         functionName.toString(),
@@ -1806,7 +1806,7 @@ String unit() :
           (<S>)* sum = sum() {content.append(sum);} (<S>)*
           <RIGHTROUND> { content.append(")"); }
         } catch (ParseException e) {
-          if (!enableErrorRecovery) throw e;
+          if (!enableErrorRecovery || e.currentToken == null) throw e;
           skipComponentValuesToAfter(RIGHTROUND);
           throw e;
         }
@@ -1905,7 +1905,7 @@ CssAtRuleNode at_rule() :
     ( <S> )*
     ( ( v = composite_term() | v = extended_term() ) { parameters.add(v); } ( <S> )* )*
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
       skipComponentValuesToAfter(RIGHTBRACE);
     }
@@ -1917,7 +1917,7 @@ CssAtRuleNode at_rule() :
         block = block(true)
         t = <RIGHTBRACE> { tokens.add(t); }
       } catch (ParseException e) {
-        if (!enableErrorRecovery) throw e;
+        if (!enableErrorRecovery || e.currentToken == null) throw e;
         skipComponentValuesToAfter(RIGHTBRACE);
         throw e;
       }
@@ -1927,7 +1927,7 @@ CssAtRuleNode at_rule() :
     |
     {
       ParseException e = generateParseException();
-      if (enableErrorRecovery) {
+      if (enableErrorRecovery && e.currentToken != null) {
         if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
           skipComponentValuesToAfter(RIGHTBRACE);
         }
@@ -2002,7 +2002,7 @@ CssAtRuleNode atRuleWithDeclBlock() :
       )*
     )
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
       skipComponentValuesToAfter(RIGHTBRACE);
     }
@@ -2013,7 +2013,7 @@ CssAtRuleNode atRuleWithDeclBlock() :
         ( <S> )* block = styleDeclaration()
         t = <RIGHTBRACE> { tokens.add(t); }
       } catch (ParseException e) {
-        if (!enableErrorRecovery) throw e;
+        if (!enableErrorRecovery || e.currentToken == null) throw e;
         skipComponentValuesToAfter(RIGHTBRACE);
         throw e;
       }
@@ -2023,7 +2023,7 @@ CssAtRuleNode atRuleWithDeclBlock() :
     |
     {
       ParseException e = generateParseException();
-      if (enableErrorRecovery) {
+      if (enableErrorRecovery && e.currentToken != null) {
         if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
           skipComponentValuesToAfter(RIGHTBRACE);
         }
@@ -2094,7 +2094,7 @@ CssAtRuleNode innerAtRule() :
       )*
     )
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
       skipComponentValuesToAfter(RIGHTBRACE);
     }
@@ -2106,7 +2106,7 @@ CssAtRuleNode innerAtRule() :
         ( <S> )* block = styleDeclaration()
         t = <RIGHTBRACE> { tokens.add(t); }
       } catch (ParseException e) {
-        if (!enableErrorRecovery) throw e;
+        if (!enableErrorRecovery || e.currentToken == null) throw e;
         skipComponentValuesToAfter(RIGHTBRACE);
         throw e;
       }
@@ -2116,7 +2116,7 @@ CssAtRuleNode innerAtRule() :
   |
     {
       ParseException e = generateParseException();
-      if (enableErrorRecovery) {
+      if (enableErrorRecovery && e.currentToken != null) {
         if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
           skipComponentValuesToAfter(RIGHTBRACE);
         }
@@ -2166,7 +2166,7 @@ CssAtRuleNode webkit_keyframes_rule() :
     }
     ( <S> )*
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
       skipComponentValuesToAfter(RIGHTBRACE);
     }
@@ -2177,7 +2177,7 @@ CssAtRuleNode webkit_keyframes_rule() :
       ( <S> )* block = webkit_keyframes_block()
       t = <RIGHTBRACE> { tokens.add(t);}
     } catch (ParseException e) {
-      if (!enableErrorRecovery) throw e;
+      if (!enableErrorRecovery || e.currentToken == null) throw e;
       skipComponentValuesToAfter(RIGHTBRACE);
       throw e;
     }
@@ -2224,7 +2224,7 @@ CssKeyframeRulesetNode webkit_keyframe_ruleSet() :
     keys = keyList()
     t = <LEFTBRACE> { tokens.add(t); }
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     if (skipComponentValuesToAfter(SEMICOLON, LEFTBRACE) == LEFTBRACE) {
       skipComponentValuesToAfter(RIGHTBRACE);
     }
@@ -2234,7 +2234,7 @@ CssKeyframeRulesetNode webkit_keyframe_ruleSet() :
     declarations = styleDeclaration()
     t = <RIGHTBRACE> { tokens.add(t); }
   } catch (ParseException e) {
-    if (!enableErrorRecovery) throw e;
+    if (!enableErrorRecovery || e.currentToken == null) throw e;
     skipComponentValuesToAfter(RIGHTBRACE);
     throw e;
   }
@@ -2521,7 +2521,7 @@ String scanCrazyContent(String endChars) {
     t = getNextToken();
   }
   if (sb.length() < 1) {
-    throw new ParseException("expected [" + endChars + "]");
+    throw generateParseException();
   }
   return sb.toString();
 }
