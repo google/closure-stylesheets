@@ -728,7 +728,7 @@ public class DefaultVisitControllerTest extends TestCase {
 
   private static class ValueDetector extends DefaultTreeVisitor {
     private final String quarry;
-    private boolean[] foundValue = {false};
+    private final boolean[] foundValue = {false};
     @Override public boolean enterValueNode(CssValueNode node) {
       if (quarry.equals(node.getValue())) {
         foundValue[0] = true;
@@ -745,7 +745,7 @@ public class DefaultVisitControllerTest extends TestCase {
   }
 
   private static class FunctionDetector extends DefaultTreeVisitor {
-    private boolean[] foundValue = {false};
+    private final boolean[] foundValue = {false};
     @Override public boolean enterFunctionNode(CssFunctionNode node) {
       foundValue[0] = true;
       return true;
@@ -808,5 +808,59 @@ public class DefaultVisitControllerTest extends TestCase {
   public void testRemoveCompositePropertyValueElementEnd() {
     verifyRemoveablePropertyValueElement(
         "red fixed, url(http://www.google.com/logo)");
+  }
+
+  public void testVisitForLoop() {
+    CssLiteralNode x = new CssLiteralNode("FOO");
+    CssDefinitionNode def = new CssDefinitionNode(x);
+
+    CssBlockNode loopBlock = new CssBlockNode(true);
+    loopBlock.addChildToBack(def);
+
+    CssValueNode from = new CssNumericNode("1", CssNumericNode.NO_UNITS);
+    CssValueNode to = new CssNumericNode("5", CssNumericNode.NO_UNITS);
+    CssValueNode step = new CssNumericNode("2", CssNumericNode.NO_UNITS);
+
+    CssLiteralNode variableNode = new CssLiteralNode("for");
+    CssForLoopRuleNode loop = new CssForLoopRuleNode(
+        variableNode, loopBlock, null, from, to, step, "i", 0);
+
+    CssBlockNode block = new CssBlockNode(false);
+    block.addChildToBack(loop);
+    CssRootNode root = new CssRootNode(block);
+    CssTree tree = new CssTree(null, root);
+
+    IMocksControl mockControl = EasyMock.createStrictControl();
+    DefaultTreeVisitor testVisitor =
+        mockControl.createMock(DefaultTreeVisitor.class);
+
+    // Enter Tree gets the root - there is no enterRoot.
+    expect(testVisitor.enterTree(eq(root))).andReturn(true);
+
+    // There are blocks that get created even if you don't add them.
+    expect(testVisitor.enterImportBlock((CssImportBlockNode) anyObject())).andReturn(true);
+    testVisitor.leaveImportBlock((CssImportBlockNode) anyObject());
+
+    // Then we enter the block.
+    expect(testVisitor.enterBlock(eq(block))).andReturn(true);
+
+    // Then we enter the for loop node.
+    expect(testVisitor.enterForLoop(eq(loop))).andReturn(true);
+
+    // Then we enter the definition within the for loop.
+    expect(testVisitor.enterDefinition(eq(def))).andReturn(true);
+
+    // Exit the nodes.
+    testVisitor.leaveDefinition(eq(def));
+    testVisitor.leaveForLoop(eq(loop));
+    testVisitor.leaveBlock(eq(block));
+    testVisitor.leaveTree(eq(root));
+
+    mockControl.replay();
+
+    DefaultVisitController controller = new DefaultVisitController(tree, true);
+    controller.startVisit(testVisitor);
+
+    mockControl.verify();
   }
 }

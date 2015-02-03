@@ -33,17 +33,17 @@ import java.util.List;
 class DefaultVisitController implements MutatingVisitController {
 
   /** The (sub)tree to be visited. */
-  private CssNode subtree;
+  private final CssNode subtree;
 
   /** Whether mutations of the tree are allowed or not. */
-  private boolean allowMutating;
+  private final boolean allowMutating;
 
   /** The visitor of the tree. */
   @VisibleForTesting
   CssTreeVisitor visitor;
 
   /** The stack of states for the controller. */
-  private StateStack stateStack = new StateStack();
+  private final StateStack stateStack = new StateStack();
 
   /** Whether the visit was required to stop. */
   @SuppressWarnings("unused")
@@ -653,7 +653,7 @@ class DefaultVisitController implements MutatingVisitController {
   private class VisitMediaTypeListDelimiterState
       extends BaseVisitState<CssNode> {
 
-    private CssNodesListNode<? extends CssNode> node;
+    private final CssNodesListNode<? extends CssNode> node;
 
     public VisitMediaTypeListDelimiterState(
         CssNodesListNode<? extends CssNode> node) {
@@ -1446,7 +1446,7 @@ class DefaultVisitController implements MutatingVisitController {
   class VisitCompositeValueState extends BaseVisitState<CssValueNode> {
 
     private final CssCompositeValueNode node;
-    private List<CssValueNode> children;
+    private final List<CssValueNode> children;
     private int currentIndex = -1;
     private boolean doNotIncreaseIndex = false;
     private boolean visitChildren = true;
@@ -1751,6 +1751,39 @@ class DefaultVisitController implements MutatingVisitController {
 
     VisitComponentChildrenState(CssBlockNode block) {
       super(block);
+    }
+  }
+
+  @VisibleForTesting
+  class VisitForLoopRuleState extends BaseVisitState<CssNode> {
+
+    private final CssForLoopRuleNode node;
+
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
+
+    VisitForLoopRuleState(CssForLoopRuleNode node) {
+      this.node = node;
+    }
+
+    @Override
+    public void doVisit() {
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterForLoop(node);
+      } else {
+        visitor.leaveForLoop(node);
+      }
+    }
+
+    @Override
+    public void transitionToNextState() {
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitBlockChildrenState(node.getBlock()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
+      }
     }
   }
 
@@ -2080,6 +2113,10 @@ class DefaultVisitController implements MutatingVisitController {
     // VisitDeclarationBlockState
     if (child instanceof CssMixinNode) {
       return new VisitMixinState((CssMixinNode) child);
+    }
+
+    if (child instanceof CssForLoopRuleNode) {
+      return new VisitForLoopRuleState((CssForLoopRuleNode) child);
     }
 
     // VisitBlockChildrenState

@@ -77,6 +77,8 @@ public class PassRunner {
         .runPass();
     new CreateConditionalNodes(cssTree.getMutatingVisitController(),
         errorManager).runPass();
+    new CreateForLoopNodes(cssTree.getMutatingVisitController(),
+        errorManager).runPass();
     new CreateComponentNodes(cssTree.getMutatingVisitController(),
         errorManager).runPass();
 
@@ -105,6 +107,7 @@ public class PassRunner {
     new EliminateConditionalNodes(
         cssTree.getMutatingVisitController(),
         ImmutableSet.copyOf(job.trueConditionNames)).runPass();
+    new UnrollLoops(cssTree.getMutatingVisitController()).runPass();
     // Collect constant definitions.
     CollectConstantDefinitions collectConstantDefinitionsPass =
         new CollectConstantDefinitions(cssTree);

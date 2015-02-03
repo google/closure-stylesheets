@@ -454,6 +454,13 @@ public class GssParserCC {
       return node;
     }
 
+    public CssLiteralNode buildLoopVariableNode(String value, SourceCodeLocation location,
+        List<Token> tokens) {
+      CssLoopVariableNode node = new CssLoopVariableNode(value, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
     public CssFunctionNode buildFunctionNode(String name, SourceCodeLocation location,
         CssFunctionArgumentsNode args, List<Token> tokens) {
       CssFunctionNode.Function functionType = CssFunctionNode.Function.byName(name);
@@ -680,9 +687,11 @@ PARSER_END(GssParserCC)
       <ALPHA> | <LEFTSQUARE> | <RIGHTSQUARE> | <CARET> | <UNDERSCORE> | "`" |
       <LEFTBRACE> | <PIPE> | <RIGHTBRACE> | <TILDE> | <NONASCII> >
 
+  | < FOR_VARIABLE: <DOLLAR> <NAMESTART> (<NAMECHAR>)* >
+
   // ident        -?{nmstart}{nmchar}*
   // {ident}         {return IDENT;}
-  | < IDENTIFIER: (<MINUS>)? <NAMESTART> (<NAMECHAR>)* >
+  | < IDENTIFIER: (<MINUS>)? <NAMESTART> (<NAMECHAR> | <MINUS> <FOR_VARIABLE> )* >
 
   // "not("
   // Special handling needed because ':not' takes simple selectors as
@@ -1344,7 +1353,7 @@ CssValueNode slash_term() :
 
 // term
 //   : unary_operator?
-//     [ [ NUMBER [ PERCENT | IDENTIFIER ] ] | STRING | IDENT
+//     [ [ NUMBER [ PERCENT | IDENTIFIER ] ] | STRING | IDENT | FOR_VARIABLE
 //       | '(' S? IDENT ':' S* NUMBER IDENT? ')' | URI | hexcolor | function
 //       | math
 //     ] S*
@@ -1359,12 +1368,13 @@ CssValueNode term() :
   CssStringNode stringNode = null;
   List<Token> tokens = Lists.newArrayList();
   boolean hexcolor = false;
+  boolean loopVariable = false;
 }
 {
   (
     ( t = unary_operator() { unop = trim(t.image);   tokens.add(t); } )?
     (  // Number with optional arbitrary dimension or percent.
-      t = <NUMBER>     { unit = CssNumericNode.NO_UNITS; tokens.add(t); }
+      t = <NUMBER> { unit = CssNumericNode.NO_UNITS; tokens.add(t); }
           ( (dim = <PERCENT> | dim = <IDENTIFIER>)
               { unit = dim.image.toLowerCase(); tokens.add(dim);} )?
     )
@@ -1372,6 +1382,8 @@ CssValueNode term() :
     | // This lookahead is to support function names with . and :.
       ( LOOKAHEAD({getToken(2).kind != DOT && getToken(2).kind != COLON})
       t = <IDENTIFIER> { tokens.add(t); } )
+    | // For variables will be evaluated to a number eventually.
+      t = <FOR_VARIABLE> { loopVariable = true; tokens.add(t); }
     | // Support for syntax like '(max-height: 300px)' that is needed for
       // the @media rule.
       // Without the look ahead the parser can't distinguish between
@@ -1419,7 +1431,11 @@ CssValueNode term() :
       for (Token token : tokens) {
         sb.append(token.image);
       }
-      return nodeBuilder.buildLiteralNode(sb.toString(), this.getLocation(t), tokens);
+      if (loopVariable) {
+        return nodeBuilder.buildLoopVariableNode(sb.toString(), this.getLocation(t), tokens);
+      } else {
+        return nodeBuilder.buildLiteralNode(sb.toString(), this.getLocation(t), tokens);
+      }
     }
   }
 }

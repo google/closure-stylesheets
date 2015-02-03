@@ -78,6 +78,9 @@ public abstract class CssAtRuleNode extends CssNodesListNode<CssValueNode> {
     ELSEIF("elseif"),
     ELSE("else"),
 
+    // Loops extension.
+    FOR("for"),
+
     // GSS components.
     ABSTRACT_COMPONENT("abstract_component"),
     COMPONENT("component"),

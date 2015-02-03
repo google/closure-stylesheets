@@ -28,6 +28,7 @@ import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssFontFaceNode;
+import com.google.common.css.compiler.ast.CssForLoopRuleNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssIdSelectorNode;
 import com.google.common.css.compiler.ast.CssImportBlockNode;
@@ -553,6 +554,17 @@ public class UniformVisitor implements CssTreeVisitor {
   @Override
   public void leaveValueNode(CssValueNode n) {
     leave(n);
+  }
+
+  @Override
+  public boolean enterForLoop(CssForLoopRuleNode node) {
+    enter(node);
+    return true;
+  }
+
+  @Override
+  public void leaveForLoop(CssForLoopRuleNode node) {
+    leave(node);
   }
 
   /** Traverse the (sub) tree starting at {@code node} */

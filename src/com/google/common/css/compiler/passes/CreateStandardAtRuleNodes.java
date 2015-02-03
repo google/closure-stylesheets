@@ -106,7 +106,7 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
   // can be misleading; @def rules are processed by the compiler but @media
   // rules are handled by the browser.
   private static final Set<String> ALLOWED_AT_RULES_IN_MEDIA = ImmutableSet.of(
-      "page", "if", "elseif", "else");
+      "page", "if", "elseif", "else", "for");
 
   private final MutatingVisitController visitController;
   private final ErrorManager errorManager;

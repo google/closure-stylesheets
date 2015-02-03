@@ -172,8 +172,8 @@ public class GssParserErrorTest extends TestCase {
   }
 
   public void testBadMixinDefinition() {
-    testError("@defmixin name($var) {}", 1, 16,
-        "@defmixin name($var) {}",
+    testError("@defmixin name($#%$var) {}", 1, 16,
+        "@defmixin name($#%$var) {}",
         "               ^");
   }
 

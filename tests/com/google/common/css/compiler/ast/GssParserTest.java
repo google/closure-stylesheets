@@ -839,6 +839,30 @@ public class GssParserTest extends TestCase {
         "[[a]{[border-bottom-height:[[1em]];]}]");
   }
 
+  public void testForLoop() throws Exception {
+    testTree(
+        "@for $i from 1 to 6 {}",
+        "[@for [$i] [from] [1] [to] [6]{}]");
+  }
+
+  public void testForLoopWithStep() throws Exception {
+    testTree(
+        "@for $i from 1 to 6 step 2 {}",
+        "[@for [$i] [from] [1] [to] [6] [step] [2]{}]");
+  }
+
+  public void testForLoopWithVariables() throws Exception {
+    testTree(
+        "@for $i from $x to $y step $z {}",
+        "[@for [$i] [from] [$x] [to] [$y] [step] [$z]{}]");
+  }
+
+  public void testForLoopWithVariablesInBlock() throws Exception {
+    testTree(
+        "@for $i from 1 to 2 { .foo-$i { padding: $i } }",
+        "[@for [$i] [from] [1] [to] [2]{[.foo-$i]{[padding:[[$i]];]}}]");
+  }
+
   public void testAllCasesWithReuseableParser() throws Exception {
     // Call all other test cases in one method to make sure the same thread
     // local parser is reused.

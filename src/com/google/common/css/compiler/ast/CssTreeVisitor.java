@@ -174,6 +174,12 @@ public interface CssTreeVisitor extends AtRuleHandler {
   /** Called after visiting a {@code CssKeyframeRulesetNode}'s sub trees */
   void leaveKeyframeRuleset(CssKeyframeRulesetNode key);
 
+  /** Called before visiting a {@code CssForLoopRuleNode}'s sub trees */
+  boolean enterForLoop(CssForLoopRuleNode node);
+
+  /** Called after visiting a {@code CssForLoopRuleNode}'s sub trees */
+  void leaveForLoop(CssForLoopRuleNode node);
+
   /** Traverse the (sub) tree starting at {@code node} */
   void visit(CssNode node);
 }

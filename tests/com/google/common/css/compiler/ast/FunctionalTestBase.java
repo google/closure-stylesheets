@@ -21,6 +21,7 @@ import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.css.compiler.passes.CreateComponentNodes;
 import com.google.common.css.compiler.passes.CreateConditionalNodes;
 import com.google.common.css.compiler.passes.CreateDefinitionNodes;
+import com.google.common.css.compiler.passes.CreateForLoopNodes;
 import com.google.common.css.compiler.passes.CreateStandardAtRuleNodes;
 import com.google.common.css.compiler.passes.PrettyPrinter;
 
@@ -55,6 +56,8 @@ public class FunctionalTestBase extends FunctionalTestCommonBase {
     pass2.runPass();
     CreateComponentNodes pass3 = new CreateComponentNodes(vc, errorManager);
     pass3.runPass();
+    CreateForLoopNodes pass4 = new CreateForLoopNodes(vc, errorManager);
+    pass4.runPass();
     new CreateStandardAtRuleNodes(vc, errorManager).runPass();
   }
 
