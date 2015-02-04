@@ -134,7 +134,8 @@ public class CreateForLoopNodes extends DefaultTreeVisitor implements CssCompile
         to,
         step,
         variableName,
-        nextLoopId());
+        nextLoopId(),
+        node.getSourceCodeLocation());
     loopNode.setParameters(node.getChildren());
 
     visitController.replaceCurrentBlockChildWith(Lists.newArrayList(loopNode), true);

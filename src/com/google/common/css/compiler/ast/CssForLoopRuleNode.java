@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.ast;
 
+import com.google.common.css.SourceCodeLocation;
+
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -41,13 +43,15 @@ public class CssForLoopRuleNode extends CssAtRuleNode {
       CssValueNode to,
       CssValueNode step,
       String variableName,
-      int loopId) {
+      int loopId,
+      @Nullable SourceCodeLocation sourceCodeLocation) {
     super(CssAtRuleNode.Type.FOR, name, block, comments);
     this.from = from;
     this.to = to;
     this.step = step;
     this.variableName = variableName;
     this.loopId = loopId;
+    setSourceCodeLocation(sourceCodeLocation);
   }
 
   public CssForLoopRuleNode(CssForLoopRuleNode node) {

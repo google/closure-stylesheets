@@ -823,7 +823,7 @@ public class DefaultVisitControllerTest extends TestCase {
 
     CssLiteralNode variableNode = new CssLiteralNode("for");
     CssForLoopRuleNode loop = new CssForLoopRuleNode(
-        variableNode, loopBlock, null, from, to, step, "i", 0);
+        variableNode, loopBlock, null, from, to, step, "i", 0, null);
 
     CssBlockNode block = new CssBlockNode(false);
     block.addChildToBack(loop);
