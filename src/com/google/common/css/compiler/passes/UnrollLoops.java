@@ -74,6 +74,7 @@ public class UnrollLoops extends DefaultTreeVisitor implements CssCompilerPass {
   private CssBlockNode makeBlock(
       CssForLoopRuleNode node, int value, Set<String> definitions, int loopId) {
     CssBlockNode newBlock = new CssBlockNode(false, node.getBlock().deepCopy().getChildren());
+    newBlock.setSourceCodeLocation(node.getSourceCodeLocation());
     CssTree tree = new CssTree(null, new CssRootNode(newBlock));
     new LoopVariableReplacementPass(
         node.getVariableName(), value, definitions, tree.getMutatingVisitController(), loopId)

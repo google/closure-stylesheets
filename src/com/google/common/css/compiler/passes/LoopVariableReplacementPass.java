@@ -133,7 +133,8 @@ class LoopVariableReplacementPass extends DefaultTreeVisitor implements CssCompi
     } else if (node instanceof CssLoopVariableNode) {
       CssLoopVariableNode variableNode = (CssLoopVariableNode) node;
       if (needsReplacement(variableNode.getValue())) {
-        return new CssNumericNode(String.valueOf(value), CssNumericNode.NO_UNITS);
+        return new CssNumericNode(
+            String.valueOf(value), CssNumericNode.NO_UNITS, node.getSourceCodeLocation());
       }
     }
     return null;
