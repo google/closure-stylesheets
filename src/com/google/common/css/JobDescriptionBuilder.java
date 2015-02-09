@@ -26,7 +26,9 @@ import com.google.common.css.JobDescription.OptimizeStrategy;
 import com.google.common.css.JobDescription.OutputFormat;
 import com.google.common.css.JobDescription.OutputOrientation;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -61,6 +63,7 @@ public class JobDescriptionBuilder {
   private SubstitutionMapProvider cssSubstitutionMapProvider;
   private OutputRenamingMapFormat outputRenamingMapFormat;
   private boolean preserveComments;
+  private Map<String, Integer> compileConstants;
 
   private JobDescription job = null;
 
@@ -91,6 +94,7 @@ public class JobDescriptionBuilder {
     this.cssSubstitutionMapProvider = null;
     this.outputRenamingMapFormat = OutputRenamingMapFormat.JSCOMP_VARIABLE_MAP;
     this.preserveComments = false;
+    this.compileConstants = new HashMap<>();
   }
 
   public JobDescriptionBuilder copyFrom(JobDescription jobToCopy) {
@@ -100,7 +104,7 @@ public class JobDescriptionBuilder {
     setInputOrientation(jobToCopy.inputOrientation);
     setOutputOrientation(jobToCopy.outputOrientation);
     this.optimize = jobToCopy.optimize;
-    setTrueConditionNames(Lists.newArrayList(jobToCopy.trueConditionNames));
+    setTrueConditionNames(jobToCopy.trueConditionNames);
     this.useInternalBidiFlipper = jobToCopy.useInternalBidiFlipper;
     this.swapLtrRtlInUrl = jobToCopy.swapLtrRtlInUrl;
     this.swapLeftRightInUrl = jobToCopy.swapLeftRightInUrl;
@@ -122,6 +126,7 @@ public class JobDescriptionBuilder {
     this.cssSubstitutionMapProvider = jobToCopy.cssSubstitutionMapProvider;
     this.outputRenamingMapFormat = jobToCopy.outputRenamingMapFormat;
     this.preserveComments = jobToCopy.preserveComments;
+    setCompileConstants(jobToCopy.compileConstants);
     return this;
   }
 
@@ -378,6 +383,15 @@ public class JobDescriptionBuilder {
     return setPreserveComments(true);
   }
 
+  public JobDescriptionBuilder setCompileConstants(
+      Map<String, Integer> newCompileConstants) {
+    checkJobIsNotAlreadyCreated();
+    Preconditions.checkState(this.compileConstants.isEmpty());
+    Preconditions.checkArgument(!newCompileConstants.containsKey(null));
+    this.compileConstants = new HashMap<>(newCompileConstants);
+    return this;
+  }
+
   public JobDescription getJobDescription() {
     if (job != null) {
       return job;
@@ -394,7 +408,7 @@ public class JobDescriptionBuilder {
         allowKeyframes, allowWebkitKeyframes, processDependencies,
         allowedAtRules, cssRenamingPrefix, excludedClassesFromRenaming,
         gssFunctionMapProvider, cssSubstitutionMapProvider,
-        outputRenamingMapFormat, preserveComments);
+        outputRenamingMapFormat, preserveComments, compileConstants);
     return job;
   }
 }

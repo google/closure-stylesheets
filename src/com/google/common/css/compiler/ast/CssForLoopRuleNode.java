@@ -87,28 +87,6 @@ public class CssForLoopRuleNode extends CssAtRuleNode {
     step = value;
   }
 
-  public int getFromValue() {
-    return getNumberValue(from);
-  }
-
-  public int getToValue() {
-    return getNumberValue(to);
-  }
-
-  public int getStepValue() {
-    return getNumberValue(step);
-  }
-
-  private int getNumberValue(CssValueNode node) {
-    if (node instanceof CssNumericNode) {
-      return Integer.parseInt(((CssNumericNode) node).getNumericPart());
-    } else if (node instanceof CssLoopVariableNode) {
-      throw new RuntimeException("For loop variable is used before it was evaluated");
-    } else {
-      throw new RuntimeException("Unsupported value type for loop variable: " + node.getClass());
-    }
-  }
-
   public String getVariableName() {
     return variableName;
   }

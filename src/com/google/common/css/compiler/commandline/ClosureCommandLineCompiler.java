@@ -45,7 +45,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -176,6 +178,11 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         "Preserve comments from sources into pretty printed output css.")
     private boolean preserveComments = false;
 
+    @Option(name = "--const",
+        usage = "Specify integer constants to be used in for loops. Invoke for each const, e.g.: "
+        + "--const=VAR1=VALUE1 --const=VAR2=VALUE2")
+    private Map<String, String> compileConstants = new HashMap<>();
+
     /**
      * All remaining arguments are considered input CSS files.
      */
@@ -210,6 +217,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setCssRenamingPrefix(cssRenamingPrefix);
       builder.setPreserveComments(preserveComments);
       builder.setOutputRenamingMapFormat(outputRenamingMapFormat);
+      builder.setCompileConstants(parseCompileConstants(compileConstants));
 
       GssFunctionMapProvider gssFunctionMapProvider =
           getGssFunctionMapProviderForName(gssFunctionMapProviderClassName);
@@ -237,6 +245,18 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       return new OutputInfo(
           (outputFile == null) ? null : new File(outputFile),
           (renameFile == null) ? null : new File(renameFile));
+    }
+
+    /**
+     * Parses the values in the compile constants to integers.
+     */
+    private Map<String, Integer> parseCompileConstants(
+        Map<String, String> compileConstants) {
+      Map<String, Integer> parsedConstants = new HashMap<>(compileConstants.size());
+      for (Map.Entry<String, String> entry : compileConstants.entrySet()) {
+        parsedConstants.put(entry.getKey(), Integer.parseInt(entry.getValue()));
+      }
+      return parsedConstants;
     }
   }
 

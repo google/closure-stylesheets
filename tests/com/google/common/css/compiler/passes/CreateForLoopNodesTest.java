@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.CssForLoopRuleNode;
+import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssLoopVariableNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
@@ -51,6 +52,18 @@ public class CreateForLoopNodesTest extends NewFunctionalTestBase {
     assertEquals("$y", loop.getTo().getValue());
     assertTrue(loop.getStep() instanceof CssLoopVariableNode);
     assertEquals("$z", loop.getStep().getValue());
+  }
+
+  public void testCreateLoopNodeWithConstants() throws Exception {
+    parseAndRun("@for $i from X to Y step Z {}");
+    assertTrue(getFirstActualNode() instanceof CssForLoopRuleNode);
+    CssForLoopRuleNode loop = (CssForLoopRuleNode) getFirstActualNode();
+    assertTrue(loop.getFrom() instanceof CssLiteralNode);
+    assertEquals("X", loop.getFrom().getValue());
+    assertTrue(loop.getTo() instanceof CssLiteralNode);
+    assertEquals("Y", loop.getTo().getValue());
+    assertTrue(loop.getStep() instanceof CssLiteralNode);
+    assertEquals("Z", loop.getStep().getValue());
   }
 
   public void testLoopWithoutBlock() throws Exception {

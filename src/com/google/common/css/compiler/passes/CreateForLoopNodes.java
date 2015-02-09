@@ -149,7 +149,7 @@ public class CreateForLoopNodes extends DefaultTreeVisitor implements CssCompile
   }
 
   private boolean isValidValueNode(CssValueNode node) {
-    return node instanceof CssNumericNode || node instanceof CssLoopVariableNode;
+    return node instanceof CssNumericNode || node instanceof CssLiteralNode;
   }
 
   private void reportError(String message, CssNode node) {

@@ -18,8 +18,10 @@ package com.google.common.css;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -57,6 +59,7 @@ public class JobDescription {
   public final SubstitutionMapProvider cssSubstitutionMapProvider;
   public final OutputRenamingMapFormat outputRenamingMapFormat;
   public final boolean preserveComments;
+  public final Map<String, Integer> compileConstants;
 
   static final String CONDITION_FOR_LTR = "GSS_LTR";
   static final String CONDITION_FOR_RTL = "GSS_RTL";
@@ -117,7 +120,8 @@ public class JobDescription {
       GssFunctionMapProvider gssFunctionMapProvider,
       SubstitutionMapProvider cssSubstitutionMapProvider,
       OutputRenamingMapFormat outputRenamingMapFormat,
-      boolean preserveComments) {
+      boolean preserveComments,
+      Map<String, Integer> compileConstants) {
     Preconditions.checkArgument(!inputs.contains(null));
     Preconditions.checkNotNull(outputFormat);
     Preconditions.checkNotNull(inputOrientation);
@@ -126,6 +130,7 @@ public class JobDescription {
     Preconditions.checkNotNull(trueConditionNames);
     Preconditions.checkNotNull(allowedAtRules);
     Preconditions.checkNotNull(excludedClassesFromRenaming);
+    Preconditions.checkNotNull(compileConstants);
     this.inputs = ImmutableList.copyOf(inputs);
     this.copyrightNotice = copyrightNotice;
     this.outputFormat = outputFormat;
@@ -156,6 +161,7 @@ public class JobDescription {
     this.cssSubstitutionMapProvider = cssSubstitutionMapProvider;
     this.outputRenamingMapFormat = outputRenamingMapFormat;
     this.preserveComments = preserveComments;
+    this.compileConstants = ImmutableMap.copyOf(compileConstants);
   }
 
   /**

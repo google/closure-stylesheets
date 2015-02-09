@@ -28,7 +28,7 @@ public class UnrollLoopsTest extends PassesTestBase {
     new CreateDefinitionNodes(tree.getMutatingVisitController(), errorManager).runPass();
     new CreateConstantReferences(tree.getMutatingVisitController()).runPass();
     new CreateForLoopNodes(tree.getMutatingVisitController(), errorManager).runPass();
-    new UnrollLoops(tree.getMutatingVisitController()).runPass();
+    new UnrollLoops(tree.getMutatingVisitController(), errorManager).runPass();
   }
 
   public void testSimpleLoopUnroll() throws Exception {
@@ -59,5 +59,17 @@ public class UnrollLoopsTest extends PassesTestBase {
         "}"),
         "[@def FOO__LOOP0__1 [[1]];[.foo]{[top:[[FOO__LOOP0__1]];]}"
         + "@def FOO__LOOP0__2 [[2]];[.foo]{[top:[[FOO__LOOP0__2]];]}]");
+  }
+
+  public void testUnevalutedConstants() throws Exception {
+    parseAndRun("@for $i from CONST to 2 {}", UnrollLoops.UNKNOWN_CONSTANT);
+    parseAndRun("@for $i from 1 to CONST {}", UnrollLoops.UNKNOWN_CONSTANT);
+    parseAndRun("@for $i from 1 to 2 step CONST {}", UnrollLoops.UNKNOWN_CONSTANT);
+  }
+
+  public void testUnevalutedVariable() throws Exception {
+    parseAndRun("@for $i from $j to 2 {}", UnrollLoops.UNKNOWN_VARIABLE);
+    parseAndRun("@for $i from 1 to $j {}", UnrollLoops.UNKNOWN_VARIABLE);
+    parseAndRun("@for $i from 1 to 2 step $j {}", UnrollLoops.UNKNOWN_VARIABLE);
   }
 }
