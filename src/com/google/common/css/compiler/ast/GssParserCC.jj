@@ -72,6 +72,9 @@ public class GssParserCC {
   private static final CharMatcher CSS_WHITESPACE =
       CharMatcher.anyOf(" \t\r\n\f");
 
+  private static final Pattern VALID_BLOCK_COMMENT_PATTERN =
+      Pattern.compile(".*/\\*.*\\*/.*", Pattern.DOTALL);
+
   private CssBlockNode globalBlock;
   private SourceCode sourceCode;
   private final CssNodeBuilder nodeBuilder = new CssNodeBuilder();
@@ -237,7 +240,10 @@ public class GssParserCC {
     try {
       start();
     } catch (ParseException e) {
-      throw new GssParserException(this.getLocation(token.next), e);
+      // token.next can be null if there is an error after EOF, such as an unterminated block
+      // comment.
+      Token tokenWithError = token.next == null ? token : token.next;
+      throw new GssParserException(this.getLocation(tokenWithError), e);
     }
   }
 
@@ -530,23 +536,21 @@ public class GssParserCC {
 
 PARSER_END(GssParserCC)
 
-<DEFAULT> MORE :
+// Pass comments to the parser as special token
+<DEFAULT> SPECIAL_TOKEN :
 {
-  // switch to comment lexical state
-  < "/*" > : COMMENT
-}
-
-// pass comments to the parser as special token
-<COMMENT> SPECIAL_TOKEN :
-{
-  //return to default state - consume whitespace chars after itself !
-  < "*/" ("\r\n"| "\n" | "\r" | "\f" |" " |"\t")* > : DEFAULT
-}
-
-<COMMENT> MORE :
-{
-  // collect text from the comment (match any characters)
-  < ~[] > : COMMENT
+  // Consume the comment until the first "*/" or end of file (whichever is first), and then any
+  // whitespace that may follow.
+  // We do this by consuming the following:
+  // 1. Start of comment.
+  // 2. Longest string not containing "*/". If there is no terminating "*/", this will consume until
+  //    EOF. This ensures the contents of the comment are never consumed as a CSS token.
+  // 3. Optionally the closing "*/".
+  // 4. Any remaining whitespace.
+  < "/" "*"
+    ((("*")* ~["*", "/"]) | "/")* ("*")*
+    ("*/")?
+    ("\r\n"| "\n" | "\r" | "\f" |" " |"\t")* > : DEFAULT
 }
 
 
@@ -2337,6 +2341,14 @@ void start() :
   ( <S> | <CDO> | <CDC> )*
   block(false)
   <EOF>
+  {
+    try {
+      validateFinalBlockCommentIfPresent();
+    } catch (ParseException e) {
+      if (!enableErrorRecovery) throw e;
+      handledErrors.add(new GssParserException(getLocation(), e));
+    }
+  }
 }
 
 
@@ -2550,4 +2562,14 @@ int skipComponentValuesToAfter(Integer... kinds) {
     getNextToken();
   }
   return kind;
+}
+
+JAVACODE
+void validateFinalBlockCommentIfPresent() throws ParseException {
+  if (token.specialToken != null
+      && !VALID_BLOCK_COMMENT_PATTERN.matcher(token.specialToken.image).matches()) {
+    // Manually construct a ParseException since this syntax error occurs after the last token,
+    // and we don't want the ParseException to reference a non-existent token.
+    throw new ParseException("unterminated block comment at EOF");
+  }
 }

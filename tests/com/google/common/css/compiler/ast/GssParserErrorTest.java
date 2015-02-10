@@ -310,6 +310,55 @@ public class GssParserErrorTest extends TestCase {
         + "                               ^\n");
   }
 
+  public void testUnterminatedBlockCommentsWithoutErrorRecovery() throws GssParserException {
+    testError("div {}/*comment**p {}", 1, 7,
+              "div {}/*comment**p {}",
+              "      ^");
+    testError("div {}/*/p {}", 1, 7,
+              "div {}/*/p {}",
+              "      ^");
+    testError("div {}/*", 1, 7,
+              "div {}/*",
+              "      ^");
+    testError("div {}/* *\ndiv { color: red; }", 1, 7,
+              "div {}/* *",
+              "      ^");
+    testError("div {} /* comment */ div {} /* unterminated comment", 1, 29,
+              "div {} /* comment */ div {} /* unterminated comment",
+              "                            ^");
+    testError("div {} /* comment */ /* unterminated comment", 1, 22,
+              "div {} /* comment */ /* unterminated comment",
+              "                     ^");
+  }
+
+  public void testUnterminatedBlockCommentsWithErrorRecovery() throws GssParserException {
+    testErrorHandling("div {}/*comment**p {}", "[[div]{[]}]",
+        "Parse error in test at line 1 column 7:\n"
+        + "div {}/*comment**p {}\n"
+        + "      ^\n");
+    testErrorHandling("div {}/*/p {}", "[[div]{[]}]",
+        "Parse error in test at line 1 column 7:\n"
+        + "div {}/*/p {}\n"
+        + "      ^\n");
+    testErrorHandling("div {}/*", "[[div]{[]}]",
+        "Parse error in test at line 1 column 7:\n"
+        + "div {}/*\n"
+        + "      ^\n");
+    testErrorHandling("div {}/* *\ndiv { color: red; }", "[[div]{[]}]",
+        "Parse error in test at line 1 column 7:\n"
+        + "div {}/* *\n"
+        + "      ^\n");
+    testErrorHandling(
+        "div {} /* comment */ div {} /* unterminated comment", "[[div]{[]}, [div]{[]}]",
+        "Parse error in test at line 1 column 29:\n"
+        + "div {} /* comment */ div {} /* unterminated comment\n"
+        + "                            ^\n");
+    testErrorHandling("div {} /* comment */ /* unterminated comment", "[[div]{[]}]",
+        "Parse error in test at line 1 column 22:\n"
+        + "div {} /* comment */ /* unterminated comment\n"
+        + "                     ^\n");
+  }
+
   // When porting this test to Junit4, please make necessary change to this
   // method to make sure all the rest test cases are invoked here.
   public void testAllCasesWithReuseableParser() throws Exception {

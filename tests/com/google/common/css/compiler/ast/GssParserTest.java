@@ -863,6 +863,18 @@ public class GssParserTest extends TestCase {
         "[@for [$i] [from] [1] [to] [2]{[.foo-$i]{[padding:[[$i]];]}}]");
   }
 
+  public void testComments() throws GssParserException {
+    testTree("div {}/*comment*/", "[[div]{[]}]");
+    testTree("div {}/*comment*/p {}", "[[div]{[]}[p]{[]}]");
+    testTree("div {}/***comment**/p {}", "[[div]{[]}[p]{[]}]");
+    testTree("div {}/***c/o**m//m***e////nt**/p {}", "[[div]{[]}[p]{[]}]");
+    testTree("div {}/***c/o**m//m/***e////nt/***/p {}", "[[div]{[]}[p]{[]}]");
+    testTree("div {}/****************/p {}", "[[div]{[]}[p]{[]}]");
+    testTree("div {}/**/p {}", "[[div]{[]}[p]{[]}]");
+    testTree("div {}/**/p {}/**/", "[[div]{[]}[p]{[]}]");
+    testTree("div {}/**/p {}/**/div {}", "[[div]{[]}[p]{[]}[div]{[]}]");
+  }
+
   public void testAllCasesWithReuseableParser() throws Exception {
     // Call all other test cases in one method to make sure the same thread
     // local parser is reused.
