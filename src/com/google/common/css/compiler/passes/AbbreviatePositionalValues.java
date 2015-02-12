@@ -60,6 +60,8 @@ public class AbbreviatePositionalValues extends DefaultTreeVisitor
       if (newValues != null) {
         CssDeclarationNode newDeclaration = new CssDeclarationNode(declaration);
         CssPropertyValueNode newValuesNode = new CssPropertyValueNode(newValues);
+        newDeclaration.setSourceCodeLocation(declaration.getSourceCodeLocation());
+        newValuesNode.setSourceCodeLocation(valueNode.getSourceCodeLocation());
         newDeclaration.setPropertyValue(newValuesNode);
         List<CssNode> replacementList = Lists.newArrayList();
         replacementList.add(newDeclaration);
