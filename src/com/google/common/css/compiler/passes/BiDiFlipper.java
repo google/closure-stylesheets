@@ -19,6 +19,7 @@ package com.google.common.css.compiler.passes;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssCompositeValueNode;
@@ -30,6 +31,7 @@ import com.google.common.css.compiler.ast.CssHexColorNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssNumericNode;
+import com.google.common.css.compiler.ast.CssPriorityNode;
 import com.google.common.css.compiler.ast.CssPropertyNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssValueNode;
@@ -470,8 +472,8 @@ public class BiDiFlipper extends DefaultTreeVisitor
 
     if (BORDER_RADIUS_PROPERTIES.contains(propertyName)) {
       return flipBorderRadius(valueNodes);
-    } else if (valueNodes.size() != 4 ||
-        !FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP.contains(propertyName)) {
+    } else if (valueNodes.size() != 4
+        || !FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP.contains(propertyName)) {
       return valueNodes;
     }
 
@@ -675,8 +677,19 @@ public class BiDiFlipper extends DefaultTreeVisitor
       valueIndex++;
     }
     if (valueNodes.size() != 0) {
-      newDeclarationNode.setPropertyValue(new CssPropertyValueNode(
-          flipNumericValues(valueNodes, propertyNode.getPropertyName())));
+      CssValueNode priority = null;
+      // Remove possible !important priority node.
+      if (!valueNodes.isEmpty() && Iterables.getLast(valueNodes) instanceof CssPriorityNode) {
+        priority = Iterables.getLast(valueNodes);
+        valueNodes = valueNodes.subList(0, valueNodes.size() - 1);
+      }
+      List<CssValueNode> newValueList =
+          flipNumericValues(valueNodes, propertyNode.getPropertyName());
+      // Re-add priority node if we removed it earlier.
+      if (priority != null) {
+        newValueList.add(priority);
+      }
+      newDeclarationNode.setPropertyValue(new CssPropertyValueNode(newValueList));
     } else {
       newDeclarationNode.setPropertyValue(propertyValueNode.deepCopy());
     }

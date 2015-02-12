@@ -24,6 +24,8 @@ import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssFunctionNode.Function;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNumericNode;
+import com.google.common.css.compiler.ast.CssPriorityNode;
+import com.google.common.css.compiler.ast.CssPriorityNode.PriorityType;
 import com.google.common.css.compiler.ast.CssPropertyNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssRootNode;
@@ -230,5 +232,61 @@ public class BiDiFlipperTest extends TestCase {
         + "background-position-x:[98.87654322%], "
         + "-ms-background-position-x:[97.5%]"
         + "]}]");
+  }
+
+  public void testBidiImportant() {
+    // margin: 1px 2px 3px 4px !important;
+    CssPropertyNode prop1 = new CssPropertyNode("margin", null);
+    CssPropertyValueNode value1 = new CssPropertyValueNode();
+    BackDoorNodeMutation.addChildToBack(value1, new CssNumericNode("1", "px"));
+    BackDoorNodeMutation.addChildToBack(value1, new CssNumericNode("2", "px"));
+    BackDoorNodeMutation.addChildToBack(value1, new CssNumericNode("3", "px"));
+    BackDoorNodeMutation.addChildToBack(value1, new CssNumericNode("4", "px"));
+    BackDoorNodeMutation.addChildToBack(value1, new CssPriorityNode(PriorityType.IMPORTANT));
+
+    // border-radius: 1px 2px !important;
+    CssPropertyNode prop2 = new CssPropertyNode("border-radius", null);
+    CssPropertyValueNode value2 = new CssPropertyValueNode();
+    BackDoorNodeMutation.addChildToBack(value2, new CssNumericNode("1", "px"));
+    BackDoorNodeMutation.addChildToBack(value2, new CssNumericNode("2", "px"));
+    BackDoorNodeMutation.addChildToBack(value2, new CssPriorityNode(PriorityType.IMPORTANT));
+
+    // padding-right: 1px !important;
+    CssPropertyNode prop3 = new CssPropertyNode("padding-right", null);
+    CssPropertyValueNode value3 = new CssPropertyValueNode();
+    BackDoorNodeMutation.addChildToBack(value3, new CssNumericNode("1", "px"));
+    BackDoorNodeMutation.addChildToBack(value3, new CssPriorityNode(PriorityType.IMPORTANT));
+
+    CssDeclarationNode decl1 = new CssDeclarationNode(prop1);
+    decl1.setPropertyValue(value1);
+
+    CssDeclarationNode decl2 = new CssDeclarationNode(prop2);
+    decl2.setPropertyValue(value2);
+
+    CssDeclarationNode decl3 = new CssDeclarationNode(prop3);
+    decl3.setPropertyValue(value3);
+
+    CssRulesetNode ruleset = new CssRulesetNode();
+    CssSelectorNode sel = new CssSelectorNode("foo", null);
+    ruleset.addSelector(sel);
+    ruleset.addDeclaration(decl1);
+    ruleset.addDeclaration(decl2);
+    ruleset.addDeclaration(decl3);
+
+    CssBlockNode body = new CssBlockNode(false);
+    BackDoorNodeMutation.addChildToBack(body, ruleset);
+
+    CssRootNode root = new CssRootNode(body);
+    CssTree tree = new CssTree(null, root);
+
+    BiDiFlipper pass = new BiDiFlipper(tree.getMutatingVisitController(),
+                                       true, true);
+    pass.runPass();
+    assertEquals(
+        "[[foo]{["
+        + "margin:[1px, 4px, 3px, 2px, !important], "
+        + "border-radius:[2px, 1px, !important], "
+        + "padding-left:[1px, !important]"
+        + "]}]", tree.getRoot().getBody().toString());
   }
 }
