@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="build/genfiles/java"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="tests"/>
-	<classpathentry kind="lib" path="lib/args4j-2.0.17.jar"/>
-	<classpathentry kind="lib" path="lib/cglib-nodep-2.2.2.jar"/>
-	<classpathentry kind="lib" path="lib/easymock-3_0.jar"/>
-	<classpathentry kind="lib" path="lib/gson-1.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/guava-10.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/javacc.jar"/>
-	<classpathentry kind="lib" path="lib/jsr305.jar"/>
-	<classpathentry kind="lib" path="lib/junit.jar"/>
-	<classpathentry kind="lib" path="lib/objenesis-1_2.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="output" path="build/eclipse/classes"/>
+  <classpathentry kind="src" path="build/genfiles/java"/>
+  <classpathentry kind="src" path="src"/>
+  <classpathentry kind="src" path="tests"/>
+  <classpathentry kind="lib" path="lib/args4j-2.0.26.jar"/>
+  <classpathentry kind="lib" path="lib/cglib-nodep-2.2.2.jar"/>
+  <classpathentry kind="lib" path="lib/easymock-3_0.jar"/>
+  <classpathentry kind="lib" path="lib/gson-1.7.1.jar"/>
+  <classpathentry kind="lib" path="lib/guava-14.0.jar"/>
+  <classpathentry kind="lib" path="lib/javacc.jar"/>
+  <classpathentry kind="lib" path="lib/jsr305.jar"/>
+  <classpathentry kind="lib" path="lib/junit.jar"/>
+  <classpathentry kind="lib" path="lib/objenesis-1_2.jar"/>
+  <classpathentry kind="lib" path="lib/truth-0.24.jar"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="output" path="build/eclipse/classes"/>
 </classpath>
