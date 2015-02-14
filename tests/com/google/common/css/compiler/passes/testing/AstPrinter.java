@@ -61,44 +61,44 @@ public class AstPrinter extends CompactPrinter {
 
   @Override
   public boolean enterTree(CssRootNode root) {
-    sb.append("[");
+    append("[");
     return super.enterTree(root);
   }
 
   @Override
   public void leaveTree(CssRootNode root) {
     super.leaveTree(root);
-    sb.append("]");
+    append("]");
   }
 
   @Override
   public boolean enterDeclarationBlock(CssDeclarationBlockNode block) {
     super.enterDeclarationBlock(block);
-    sb.append("[");
+    append("[");
     return true;
   }
 
   @Override
   public void leaveDeclarationBlock(CssDeclarationBlockNode block) {
-    sb.append("]");
+    append("]");
     super.leaveDeclarationBlock(block);
   }
 
   @Override
   public boolean enterSelectorBlock(CssSelectorListNode block) {
-    sb.append("[");
+    append("[");
     return super.enterSelectorBlock(block);
   }
 
   @Override
   public void leaveSelectorBlock(CssSelectorListNode block) {
     super.leaveSelectorBlock(block);
-    sb.append("]");
+    append("]");
   }
 
   @Override
   public boolean enterPropertyValue(CssPropertyValueNode propertyValue) {
-    sb.append("[");
+    append("[");
     return super.enterPropertyValue(propertyValue);
   }
 
@@ -106,12 +106,12 @@ public class AstPrinter extends CompactPrinter {
   public void leavePropertyValue(CssPropertyValueNode propertyValue) {
     super.leavePropertyValue(propertyValue);
     deleteLastCharIfCharIs(' ');
-    sb.append("]");
+    append("]");
   }
 
   @Override
   public boolean enterCompositeValueNode(CssCompositeValueNode value) {
-    sb.append("[");
+    append("[");
     return super.enterCompositeValueNode(value);
   }
 
@@ -119,12 +119,12 @@ public class AstPrinter extends CompactPrinter {
   public void leaveCompositeValueNode(CssCompositeValueNode value) {
     super.leaveCompositeValueNode(value);
     deleteLastCharIfCharIs(' ');
-    sb.append("]");
+    append("]");
   }
 
   @Override
   public boolean enterValueNode(CssValueNode value) {
-    sb.append("[");
+    append("[");
     return super.enterValueNode(value);
   }
 
@@ -132,21 +132,21 @@ public class AstPrinter extends CompactPrinter {
   public void leaveValueNode(CssValueNode value) {
     super.leaveValueNode(value);
     deleteLastCharIfCharIs(' ');
-    sb.append("]");
+    append("]");
   }
 
   @Override
   public boolean enterDefinition(CssDefinitionNode node) {
-    sb.append("@def ");
-    sb.append(node.getName());
-    sb.append(" [");
+    append("@def ");
+    append(node.getName());
+    append(" [");
     return true;
   }
 
   @Override
   public void leaveDefinition(CssDefinitionNode node) {
     deleteLastCharIfCharIs(' ');
-    sb.append("];");
+    append("];");
   }
 
   @Override
@@ -156,20 +156,20 @@ public class AstPrinter extends CompactPrinter {
 
   @Override
   public boolean enterConditionalRule(CssConditionalRuleNode node) {
-    sb.append(node.getType());
-    sb.append("[");
+    append(node.getType());
+    append("[");
     for (CssValueNode value : node.getParameters()) {
       appendValue(value);
-      sb.append(" ");
+      append(" ");
     }
     deleteLastCharIfCharIs(' ');
-    sb.append("]{");
+    append("]{");
     return true;
   }
 
   @Override
   public void leaveConditionalRule(CssConditionalRuleNode node) {
-    sb.append("}");
+    append("}");
   }
 
   @Override
@@ -204,21 +204,21 @@ public class AstPrinter extends CompactPrinter {
     if (node instanceof CssBooleanExpressionNode) {
       appendBooleanExpression((CssBooleanExpressionNode) node);
     } else {
-      sb.append(node.getValue());
+      append(node.getValue());
     }
   }
 
   private void appendBooleanExpression(CssBooleanExpressionNode node) {
     if (!node.getType().isOperator()) {
-      sb.append(node.getValue());
+      append(node.getValue());
     } else if (node.getType().isBinaryOperator()) {
       appendBooleanChildExpression(node, node.getLeft());
-      sb.append(" ");
-      sb.append(node.getType().getOperatorString());
-      sb.append(" ");
+      append(" ");
+      append(node.getType().getOperatorString());
+      append(" ");
       appendBooleanChildExpression(node, node.getRight());
     } else if (node.getType().isUnaryOperator()) {
-      sb.append(node.getType().getOperatorString());
+      append(node.getType().getOperatorString());
       appendBooleanChildExpression(node, node.getLeft());
     }
   }
@@ -228,17 +228,17 @@ public class AstPrinter extends CompactPrinter {
     if (child.getType().getPriority() >= node.getType().getPriority()) {
       appendBooleanExpression(child);
     } else {
-      sb.append("(");
+      append("(");
       appendBooleanExpression(child);
-      sb.append(")");
+      append(")");
     }
   }
 
   private void appendComments(CssNode node) {
     for (CssCommentNode c : node.getComments()) {
-      sb.append("[");
-      sb.append(c.getValue());
-      sb.append("]");
+      append("[");
+      append(c.getValue());
+      append("]");
     }
   }
 }

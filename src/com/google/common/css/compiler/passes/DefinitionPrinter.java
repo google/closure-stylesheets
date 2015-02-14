@@ -19,10 +19,10 @@ package com.google.common.css.compiler.passes;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
+import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssPriorityNode;
+import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
-import com.google.common.css.compiler.ast.DefaultTreeVisitor;
-import com.google.common.css.compiler.ast.VisitController;
 
 /**
  * Printer for definition nodes, which outputs GSS definitions so that
@@ -35,24 +35,30 @@ import com.google.common.css.compiler.ast.VisitController;
  *
  * @author dgajda@google.com (Damian Gajda)
  */
-public class DefinitionPrinter<T> extends DefaultTreeVisitor
-    implements CssCompilerPass {
+public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass {
 
-  private final VisitController visitController;
   private final T chunk;
-
-  private final StringBuilder sb = new StringBuilder();
-
   private boolean printDefinition;
 
   /**
    * Create a printer for all the definitions in the given chunk.
    *
-   * @param visitController the visit controller of the tree
+   * @param subtree the subtree to be printed
    * @param chunk the selected chunk
    */
-  public DefinitionPrinter(VisitController visitController, T chunk) {
-    this.visitController = visitController;
+  public DefinitionPrinter(CssNode subtree, T chunk) {
+    super(subtree);
+    this.chunk = chunk;
+  }
+
+  /**
+   * Create a printer for all the definitions in the given chunk.
+   *
+   * @param tree the css tree to be printed
+   * @param chunk the selected chunk
+   */
+  public DefinitionPrinter(CssTree tree, T chunk) {
+    super(tree);
     this.chunk = chunk;
   }
 
@@ -60,7 +66,7 @@ public class DefinitionPrinter<T> extends DefaultTreeVisitor
   public boolean enterDefinition(CssDefinitionNode definition) {
     printDefinition = chunk.equals(definition.getChunk());
     if (printDefinition) {
-      sb.append("@def ").append(definition.getName()).append(' ');
+      append("@def ").append(definition.getName()).append(' ');
     }
     return printDefinition;
   }
@@ -68,7 +74,7 @@ public class DefinitionPrinter<T> extends DefaultTreeVisitor
   @Override
   public void leaveDefinition(CssDefinitionNode node) {
     if (printDefinition) {
-      sb.append(";\n");
+      append(";\n");
       printDefinition = false;
     }
   }
@@ -79,9 +85,9 @@ public class DefinitionPrinter<T> extends DefaultTreeVisitor
       return false;
     }
     if (node instanceof CssPriorityNode) {
-      sb.deleteCharAt(sb.length() - 1);
+      deleteBufferCharAt(getCurrentBufferLength() - 1);
     }
-    sb.append(node);
+    append(node);
     return true;
   }
 
@@ -90,7 +96,7 @@ public class DefinitionPrinter<T> extends DefaultTreeVisitor
     if (!printDefinition) {
       return;
     }
-    sb.append(' ');
+    append(' ');
   }
 
   @Override
@@ -98,8 +104,8 @@ public class DefinitionPrinter<T> extends DefaultTreeVisitor
     if (!printDefinition) {
       return false;
     }
-    sb.append(node.getFunctionName());
-    sb.append('(');
+    append(node.getFunctionName());
+    append('(');
     return true;
   }
 
@@ -108,7 +114,7 @@ public class DefinitionPrinter<T> extends DefaultTreeVisitor
     if (!printDefinition) {
       return;
     }
-    sb.append(") ");
+    append(") ");
   }
 
   @Override
@@ -119,7 +125,7 @@ public class DefinitionPrinter<T> extends DefaultTreeVisitor
     // If the previous argument was a function node, then it has a trailing
     // space that needs to be removed.
     deleteLastCharIfCharIs(' ');
-    sb.append(node);
+    append(node);
     return true;
   }
 
@@ -127,17 +133,12 @@ public class DefinitionPrinter<T> extends DefaultTreeVisitor
    * Returns a GSS output with all the printed definitions.
    */
   public String getDefinitionGss() {
-    return sb.toString();
+    return getOutputBuffer();
   }
 
   @Override
   public void runPass() {
+    resetBuffer();
     visitController.startVisit(this);
-  }
-
-  private void deleteLastCharIfCharIs(char ch) {
-    if (sb.charAt(sb.length() - 1) == ch) {
-      sb.deleteCharAt(sb.length() - 1);
-    }
   }
 }

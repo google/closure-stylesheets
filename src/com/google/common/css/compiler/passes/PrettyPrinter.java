@@ -61,7 +61,6 @@ import com.google.common.css.compiler.ast.CssStringNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
-import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.VisitController;
 
 /**
@@ -72,18 +71,14 @@ import com.google.common.css.compiler.ast.VisitController;
  * @author oana@google.com (Oana Florescu)
  * @author fbenz@google.com (Florian Benz)
  */
-public class PrettyPrinter extends DefaultTreeVisitor
-    implements CssCompilerPass {
-
-  private StringBuilder sb = null;
+public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   private String prettyPrintedString = null;
   private String indent = "";
-  private final VisitController visitController;
   private boolean stripQuotes = false;
   private boolean preserveComments = false;
 
   public PrettyPrinter(VisitController visitController) {
-    this.visitController = visitController;
+    super(visitController);
   }
 
   /**
@@ -109,16 +104,16 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterImportRule(CssImportRuleNode node) {
     maybeAppendComments(node);
-    sb.append(node.getType().toString());
+    append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
-      sb.append(" ");
+      append(" ");
       // TODO(user): teach visit controllers to explore this subtree
       // rather than leaving it to each pass to figure things out.
       if (param instanceof CssStringNode) {
         CssStringNode n = (CssStringNode) param;
-        sb.append(n.toString(CssStringNode.SHORT_ESCAPER));
+        append(n.toString(CssStringNode.SHORT_ESCAPER));
       } else {
-        sb.append(param.getValue());
+        append(param.getValue());
       }
     }
     return true;
@@ -126,16 +121,16 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public void leaveImportRule(CssImportRuleNode node) {
-    sb.append(";\n");
+    append(";\n");
   }
 
   @Override
   public boolean enterMediaRule(CssMediaRuleNode node) {
     maybeAppendComments(node);
-    sb.append(node.getType().toString());
+    append(node.getType().toString());
     if (node.getParameters().size() > 0
         || (node.getType().hasBlock() && node.getBlock() != null)) {
-      sb.append(" ");
+      append(" ");
     }
     return true;
   }
@@ -146,13 +141,13 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterPageRule(CssPageRuleNode node) {
     maybeAppendComments(node);
-    sb.append(node.getType().toString());
-    sb.append(' ');
+    append(node.getType().toString());
+    append(' ');
     for (CssValueNode param : node.getParameters()) {
-      sb.append(param.getValue());
+      append(param.getValue());
     }
     if (node.getParametersCount() > 0) {
-      sb.append(' ');
+      append(' ');
     }
     return true;
   }
@@ -160,10 +155,10 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterPageSelector(CssPageSelectorNode node) {
     maybeAppendComments(node);
-    sb.append(node.getType().toString());
+    append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
-      sb.append(" ");
-      sb.append(param.getValue());
+      append(" ");
+      append(param.getValue());
     }
     return true;
   }
@@ -171,19 +166,19 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterFontFace(CssFontFaceNode node) {
     maybeAppendComments(node);
-    sb.append(node.getType().toString());
+    append(node.getType().toString());
     return true;
   }
 
   @Override
   public boolean enterDefinition(CssDefinitionNode node) {
     maybeAppendComments(node);
-    sb.append(indent);
-    sb.append(node.getType());
-    sb.append(" ");
-    sb.append(node.getName());
+    append(indent);
+    append(node.getType());
+    append(" ");
+    append(node.getName());
     // Add a space to separate it from next value.
-    sb.append(" ");
+    append(" ");
     return true;
   }
 
@@ -191,20 +186,20 @@ public class PrettyPrinter extends DefaultTreeVisitor
   public void leaveDefinition(CssDefinitionNode node) {
     // Remove trailing space after last value.
     deleteEndingIfEndingIs(" ");
-    sb.append(";\n");
+    append(";\n");
   }
 
   @Override
   public boolean enterRuleset(CssRulesetNode ruleset) {
     maybeAppendComments(ruleset);
-    sb.append(indent);
+    append(indent);
     return true;
   }
 
   @Override
   public boolean enterKeyframeRuleset(CssKeyframeRulesetNode ruleset) {
     maybeAppendComments(ruleset);
-    sb.append(indent);
+    append(indent);
     return true;
   }
 
@@ -214,7 +209,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   public boolean enterDeclarationBlock(CssDeclarationBlockNode block) {
     maybeAppendComments(block);
     deleteEndingIfEndingIs(" ");
-    sb.append(" {\n");
+    append(" {\n");
     indent += "  ";
     return true;
   }
@@ -222,8 +217,8 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public void leaveDeclarationBlock(CssDeclarationBlockNode block) {
     indent = indent.substring(0, indent.length() - 2);
-    sb.append(indent);
-    sb.append("}\n");
+    append(indent);
+    append("}\n");
   }
 
   @Override
@@ -231,7 +226,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
     maybeAppendComments(block);
     if (block.getParent() instanceof CssUnknownAtRuleNode
         || block.getParent() instanceof CssMediaRuleNode) {
-      sb.append("{\n");
+      append("{\n");
       indent += "  ";
     }
     return true;
@@ -240,7 +235,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public void leaveBlock(CssBlockNode block) {
     if (block.getParent() instanceof CssMediaRuleNode) {
-      sb.append("}\n");
+      append("}\n");
       indent = indent.substring(0, indent.length() - 2);
     }
   }
@@ -248,19 +243,19 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterDeclaration(CssDeclarationNode declaration) {
     maybeAppendComments(declaration);
-    sb.append(indent);
+    append(indent);
     if (declaration.hasStarHack()) {
-      sb.append('*');
+      append('*');
     }
-    sb.append(declaration.getPropertyName().getValue());
-    sb.append(": ");
+    append(declaration.getPropertyName().getValue());
+    append(": ");
     return true;
   }
 
   @Override
   public void leaveDeclaration(CssDeclarationNode declaration) {
     deleteEndingIfEndingIs(" ");
-    sb.append(";\n");
+    append(";\n");
   }
 
   @Override
@@ -272,13 +267,13 @@ public class PrettyPrinter extends DefaultTreeVisitor
     if (stripQuotes && node.getParent() instanceof CssDefinitionNode) {
       v = maybeStripQuotes(v);
     }
-    sb.append(v);
+    append(v);
 
     // NOTE(flan): When visiting function arguments, we don't want to add extra
     // spaces because they are already in the arguments list if they are
     // required. Yes, this sucks.
     if (!node.inFunArgs()) {
-      sb.append(" ");
+      append(" ");
     }
     return true;
   }
@@ -286,9 +281,9 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterCompositeValueNodeOperator(CssCompositeValueNode parent) {
     maybeAppendComments(parent);
-    sb.append(parent.getOperator().getOperatorName());
+    append(parent.getOperator().getOperatorName());
     if (!parent.inFunArgs()) {
-      sb.append(" ");
+      append(" ");
     }
     return true;
   }
@@ -296,15 +291,15 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterFunctionNode(CssFunctionNode node) {
     maybeAppendComments(node);
-    sb.append(node.getFunctionName());
-    sb.append("(");
+    append(node.getFunctionName());
+    append("(");
     return true;
   }
 
   @Override
   public void leaveFunctionNode(CssFunctionNode node) {
     deleteEndingIfEndingIs(" ");
-    sb.append(") ");
+    append(") ");
   }
 
   @Override
@@ -317,7 +312,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
             .equals("url")) {
       v = maybeStripQuotes(v);
     }
-    sb.append(v);
+    append(v);
     return !(node instanceof CssCompositeValueNode);
   }
 
@@ -326,14 +321,14 @@ public class PrettyPrinter extends DefaultTreeVisitor
     maybeAppendComments(selector);
     String name = selector.getSelectorName();
     if (name != null) {
-      sb.append(name);
+      append(name);
     }
     return true;
   }
 
   @Override
   public void leaveSelector(CssSelectorNode selector) {
-    sb.append(", ");
+    append(", ");
   }
 
   @Override
@@ -353,16 +348,16 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterPseudoClass(CssPseudoClassNode node) {
     maybeAppendComments(node);
-    sb.append(node.getPrefix());
-    sb.append(node.getRefinerName());
+    append(node.getPrefix());
+    append(node.getRefinerName());
     switch (node.getFunctionType()) {
       case NTH:
-        sb.append(node.getArgument().replace(" ", ""));
-        sb.append(")");
+        append(node.getArgument().replace(" ", ""));
+        append(")");
         break;
       case LANG:
-        sb.append(node.getArgument());
-        sb.append(")");
+        append(node.getArgument());
+        append(")");
         break;
     }
     return true;
@@ -372,7 +367,7 @@ public class PrettyPrinter extends DefaultTreeVisitor
   public void leavePseudoClass(CssPseudoClassNode node) {
     if (node.getFunctionType() == FunctionType.NOT) {
       deleteEndingIfEndingIs(", ");
-      sb.append(")");
+      append(")");
     }
   }
 
@@ -386,11 +381,11 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public boolean enterAttributeSelector(CssAttributeSelectorNode node) {
     maybeAppendComments(node);
-    sb.append(node.getPrefix());
-    sb.append(node.getAttributeName());
-    sb.append(node.getMatchSymbol());
-    sb.append(node.getValue());
-    sb.append(node.getSuffix());
+    append(node.getPrefix());
+    append(node.getAttributeName());
+    append(node.getMatchSymbol());
+    append(node.getValue());
+    append(node.getSuffix());
     return true;
   }
 
@@ -399,15 +394,15 @@ public class PrettyPrinter extends DefaultTreeVisitor
    * or a pseudo-element.
    */
   private void appendRefiner(CssRefinerNode node) {
-    sb.append(node.getPrefix());
-    sb.append(node.getRefinerName());
+    append(node.getPrefix());
+    append(node.getRefinerName());
   }
 
   @Override
   public boolean enterCombinator(CssCombinatorNode combinator) {
     if (combinator != null) {
       maybeAppendComments(combinator);
-      sb.append(combinator.getCombinatorType().getCanonicalName());
+      append(combinator.getCombinatorType().getCanonicalName());
     }
     return true;
   }
@@ -424,30 +419,30 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public void leaveConditionalBlock(CssConditionalBlockNode block) {
-    sb.append("\n");
+    append("\n");
   }
 
   @Override
   public boolean enterConditionalRule(CssConditionalRuleNode node) {
     maybeAppendComments(node);
     if (node.getType() != Type.IF) {
-      sb.append(" ");
+      append(" ");
     } else {
-      sb.append(indent);
+      append(indent);
     }
-    sb.append(node.getType());
+    append(node.getType());
     if (node.getParametersCount() > 0) {
-      sb.append(" ");
+      append(" ");
       boolean firstParameter = true;
       for (CssValueNode value : node.getParameters()) {
         if (!firstParameter) {
-          sb.append(" ");
+          append(" ");
         }
         firstParameter = false;
-        sb.append(value.toString());
+        append(value.toString());
       }
     }
-    sb.append(" {\n");
+    append(" {\n");
     indent += "  ";
     return true;
   }
@@ -455,18 +450,18 @@ public class PrettyPrinter extends DefaultTreeVisitor
   @Override
   public void leaveConditionalRule(CssConditionalRuleNode node) {
     indent = indent.substring(0, indent.length() - 2);
-    sb.append(indent);
-    sb.append("}");
+    append(indent);
+    append("}");
   }
 
   @Override
   public boolean enterUnknownAtRule(CssUnknownAtRuleNode node) {
     maybeAppendComments(node);
-    sb.append(indent);
-    sb.append('@').append(node.getName().toString());
+    append(indent);
+    append('@').append(node.getName().toString());
     if (node.getParameters().size() > 0
         || (node.getType().hasBlock() && node.getBlock() != null)) {
-      sb.append(" ");
+      append(" ");
     }
     return true;
   }
@@ -476,26 +471,26 @@ public class PrettyPrinter extends DefaultTreeVisitor
     if (node.getType().hasBlock()) {
       if (!(node.getBlock() instanceof CssDeclarationBlockNode)) {
         indent = indent.substring(0, indent.length() - 2);
-        sb.append(indent);
-        sb.append("}\n");
+        append(indent);
+        append("}\n");
       }
     } else {
       deleteEndingIfEndingIs(" ");
-      sb.append(";\n");
+      append(";\n");
     }
   }
 
   @Override
   public boolean enterKeyframesRule(CssKeyframesNode node) {
     maybeAppendComments(node);
-    sb.append(indent);
-    sb.append('@').append(node.getName().toString());
+    append(indent);
+    append('@').append(node.getName().toString());
     for (CssValueNode param : node.getParameters()) {
-      sb.append(" ");
-      sb.append(param.getValue());
+      append(" ");
+      append(param.getValue());
     }
     if (node.getType().hasBlock()) {
-      sb.append(" {\n");
+      append(" {\n");
       indent += "  ";
     }
     return true;
@@ -505,10 +500,10 @@ public class PrettyPrinter extends DefaultTreeVisitor
   public void leaveKeyframesRule(CssKeyframesNode node) {
     if (node.getType().hasBlock()) {
       indent = indent.substring(0, indent.length() - 2);
-      sb.append(indent);
-      sb.append("}\n");
+      append(indent);
+      append("}\n");
     } else {
-      sb.append(";\n");
+      append(";\n");
     }
   }
 
@@ -517,14 +512,14 @@ public class PrettyPrinter extends DefaultTreeVisitor
     maybeAppendComments(key);
     String value = key.getKeyValue();
     if (value != null) {
-      sb.append(value);
+      append(value);
     }
     return true;
   }
 
   @Override
   public void leaveKey(CssKeyNode key) {
-    sb.append(", ");
+    append(", ");
   }
 
   @Override
@@ -589,16 +584,10 @@ public class PrettyPrinter extends DefaultTreeVisitor
   private void maybeAppendComments(CssNode node) {
     if (preserveComments && !node.getComments().isEmpty()) {
       for (CssCommentNode c : node.getComments()) {
-        sb.append(indent);
-        sb.append(c.getValue());
-        sb.append("\n");
+        append(indent);
+        append(c.getValue());
+        append("\n");
       }
-    }
-  }
-
-  private void deleteEndingIfEndingIs(String s) {
-    if (sb.subSequence(sb.length() - s.length(), sb.length()).equals(s)) {
-      sb.delete(sb.length() - s.length(), sb.length());
     }
   }
 
@@ -608,9 +597,9 @@ public class PrettyPrinter extends DefaultTreeVisitor
 
   @Override
   public void runPass() {
-    sb = new StringBuilder();
+    resetBuffer();
     visitController.startVisit(this);
-    prettyPrintedString = sb.toString();
+    prettyPrintedString = getOutputBuffer();
   }
 
   private String maybeStripQuotes(String v) {

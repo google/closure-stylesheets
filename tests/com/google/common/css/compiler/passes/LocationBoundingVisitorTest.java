@@ -22,7 +22,6 @@ import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
-import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 /**
@@ -148,22 +147,5 @@ public class LocationBoundingVisitorTest extends NewFunctionalTestBase {
     // assertions.
     assertEquals(0, actual.getBeginCharacterIndex());
     assertEquals(18, actual.getEndCharacterIndex());
-  }
-
-  private String printWithLocationAnnotations(CssTree t) {
-    StringBuilder sb = new StringBuilder();
-    SExprPrinter printer = new SExprPrinter(sb) {
-        @Override public void enter(CssNode node) {
-          super.enter(node);
-          SourceCodeLocation loc = node.getSourceCodeLocation();
-          if (loc == null) {
-            loc = SourceCodeLocation.getUnknownLocation();
-          }
-          sb.append(String.format(
-              ":scl-unknown %s ", loc.isUnknown()));
-        }
-      };
-    t.getVisitController().startVisit(printer);
-    return sb.toString();
   }
 }
