@@ -90,6 +90,9 @@ public class PassRunner {
         job.simplifyCss).runPass();
     new CreateVendorPrefixedKeyframes(cssTree.getMutatingVisitController(),
         errorManager).runPass();
+    new EvaluateCompileConstants(cssTree.getMutatingVisitController(),
+        job.compileConstants).runPass();
+    new UnrollLoops(cssTree.getMutatingVisitController(), errorManager).runPass();
     new ProcessRefiners(cssTree.getMutatingVisitController(), errorManager,
         job.simplifyCss).runPass();
 
@@ -107,9 +110,6 @@ public class PassRunner {
     new EliminateConditionalNodes(
         cssTree.getMutatingVisitController(),
         ImmutableSet.copyOf(job.trueConditionNames)).runPass();
-    new EvaluateCompileConstants(cssTree.getMutatingVisitController(),
-        job.compileConstants).runPass();
-    new UnrollLoops(cssTree.getMutatingVisitController(), errorManager).runPass();
     // Collect constant definitions.
     CollectConstantDefinitions collectConstantDefinitionsPass =
         new CollectConstantDefinitions(cssTree);

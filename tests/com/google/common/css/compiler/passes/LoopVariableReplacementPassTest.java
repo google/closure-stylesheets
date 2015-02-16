@@ -64,4 +64,28 @@ public class LoopVariableReplacementPassTest extends PassesTestBase {
         "$i", 2, ImmutableSet.of("XXX"), tree.getMutatingVisitController(), LOOP_ID).runPass();
     checkTreeDebugString("[@def XXX__LOOP3__2 [[2]];[.foo]{[top:[[XXX__LOOP3__2]];]}]");
   }
+
+  public void testBasicPseudoClassReplacement() throws Exception {
+    parseAndRun(".foo:nth_child($i) { top: 0; }");
+    new LoopVariableReplacementPass(
+        "$i", 2, Collections.<String>emptySet(), tree.getMutatingVisitController(), LOOP_ID)
+        .runPass();
+    checkTreeDebugString("[[.foo:nth_child(2)]{[top:[[0]];]}]");
+  }
+
+  public void testArgumentAOnlyPseudoClassReplacement() throws Exception {
+    parseAndRun(".foo:nth_child(-$in) { top: 0; }");
+    new LoopVariableReplacementPass(
+        "$i", 2, Collections.<String>emptySet(), tree.getMutatingVisitController(), LOOP_ID)
+        .runPass();
+    checkTreeDebugString("[[.foo:nth_child(-2n)]{[top:[[0]];]}]");
+  }
+
+  public void testBothArgumentPseudoClassReplacement() throws Exception {
+    parseAndRun(".foo:nth_child($in + $i) { top: 0; }");
+    new LoopVariableReplacementPass(
+        "$i", 2, Collections.<String>emptySet(), tree.getMutatingVisitController(), LOOP_ID)
+        .runPass();
+    checkTreeDebugString("[[.foo:nth_child(2n+2)]{[top:[[0]];]}]");
+  }
 }

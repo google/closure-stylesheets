@@ -25,11 +25,13 @@ import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssForLoopRuleNode;
 import com.google.common.css.compiler.ast.CssLoopVariableNode;
 import com.google.common.css.compiler.ast.CssNumericNode;
+import com.google.common.css.compiler.ast.CssPseudoClassNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -46,6 +48,7 @@ class LoopVariableReplacementPass extends DefaultTreeVisitor implements CssCompi
   private final Set<String> loopDefinitions;
   private final MutatingVisitController visitController;
   private final int loopId;
+  private final Pattern variableInNthArgumentPattern;
 
   public LoopVariableReplacementPass(
       String variable,
@@ -58,6 +61,8 @@ class LoopVariableReplacementPass extends DefaultTreeVisitor implements CssCompi
     this.loopDefinitions = loopDefinitions;
     this.visitController = visitController;
     this.loopId = loopId;
+    variableInNthArgumentPattern =
+        Pattern.compile("\\s*(?:-|\\+)?" + Pattern.quote(variable) + "n?\\s*");
   }
 
   @Override
@@ -100,6 +105,21 @@ class LoopVariableReplacementPass extends DefaultTreeVisitor implements CssCompi
   public boolean enterDefinition(CssDefinitionNode node) {
     CssValueNode definitionName = node.getName();
     definitionName.setValue(replaceDefinition(definitionName.getValue()));
+    return true;
+  }
+
+  @Override
+  public boolean enterPseudoClass(CssPseudoClassNode refiner) {
+    if (refiner.getFunctionType().equals(CssPseudoClassNode.FunctionType.NTH)) {
+      String[] parts = refiner.getArgument().split("\\+");
+      for (int i = 0; i < parts.length; ++i) {
+        if (variableInNthArgumentPattern.matcher(parts[i]).matches()) {
+          parts[i] = parts[i].replaceFirst(Pattern.quote(variable), String.valueOf(value));
+        }
+      }
+
+      refiner.setArgument(Joiner.on("+").join(parts));
+    }
     return true;
   }
 

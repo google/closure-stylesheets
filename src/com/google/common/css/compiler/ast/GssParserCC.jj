@@ -950,7 +950,7 @@ CssRefinerNode pseudo() :
 }
 
 // nth
-//   : [ [ [ S* '+' ] | '-' | NUMBER | IDENTIFIER ] S* ]+
+//   : [ [ [ S* '+' ] | '-' | NUMBER | IDENTIFIER | FOR_VARIABLE ] S* ]+
 //   ;
 String nth() :
 {
@@ -969,6 +969,8 @@ String nth() :
       t = <NUMBER> { argument.append(t.image); }
       |
       t = <IDENTIFIER> { argument.append(t.image); }
+      |
+      t = <FOR_VARIABLE> { argument.append(t.image); }
     )
     ( <S> )*
   )+
