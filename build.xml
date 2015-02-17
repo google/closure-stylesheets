@@ -12,6 +12,8 @@
   <property name="classes.dir"       value="${build.dir}/classes" />
   <property name="compiler-jarfile"
             value="${build.dir}/${ant.project.name}.jar" />
+  <property name="compiler-jarfile-library"
+            value="${build.dir}/${ant.project.name}-library.jar" />
   <property name="testClasses.dir"   value="${build.dir}/test" />
   <property name="javadoc.dir"       value="${build.dir}/javadoc" />
   <property name="includeDebugInfo"  value="true" />
@@ -85,11 +87,26 @@
     </jar>
   </target>
 
+  <target name="library-jar"
+          depends="compile, yyyymmdd"
+          description="Build a version without bundling any dependencies">
+    <jar destfile="${compiler-jarfile-library}" update="true">
+      <fileset dir="${classes.dir}" />
+    </jar>
+  </target>
+
   <target name="release-jar"
           depends="jar, yyyymmdd"
           description="Builds a release that should be uploaded to http://code.google.com/p/closure-stylesheets/downloads/list">
     <copy file="${compiler-jarfile}"
           tofile="${build.dir}/closure-stylesheets-${build.yyyymmdd}.jar" />
+  </target>
+
+  <target name="release-library-jar"
+          depends="jar, yyyymmdd"
+          description="Builds a library jar">
+    <copy file="${compiler-jarfile-library}"
+          tofile="${build.dir}/closure-stylesheets-library-${build.yyyymmdd}.jar" />
   </target>
 
   <target name="compile-tests"
