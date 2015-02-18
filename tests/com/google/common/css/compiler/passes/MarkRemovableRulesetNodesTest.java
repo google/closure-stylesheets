@@ -26,7 +26,7 @@ import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssTree.RulesetNodesToRemove;
-import com.google.common.css.compiler.ast.MutatingVisitController;
+import com.google.common.css.compiler.ast.VisitController;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
 
 import java.util.Iterator;
@@ -40,10 +40,10 @@ import java.util.Set;
 public class MarkRemovableRulesetNodesTest extends PassesTestBase {
 
   public void testRunPass() {
-    MutatingVisitController visitController = createMock(
-        MutatingVisitController.class);
+    VisitController visitController = createMock(
+        VisitController.class);
     tree = createMock(CssTree.class);
-    expect(tree.getMutatingVisitController()).andReturn(visitController)
+    expect(tree.getVisitController()).andReturn(visitController)
         .anyTimes();
     replay(tree);
 

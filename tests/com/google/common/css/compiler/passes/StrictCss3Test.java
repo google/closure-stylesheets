@@ -28,7 +28,7 @@ public class StrictCss3Test extends NewFunctionalTestBase {
 
   @Override
   protected void runPass() {
-    new StrictCss3(tree.getMutatingVisitController(), errorManager).runPass();
+    new StrictCss3(tree.getVisitController(), errorManager).runPass();
     CompactPrinter compactPrinterPass = new CompactPrinter(tree);
     compactPrinterPass.runPass();
     compactPrintedResult = compactPrinterPass.getCompactPrintedString();

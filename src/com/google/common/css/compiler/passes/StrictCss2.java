@@ -28,7 +28,7 @@ import com.google.common.css.compiler.ast.CssPseudoElementNode;
 import com.google.common.css.compiler.ast.CssRefinerNode;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
-import com.google.common.css.compiler.ast.MutatingVisitController;
+import com.google.common.css.compiler.ast.VisitController;
 
 import java.util.Set;
 
@@ -83,7 +83,7 @@ public class StrictCss2 extends StrictCssBase {
   static final String FORBIDDEN_ATTRIBUTE_COMPARER_ERROR_MESSAGE =
       "An operator for matching attributes not allowed in CSS 2.1 is used.";
 
-  public StrictCss2(MutatingVisitController visitController,
+  public StrictCss2(VisitController visitController,
       ErrorManager errorManager) {
     super(visitController, errorManager);
   }

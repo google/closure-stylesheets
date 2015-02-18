@@ -23,7 +23,7 @@ import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
-import com.google.common.css.compiler.ast.MutatingVisitController;
+import com.google.common.css.compiler.ast.VisitController;
 
 import java.util.Set;
 
@@ -39,10 +39,10 @@ public abstract class StrictCssBase extends DefaultTreeVisitor
 
   static final String INVALID_UNIT_PREFIX = "Invalid unit: ";
 
-  protected final MutatingVisitController visitController;
+  protected final VisitController visitController;
   protected final ErrorManager errorManager;
 
-  public StrictCssBase(MutatingVisitController visitController,
+  public StrictCssBase(VisitController visitController,
       ErrorManager errorManager) {
     this.visitController = visitController;
     this.errorManager = errorManager;

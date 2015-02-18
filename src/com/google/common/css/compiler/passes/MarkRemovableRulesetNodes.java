@@ -35,8 +35,8 @@ import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
-import com.google.common.css.compiler.ast.MutatingVisitController;
 import com.google.common.css.compiler.ast.SkippingTreeVisitor;
+import com.google.common.css.compiler.ast.VisitController;
 
 import java.util.Set;
 
@@ -59,7 +59,7 @@ public class MarkRemovableRulesetNodes extends SkippingTreeVisitor
     implements CssCompilerPass {
 
   private final CssTree tree;
-  private final MutatingVisitController visitController;
+  private final VisitController visitController;
 
   /**
    * Property names not be to checked while traversing the tree to find
@@ -90,7 +90,7 @@ public class MarkRemovableRulesetNodes extends SkippingTreeVisitor
   public MarkRemovableRulesetNodes(CssTree tree, boolean skipping) {
     super(skipping);
     this.tree = tree;
-    this.visitController = tree.getMutatingVisitController();
+    this.visitController = tree.getVisitController();
   }
 
   /**

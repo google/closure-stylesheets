@@ -23,7 +23,7 @@ import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
-import com.google.common.css.compiler.ast.MutatingVisitController;
+import com.google.common.css.compiler.ast.VisitController;
 
 /**
  * Compiler pass which ensures that @keyframes rules are only allowed if
@@ -44,12 +44,12 @@ public class ProcessKeyframes extends DefaultTreeVisitor
   static final String INVALID_NUMBER_ERROR_MESSAGE =
     "the value of the key is invalid (not 'from', 'to', or 'XXX.XXX%')";
 
-  private final MutatingVisitController visitController;
+  private final VisitController visitController;
   private final ErrorManager errorManager;
   private final boolean keyframesAllowed;
   private final boolean simplifyCss;
 
-  public ProcessKeyframes(MutatingVisitController visitController,
+  public ProcessKeyframes(VisitController visitController,
       ErrorManager errorManager,
       boolean keyframesAllowed,
       boolean simplifyCss) {

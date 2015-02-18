@@ -29,7 +29,7 @@ import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
-import com.google.common.css.compiler.ast.MutatingVisitController;
+import com.google.common.css.compiler.ast.VisitController;
 
 import java.util.List;
 import java.util.Map;
@@ -59,7 +59,7 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
   private static final Pattern OVERRIDE_DEF_REGEX = Pattern.compile(
       "/\\*\\s+@overrideDef\\s+\\{(.*)\\}\\s+\\*/");
 
-  private final MutatingVisitController visitController;
+  private final VisitController visitController;
   private final ErrorManager errorManager;
 
   // Key: filename; Value: provide namespace
@@ -73,7 +73,7 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
   // Key: defmixin name; Value: provide namespace
   private final ListMultimap<String, String> defmixinProvideMap;
 
-  public CheckMissingRequire(MutatingVisitController visitController,
+  public CheckMissingRequire(VisitController visitController,
       ErrorManager errorManager,
       Map<String, String> filenameProvideMap,
       ListMultimap<String, String> filenameRequireMap,

@@ -28,7 +28,7 @@ public class StrictCss2Test extends NewFunctionalTestBase {
 
   @Override
   protected void runPass() {
-    new StrictCss2(tree.getMutatingVisitController(), errorManager).runPass();
+    new StrictCss2(tree.getVisitController(), errorManager).runPass();
     CompactPrinter compactPrinterPass = new CompactPrinter(tree);
     compactPrinterPass.runPass();
     compactPrintedResult = compactPrinterPass.getCompactPrintedString();

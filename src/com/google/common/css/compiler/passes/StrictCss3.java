@@ -26,7 +26,7 @@ import com.google.common.css.compiler.ast.CssPseudoElementNode;
 import com.google.common.css.compiler.ast.CssRefinerNode;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
-import com.google.common.css.compiler.ast.MutatingVisitController;
+import com.google.common.css.compiler.ast.VisitController;
 
 import java.util.Set;
 
@@ -122,7 +122,7 @@ public class StrictCss3 extends StrictCssBase {
   static final String MISSING_FUNCTION_PESUDO_CLASS_NTH_ERROR_MESSAGE =
       "A pseudo-class for the nth-pattern is used without an argument.";
 
-  public StrictCss3(MutatingVisitController visitController,
+  public StrictCss3(VisitController visitController,
       ErrorManager errorManager) {
     super(visitController, errorManager);
   }

@@ -91,7 +91,7 @@ public class ProcessKeyframesTest extends NewFunctionalTestBase {
   @Override
   protected void runPass() {
     new ProcessKeyframes(
-        tree.getMutatingVisitController(), errorManager,
+        tree.getVisitController(), errorManager,
         keyframesAllowed, simplifyCss).runPass();
     CompactPrinter compactPrinterPass = new CompactPrinter(tree);
     compactPrinterPass.runPass();

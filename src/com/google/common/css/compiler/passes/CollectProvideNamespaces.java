@@ -29,7 +29,7 @@ import com.google.common.css.compiler.ast.CssProvideNode;
 import com.google.common.css.compiler.ast.CssRequireNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
-import com.google.common.css.compiler.ast.MutatingVisitController;
+import com.google.common.css.compiler.ast.VisitController;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -48,7 +48,7 @@ public final class CollectProvideNamespaces extends DefaultTreeVisitor implement
   private static final Pattern OVERRIDE_REGEX = Pattern.compile(
       "/\\*\\s+@overrideSelector\\s+\\{(.*)\\}\\s+\\*/");
 
-  private final MutatingVisitController visitController;
+  private final VisitController visitController;
   private final ErrorManager errorManager;
 
   // Key: filename; Value: provide namespace
@@ -78,7 +78,7 @@ public final class CollectProvideNamespaces extends DefaultTreeVisitor implement
     return ImmutableListMultimap.copyOf(defmixinProvideMap);
   }
 
-  public CollectProvideNamespaces(MutatingVisitController visitController,
+  public CollectProvideNamespaces(VisitController visitController,
       ErrorManager errorManager) {
     this.visitController = visitController;
     this.errorManager = errorManager;
