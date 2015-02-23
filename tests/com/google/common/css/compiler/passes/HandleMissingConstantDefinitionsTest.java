@@ -16,7 +16,6 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.collect.Sets;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 /**

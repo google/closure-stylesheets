@@ -22,7 +22,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-
 /**
  * A node representing a {@code @for} loop rule.
  */
