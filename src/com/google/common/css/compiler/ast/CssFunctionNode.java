@@ -134,13 +134,6 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "-o-repeating-radial-gradient",
           "-webkit-repeating-radial-gradient",
 
-          // Radial gradients
-          "radial-gradient",
-          "-moz-radial-gradient",
-          "-ms-radial-gradient",
-          "-o-radial-gradient",
-          "-webkit-radial-gradient",
-
           // Calc
           "calc",
           "-webkit-calc",
