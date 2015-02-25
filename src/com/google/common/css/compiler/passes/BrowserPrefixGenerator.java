@@ -108,6 +108,13 @@ final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("align-items")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-align-items")
+        .addExpandPropertyName("align-items")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("align-self")
         .isFunction(false)
         .addExpandPropertyName("-webkit-align-self")
