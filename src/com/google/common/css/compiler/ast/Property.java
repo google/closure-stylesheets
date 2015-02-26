@@ -364,8 +364,17 @@ public final class Property {
         builder("-ms-box-sizing"),
         builder("-ms-filter"),
         builder("-ms-flex"),
+        builder("-ms-flex-align").warn(
+            "-ms-flex-align is outdated: align-items should be sufficient"),
         builder("-ms-flex-direction"),
         builder("-ms-flex-flow"),
+        builder("-ms-flex-order").warn(
+            "-ms-flex-order is outdated: order should be sufficient"),
+        builder("-ms-flex-pack").warn(
+            "-ms-flex-pack is outdated: justify-content should be sufficient"),
+        builder("-ms-flex-preferred-size"),
+        builder("-ms-flex-wrap").warn(
+            "-ms-flex-wrap is outdated: flex-wrap should be sufficient"),
         builder("-ms-grid-column"),
         builder("-ms-grid-column-align"),
         builder("-ms-grid-column-span"),
@@ -682,6 +691,7 @@ public final class Property {
         builder("-webkit-min-logical-width"),
         builder("-webkit-nbsp-mode"),
         builder("-webkit-opacity"),
+        builder("-webkit-order"),
         builder("-webkit-overflow-scrolling"),
         builder("-webkit-padding-after"),
         builder("-webkit-padding-before"),
