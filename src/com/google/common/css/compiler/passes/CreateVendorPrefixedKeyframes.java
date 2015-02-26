@@ -17,14 +17,12 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.css.compiler.ast.CssAbstractBlockNode;
+import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
-import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
-import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 
 /**
@@ -60,22 +58,12 @@ public class CreateVendorPrefixedKeyframes extends DefaultTreeVisitor
       CssKeyframesNode copy = new CssKeyframesNode(
           new CssLiteralNode(
               "-webkit-" + node.getName().toString(),
-              node.getSourceCodeLocation()),
+              node.getName().getSourceCodeLocation()),
           node);
-      if (node.getParent() instanceof CssAbstractBlockNode) {
-        CssAbstractBlockNode parent = (CssAbstractBlockNode) node.getParent();
-        parent.addChildToBack(copy);
-      } else {
-        reportError("Internal Error: "
-            + "Expected CssKeyframesNode to have a CssBlockNode parent."
-            + " Found parent class: "
-            + node.getParent().getClass().getName(), node);
-      }
+      visitController.replaceCurrentBlockChildWith(
+          Lists.newArrayList(node, copy),
+          false /* visitTheReplacementNodes */);
     }
-  }
-
-  private void reportError(String message, CssNode node) {
-    errorManager.report(new GssError(message, node.getSourceCodeLocation()));
   }
 
   @Override

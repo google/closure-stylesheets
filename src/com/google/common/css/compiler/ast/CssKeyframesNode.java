@@ -31,6 +31,7 @@ public class CssKeyframesNode extends CssAtRuleNode implements ChunkAware {
 
   public CssKeyframesNode(CssKeyframesNode node) {
     super(node);
+    setChunk(node.getChunk());
   }
 
   /**
@@ -40,6 +41,7 @@ public class CssKeyframesNode extends CssAtRuleNode implements ChunkAware {
   public CssKeyframesNode(CssLiteralNode name, CssKeyframesNode node) {
     super(node);
     setName(name);
+    setChunk(node.getChunk());
   }
 
   @Override
