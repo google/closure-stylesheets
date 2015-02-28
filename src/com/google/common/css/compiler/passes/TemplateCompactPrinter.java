@@ -52,6 +52,19 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   public static final char RULE_START = '\u0118';
   public static final char RULE_END = '\u0119';
 
+  // CodeBuffer with specific behavior for the printer
+  private static final class CodeBufferForTemplate extends CodeBuffer {
+    @Override
+    public void deleteLastCharIfCharIs(char ch) {
+      if (ch == ';' && getLastChar() == DECLARATION_END) {
+        deleteLastChars(2);
+        append(DECLARATION_END);
+      } else {
+        super.deleteLastCharIfCharIs(ch);
+      }
+    }
+  }
+
   /**
    * Create a template printer for a given chunk.
    *
@@ -59,15 +72,15 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
    * @param chunk the chunk selected for printing
    */
   public TemplateCompactPrinter(CssTree tree, T chunk) {
-    super(tree, chunk);
+    super(tree, chunk, new CodeBufferForTemplate());
   }
 
   @Override
   protected void appendValueNode(CssValueNode node) {
     if (node instanceof CssConstantReferenceNode) {
-      append(REFERENCE_START);
+      buffer.append(REFERENCE_START);
       super.appendValueNode(node);
-      append(REFERENCE_END);
+      buffer.append(REFERENCE_END);
     } else {
       super.appendValueNode(node);
     }
@@ -75,21 +88,21 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
 
   @Override
   public boolean enterDeclaration(CssDeclarationNode declaration) {
-    append(DECLARATION_START);
+    buffer.append(DECLARATION_START);
     return super.enterDeclaration(declaration);
   }
 
   @Override
   public void leaveDeclaration(CssDeclarationNode declaration) {
     super.leaveDeclaration(declaration);
-    append(DECLARATION_END);
+    buffer.append(DECLARATION_END);
   }
 
   @Override
   public boolean enterRuleset(CssRulesetNode ruleset) {
     boolean printRuleset = super.enterRuleset(ruleset);
     if (printRuleset) {
-      append(RULE_START);
+      buffer.append(RULE_START);
     }
     return printRuleset;
   }
@@ -97,16 +110,16 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   @Override
   public void leaveRuleset(CssRulesetNode ruleset) {
     // only called if enterRuleset returns true
-    append(RULE_END);
+    buffer.append(RULE_END);
     super.leaveRuleset(ruleset);
   }
 
   @Override
   public boolean enterMediaRule(CssMediaRuleNode media) {
-    append(RULE_START);
+    buffer.append(RULE_START);
     boolean printMediaRule = super.enterMediaRule(media);
     if (!printMediaRule) {
-      deleteLastCharIfCharIs(RULE_START);
+      buffer.deleteLastCharIfCharIs(RULE_START);
     }
     return printMediaRule;
   }
@@ -115,15 +128,15 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   public void leaveMediaRule(CssMediaRuleNode media) {
     // only called if enterMediaRule returns true
     super.leaveMediaRule(media);
-    append(RULE_END);
+    buffer.append(RULE_END);
   }
 
   @Override
   public boolean enterFontFace(CssFontFaceNode cssFontFaceNode) {
-    append(RULE_START);
+    buffer.append(RULE_START);
     boolean printFontFace = super.enterFontFace(cssFontFaceNode);
     if (!printFontFace) {
-      deleteLastCharIfCharIs(RULE_START);
+      buffer.deleteLastCharIfCharIs(RULE_START);
     }
     return printFontFace;
   }
@@ -132,15 +145,15 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   public void leaveFontFace(CssFontFaceNode cssFontFaceNode) {
     // only called if enterFontFace returns true
     super.leaveFontFace(cssFontFaceNode);
-    append(RULE_END);
+    buffer.append(RULE_END);
   }
 
   @Override
   public boolean enterKeyframeRuleset(CssKeyframeRulesetNode ruleset) {
-    append(RULE_START);
+    buffer.append(RULE_START);
     boolean printKeyframeRuleset = super.enterKeyframeRuleset(ruleset);
     if (!printKeyframeRuleset) {
-      deleteLastCharIfCharIs(RULE_START);
+      buffer.deleteLastCharIfCharIs(RULE_START);
     }
     return printKeyframeRuleset;
   }
@@ -149,15 +162,15 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   public void leaveKeyframeRuleset(CssKeyframeRulesetNode ruleset) {
     // only called if enterKeyframeRuleset returns true
     super.leaveKeyframeRuleset(ruleset);
-    append(RULE_END);
+    buffer.append(RULE_END);
   }
 
   @Override
   public boolean enterPageRule(CssPageRuleNode node) {
-    append(RULE_START);
+    buffer.append(RULE_START);
     boolean printPageRule = super.enterPageRule(node);
     if (!printPageRule) {
-      deleteLastCharIfCharIs(RULE_START);
+      buffer.deleteLastCharIfCharIs(RULE_START);
     }
     return printPageRule;
   }
@@ -166,15 +179,15 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   public void leavePageRule(CssPageRuleNode node) {
     // only called if enterPageRule returns true
     super.leavePageRule(node);
-    append(RULE_END);
+    buffer.append(RULE_END);
   }
 
   @Override
   public boolean enterUnknownAtRule(CssUnknownAtRuleNode node) {
-    append(RULE_START);
+    buffer.append(RULE_START);
     boolean printUnknownAtRule = super.enterUnknownAtRule(node);
     if (!printUnknownAtRule) {
-      deleteLastCharIfCharIs(RULE_START);
+      buffer.deleteLastCharIfCharIs(RULE_START);
     }
     return printUnknownAtRule;
   }
@@ -183,15 +196,15 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   public void leaveUnknownAtRule(CssUnknownAtRuleNode node) {
     // only called if enterUnknownAtRule returns true
     super.leaveUnknownAtRule(node);
-    append(RULE_END);
+    buffer.append(RULE_END);
   }
 
   @Override
   public boolean enterImportRule(CssImportRuleNode node) {
-    append(RULE_START);
+    buffer.append(RULE_START);
     boolean printImportRule = super.enterImportRule(node);
     if (!printImportRule) {
-      deleteLastCharIfCharIs(RULE_START);
+      buffer.deleteLastCharIfCharIs(RULE_START);
     }
     return printImportRule;
   }
@@ -199,15 +212,6 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   @Override
   public void leaveImportRule(CssImportRuleNode node) {
     super.leaveImportRule(node);
-    append(RULE_END);
-  }
-
-  @Override
-  protected void deleteLastCharIfCharIs(char ch) {
-    if (ch == ';' && getLastCharInBuffer() == DECLARATION_END) {
-      deleteBufferCharAt(getCurrentBufferLength() - 2);
-    } else {
-      super.deleteLastCharIfCharIs(ch);
-    }
+    buffer.append(RULE_END);
   }
 }

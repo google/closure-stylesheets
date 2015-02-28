@@ -66,7 +66,7 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
   public boolean enterDefinition(CssDefinitionNode definition) {
     printDefinition = chunk.equals(definition.getChunk());
     if (printDefinition) {
-      append("@def ").append(definition.getName()).append(' ');
+      buffer.append("@def ").append(definition.getName()).append(' ');
     }
     return printDefinition;
   }
@@ -74,7 +74,7 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
   @Override
   public void leaveDefinition(CssDefinitionNode node) {
     if (printDefinition) {
-      append(";\n");
+      buffer.append(";").startNewLine();
       printDefinition = false;
     }
   }
@@ -85,9 +85,9 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
       return false;
     }
     if (node instanceof CssPriorityNode) {
-      deleteBufferCharAt(getCurrentBufferLength() - 1);
+      buffer.deleteLastChar();
     }
-    append(node);
+    buffer.append(node);
     return true;
   }
 
@@ -96,7 +96,7 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
     if (!printDefinition) {
       return;
     }
-    append(' ');
+    buffer.append(' ');
   }
 
   @Override
@@ -104,8 +104,8 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
     if (!printDefinition) {
       return false;
     }
-    append(node.getFunctionName());
-    append('(');
+    buffer.append(node.getFunctionName());
+    buffer.append('(');
     return true;
   }
 
@@ -114,7 +114,7 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
     if (!printDefinition) {
       return;
     }
-    append(") ");
+    buffer.append(") ");
   }
 
   @Override
@@ -124,8 +124,8 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
     }
     // If the previous argument was a function node, then it has a trailing
     // space that needs to be removed.
-    deleteLastCharIfCharIs(' ');
-    append(node);
+    buffer.deleteLastCharIfCharIs(' ');
+    buffer.append(node);
     return true;
   }
 

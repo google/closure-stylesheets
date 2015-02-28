@@ -56,6 +56,8 @@ import com.google.common.css.compiler.ast.CssValueNode;
 
 import java.util.logging.Logger;
 
+import javax.annotation.Nullable;
+
 /**
  * A compact-printer for {@link CssTree} instances.
  * TODO(oana): Change this pass to stop visiting when definitions are
@@ -70,12 +72,20 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   private static final Logger logger = Logger.getLogger(
       CompactPrinter.class.getName());
 
+  public CompactPrinter(CssNode subtree, @Nullable CodeBuffer buffer) {
+    super(subtree, buffer);
+  }
+
   public CompactPrinter(CssNode subtree) {
-    super(subtree);
+    this(subtree, null /* buffer */);
+  }
+
+  public CompactPrinter(CssTree tree, @Nullable CodeBuffer buffer) {
+    super(tree, buffer);
   }
 
   public CompactPrinter(CssTree tree) {
-    super(tree);
+    this(tree, null /* buffer */);
   }
 
   @Override
@@ -85,16 +95,16 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
 
   @Override
   public boolean enterImportRule(CssImportRuleNode node) {
-    append(node.getType().toString());
+    buffer.append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
-      append(' ');
+      buffer.append(' ');
       // TODO(user): teach visit controllers to explore
       // CssImportRuleNode parameters rather than leaving it to each
       // pass to figure things out.
       if (param instanceof CssStringNode) {
-        append(param.toString());
+        buffer.append(param.toString());
       } else {
-        append(param.getValue());
+        buffer.append(param.getValue());
       }
     }
     return true;
@@ -102,14 +112,14 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
 
   @Override
   public void leaveImportRule(CssImportRuleNode node) {
-    append(';');
+    buffer.append(';');
   }
 
   @Override
   public boolean enterMediaRule(CssMediaRuleNode node) {
-    append(node.getType().toString());
+    buffer.append(node.getType().toString());
     if (node.getParameters().size() > 0) {
-      append(" ");
+      buffer.append(' ');
     }
     return true;
   }
@@ -121,43 +131,43 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
    */
   private void appendMediaParameterWithParentheses(CssValueNode node) {
     // TODO(fbenz): Try to avoid the special handling of this case.
-    append("(");
-    append(node.getValue());
-    append(")");
+    buffer.append('(');
+    buffer.append(node.getValue());
+    buffer.append(')');
   }
 
   @Override
   public void leaveMediaRule(CssMediaRuleNode node) {
-    append('}');
+    buffer.append('}');
   }
 
   @Override
   public boolean enterPageRule(CssPageRuleNode node) {
-    append(node.getType().toString());
-    append(' ');
+    buffer.append(node.getType().toString());
+    buffer.append(' ');
     // TODO(fbenz): There are only two parameters possible ('bla:left') that
     // come with no whitespace in between. So it would be better to have a
     // single node (maybe a selector).
     for (CssValueNode param : node.getParameters()) {
-      append(param.getValue());
+      buffer.append(param.getValue());
     }
-    deleteLastCharIfCharIs(' ');
+    buffer.deleteLastCharIfCharIs(' ');
     return true;
   }
 
   @Override
   public boolean enterPageSelector(CssPageSelectorNode node) {
-    append(node.getType().toString());
+    buffer.append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
-      append(' ');
-      append(param.getValue());
+      buffer.append(' ');
+      buffer.append(param.getValue());
     }
     return true;
   }
 
   @Override
   public boolean enterFontFace(CssFontFaceNode node) {
-    append(node.getType().toString());
+    buffer.append(node.getType().toString());
     return true;
   }
 
@@ -165,14 +175,14 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   public boolean enterSelector(CssSelectorNode selector) {
     String name = selector.getSelectorName();
     if (name != null) {
-      append(name);
+      buffer.append(name);
     }
     return true;
   }
 
   @Override
   public void leaveSelector(CssSelectorNode selector) {
-    append(',');
+    buffer.append(',');
   }
 
   @Override
@@ -189,16 +199,16 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
 
   @Override
   public boolean enterPseudoClass(CssPseudoClassNode node) {
-    append(node.getPrefix());
-    append(node.getRefinerName());
+    buffer.append(node.getPrefix());
+    buffer.append(node.getRefinerName());
     switch (node.getFunctionType()) {
       case NTH:
-        append(node.getArgument().replace(" ", ""));
-        append(")");
+        buffer.append(node.getArgument().replace(" ", ""));
+        buffer.append(')');
         break;
       case LANG:
-        append(node.getArgument());
-        append(")");
+        buffer.append(node.getArgument());
+        buffer.append(')');
         break;
     }
     return true;
@@ -207,8 +217,8 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public void leavePseudoClass(CssPseudoClassNode node) {
     if (node.getFunctionType() == FunctionType.NOT) {
-      deleteLastCharIfCharIs(',');
-      append(")");
+      buffer.deleteLastCharIfCharIs(',');
+      buffer.append(')');
     }
   }
 
@@ -220,11 +230,11 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
 
   @Override
   public boolean enterAttributeSelector(CssAttributeSelectorNode node) {
-    append(node.getPrefix());
-    append(node.getAttributeName());
-    append(node.getMatchSymbol());
-    append(node.getValue());
-    append(node.getSuffix());
+    buffer.append(node.getPrefix());
+    buffer.append(node.getAttributeName());
+    buffer.append(node.getMatchSymbol());
+    buffer.append(node.getValue());
+    buffer.append(node.getSuffix());
     return true;
   }
 
@@ -233,45 +243,45 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
    * or a pseudo-element.
    */
   private void appendRefiner(CssRefinerNode node) {
-    append(node.getPrefix());
-    append(node.getRefinerName());
+    buffer.append(node.getPrefix());
+    buffer.append(node.getRefinerName());
   }
 
   @Override
   public boolean enterCombinator(CssCombinatorNode combinator) {
     if (combinator != null) {
-      append(combinator.getCombinatorType().getCanonicalName());
+      buffer.append(combinator.getCombinatorType().getCanonicalName());
     }
     return true;
   }
 
   @Override
   public void leaveCombinator(CssCombinatorNode combinator) {
-    deleteLastCharIfCharIs(',');
+    buffer.deleteLastCharIfCharIs(',');
   }
 
   @Override
   public void leaveSelectorBlock(CssSelectorListNode node) {
-    deleteLastCharIfCharIs(',');
+    buffer.deleteLastCharIfCharIs(',');
   }
 
   @Override
   public boolean enterDeclarationBlock(CssDeclarationBlockNode block) {
-    append('{');
+    buffer.append('{');
     return true;
   }
 
   @Override
   public void leaveDeclarationBlock(CssDeclarationBlockNode block) {
-    deleteLastCharIfCharIs(';');
-    append('}');
+    buffer.deleteLastCharIfCharIs(';');
+    buffer.append('}');
   }
 
   @Override
   public boolean enterBlock(CssBlockNode block) {
     if (block.getParent() instanceof CssUnknownAtRuleNode
         || block.getParent() instanceof CssMediaRuleNode) {
-      append("{");
+      buffer.append('{');
     }
     return true;
   }
@@ -279,31 +289,31 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterDeclaration(CssDeclarationNode declaration) {
     if (declaration.hasStarHack()) {
-      append('*');
+      buffer.append('*');
     }
-    append(declaration.getPropertyName().getValue());
-    append(':');
+    buffer.append(declaration.getPropertyName().getValue());
+    buffer.append(':');
     return true;
   }
 
   @Override
   public void leaveDeclaration(CssDeclarationNode declaration) {
-    deleteLastCharIfCharIs(' ');
-    append(';');
+    buffer.deleteLastCharIfCharIs(' ');
+    buffer.append(';');
   }
 
   @Override
   public void leaveCompositeValueNode(CssCompositeValueNode node) {
-    deleteLastCharIfCharIs(' ');
+    buffer.deleteLastCharIfCharIs(' ');
     if (node.getParent() instanceof CssPropertyValueNode) {
-      append(' ');
+      buffer.append(' ');
     }
   }
 
   @Override
   public boolean enterValueNode(CssValueNode node) {
     if (node instanceof CssPriorityNode) {
-      deleteLastCharIfCharIs(' ');
+      buffer.deleteLastCharIfCharIs(' ');
     }
     appendValueNode(node);
     return true;
@@ -312,28 +322,28 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public void leaveValueNode(CssValueNode node) {
     if (node.getParent() instanceof CssPropertyValueNode) {
-      append(' ');
+      buffer.append(' ');
     }
   }
 
   @Override
   public boolean enterCompositeValueNodeOperator(CssCompositeValueNode parent) {
-    deleteLastCharIfCharIs(' ');
-    append(parent.getOperator().getOperatorName());
+    buffer.deleteLastCharIfCharIs(' ');
+    buffer.append(parent.getOperator().getOperatorName());
     return true;
   }
 
   @Override
   public boolean enterFunctionNode(CssFunctionNode node) {
-    append(node.getFunctionName());
-    append('(');
+    buffer.append(node.getFunctionName());
+    buffer.append('(');
     return true;
   }
 
   @Override
   public void leaveFunctionNode(CssFunctionNode node) {
-    deleteLastCharIfCharIs(' ');
-    append(") ");
+    buffer.deleteLastCharIfCharIs(' ');
+    buffer.append(") ");
   }
 
   // We need to handle both standard function calls separated by
@@ -349,7 +359,7 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
     if (ARGUMENT_SEPARATORS.contains(node.toString())) {
       // If the previous argument was a function node, then it has a
       // trailing space that needs to be removed.
-      deleteLastCharIfCharIs(' ');
+      buffer.deleteLastCharIfCharIs(' ');
     }
     appendValueNode(node);
     return true;
@@ -368,9 +378,9 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
 
   @Override
   public boolean enterUnknownAtRule(CssUnknownAtRuleNode node) {
-    append("@").append(node.getName().toString());
+    buffer.append('@').append(node.getName().toString());
     if (node.getParameters().size() > 0) {
-      append(" ");
+      buffer.append(' ');
     }
     return true;
   }
@@ -378,7 +388,7 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterMediaTypeListDelimiter(
       CssNodesListNode<? extends CssNode> node) {
-    append(' ');
+    buffer.append(' ');
     return true;
   }
 
@@ -386,22 +396,22 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   public void leaveUnknownAtRule(CssUnknownAtRuleNode node) {
     if (node.getType().hasBlock()) {
       if (!(node.getBlock() instanceof CssDeclarationBlockNode)) {
-        append('}');
+        buffer.append('}');
       }
     } else {
-      append(';');
+      buffer.append(';');
     }
   }
 
   @Override
   public boolean enterKeyframesRule(CssKeyframesNode node) {
-    append('@').append(node.getName().toString());
+    buffer.append('@').append(node.getName().toString());
     for (CssValueNode param : node.getParameters()) {
-      append(' ');
-      append(param.getValue());
+      buffer.append(' ');
+      buffer.append(param.getValue());
     }
     if (node.getType().hasBlock()) {
-      append('{');
+      buffer.append('{');
     }
     return true;
   }
@@ -409,9 +419,9 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public void leaveKeyframesRule(CssKeyframesNode node) {
     if (node.getType().hasBlock()) {
-      append('}');
+      buffer.append('}');
     } else {
-      append(';');
+      buffer.append(';');
     }
   }
 
@@ -419,19 +429,19 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   public boolean enterKey(CssKeyNode node) {
     String value = node.getKeyValue();
     if (value != null) {
-      append(value);
+      buffer.append(value);
     }
     return true;
   }
 
   @Override
   public void leaveKey(CssKeyNode key) {
-    append(',');
+    buffer.append(',');
   }
 
   @Override
   public void leaveKeyBlock(CssKeyListNode block) {
-    deleteLastCharIfCharIs(',');
+    buffer.deleteLastCharIfCharIs(',');
   }
 
   /**
@@ -467,7 +477,7 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
     }
     if (node instanceof CssStringNode) {
       CssStringNode s = (CssStringNode) node;
-      append(s.toString(CssStringNode.HTML_ESCAPER));
+      buffer.append(s.toString(CssStringNode.HTML_ESCAPER));
       return;
     }
     if (node instanceof CssNumericNode) {
@@ -476,11 +486,11 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
       // or
       //   CharSequence CssNode.asCharSequence
       CssNumericNode n = (CssNumericNode) node;
-      append(n.getNumericPart());
-      append(n.getUnit());
+      buffer.append(n.getNumericPart());
+      buffer.append(n.getUnit());
       return;
     }
-    append(node.toString());
+    buffer.append(node.toString());
   }
 
   public static String printCompactly(CssNode n) {

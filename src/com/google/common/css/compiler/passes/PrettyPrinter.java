@@ -104,16 +104,16 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterImportRule(CssImportRuleNode node) {
     maybeAppendComments(node);
-    append(node.getType().toString());
+    buffer.append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
-      append(" ");
+      buffer.append(' ');
       // TODO(user): teach visit controllers to explore this subtree
       // rather than leaving it to each pass to figure things out.
       if (param instanceof CssStringNode) {
         CssStringNode n = (CssStringNode) param;
-        append(n.toString(CssStringNode.SHORT_ESCAPER));
+        buffer.append(n.toString(CssStringNode.SHORT_ESCAPER));
       } else {
-        append(param.getValue());
+        buffer.append(param.getValue());
       }
     }
     return true;
@@ -121,16 +121,16 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
 
   @Override
   public void leaveImportRule(CssImportRuleNode node) {
-    append(";\n");
+    buffer.append(';').startNewLine();
   }
 
   @Override
   public boolean enterMediaRule(CssMediaRuleNode node) {
     maybeAppendComments(node);
-    append(node.getType().toString());
+    buffer.append(node.getType().toString());
     if (node.getParameters().size() > 0
         || (node.getType().hasBlock() && node.getBlock() != null)) {
-      append(" ");
+      buffer.append(' ');
     }
     return true;
   }
@@ -141,13 +141,13 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterPageRule(CssPageRuleNode node) {
     maybeAppendComments(node);
-    append(node.getType().toString());
-    append(' ');
+    buffer.append(node.getType().toString());
+    buffer.append(' ');
     for (CssValueNode param : node.getParameters()) {
-      append(param.getValue());
+      buffer.append(param.getValue());
     }
     if (node.getParametersCount() > 0) {
-      append(' ');
+      buffer.append(' ');
     }
     return true;
   }
@@ -155,10 +155,10 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterPageSelector(CssPageSelectorNode node) {
     maybeAppendComments(node);
-    append(node.getType().toString());
+    buffer.append(node.getType().toString());
     for (CssValueNode param : node.getParameters()) {
-      append(" ");
-      append(param.getValue());
+      buffer.append(' ');
+      buffer.append(param.getValue());
     }
     return true;
   }
@@ -166,40 +166,40 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterFontFace(CssFontFaceNode node) {
     maybeAppendComments(node);
-    append(node.getType().toString());
+    buffer.append(node.getType().toString());
     return true;
   }
 
   @Override
   public boolean enterDefinition(CssDefinitionNode node) {
     maybeAppendComments(node);
-    append(indent);
-    append(node.getType());
-    append(" ");
-    append(node.getName());
+    buffer.append(indent);
+    buffer.append(node.getType());
+    buffer.append(' ');
+    buffer.append(node.getName());
     // Add a space to separate it from next value.
-    append(" ");
+    buffer.append(' ');
     return true;
   }
 
   @Override
   public void leaveDefinition(CssDefinitionNode node) {
     // Remove trailing space after last value.
-    deleteEndingIfEndingIs(" ");
-    append(";\n");
+    buffer.deleteLastCharIfCharIs(' ');
+    buffer.append(';').startNewLine();
   }
 
   @Override
   public boolean enterRuleset(CssRulesetNode ruleset) {
     maybeAppendComments(ruleset);
-    append(indent);
+    buffer.append(indent);
     return true;
   }
 
   @Override
   public boolean enterKeyframeRuleset(CssKeyframeRulesetNode ruleset) {
     maybeAppendComments(ruleset);
-    append(indent);
+    buffer.append(indent);
     return true;
   }
 
@@ -208,8 +208,8 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterDeclarationBlock(CssDeclarationBlockNode block) {
     maybeAppendComments(block);
-    deleteEndingIfEndingIs(" ");
-    append(" {\n");
+    buffer.deleteLastCharIfCharIs(' ');
+    buffer.append(" {").startNewLine();
     indent += "  ";
     return true;
   }
@@ -217,8 +217,8 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public void leaveDeclarationBlock(CssDeclarationBlockNode block) {
     indent = indent.substring(0, indent.length() - 2);
-    append(indent);
-    append("}\n");
+    buffer.append(indent);
+    buffer.append('}').startNewLine();
   }
 
   @Override
@@ -226,7 +226,7 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
     maybeAppendComments(block);
     if (block.getParent() instanceof CssUnknownAtRuleNode
         || block.getParent() instanceof CssMediaRuleNode) {
-      append("{\n");
+      buffer.append('{').startNewLine();
       indent += "  ";
     }
     return true;
@@ -235,7 +235,7 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public void leaveBlock(CssBlockNode block) {
     if (block.getParent() instanceof CssMediaRuleNode) {
-      append("}\n");
+      buffer.append('}').startNewLine();
       indent = indent.substring(0, indent.length() - 2);
     }
   }
@@ -243,19 +243,19 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterDeclaration(CssDeclarationNode declaration) {
     maybeAppendComments(declaration);
-    append(indent);
+    buffer.append(indent);
     if (declaration.hasStarHack()) {
-      append('*');
+      buffer.append('*');
     }
-    append(declaration.getPropertyName().getValue());
-    append(": ");
+    buffer.append(declaration.getPropertyName().getValue());
+    buffer.append(": ");
     return true;
   }
 
   @Override
   public void leaveDeclaration(CssDeclarationNode declaration) {
-    deleteEndingIfEndingIs(" ");
-    append(";\n");
+    buffer.deleteLastCharIfCharIs(' ');
+    buffer.append(';').startNewLine();
   }
 
   @Override
@@ -267,13 +267,13 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
     if (stripQuotes && node.getParent() instanceof CssDefinitionNode) {
       v = maybeStripQuotes(v);
     }
-    append(v);
+    buffer.append(v);
 
     // NOTE(flan): When visiting function arguments, we don't want to add extra
     // spaces because they are already in the arguments list if they are
     // required. Yes, this sucks.
     if (!node.inFunArgs()) {
-      append(" ");
+      buffer.append(' ');
     }
     return true;
   }
@@ -281,9 +281,9 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterCompositeValueNodeOperator(CssCompositeValueNode parent) {
     maybeAppendComments(parent);
-    append(parent.getOperator().getOperatorName());
+    buffer.append(parent.getOperator().getOperatorName());
     if (!parent.inFunArgs()) {
-      append(" ");
+      buffer.append(' ');
     }
     return true;
   }
@@ -291,15 +291,15 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterFunctionNode(CssFunctionNode node) {
     maybeAppendComments(node);
-    append(node.getFunctionName());
-    append("(");
+    buffer.append(node.getFunctionName());
+    buffer.append('(');
     return true;
   }
 
   @Override
   public void leaveFunctionNode(CssFunctionNode node) {
-    deleteEndingIfEndingIs(" ");
-    append(") ");
+    buffer.deleteLastCharIfCharIs(' ');
+    buffer.append(") ");
   }
 
   @Override
@@ -312,7 +312,7 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
             .equals("url")) {
       v = maybeStripQuotes(v);
     }
-    append(v);
+    buffer.append(v);
     return !(node instanceof CssCompositeValueNode);
   }
 
@@ -321,14 +321,14 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
     maybeAppendComments(selector);
     String name = selector.getSelectorName();
     if (name != null) {
-      append(name);
+      buffer.append(name);
     }
     return true;
   }
 
   @Override
   public void leaveSelector(CssSelectorNode selector) {
-    append(", ");
+    buffer.append(", ");
   }
 
   @Override
@@ -348,16 +348,16 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterPseudoClass(CssPseudoClassNode node) {
     maybeAppendComments(node);
-    append(node.getPrefix());
-    append(node.getRefinerName());
+    buffer.append(node.getPrefix());
+    buffer.append(node.getRefinerName());
     switch (node.getFunctionType()) {
       case NTH:
-        append(node.getArgument().replace(" ", ""));
-        append(")");
+        buffer.append(node.getArgument().replace(" ", ""));
+        buffer.append(')');
         break;
       case LANG:
-        append(node.getArgument());
-        append(")");
+        buffer.append(node.getArgument());
+        buffer.append(')');
         break;
     }
     return true;
@@ -366,8 +366,8 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public void leavePseudoClass(CssPseudoClassNode node) {
     if (node.getFunctionType() == FunctionType.NOT) {
-      deleteEndingIfEndingIs(", ");
-      append(")");
+      buffer.deleteEndingIfEndingIs(", ");
+      buffer.append(')');
     }
   }
 
@@ -381,11 +381,11 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public boolean enterAttributeSelector(CssAttributeSelectorNode node) {
     maybeAppendComments(node);
-    append(node.getPrefix());
-    append(node.getAttributeName());
-    append(node.getMatchSymbol());
-    append(node.getValue());
-    append(node.getSuffix());
+    buffer.append(node.getPrefix());
+    buffer.append(node.getAttributeName());
+    buffer.append(node.getMatchSymbol());
+    buffer.append(node.getValue());
+    buffer.append(node.getSuffix());
     return true;
   }
 
@@ -394,55 +394,55 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
    * or a pseudo-element.
    */
   private void appendRefiner(CssRefinerNode node) {
-    append(node.getPrefix());
-    append(node.getRefinerName());
+    buffer.append(node.getPrefix());
+    buffer.append(node.getRefinerName());
   }
 
   @Override
   public boolean enterCombinator(CssCombinatorNode combinator) {
     if (combinator != null) {
       maybeAppendComments(combinator);
-      append(combinator.getCombinatorType().getCanonicalName());
+      buffer.append(combinator.getCombinatorType().getCanonicalName());
     }
     return true;
   }
 
   @Override
   public void leaveCombinator(CssCombinatorNode combinator) {
-    deleteEndingIfEndingIs(", ");
+    buffer.deleteEndingIfEndingIs(", ");
   }
 
   @Override
   public void leaveSelectorBlock(CssSelectorListNode node) {
-    deleteEndingIfEndingIs(", ");
+    buffer.deleteEndingIfEndingIs(", ");
   }
 
   @Override
   public void leaveConditionalBlock(CssConditionalBlockNode block) {
-    append("\n");
+    buffer.startNewLine();
   }
 
   @Override
   public boolean enterConditionalRule(CssConditionalRuleNode node) {
     maybeAppendComments(node);
     if (node.getType() != Type.IF) {
-      append(" ");
+      buffer.append(' ');
     } else {
-      append(indent);
+      buffer.append(indent);
     }
-    append(node.getType());
+    buffer.append(node.getType());
     if (node.getParametersCount() > 0) {
-      append(" ");
+      buffer.append(' ');
       boolean firstParameter = true;
       for (CssValueNode value : node.getParameters()) {
         if (!firstParameter) {
-          append(" ");
+          buffer.append(' ');
         }
         firstParameter = false;
-        append(value.toString());
+        buffer.append(value.toString());
       }
     }
-    append(" {\n");
+    buffer.append(" {").startNewLine();
     indent += "  ";
     return true;
   }
@@ -450,18 +450,18 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   @Override
   public void leaveConditionalRule(CssConditionalRuleNode node) {
     indent = indent.substring(0, indent.length() - 2);
-    append(indent);
-    append("}");
+    buffer.append(indent);
+    buffer.append('}');
   }
 
   @Override
   public boolean enterUnknownAtRule(CssUnknownAtRuleNode node) {
     maybeAppendComments(node);
-    append(indent);
-    append('@').append(node.getName().toString());
+    buffer.append(indent);
+    buffer.append('@').append(node.getName().toString());
     if (node.getParameters().size() > 0
         || (node.getType().hasBlock() && node.getBlock() != null)) {
-      append(" ");
+      buffer.append(' ');
     }
     return true;
   }
@@ -471,26 +471,26 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
     if (node.getType().hasBlock()) {
       if (!(node.getBlock() instanceof CssDeclarationBlockNode)) {
         indent = indent.substring(0, indent.length() - 2);
-        append(indent);
-        append("}\n");
+        buffer.append(indent);
+        buffer.append('}').startNewLine();
       }
     } else {
-      deleteEndingIfEndingIs(" ");
-      append(";\n");
+      buffer.deleteLastCharIfCharIs(' ');
+      buffer.append(';').startNewLine();
     }
   }
 
   @Override
   public boolean enterKeyframesRule(CssKeyframesNode node) {
     maybeAppendComments(node);
-    append(indent);
-    append('@').append(node.getName().toString());
+    buffer.append(indent);
+    buffer.append('@').append(node.getName().toString());
     for (CssValueNode param : node.getParameters()) {
-      append(" ");
-      append(param.getValue());
+      buffer.append(' ');
+      buffer.append(param.getValue());
     }
     if (node.getType().hasBlock()) {
-      append(" {\n");
+      buffer.append(" {").startNewLine();
       indent += "  ";
     }
     return true;
@@ -500,10 +500,10 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   public void leaveKeyframesRule(CssKeyframesNode node) {
     if (node.getType().hasBlock()) {
       indent = indent.substring(0, indent.length() - 2);
-      append(indent);
-      append("}\n");
+      buffer.append(indent);
+      buffer.append('}').startNewLine();
     } else {
-      append(";\n");
+      buffer.append(';').startNewLine();
     }
   }
 
@@ -512,19 +512,19 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
     maybeAppendComments(key);
     String value = key.getKeyValue();
     if (value != null) {
-      append(value);
+      buffer.append(value);
     }
     return true;
   }
 
   @Override
   public void leaveKey(CssKeyNode key) {
-    append(", ");
+    buffer.append(", ");
   }
 
   @Override
   public void leaveKeyBlock(CssKeyListNode node) {
-    deleteEndingIfEndingIs(", ");
+    buffer.deleteEndingIfEndingIs(", ");
   }
 
   @Override
@@ -584,9 +584,9 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   private void maybeAppendComments(CssNode node) {
     if (preserveComments && !node.getComments().isEmpty()) {
       for (CssCommentNode c : node.getComments()) {
-        append(indent);
-        append(c.getValue());
-        append("\n");
+        buffer.append(indent);
+        buffer.append(c.getValue());
+        buffer.startNewLine();
       }
     }
   }

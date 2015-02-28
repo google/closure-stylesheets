@@ -29,6 +29,8 @@ import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 
+import javax.annotation.Nullable;
+
 /**
  * Compact-printer for {@link CssTree} instances that only outputs rulesets which
  * include a selector belonging to one chunk. This printer does not support
@@ -58,10 +60,21 @@ public class ChunkCompactPrinter<T> extends CompactPrinter {
    *
    * @param tree CSS AST to be printed (with regard to a selected chunk)
    * @param chunk the chunk selected for printing
+   * @param buffer {@link CodeBuffer} to use in the printer
+   */
+  public ChunkCompactPrinter(CssTree tree, T chunk, @Nullable CodeBuffer buffer) {
+    super(tree, buffer);
+    this.chunk = chunk;
+  }
+
+  /**
+   * Create a chunk printer for a given chunk.
+   *
+   * @param tree CSS AST to be printed (with regard to a selected chunk)
+   * @param chunk the chunk selected for printing
    */
   public ChunkCompactPrinter(CssTree tree, T chunk) {
-    super(tree);
-    this.chunk = chunk;
+    this(tree, chunk, null /* buffer */);
   }
 
   @Override

@@ -69,9 +69,9 @@ public class SExprPrinter extends CodePrinter {
   @Override
   public void enter(CssNode node) {
     if (includeHashCodes) {
-      append(String.format("(%s@%d ", node.getClass().getName(), node.hashCode()));
+      buffer.append(String.format("(%s@%d ", node.getClass().getName(), node.hashCode()));
     } else {
-      append(String.format("(%s ", node.getClass().getName()));
+      buffer.append(String.format("(%s ", node.getClass().getName()));
     }
 
     if (withLocationAnnotation) {
@@ -79,15 +79,15 @@ public class SExprPrinter extends CodePrinter {
       if (loc == null) {
         loc = SourceCodeLocation.getUnknownLocation();
       }
-      append(String.format(
+      buffer.append(String.format(
         ":scl-unknown %s ", loc.isUnknown()));
     }
   }
 
   @Override
   public void leave(CssNode node) {
-    deleteLastCharIfCharIs(' ');
-    append(")");
+    buffer.deleteLastCharIfCharIs(' ');
+    buffer.append(')');
   }
 
   /** Called between adjacent nodes in a media type list */
@@ -95,7 +95,7 @@ public class SExprPrinter extends CodePrinter {
   public boolean enterMediaTypeListDelimiter(CssNodesListNode<? extends CssNode> node) {
     super.enterMediaTypeListDelimiter(node);
     // this very special state does not represent a node
-    append("(MediaTypeListDelimiter");
+    buffer.append("(MediaTypeListDelimiter");
     return true;
   }
 
@@ -103,7 +103,7 @@ public class SExprPrinter extends CodePrinter {
   @Override
   public void leaveMediaTypeListDelimiter(CssNodesListNode<? extends CssNode> node) {
     // this very special state does not represent a node
-    append(")");
+    buffer.append(')');
     super.leaveMediaTypeListDelimiter(node);
   }
 
@@ -112,22 +112,22 @@ public class SExprPrinter extends CodePrinter {
   public boolean enterCompositeValueNodeOperator(CssCompositeValueNode parent) {
     super.enterCompositeValueNodeOperator(parent);
     // this very special state does not represent a node
-    append("(CompositeValueNodeOperator ");
-    append(parent.getOperator().name());
+    buffer.append("(CompositeValueNodeOperator ");
+    buffer.append(parent.getOperator().name());
     return true;
   }
 
   /** Called between values in a {@code CssCompositeValueNode} */
   @Override
   public void leaveCompositeValueNodeOperator(CssCompositeValueNode parent) {
-    append(")");
+    buffer.append(')');
     super.leaveCompositeValueNodeOperator(parent);
   }
 
   @Override
   public boolean enterValueNode(CssValueNode n) {
     super.enterValueNode(n);
-    append(n + " ");
+    buffer.append(n + " ");
     return true;
   }
 
