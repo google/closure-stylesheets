@@ -215,6 +215,12 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
         "@media all and (max-height:300px){}",
         "@media all and ( max-height: 300px ){}");
     assertNewCompactPrintedResult(
+        "@media all and (aspect-ratio:3/4){}",
+        "@media all and ( aspect-ratio: 3 / 4 ){}");
+    assertNewCompactPrintedResult(
+        "@media all and (aspect-ratio:3/4){}",
+        "@media all and (aspect-ratio: 3  /4 ){}");
+    assertNewCompactPrintedResult(
         "@media screen and (device-width:800px){}",
         "@media screen and (device-width:800px){}");
     assertNewCompactPrintedResult(

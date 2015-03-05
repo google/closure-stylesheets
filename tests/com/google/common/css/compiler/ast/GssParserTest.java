@@ -554,6 +554,26 @@ public class GssParserTest extends TestCase {
     testValid("@media screen and (max-height: 300px) and (min-width: 20px) {}");
   }
 
+  public void testMediaQueryRatioNoSpaces() throws Exception {
+    testValid("@media screen and (aspect-ratio: 3/4) {}");
+  }
+
+  public void testMediaQueryRatioWithSpaces() throws Exception {
+    testValid("@media screen and (aspect-ratio: 3 / 4) {}");
+  }
+
+  public void testMediaQueryRatioWithManyLeadingSpaces() throws Exception {
+    testValid("@media screen and (aspect-ratio: 3    / 4) {}");
+  }
+
+  public void testMediaQueryRatioWithTrailingSpaces() throws Exception {
+    testValid("@media screen and (aspect-ratio: 3/ 4) {}");
+  }
+
+  public void testMediaQueryRatioWithNoTrailingSpaces() throws Exception {
+    testValid("@media screen and (aspect-ratio: 3 /4) {}");
+  }
+
   public void testMozLinearGradient() throws Exception {
     testValid(".CSS { background-image: " +
         "-moz-linear-gradient(bottom, #c0c0c0 0%, #dddddd 90%) }");

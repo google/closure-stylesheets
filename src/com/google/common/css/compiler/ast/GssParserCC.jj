@@ -1360,8 +1360,8 @@ CssValueNode slash_term() :
 // term
 //   : unary_operator?
 //     [ [ NUMBER [ PERCENT | IDENTIFIER ] ] | STRING | IDENT | FOR_VARIABLE
-//       | '(' S? IDENT ':' S* NUMBER IDENT? ')' | URI | hexcolor | function
-//       | math
+//       | '(' S? IDENT ':' S* NUMBER [ S* '/' S* NUMBER | IDENT ]? ')'
+//       | URI | hexcolor | function | math
 //     ] S*
 //   ;
 CssValueNode term() :
@@ -1405,6 +1405,12 @@ CssValueNode term() :
           t = <COLON>      { tokens.add(t); }
           ( <S> )*
           (  ( t = <NUMBER> { tokens.add(t); }
+               (
+                 ( <S> )*
+                 (t = <SLASH> ) { tokens.add(t); }
+                 ( <S> )*
+                 (t = <NUMBER> ) {tokens.add(t); }
+               )?
                ( (dim = <IDENTIFIER> ) { tokens.add(dim); } )?
              )
             |
