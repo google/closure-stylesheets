@@ -253,6 +253,14 @@ final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("background-image")
+        .matchPropertyValue("repeating-linear-gradient")
+        .isFunction(true)
+        .addExpandPropertyValue("-webkit-repeating-linear-gradient")
+        .addExpandPropertyValue("repeating-linear-gradient")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("perspective")
         .isFunction(false)
         .addExpandPropertyName("-webkit-perspective")
