@@ -132,7 +132,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("animation")
         .isFunction(false)
         .addExpandPropertyName("-webkit-animation")
-        .addExpandPropertyName("-moz-animation")
         .addExpandPropertyName("-o-animation")
         .addExpandPropertyName("animation")
         .build());
@@ -141,7 +140,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("animation-delay")
         .isFunction(false)
         .addExpandPropertyName("-webkit-animation-delay")
-        .addExpandPropertyName("-moz-animation-delay")
         .addExpandPropertyName("-o-animation-delay")
         .addExpandPropertyName("animation-delay")
         .build());
@@ -150,7 +148,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("animation-direction")
         .isFunction(false)
         .addExpandPropertyName("-webkit-animation-direction")
-        .addExpandPropertyName("-moz-animation-direction")
         .addExpandPropertyName("-o-animation-direction")
         .addExpandPropertyName("animation-direction")
         .build());
@@ -159,7 +156,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("animation-duration")
         .isFunction(false)
         .addExpandPropertyName("-webkit-animation-duration")
-        .addExpandPropertyName("-moz-animation-duration")
         .addExpandPropertyName("-o-animation-duration")
         .addExpandPropertyName("animation-duration")
         .build());
@@ -175,7 +171,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("animation-iteration-count")
         .isFunction(false)
         .addExpandPropertyName("-webkit-animation-iteration-count")
-        .addExpandPropertyName("-moz-animation-iteration-count")
         .addExpandPropertyName("-o-animation-iteration-count")
         .addExpandPropertyName("animation-iteration-count")
         .build());
@@ -184,7 +179,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("animation-name")
         .isFunction(false)
         .addExpandPropertyName("-webkit-animation-name")
-        .addExpandPropertyName("-moz-animation-name")
         .addExpandPropertyName("-o-animation-name")
         .addExpandPropertyName("animation-name")
         .build());
@@ -193,7 +187,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("animation-timing-function")
         .isFunction(false)
         .addExpandPropertyName("-webkit-animation-timing-function")
-        .addExpandPropertyName("-moz-animation-timing-function")
         .addExpandPropertyName("-o-animation-timing-function")
         .addExpandPropertyName("animation-timing-function")
         .build());
@@ -203,7 +196,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("background-size")
         .isFunction(false)
         .addExpandPropertyName("-webkit-background-size")
-        .addExpandPropertyName("-moz-background-size")
         .addExpandPropertyName("-o-background-size")
         .addExpandPropertyName("background-size")
         .build());
@@ -212,7 +204,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("backface-visibility")
         .isFunction(false)
         .addExpandPropertyName("-webkit-backface-visibility")
-        .addExpandPropertyName("-moz-backface-visibility")
         .addExpandPropertyName("-o-backface-visibility")
         .addExpandPropertyName("backface-visibility")
         .build());
@@ -237,7 +228,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("box-sizing")
         .isFunction(false)
         .addExpandPropertyName("-webkit-box-sizing")
-        .addExpandPropertyName("-moz-box-sizing")
         .addExpandPropertyName("box-sizing")
         .build());
 
@@ -264,7 +254,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("perspective")
         .isFunction(false)
         .addExpandPropertyName("-webkit-perspective")
-        .addExpandPropertyName("-moz-perspective")
         .addExpandPropertyName("perspective")
         .build());
 
@@ -272,7 +261,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("perspective-origin")
         .isFunction(false)
         .addExpandPropertyName("-webkit-perspective-origin")
-        .addExpandPropertyName("-moz-perspective-origin")
         .addExpandPropertyName("perspective-origin")
         .build());
 
@@ -287,18 +275,9 @@ final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
-        .matchPropertyName("perspective-origin")
-        .isFunction(false)
-        .addExpandPropertyName("-webkit-perspective-origin")
-        .addExpandPropertyName("-moz-perspective-origin")
-        .addExpandPropertyName("perspective-origin")
-        .build());
-
-    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("transform")
         .isFunction(false)
         .addExpandPropertyName("-webkit-transform")
-        .addExpandPropertyName("-moz-transform")
         .addExpandPropertyName("-ms-transform")
         .addExpandPropertyName("-o-transform")
         .addExpandPropertyName("transform")
@@ -308,7 +287,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("transform-origin")
         .isFunction(false)
         .addExpandPropertyName("-webkit-transform-origin")
-        .addExpandPropertyName("-moz-transform-origin")
         .addExpandPropertyName("-ms-transform-origin")
         .addExpandPropertyName("-o-transform-origin")
         .addExpandPropertyName("transform-origin")
@@ -318,7 +296,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("transform-style")
         .isFunction(false)
         .addExpandPropertyName("-webkit-transform-style")
-        .addExpandPropertyName("-moz-transform-style")
         .addExpandPropertyName("transform-style")
         .build());
 
@@ -326,7 +303,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("transition")
         .isFunction(false)
         .addExpandPropertyName("-webkit-transition")
-        .addExpandPropertyName("-moz-transition")
         .addExpandPropertyName("-o-transition")
         .addExpandPropertyName("transition")
         .build());
@@ -335,7 +311,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("transition-delay")
         .isFunction(false)
         .addExpandPropertyName("-webkit-transition-delay")
-        .addExpandPropertyName("-moz-transition-delay")
         .addExpandPropertyName("-o-transition-delay")
         .addExpandPropertyName("transition-delay")
         .build());
@@ -344,7 +319,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("transition-duration")
         .isFunction(false)
         .addExpandPropertyName("-webkit-transition-duration")
-        .addExpandPropertyName("-moz-transition-duration")
         .addExpandPropertyName("-o-transition-duration")
         .addExpandPropertyName("transition-duration")
         .build());
@@ -353,7 +327,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("transition-property")
         .isFunction(false)
         .addExpandPropertyName("-webkit-transition-property")
-        .addExpandPropertyName("-moz-transition-property")
         .addExpandPropertyName("-o-transition-property")
         .addExpandPropertyName("transition-property")
         .build());
@@ -362,7 +335,6 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("transition-timing-function")
         .isFunction(false)
         .addExpandPropertyName("-webkit-transition-timing-function")
-        .addExpandPropertyName("-moz-transition-timing-function")
         .addExpandPropertyName("-o-transition-timing-function")
         .addExpandPropertyName("transition-timing-function")
         .build());
