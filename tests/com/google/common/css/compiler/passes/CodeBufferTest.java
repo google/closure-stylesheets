@@ -29,6 +29,8 @@ public class CodeBufferTest extends TestCase {
     CodeBuffer buffer = new CodeBuffer();
     assertEquals(0, buffer.getNextCharIndex());
     assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(-1, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
   }
 
   public void testReset() {
@@ -37,6 +39,8 @@ public class CodeBufferTest extends TestCase {
     buffer.reset();
     assertEquals(0, buffer.getNextCharIndex());
     assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(-1, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
   }
 
   public void testAppendNull() {
@@ -44,6 +48,8 @@ public class CodeBufferTest extends TestCase {
     buffer.append(null);
     assertEquals(0, buffer.getNextCharIndex());
     assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(-1, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
   }
 
   public void testAppendChar() {
@@ -51,6 +57,8 @@ public class CodeBufferTest extends TestCase {
     buffer.append('c');
     assertEquals(1, buffer.getNextCharIndex());
     assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(0, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
   }
 
   public void testAppendStr() {
@@ -58,6 +66,8 @@ public class CodeBufferTest extends TestCase {
     buffer.append("foo");
     assertEquals(3, buffer.getNextCharIndex());
     assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(2, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
   }
 
   public void testAppendStrIncludeNewLine() {
@@ -67,11 +77,15 @@ public class CodeBufferTest extends TestCase {
     buffer.append("foo\nbarrr\n");
     assertEquals(0, buffer.getNextCharIndex());
     assertEquals(2, buffer.getNextLineIndex());
+    assertEquals(5, buffer.getLastCharIndex());
+    assertEquals(1, buffer.getLastLineIndex());
 
     buffer = new CodeBuffer();
     buffer.append("foo\nbarrr");
     assertEquals(5, buffer.getNextCharIndex());
     assertEquals(1, buffer.getNextLineIndex());
+    assertEquals(4, buffer.getLastCharIndex());
+    assertEquals(1, buffer.getLastLineIndex());
   }
 
   public void testAppendObject() {
@@ -85,6 +99,8 @@ public class CodeBufferTest extends TestCase {
     buffer.append(new TestObject());
     assertEquals(6, buffer.getNextCharIndex());
     assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(5, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
   }
 
   public void testAppendNewLineChar() {
@@ -93,9 +109,21 @@ public class CodeBufferTest extends TestCase {
     buffer.append('\n');
     assertEquals(0, buffer.getNextCharIndex());
     assertEquals(1, buffer.getNextLineIndex());
+    assertEquals(3, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
     buffer.append("bar");
     assertEquals(3, buffer.getNextCharIndex());
     assertEquals(1, buffer.getNextLineIndex());
+    assertEquals(2, buffer.getLastCharIndex());
+    assertEquals(1, buffer.getLastLineIndex());
+  }
+  public void testAppendSequenceOfNewLineChar() {
+    CodeBuffer buffer = new CodeBuffer();
+    buffer.append("foo\n\nbar");
+    assertEquals(3, buffer.getNextCharIndex());
+    assertEquals(2, buffer.getNextLineIndex());
+    assertEquals(2, buffer.getLastCharIndex());
+    assertEquals(2, buffer.getLastLineIndex());
   }
 
   public void testStartNewLine() {
@@ -104,9 +132,13 @@ public class CodeBufferTest extends TestCase {
     buffer.startNewLine();
     assertEquals(0, buffer.getNextCharIndex());
     assertEquals(1, buffer.getNextLineIndex());
+    assertEquals(3, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
     buffer.append("bar");
     assertEquals(3, buffer.getNextCharIndex());
     assertEquals(1, buffer.getNextLineIndex());
+    assertEquals(2, buffer.getLastCharIndex());
+    assertEquals(1, buffer.getLastLineIndex());
   }
 
   public void testDeleteLastChar() {
@@ -115,9 +147,18 @@ public class CodeBufferTest extends TestCase {
     buffer.deleteLastChar();
     assertEquals(2, buffer.getNextCharIndex());
     assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(1, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
     buffer.deleteLastChar();
     assertEquals(1, buffer.getNextCharIndex());
     assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(0, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
+    buffer.deleteLastChar();
+    assertEquals(0, buffer.getNextCharIndex());
+    assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(-1, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
   }
 
   public void testDeleteLastChars() {
@@ -126,6 +167,18 @@ public class CodeBufferTest extends TestCase {
     buffer.deleteLastChars(2);
     assertEquals(1, buffer.getNextCharIndex());
     assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(0, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
+  }
+
+  public void testDeleteLastCharsWhenExceedBufferLength() {
+    CodeBuffer buffer = new CodeBuffer();
+    buffer.append("foo");
+    buffer.deleteLastChars(10);
+    assertEquals(0, buffer.getNextCharIndex());
+    assertEquals(0, buffer.getNextLineIndex());
+    assertEquals(-1, buffer.getLastCharIndex());
+    assertEquals(0, buffer.getLastLineIndex());
   }
 
   public void testDeleteLastCharForNewLine() {
@@ -138,9 +191,13 @@ public class CodeBufferTest extends TestCase {
     buffer.deleteLastChar();
     assertEquals(0, buffer.getNextCharIndex());
     assertEquals(2, buffer.getNextLineIndex());
+    assertEquals(5, buffer.getLastCharIndex());
+    assertEquals(1, buffer.getLastLineIndex());
     buffer.deleteLastChar();
     assertEquals(5, buffer.getNextCharIndex());
     assertEquals(1, buffer.getNextLineIndex());
+    assertEquals(4, buffer.getLastCharIndex());
+    assertEquals(1, buffer.getLastLineIndex());
   }
 
   public void testDeleteEndingIfEndingIs() {
@@ -153,8 +210,12 @@ public class CodeBufferTest extends TestCase {
     buffer.deleteEndingIfEndingIs("c");
     assertEquals(0, buffer.getNextCharIndex());
     assertEquals(2, buffer.getNextLineIndex());
+    assertEquals(5, buffer.getLastCharIndex());
+    assertEquals(1, buffer.getLastLineIndex());
     buffer.deleteEndingIfEndingIs("arrr\n");
     assertEquals(1, buffer.getNextCharIndex());
     assertEquals(1, buffer.getNextLineIndex());
+    assertEquals(0, buffer.getLastCharIndex());
+    assertEquals(1, buffer.getLastLineIndex());
   }
 }

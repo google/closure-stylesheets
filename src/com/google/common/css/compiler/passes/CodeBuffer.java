@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import com.google.common.base.Preconditions;
+
 import javax.annotation.Nullable;
 
 /**
@@ -38,17 +40,24 @@ public class CodeBuffer {
    * The index within the line of the next character to be written to the buffer.
    * Indices start at 0, following source map v3.
    */
-  private int nextCharIndex = 0;
+  private int nextCharIndex;
 
   /**
-   * The number of the line that will contain the character at characterIndex.
-   * Numbers start at 0, following source map v3.
+   * The index of the line that will contain the character at nextCharIndex.
+   * Indices start at 0, following source map v3.
    */
-  private int nextLineIndex = 0;
+  private int nextLineIndex;
+
+  /**
+   * The index of the last character written to the buffer.
+   * Indices start at 0, following source map v3.
+   */
+  private int lastCharIndex;
 
   CodeBuffer () {
     this.sb = new StringBuilder();
-  };
+    resetIndex();
+  }
 
   /** Returns buffer as String. */
   public final String getOutput() {
@@ -66,19 +75,33 @@ public class CodeBuffer {
   }
 
   /**
-   * Returns the index within the line of the next character to be written to the buffer.
-   * Indices start at 0, following source map v3.
+   * Returns {@link #nextCharIndex}.
    */
   public final int getNextCharIndex() {
     return nextCharIndex;
   }
 
   /**
-   * Returns the number of the line that will contain the next character at characterIndex. Numbers
-   * start at 0, following source map v3.
+   * Returns {@link #nextLineIndex}.
    */
   public final int getNextLineIndex() {
     return nextLineIndex;
+  }
+
+  /**
+   * Returns {@link #lastCharIndex}.
+   */
+  public final int getLastCharIndex() {
+    return lastCharIndex;
+  }
+
+  /**
+   * Returns the index of the line which contains the last character at lastCharIndex.
+   * It is always the same or 1 index behind {@link #nextLineIndex}.
+   */
+  public final int getLastLineIndex() {
+    return nextLineIndex - (
+        (sb.length() > 0 && sb.charAt(sb.length() - 1) == '\n') ? 1 : 0);
   }
 
   /**
@@ -98,7 +121,7 @@ public class CodeBuffer {
       String[] parts = str.split("\n", -1);
       for (int i = 0; i < parts.length; i++) {
         sb.append(parts[i]);
-        nextCharIndex += parts[i].length();
+        incrementIndexBy(parts[i].length());
         if (i != (parts.length - 1)) {
           startNewLine();
         }
@@ -109,14 +132,14 @@ public class CodeBuffer {
   }
 
   /**
-   * Append {@code c} to the buffer and update {@code nextCharIndex}.
+   * Appends {@code c} to the buffer and update {@code nextCharIndex}.
    */
   public final CodeBuffer append(char c) {
     if (c == '\n') {
       startNewLine();
     } else {
       sb.append(c);
-      nextCharIndex += 1;
+      incrementIndexBy(1);
     }
     return this;
   }
@@ -132,11 +155,8 @@ public class CodeBuffer {
    * {@code nextLineIndex}.
    */
   public final CodeBuffer startNewLine() {
-    if (nextCharIndex > 0) {
-      sb.append('\n');
-      nextLineIndex++;
-      nextCharIndex = 0;
-    }
+    sb.append('\n');
+    incrementIndexForNewline();
     return this;
   }
 
@@ -145,22 +165,9 @@ public class CodeBuffer {
    * {@code nextLineIndex}.
    */
   public final CodeBuffer deleteLastChar() {
-    int index = getCurrentLength() - 1;
-    char c = sb.charAt(index);
-    sb.deleteCharAt(index);
-
-    if (c == '\n') {
-      nextLineIndex--;
-      int lastNewline = sb.lastIndexOf("\n");
-      if (lastNewline != -1) {
-        // Transform length() from 1-based index to 0-based.
-        nextCharIndex = (sb.length() - 1) - lastNewline;
-      } else {
-        // Situation when delete back to the first line.
-        nextCharIndex = sb.length();
-      }
-    } else {
-      nextCharIndex--;
+    if (getCurrentLength() > 0) {
+      decrementIndex();
+      sb.deleteCharAt(getCurrentLength() - 1);
     }
     return this;
   }
@@ -178,8 +185,7 @@ public class CodeBuffer {
    * and {@code nextLineIndex}.
    */
   public final CodeBuffer reset() {
-    nextCharIndex = 0;
-    nextLineIndex = 0;
+    resetIndex();
     sb.setLength(0);
     sb.trimToSize();
     return this;
@@ -204,5 +210,72 @@ public class CodeBuffer {
     if (sb.subSequence(sb.length() - s.length(), sb.length()).equals(s)) {
       deleteLastChars(s.length());
     }
+  }
+
+  /**
+   * Updates character-related indexes before or after writing some non-newline characters
+   * to the buffer. Use {@link #incrementIndexForNewline} when writing '\n'.
+   *
+   * @param step numbers of characters writes to buffer
+   */
+  private void incrementIndexBy(int step) {
+    if (step > 0) {
+      lastCharIndex = nextCharIndex + step - 1;
+      nextCharIndex = nextCharIndex + step;
+    }
+  }
+
+  /**
+   * Updates character-related indexes before/after writing a newline character to the buffer.
+   */
+  private void incrementIndexForNewline() {
+    // '\n' is written at {@code nextCharIndex}
+    lastCharIndex = nextCharIndex;
+    nextCharIndex = 0;
+
+    // future writing starts at a new line
+    nextLineIndex++;
+  }
+
+  /**
+   * Updates character-related indexes <b>before</b> deleting a character in buffer.
+   *
+   * <p>Note: Indexes updates must take place before deletion as the last two chars determine
+   * the behavior.
+   */
+  private void decrementIndex() {
+    Preconditions.checkState(getCurrentLength() > 0);
+
+    nextCharIndex = lastCharIndex;
+
+    // Need to look at the last character to determine how to update indexes
+    int lastIndex = getCurrentLength() - 1;
+
+    // As a '\n' will be removed, {@code nextLineIndex} should be moved to previous line
+    if (sb.charAt(lastIndex) == '\n') {
+      nextLineIndex--;
+    }
+
+    // When the second to last char is a newline, needs to recalculate the {@code lastCharIndex}
+    if (lastIndex - 1 > 0 && sb.charAt(lastIndex - 1) == '\n') {
+      int lastNewline = sb.lastIndexOf("\n");
+      int secondToLastNewLine = sb.substring(0, lastNewline - 1).lastIndexOf('\n');
+      if (secondToLastNewLine == -1) {
+        // when only one line left after deletion
+        lastCharIndex = lastNewline - 1;
+      } else {
+        // Adjust to 0-based index for {@code lastCharIndex}.
+        lastCharIndex = lastNewline - secondToLastNewLine - 1;
+      }
+    } else {
+      // Otherwise, when deletion happens on same line, move the index one character to the left
+      lastCharIndex = lastCharIndex - 1;
+    }
+  }
+
+  private void resetIndex() {
+    nextCharIndex = 0;
+    nextLineIndex = 0;
+    lastCharIndex = -1;
   }
 }
