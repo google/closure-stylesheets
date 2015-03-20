@@ -38,7 +38,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
         "p {",
         "  flex-grow: 1;",
         "}"),
-        "[[p]{[[/* @alternate */]-webkit-box-flex:[[1]];[/* @alternate */]box-flex:[[1]];"
+        "[[p]{[[/* @alternate */]-webkit-box-flex:[[1]];"
         + "[/* @alternate */]-ms-flex-positive:[[1]];[/* @alternate */]-webkit-flex-grow:[[1]];"
         + "[/* @alternate */]flex-grow:[[1]];]}]");
   }

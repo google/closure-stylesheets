@@ -104,6 +104,8 @@ public class PassRunner {
     new ReplaceMixins(cssTree.getMutatingVisitController(), errorManager,
         collectMixinDefinitions.getDefinitions()).runPass();
 
+    new AutoExpandBrowserPrefix(cssTree.getMutatingVisitController(), errorManager).runPass();
+
     new ProcessComponents<Object>(cssTree.getMutatingVisitController(),
         errorManager).runPass();
     // Eliminate conditional nodes.
