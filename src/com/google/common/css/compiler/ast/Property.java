@@ -61,6 +61,7 @@ public final class Property {
         builder("animation-delay"),
         builder("animation-direction"),
         builder("animation-duration"),
+        builder("animation-fill-mode"),
         builder("animation-iteration-count"),
         builder("animation-name"),
         builder("animation-play-state"),
