@@ -292,7 +292,6 @@ public final class Property {
         builder("-moz-columns"),
         builder("-moz-flex"),
         builder("-moz-flex-direction"),
-        builder("-moz-flex-wrap"),
         builder("-moz-float-edge"),
         builder("-moz-font-feature-settings"),
         builder("-moz-font-language-override"),
@@ -374,9 +373,7 @@ public final class Property {
             "-ms-flex-order is outdated: order should be sufficient"),
         builder("-ms-flex-pack").warn(
             "-ms-flex-pack is outdated: justify-content should be sufficient"),
-        builder("-ms-flex-positive"),
         builder("-ms-flex-preferred-size"),
-        builder("-ms-flex-shrink"),
         builder("-ms-flex-wrap").warn(
             "-ms-flex-wrap is outdated: flex-wrap should be sufficient"),
         builder("-ms-grid-column"),
@@ -438,7 +435,6 @@ public final class Property {
         builder("-o-animation-name"),
         builder("-o-animation-play-state"),
         builder("-o-animation-timing-function"),
-        builder("-o-backface-visibility"),
         builder("-o-background-size"),
         builder("-o-text-overflow"),
         builder("-o-transform"),

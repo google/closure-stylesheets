@@ -76,6 +76,7 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("flex-wrap")
         .isFunction(false)
         .addExpandPropertyName("-moz-flex-wrap")
+        .addExpandPropertyName("-ms-flex-wrap")
         .addExpandPropertyName("-webkit-flex-wrap")
         .addExpandPropertyName("flex-wrap")
         .build());
@@ -92,6 +93,7 @@ final class BrowserPrefixGenerator {
         .matchPropertyName("flex-grow")
         .isFunction(false)
         .addExpandPropertyName("-webkit-box-flex")
+        .addExpandPropertyName("box-flex")
         .addExpandPropertyName("-ms-flex-positive")
         .addExpandPropertyName("-webkit-flex-grow")
         .addExpandPropertyName("flex-grow")
