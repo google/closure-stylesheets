@@ -369,10 +369,12 @@ public final class Property {
             "-ms-flex-align is outdated: align-items should be sufficient"),
         builder("-ms-flex-direction"),
         builder("-ms-flex-flow"),
+        builder("-ms-flex-negative"),
         builder("-ms-flex-order").warn(
             "-ms-flex-order is outdated: order should be sufficient"),
         builder("-ms-flex-pack").warn(
             "-ms-flex-pack is outdated: justify-content should be sufficient"),
+        builder("-ms-flex-positive"),
         builder("-ms-flex-preferred-size"),
         builder("-ms-flex-wrap").warn(
             "-ms-flex-wrap is outdated: flex-wrap should be sufficient"),
