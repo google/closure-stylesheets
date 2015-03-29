@@ -81,6 +81,7 @@ public class PassRunner {
         errorManager).runPass();
     new CreateComponentNodes(cssTree.getMutatingVisitController(),
         errorManager).runPass();
+    new ValidatePropertyValues(cssTree.getVisitController(), errorManager).runPass();
 
     new HandleUnknownAtRuleNodes(cssTree.getMutatingVisitController(),
         errorManager, job.allowedAtRules,

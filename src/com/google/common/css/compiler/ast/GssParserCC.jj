@@ -453,6 +453,13 @@ public class GssParserCC {
       return node;
     }
 
+    public CssUnicodeRangeNode buildUnicodeRangeNode(String value, SourceCodeLocation location,
+        List<Token> tokens) {
+      CssUnicodeRangeNode node = new CssUnicodeRangeNode(value, location);
+      attachComments(tokens, node);
+      return node;
+    }
+
     public CssNumericNode buildNumericNode(String num, String unit, SourceCodeLocation location,
         List<Token> tokens) {
       CssNumericNode node = new CssNumericNode(num, unit, location);
@@ -708,6 +715,12 @@ PARSER_END(GssParserCC)
   // mathematical expression tree, not an argument list, so it uses a different
   // parse tree.
   | < CALC: ("calc"|"-webkit-calc"|"-moz-calc") <LEFTROUND> >
+
+  | < #UNICODE_RANGE_TEXT: ( ["0"-"9","a"-"f", "A"-"F"] ){1,6} >
+
+  // Unicode range options: U+26, U+0015-00FF, U+4??
+  | < UNICODE_RANGE: "U+" <UNICODE_RANGE_TEXT>
+      ( ( ( <MINUS> <UNICODE_RANGE_TEXT> )? ) | ( ("?"){1,6} ) ) >
 
   // {ident}"(        {return FUNCTION;}
   | < FUNCTION: <IDENTIFIER> <LEFTROUND> >
@@ -1375,6 +1388,7 @@ CssValueNode term() :
   List<Token> tokens = Lists.newArrayList();
   boolean hexcolor = false;
   boolean loopVariable = false;
+  boolean unicodeRange = false;
 }
 {
   (
@@ -1384,6 +1398,7 @@ CssValueNode term() :
           ( (dim = <PERCENT> | dim = <IDENTIFIER>)
               { unit = dim.image.toLowerCase(); tokens.add(dim);} )?
     )
+    | t = <UNICODE_RANGE> { unicodeRange = true; tokens.add(t); }
     | stringNode = string()
     | // This lookahead is to support function names with . and :.
       ( LOOKAHEAD({getToken(2).kind != DOT && getToken(2).kind != COLON})
@@ -1445,6 +1460,8 @@ CssValueNode term() :
       }
       if (loopVariable) {
         return nodeBuilder.buildLoopVariableNode(sb.toString(), this.getLocation(t), tokens);
+      } else if (unicodeRange) {
+        return nodeBuilder.buildUnicodeRangeNode(sb.toString(), this.getLocation(t), tokens);
       } else {
         return nodeBuilder.buildLiteralNode(sb.toString(), this.getLocation(t), tokens);
       }

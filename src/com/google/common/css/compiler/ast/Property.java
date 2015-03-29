@@ -536,6 +536,7 @@ public final class Property {
         builder("transition-timing-function"),
         builder("transition"),
         builder("unicode-bidi"),
+        builder("unicode-range"),
         builder("vertical-align"),
         builder("visibility"),
         builder("voice-balance"),

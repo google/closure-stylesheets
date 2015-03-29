@@ -910,6 +910,13 @@ public class GssParserTest extends TestCase {
     }
   }
 
+  public void testUnicodeRange() throws Exception {
+    testValid("@font-face { unicode-range: U+26;}");
+    testValid("@font-face { unicode-range: U+0015-00FF;}");
+    testValid("@font-face { unicode-range: U+A015-C0FF;}");
+    testValid("@font-face { unicode-range: U+26??;}");
+  }
+
   private CssTree parse(List<SourceCode> sources) throws GssParserException {
     CssTree tree;
     if (reuseGssParser) {
