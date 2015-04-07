@@ -441,16 +441,19 @@ public class ProcessComponentsTest extends PassesTestBase {
 
   public void testImplicitlyNamedNoPackageError() throws Exception {
     parseAndRun("@component { }",
-        "implicitly-named @components require a single @provide declaration " + TEST_CHUNK);
+        "implicitly-named @components require a prior @provide declaration " + TEST_CHUNK);
     assertTrue(isEmptyBody());
   }
 
-  public void testImplicitlyNamedMultiplePackageError() throws Exception {
-    parseAndRun(
-        "@provide \"some.example.package\";\n" +
-        "@provide \"another.example.package\";\n" +
-            "@component { }",
-        "implicitly-named @components require a single @provide declaration " + TEST_CHUNK);
+  public void testImplicitlyNamedMultiplePackage() throws Exception {
+    // Construct gss consisting of three @provides and one implicit @component sandwiched
+    // in-between. Verify that the produced css uses the name of the @provide immediately preceeding
+    // the @compoment, not the one before or after.
+    testTreeConstruction(
+        "@provide \"another.example.package\";\n"
+        + namelessComponentInput + "\n"
+        + "@provide \"yetanother.example.package\";\n",
+        "[" + camelCasedComponentOutput + "]");
   }
 
   public void testImplicitlyNamedMultipleComponents() throws Exception {

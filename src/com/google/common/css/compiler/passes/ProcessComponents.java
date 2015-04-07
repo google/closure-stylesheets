@@ -112,11 +112,14 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     }
     String name = node.getName().getValue();
     if (node.isImplicitlyNamed()) {
-      if (provideNodes.size() != 1) {
-        reportError("implicitly-named @components require a single @provide declaration ", node);
+      // together before compiling, which can result in multiple @component nodes in the same file.
+      // So in the unnamed @component case, having multiple @provide is okay (use the last) but not
+      // having any is still not allowed.
+      if (provideNodes.size() < 1) {
+        reportError("implicitly-named @components require a prior @provide declaration ", node);
         return false;
       }
-      name = Iterables.getOnlyElement(provideNodes).getProvide();
+      name = Iterables.getLast(provideNodes).getProvide();
     }
     if (components.containsKey(name)) {
       reportError("cannot redefine component in chunk ", node);
@@ -283,7 +286,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
 
       String currentName = current.getName().getValue();
       if (current.isImplicitlyNamed()) {
-        currentName = Iterables.getOnlyElement(provideNodes).getProvide();
+        currentName = Iterables.getLast(provideNodes).getProvide();
       }
       this.isAbstract = current.isAbstract();
       if (current.getPrefixStyle() == CssComponentNode.PrefixStyle.CASE_CONVERT) {
