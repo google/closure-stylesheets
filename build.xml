@@ -79,6 +79,8 @@
         <include name="guava*.jar" />
         <include name="truth*.jar" />
         <include name="jsr305.jar" />
+        <!-- libsourcemap.jar is generated inside google's internal code base. -->
+        <include name="libsourcemap.jar" />
       </zipgroupfileset>
       <manifest>
         <attribute name="Main-Class"
