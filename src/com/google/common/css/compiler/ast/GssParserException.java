@@ -16,7 +16,7 @@
 
 package com.google.common.css.compiler.ast;
 
-import com.google.common.css.*;
+import com.google.common.css.SourceCodeLocation;
 
 public class GssParserException extends Exception {
   private static final long serialVersionUID = 1L;

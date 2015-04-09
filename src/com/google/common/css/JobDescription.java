@@ -60,6 +60,8 @@ public class JobDescription {
   public final OutputRenamingMapFormat outputRenamingMapFormat;
   public final boolean preserveComments;
   public final Map<String, Integer> compileConstants;
+  public final boolean createSourceMap;
+  public final SourceMapDetailLevel sourceMapLevel;
 
   static final String CONDITION_FOR_LTR = "GSS_LTR";
   static final String CONDITION_FOR_RTL = "GSS_RTL";
@@ -104,6 +106,11 @@ public class JobDescription {
     MAXIMUM
   }
 
+  /**
+   * The source map generation levels.
+   */
+  public enum SourceMapDetailLevel { ALL, DEFAULT }
+
   JobDescription(List<SourceCode> inputs,
       String copyrightNotice, OutputFormat outputFormat,
       InputOrientation inputOrientation, OutputOrientation outputOrientation,
@@ -121,7 +128,9 @@ public class JobDescription {
       SubstitutionMapProvider cssSubstitutionMapProvider,
       OutputRenamingMapFormat outputRenamingMapFormat,
       boolean preserveComments,
-      Map<String, Integer> compileConstants) {
+      Map<String, Integer> compileConstants,
+      boolean createSourceMap,
+      SourceMapDetailLevel sourceMapLevel) {
     Preconditions.checkArgument(!inputs.contains(null));
     Preconditions.checkNotNull(outputFormat);
     Preconditions.checkNotNull(inputOrientation);
@@ -162,6 +171,8 @@ public class JobDescription {
     this.outputRenamingMapFormat = outputRenamingMapFormat;
     this.preserveComments = preserveComments;
     this.compileConstants = ImmutableMap.copyOf(compileConstants);
+    this.createSourceMap = createSourceMap;
+    this.sourceMapLevel = sourceMapLevel;
   }
 
   /**

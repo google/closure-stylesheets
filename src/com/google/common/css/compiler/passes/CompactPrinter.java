@@ -72,20 +72,36 @@ public class CompactPrinter extends CodePrinter implements CssCompilerPass {
   private static final Logger logger = Logger.getLogger(
       CompactPrinter.class.getName());
 
+  public CompactPrinter(CssNode subtree,
+      @Nullable CodeBuffer buffer,
+      @Nullable GssSourceMapGenerator generator) {
+    super(subtree, buffer, generator);
+  }
+
   public CompactPrinter(CssNode subtree, @Nullable CodeBuffer buffer) {
-    super(subtree, buffer);
+    this(subtree, buffer, null /* generator */);
   }
 
   public CompactPrinter(CssNode subtree) {
     this(subtree, null /* buffer */);
   }
 
-  public CompactPrinter(CssTree tree, @Nullable CodeBuffer buffer) {
-    super(tree, buffer);
+  public CompactPrinter(CssTree tree,
+      @Nullable CodeBuffer buffer,
+      @Nullable GssSourceMapGenerator generator) {
+    super(tree, buffer, generator);
+  }
+
+  public CompactPrinter(CssTree tree, CodeBuffer buffer) {
+    this(tree, buffer, null /* generator */);
+  }
+
+  public CompactPrinter(CssTree tree, GssSourceMapGenerator generator) {
+    this(tree, null /* buffer */, generator);
   }
 
   public CompactPrinter(CssTree tree) {
-    this(tree, null /* buffer */);
+    this(tree, null /* buffer */, null /* generator */);
   }
 
   @Override

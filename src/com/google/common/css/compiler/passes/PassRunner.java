@@ -187,7 +187,7 @@ public class PassRunner {
     }
   }
 
-  public @Nullable RecordingSubstitutionMap getRecordingSubstitutionMap() {
+  @Nullable public RecordingSubstitutionMap getRecordingSubstitutionMap() {
     return recordingSubstitutionMap;
   }
 

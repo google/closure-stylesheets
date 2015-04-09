@@ -31,6 +31,9 @@ import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.CompactPrinter;
+import com.google.common.css.compiler.passes.DefaultGssSourceMapGenerator;
+import com.google.common.css.compiler.passes.GssSourceMapGenerator;
+import com.google.common.css.compiler.passes.NullGssSourceMapGenerator;
 import com.google.common.css.compiler.passes.PassRunner;
 import com.google.common.css.compiler.passes.PrettyPrinter;
 import com.google.common.io.Files;
@@ -58,6 +61,7 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
   private CssTree cssTree;
   private final ErrorManager errorManager;
   private final PassRunner passRunner;
+  private final GssSourceMapGenerator gssSourceMapGenerator;
 
   /**
    * Constructs a {@code DefaultCommandLineCompiler}.
@@ -70,6 +74,14 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
     super(job, exitCodeHandler);
     this.errorManager = errorManager;
     this.passRunner = new PassRunner(job, errorManager);
+    this.gssSourceMapGenerator = createSourceMapGenerator(job);
+  }
+
+  private GssSourceMapGenerator createSourceMapGenerator(JobDescription job) {
+    if (!job.createSourceMap) {
+      return new NullGssSourceMapGenerator();
+    }
+    return new DefaultGssSourceMapGenerator(job.sourceMapLevel);
   }
 
   /**
@@ -100,7 +112,7 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
   }
 
   /**
-   * Helper method for parsing and outputing the result.
+   * Helper method for parsing and outputting the result.
    */
   private void parseAndPrint(StringBuilder result, GssParser parser)
       throws GssParserException {
@@ -110,12 +122,14 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
     }
 
     if (job.outputFormat == OutputFormat.COMPRESSED) {
-      CompactPrinter compactPrinterPass = new CompactPrinter(cssTree);
+      CompactPrinter compactPrinterPass = new CompactPrinter(cssTree, gssSourceMapGenerator);
       compactPrinterPass.runPass();
       result.append(compactPrinterPass.getCompactPrintedString());
     } else {
       PrettyPrinter prettyPrinterPass = new PrettyPrinter(cssTree
-          .getVisitController());
+          .getVisitController(),
+          null /* use external buffer */,
+          gssSourceMapGenerator);
       prettyPrinterPass
           .setPreserveComments(job.preserveComments)
           .runPass();
@@ -129,7 +143,7 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
    * {@link RecordingSubstitutionMap}, then the renaming file will be written,
    * as well.
    */
-  protected String execute(@Nullable File renameFile) {
+  protected String execute(@Nullable File renameFile, @Nullable File sourcemapFile) {
     try {
       String compilerOutput = compile();
 
@@ -153,6 +167,13 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
             .getMappings();
         writeRenamingMap(renamingMap, renamingMapWriter);
         renamingMapWriter.close();
+      }
+
+      if (job.createSourceMap) {
+        PrintWriter sourceMapWriter = new PrintWriter(
+            Files.newWriter(sourcemapFile, UTF_8));
+        gssSourceMapGenerator.appendOutputTo(sourceMapWriter, sourcemapFile.getName());
+        sourceMapWriter.close();
       }
 
       return compilerOutput;

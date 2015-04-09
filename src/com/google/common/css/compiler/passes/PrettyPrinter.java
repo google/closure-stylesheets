@@ -63,6 +63,8 @@ import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.VisitController;
 
+import javax.annotation.Nullable;
+
 /**
  * A pretty-printer for {@link CssTree} instances. This is work in progress.
  * Look at PrettyPrinterTest to see what's supported.
@@ -77,8 +79,19 @@ public class PrettyPrinter extends CodePrinter implements CssCompilerPass {
   private boolean stripQuotes = false;
   private boolean preserveComments = false;
 
+  public PrettyPrinter(VisitController visitController,
+      @Nullable CodeBuffer buffer,
+      @Nullable GssSourceMapGenerator generator) {
+    super(visitController, buffer, generator);
+  }
+
+  public PrettyPrinter(VisitController visitController,
+      GssSourceMapGenerator generator) {
+    this(visitController, null /* buffer */, generator);
+  }
+
   public PrettyPrinter(VisitController visitController) {
-    super(visitController);
+    this(visitController, null /* buffer */, null /* generator */);
   }
 
   /**

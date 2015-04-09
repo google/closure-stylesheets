@@ -39,46 +39,75 @@ public abstract class CodePrinter extends UniformVisitor {
   protected final CodeBuffer buffer;
 
   /**
-   * Initializes this instance from the given {@link VisitController}, could optionally
-   * accept {@link CodeBuffer} to use.
+   * The source map generator used by CodePrinter and subclasses.
    */
-  protected CodePrinter(VisitController visitController, @Nullable CodeBuffer buffer) {
+  private final GssSourceMapGenerator generator;
+
+  /**
+   * Initializes this instance from the given {@link VisitController}, could optionally
+   * accept {@link CodeBuffer} and {@link GssSourceMapGenerator} to use.
+   */
+  protected CodePrinter(VisitController visitController,
+      @Nullable CodeBuffer buffer,
+      @Nullable GssSourceMapGenerator generator) {
     this.visitController = visitController;
     this.buffer = buffer != null ? buffer : new CodeBuffer();
+    this.generator = generator != null ? generator : new NullGssSourceMapGenerator();
+  }
+
+  protected CodePrinter(VisitController visitController, CodeBuffer buffer) {
+    this(visitController, buffer, null /* generator */);
   }
 
   protected CodePrinter(VisitController visitController) {
-    this(visitController, null /* buffer */ );
+    this(visitController, null /* buffer */);
   }
 
   /**
-   * Initializes this instance from the given subtree. This allows printing just a subtree instead
-   * of an entire tree.
+   * Initializes this instance from the given {@link CssNode}, could optionally
+   * accept {@link CodeBuffer} and {@link GssSourceMapGenerator} to use.
    */
-  protected CodePrinter(CssNode subtree, @Nullable CodeBuffer buffer) {
-    this(subtree.getVisitController(), buffer);
+  protected CodePrinter(CssNode subtree, CodeBuffer buffer, GssSourceMapGenerator generator) {
+    this(subtree.getVisitController(), buffer, generator);
   }
 
+  protected CodePrinter(CssNode subtree, CodeBuffer buffer) {
+    this(subtree.getVisitController(), buffer, null /* generator */);
+  }
   protected CodePrinter(CssNode subtree) {
-    this(subtree, null /* buffer */);
+    this(subtree.getVisitController(), null /* buffer */);
   }
 
   /**
-   * Initializes this instance from the given tree.
+   * Initializes this instance from the given {@link CssTree}, could optionally
+   * accept {@link CodeBuffer} and {@link GssSourceMapGenerator} to use.
    */
-  protected CodePrinter(CssTree tree, @Nullable CodeBuffer buffer) {
-    this(tree.getRoot(), buffer);
+  protected CodePrinter(CssTree tree, CodeBuffer buffer, GssSourceMapGenerator generator) {
+    this(tree.getVisitController(), buffer, generator);
   }
 
-  protected CodePrinter(CssTree tree) {
-    this(tree, null /* buffer */);
+  protected CodePrinter(CssTree tree, CodeBuffer buffer) {
+    this(tree.getVisitController(), buffer, null /* generator */);
   }
-  
+  protected CodePrinter(CssTree tree) {
+    this(tree.getVisitController(), null /* buffer */);
+  }
+
+  @Override
+  public void enter(CssNode node) {
+    generator.startSourceMapping(node, buffer.getNextLineIndex(), buffer.getNextCharIndex());
+  }
+
+  @Override
+  public void leave(CssNode node) {
+    generator.endSourceMapping(node, buffer.getLastLineIndex(), buffer.getLastCharIndex());
+  }
+
   // Proxy method for external usage.
   protected void resetBuffer() {
     buffer.reset();
   }
-  
+
   protected String getOutputBuffer() {
     return buffer.getOutput();
   }

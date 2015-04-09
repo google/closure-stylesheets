@@ -25,6 +25,7 @@ import com.google.common.css.JobDescription.InputOrientation;
 import com.google.common.css.JobDescription.OptimizeStrategy;
 import com.google.common.css.JobDescription.OutputFormat;
 import com.google.common.css.JobDescription.OutputOrientation;
+import com.google.common.css.JobDescription.SourceMapDetailLevel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +67,8 @@ public class JobDescriptionBuilder {
   private Map<String, Integer> compileConstants;
 
   private JobDescription job = null;
+  private boolean createSourceMap;
+  private SourceMapDetailLevel sourceMapLevel;
 
   public JobDescriptionBuilder() {
     this.inputs = Lists.newArrayList();
@@ -95,6 +98,8 @@ public class JobDescriptionBuilder {
     this.outputRenamingMapFormat = OutputRenamingMapFormat.JSCOMP_VARIABLE_MAP;
     this.preserveComments = false;
     this.compileConstants = new HashMap<>();
+    this.createSourceMap = false;
+    this.sourceMapLevel = SourceMapDetailLevel.DEFAULT;
   }
 
   public JobDescriptionBuilder copyFrom(JobDescription jobToCopy) {
@@ -127,6 +132,8 @@ public class JobDescriptionBuilder {
     this.outputRenamingMapFormat = jobToCopy.outputRenamingMapFormat;
     this.preserveComments = jobToCopy.preserveComments;
     setCompileConstants(jobToCopy.compileConstants);
+    this.createSourceMap = jobToCopy.createSourceMap;
+    this.sourceMapLevel = jobToCopy.sourceMapLevel;
     return this;
   }
 
@@ -408,7 +415,16 @@ public class JobDescriptionBuilder {
         allowKeyframes, allowWebkitKeyframes, processDependencies,
         allowedAtRules, cssRenamingPrefix, excludedClassesFromRenaming,
         gssFunctionMapProvider, cssSubstitutionMapProvider,
-        outputRenamingMapFormat, preserveComments, compileConstants);
+        outputRenamingMapFormat, preserveComments, compileConstants,
+        createSourceMap, sourceMapLevel);
     return job;
+  }
+
+  public void setSourceMapLevel(SourceMapDetailLevel sourceMapLevel) {
+    this.sourceMapLevel = sourceMapLevel;
+  }
+
+  public void setCreateSourceMap(String sourceMapOutput) {
+    this.createSourceMap = !sourceMapOutput.isEmpty();
   }
 }

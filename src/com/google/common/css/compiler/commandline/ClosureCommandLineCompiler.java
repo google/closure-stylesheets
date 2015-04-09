@@ -27,6 +27,7 @@ import com.google.common.css.GssFunctionMapProvider;
 import com.google.common.css.JobDescription;
 import com.google.common.css.JobDescription.InputOrientation;
 import com.google.common.css.JobDescription.OutputOrientation;
+import com.google.common.css.JobDescription.SourceMapDetailLevel;
 import com.google.common.css.JobDescriptionBuilder;
 import com.google.common.css.OutputRenamingMapFormat;
 import com.google.common.css.SourceCode;
@@ -120,6 +121,18 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         + " output from the CSS class renaming.")
     private OutputRenamingMapFormat outputRenamingMapFormat =
         OutputRenamingMapFormat.JSON;
+
+
+    @Option(name = "--output-source-map", usage = "The source map output."
+        + " Provides a mapping from the generated output to their original"
+        + " source code location.")
+    private String sourceMapFile = null;
+
+    @Option(name = "source_map_output_level", usage = "The level to generate "
+        + "source maps. You could choose between DEFAULT, which will generate "
+        + "source map only for selectors, blocks, rules, variables and symbol "
+        + "mappings, and ALL, which outputs mappings for all elements.")
+    private SourceMapDetailLevel sourceMapLevel = SourceMapDetailLevel.DEFAULT;
 
     @Option(name = "--copyright-notice",
         usage = "Copyright notice to prepend to the output")
@@ -222,6 +235,8 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       GssFunctionMapProvider gssFunctionMapProvider =
           getGssFunctionMapProviderForName(gssFunctionMapProviderClassName);
       builder.setGssFunctionMapProvider(gssFunctionMapProvider);
+      builder.setSourceMapLevel(sourceMapLevel);
+      builder.setCreateSourceMap(sourceMapFile);
 
       for (String fileName : arguments) {
         File file = new File(fileName);
@@ -244,7 +259,8 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     private OutputInfo createOutputInfo() {
       return new OutputInfo(
           (outputFile == null) ? null : new File(outputFile),
-          (renameFile == null) ? null : new File(renameFile));
+          (renameFile == null) ? null : new File(renameFile),
+          (sourceMapFile == null) ? null : new File(sourceMapFile));
     }
 
     /**
@@ -297,23 +313,25 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
   }
 
   private static class OutputInfo {
-    public final @Nullable File outputFile;
-    public final @Nullable File renameFile;
+    @Nullable public final File outputFile;
+    @Nullable public final File renameFile;
+    @Nullable public final File sourceMapFile;
 
-    private OutputInfo(File outputFile, File renameFile) {
+    private OutputInfo(File outputFile, File renameFile, File sourceMapFile) {
       this.outputFile = outputFile;
       this.renameFile = renameFile;
+      this.sourceMapFile = sourceMapFile;
     }
   }
 
-  private static void executeJob(JobDescription job,
-      ExitCodeHandler exitCodeHandler, OutputInfo outputInfo) {
+  private static void executeJob(JobDescription job, ExitCodeHandler exitCodeHandler,
+      OutputInfo outputInfo) {
     CompilerErrorManager errorManager = new CompilerErrorManager();
 
-    ClosureCommandLineCompiler compiler = new ClosureCommandLineCompiler(
-        job, exitCodeHandler, errorManager);
+    ClosureCommandLineCompiler compiler =
+        new ClosureCommandLineCompiler(job, exitCodeHandler, errorManager);
 
-    String compilerOutput = compiler.execute(outputInfo.renameFile);
+    String compilerOutput = compiler.execute(outputInfo.renameFile, outputInfo.sourceMapFile);
 
     if (outputInfo.outputFile == null) {
       System.out.print(compilerOutput);
@@ -321,8 +339,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       try {
         Files.write(compilerOutput, outputInfo.outputFile, UTF_8);
       } catch (IOException e) {
-        AbstractCommandLineCompiler.exitOnUnhandledException(e,
-            exitCodeHandler);
+        AbstractCommandLineCompiler.exitOnUnhandledException(e, exitCodeHandler);
       }
     }
   }
