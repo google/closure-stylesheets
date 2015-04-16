@@ -56,6 +56,16 @@ final class BrowserPrefixGenerator {
         .addExpandPropertyValue("flex")
         .build());
 
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("display")
+        .matchPropertyValue("inline-flex")
+        .isFunction(false)
+        .addExpandPropertyValue("-webkit-inline-box")
+        .addExpandPropertyValue("-webkit-inline-flex")
+        .addExpandPropertyValue("-ms-inline-flexbox")
+        .addExpandPropertyValue("inline-flex")
+        .build());
+
      builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("flex-flow")
         .isFunction(false)
