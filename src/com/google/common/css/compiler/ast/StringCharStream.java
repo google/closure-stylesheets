@@ -44,6 +44,9 @@ public class StringCharStream implements CharStream {
   private int beginLine;
   private int beginColumn;
 
+  private int tabSize = 1;
+  private boolean trackLineColumn;
+
   /**
    * This array (working as a map: lineNumber -> characterIndex) helps to
    * compute token locations efficiently. First element is not used as line
@@ -121,7 +124,11 @@ public class StringCharStream implements CharStream {
       line++;
       column = 0;
     }
-    column++;
+    if (lastChar == '\t') {
+      column += (tabSize - (column % tabSize));
+    } else {
+      column++;
+    }
     lastChar = input.charAt(++charPos);
     return lastChar;
   }
@@ -205,5 +212,25 @@ public class StringCharStream implements CharStream {
   @Override
   public void Done() {
     // Does nothing since no resources need to be freed.
+  }
+
+  @Override
+  public void setTabSize(int tabSize) {
+    throw new UnsupportedOperationException("setTabSize() is not supported.");
+  }
+
+  @Override
+  public int getTabSize() {
+    return tabSize;
+  }
+
+  @Override
+  public boolean getTrackLineColumn() {
+    return trackLineColumn;
+  }
+
+  @Override
+  public void setTrackLineColumn(boolean trackLineColumn) {
+    this.trackLineColumn = trackLineColumn;
   }
 }
