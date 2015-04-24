@@ -23,7 +23,6 @@ import com.google.common.css.compiler.passes.testing.AstPrinter;
 
 import junit.framework.TestCase;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -33,8 +32,6 @@ import java.util.List;
  */
 
 public class GssParserTest extends TestCase {
-
-  private boolean reuseGssParser = false;
 
   private CssTree testValid(String gss) throws GssParserException {
     CssTree tree = parse(gss);
@@ -895,21 +892,6 @@ public class GssParserTest extends TestCase {
     testTree("div {}/**/p {}/**/div {}", "[[div]{[]}[p]{[]}[div]{[]}]");
   }
 
-  public void testAllCasesWithReuseableParser() throws Exception {
-    // Call all other test cases in one method to make sure the same thread
-    // local parser is reused.
-    reuseGssParser = true;
-    for (Method m : GssParserTest.class.getDeclaredMethods()) {
-      if (m.getName().startsWith("test")
-          && !m.getName().equals("testAllCasesWithReuseableParser")
-          && m.getParameterTypes().length == 0) {
-        // Run each test twice to run each test with a used parser.
-        m.invoke(this);
-        m.invoke(this);
-      }
-    }
-  }
-
   public void testUnicodeRange() throws Exception {
     testValid("@font-face { unicode-range: U+26;}");
     testValid("@font-face { unicode-range: U+0015-00FF;}");
@@ -918,15 +900,8 @@ public class GssParserTest extends TestCase {
   }
 
   private CssTree parse(List<SourceCode> sources) throws GssParserException {
-    CssTree tree;
-    if (reuseGssParser) {
-      GssParser parser = new GssParser(sources);
-      tree = parser.parse();
-    } else {
-      PerThreadGssParser parser = new PerThreadGssParser();
-      tree = parser.parse(sources);
-    }
-    return tree;
+    GssParser parser = new GssParser(sources);
+    return parser.parse();
   }
 
   private CssTree parse(String gss) throws GssParserException {

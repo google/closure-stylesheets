@@ -22,7 +22,6 @@ import com.google.common.css.SourceCode;
 
 import junit.framework.TestCase;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +32,6 @@ import java.util.List;
  */
 
 public class GssParserErrorTest extends TestCase {
-
-  private boolean reuseGssParser = false;
 
   private void testError(String gss, int lineNumber, int indexInLine,
                          String line, String caret) {
@@ -359,36 +356,12 @@ public class GssParserErrorTest extends TestCase {
         + "                     ^\n");
   }
 
-  // When porting this test to Junit4, please make necessary change to this
-  // method to make sure all the rest test cases are invoked here.
-  public void testAllCasesWithReuseableParser() throws Exception {
-    // Call all other test cases in one method to make sure the same thread
-    // local parser is reused.
-    reuseGssParser = true;
-    for (Method m : GssParserErrorTest.class.getDeclaredMethods()) {
-      if (m.getName().startsWith("test")
-          && !m.getName().equals("testAllCasesWithReuseableParser")
-          && m.getParameterTypes().length == 0) {
-        // Run each test twice to run each test with a used parser.
-        m.invoke(this);
-        m.invoke(this);
-      }
-    }
-  }
-
   private CssTree parse(String gss, boolean shouldHandleError,
       List<GssParserException> handledErrors)
       throws GssParserException {
-    CssTree tree;
-    if (reuseGssParser) {
-      GssParser parser = new GssParser(new SourceCode("test", gss));
-      tree = parser.parse(shouldHandleError);
-      handledErrors.addAll(parser.getHandledErrors());
-    } else {
-      PerThreadGssParser parser = new PerThreadGssParser();
-      tree = parser.parse(new SourceCode("test", gss), shouldHandleError);
-      handledErrors.addAll(parser.getHandledErrors());
-    }
+    GssParser parser = new GssParser(new SourceCode("test", gss));
+    CssTree tree = parser.parse(shouldHandleError);
+    handledErrors.addAll(parser.getHandledErrors());
     return tree;
   }
 
