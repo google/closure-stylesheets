@@ -424,7 +424,7 @@ public class JobDescriptionBuilder {
     this.sourceMapLevel = sourceMapLevel;
   }
 
-  public void setCreateSourceMap(String sourceMapOutput) {
-    this.createSourceMap = !sourceMapOutput.isEmpty();
+  public void setCreateSourceMap(boolean createSourceMap) {
+    this.createSourceMap = createSourceMap;
   }
 }

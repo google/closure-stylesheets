@@ -19,6 +19,7 @@ package com.google.common.css.compiler.commandline;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.css.AbstractCommandLineCompiler;
 import com.google.common.css.ExitCodeHandler;
 import com.google.common.css.JobDescription;
@@ -169,7 +170,8 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
         renamingMapWriter.close();
       }
 
-      if (job.createSourceMap) {
+      if (job.createSourceMap
+          && sourcemapFile != null && !Strings.isNullOrEmpty(sourcemapFile.getName())) {
         PrintWriter sourceMapWriter = new PrintWriter(
             Files.newWriter(sourcemapFile, UTF_8));
         gssSourceMapGenerator.appendOutputTo(sourceMapWriter, sourcemapFile.getName());

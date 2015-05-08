@@ -19,6 +19,7 @@ package com.google.common.css.compiler.commandline;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.css.AbstractCommandLineCompiler;
 import com.google.common.css.DefaultExitCodeHandler;
@@ -126,7 +127,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     @Option(name = "--output-source-map", usage = "The source map output."
         + " Provides a mapping from the generated output to their original"
         + " source code location.")
-    private String sourceMapFile = null;
+    private String sourceMapFile = "";
 
     @Option(name = "source_map_output_level", usage = "The level to generate "
         + "source maps. You could choose between DEFAULT, which will generate "
@@ -236,7 +237,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
           getGssFunctionMapProviderForName(gssFunctionMapProviderClassName);
       builder.setGssFunctionMapProvider(gssFunctionMapProvider);
       builder.setSourceMapLevel(sourceMapLevel);
-      builder.setCreateSourceMap(sourceMapFile);
+      builder.setCreateSourceMap(!Strings.isNullOrEmpty(sourceMapFile));
 
       for (String fileName : arguments) {
         File file = new File(fileName);
