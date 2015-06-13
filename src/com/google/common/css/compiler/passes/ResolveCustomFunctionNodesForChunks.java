@@ -41,7 +41,7 @@ import java.util.Set;
  * have no references as arguments. Otherwise, it creates a new definition for
  * the function call even if it's already a definition. At the end, the main
  * tree is free of function calls; all the new definitions are collected in a
- * map of {link ConstantDefinitions} per chunk; there are no nested calls.
+ * map of {@link ConstantDefinitions} per chunk; there are no nested calls.
  *
  * @author dgajda@google.com (Damian Gajda)
  */

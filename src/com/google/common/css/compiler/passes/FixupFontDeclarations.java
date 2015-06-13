@@ -83,7 +83,7 @@ public class FixupFontDeclarations extends DefaultTreeVisitor
   }
 
   /**
-   * Properties whose values may be specified in a @{code Font} declaration.
+   * Properties whose values may be specified in a {@code Font} declaration.
    */
   public enum FontProperty {
     STYLE, VARIANT, WEIGHT, SIZE, LINE_HEIGHT, FAMILY

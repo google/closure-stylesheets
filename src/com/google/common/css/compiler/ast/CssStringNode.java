@@ -293,7 +293,7 @@ public class CssStringNode extends CssValueNode {
   /**
    * Encodes a CSS term denoting {@code raw}. In general, there are multiple
    * representations in CSS of the same value; we allow clients to influence
-   * this choice through @{code discretionaryEscaper}.
+   * this choice through {@code discretionaryEscaper}.
    *
    * @see #HTML_ESCAPER
    * @see #SHORT_ESCAPER

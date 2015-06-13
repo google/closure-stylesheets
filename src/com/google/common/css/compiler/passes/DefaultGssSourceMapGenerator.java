@@ -64,7 +64,7 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
   }
 
   /**
-   * Map used internally to get {@code Predicate<CssNode>}s from @{code DetailLevel}.
+   * Map used internally to get {@code Predicate<CssNode>}s from {@code DetailLevel}.
    *
    * <ul>
    * <li> {@code ALL} provides the most details by generating source map for
