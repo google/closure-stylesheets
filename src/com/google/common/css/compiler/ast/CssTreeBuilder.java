@@ -445,8 +445,7 @@ public class CssTreeBuilder implements
     Preconditions.checkArgument(expressionToken.getToken().length() == 1);
 
     // We are going to change the state unless it's a space operator
-    if (expressionToken.getToken() != " ") {
-
+    if (!" ".equals(expressionToken.getToken())) {
       // We may need to construct the corresponding composite node if the last
       // one in the list is not a composite node or if it is not based on the
       // same operator
@@ -460,8 +459,8 @@ public class CssTreeBuilder implements
       }
 
       if (!(lastChild instanceof CssCompositeValueNode)
-          || ((CssCompositeValueNode) lastChild).getOperator().toString()
-              == expressionToken.getToken()) {
+          || ((CssCompositeValueNode) lastChild).getOperator().toString().equals(
+              expressionToken.getToken())) {
         CssCompositeValueNode node = new CssCompositeValueNode(
             Lists.newArrayList(lastChild),
             Operator.valueOf(expressionToken.getToken().charAt(0)),
