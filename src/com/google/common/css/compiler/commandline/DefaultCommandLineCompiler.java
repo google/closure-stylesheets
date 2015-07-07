@@ -25,6 +25,7 @@ import com.google.common.css.ExitCodeHandler;
 import com.google.common.css.JobDescription;
 import com.google.common.css.JobDescription.OutputFormat;
 import com.google.common.css.RecordingSubstitutionMap;
+import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.BasicErrorManager;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.ErrorManager;
@@ -51,7 +52,7 @@ import javax.annotation.Nullable;
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
+public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler<JobDescription> {
 
   /**
    * The compiler will limit the number of error messages it outputs to this
@@ -106,8 +107,15 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler {
       result.append(job.copyrightNotice);
     }
 
+    if (job.allowDefPropagation) {
       GssParser parser = new GssParser(job.inputs);
       parseAndPrint(result, parser);
+    } else {
+      for (SourceCode source : job.inputs) {
+        GssParser parser = new GssParser(source);
+        parseAndPrint(result, parser);
+      }
+    }
 
     return result.toString();
   }

@@ -80,7 +80,6 @@ public class CssCustomFunctionNode extends CssFunctionNode
     return new CssCustomFunctionNode(this);
   }
 
-
   @Override
   public String getFunctionName() {
     return gssFunctionName;

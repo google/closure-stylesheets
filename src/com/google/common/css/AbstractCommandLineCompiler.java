@@ -24,7 +24,7 @@ import com.google.common.base.Preconditions;
  * command line interface to the CSS parser.
  *
  */
-public class AbstractCommandLineCompiler {
+public class AbstractCommandLineCompiler<T extends JobDescription> {
 
   /**
    * Exit code for success (normal operation of the compiler, possibly with
@@ -57,7 +57,7 @@ public class AbstractCommandLineCompiler {
   public static final int INTERNAL_ERROR_EXIT_CODE = 3;
 
   /** The job to process: the inputs and the options. */
-  protected final JobDescription job;
+  protected final T job;
 
   /** Whether the compiler was called. We don't allow calling it twice. */
   protected boolean compilerWasUsed = false;
@@ -71,7 +71,7 @@ public class AbstractCommandLineCompiler {
    * @param job the inputs the compiler should process and the options to use
    */
   @VisibleForTesting
-  public AbstractCommandLineCompiler(JobDescription job,
+  public AbstractCommandLineCompiler(T job,
       ExitCodeHandler exitCodeHandler) {
     Preconditions.checkNotNull(job);
     Preconditions.checkNotNull(exitCodeHandler);

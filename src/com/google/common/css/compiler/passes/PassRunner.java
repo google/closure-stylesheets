@@ -65,8 +65,7 @@ public class PassRunner {
    */
   public void runPasses(CssTree cssTree) {
     new CheckDependencyNodes(cssTree.getMutatingVisitController(),
-        errorManager,
-        false).runPass();
+        errorManager, job.suppressDependencyCheck).runPass();
     new CreateStandardAtRuleNodes(cssTree.getMutatingVisitController(),
         errorManager).runPass();
     new CreateMixins(cssTree.getMutatingVisitController(),
@@ -119,8 +118,7 @@ public class PassRunner {
     ReplaceConstantReferences replaceConstantReferences =
         new ReplaceConstantReferences(cssTree,
             collectConstantDefinitionsPass.getConstantDefinitions(),
-            true /* removeDefs */, errorManager,
-            false);
+            true /* removeDefs */, errorManager, job.allowUndefinedConstants);
     replaceConstantReferences.runPass();
 
     Map<String, GssFunction> gssFunctionMap = getGssFunctionMap();

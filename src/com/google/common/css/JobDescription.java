@@ -20,9 +20,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * Provides inputs and options to Closure Stylesheets.
@@ -44,10 +46,13 @@ public class JobDescription {
   public final boolean swapLeftRightInUrl;
   public final boolean simplifyCss;
   public final boolean eliminateDeadStyles;
+  public final boolean allowDefPropagation;
   public final boolean allowUnrecognizedFunctions;
   public final Set<String> allowedNonStandardFunctions;
   public final boolean allowUnrecognizedProperties;
   public final Set<String> allowedUnrecognizedProperties;
+  public final boolean allowUndefinedConstants;
+  public final boolean allowMozDocument;
   public final Vendor vendor;
   public final boolean allowKeyframes;
   public final boolean allowWebkitKeyframes;
@@ -59,6 +64,7 @@ public class JobDescription {
   public final SubstitutionMapProvider cssSubstitutionMapProvider;
   public final OutputRenamingMapFormat outputRenamingMapFormat;
   public final boolean preserveComments;
+  public final boolean suppressDependencyCheck;
   public final Map<String, Integer> compileConstants;
   public final boolean createSourceMap;
   public final SourceMapDetailLevel sourceMapLevel;
@@ -117,20 +123,23 @@ public class JobDescription {
       OptimizeStrategy optimize, List<String> trueConditionNames,
       boolean useInternalBidiFlipper, boolean swapLtrRtlInUrl,
       boolean swapLeftRightInUrl, boolean simplifyCss,
-      boolean eliminateDeadStyles, boolean allowUnrecognizedFunctions,
+      boolean eliminateDeadStyles, boolean allowDefPropagation,
+      boolean allowUnrecognizedFunctions,
       Set<String> allowedNonStandardFunctions,
       boolean allowUnrecognizedProperties,
-      Set<String> allowedUnrecognizedProperties, Vendor vendor,
-      boolean allowKeyframes, boolean allowWebkitKeyframes,
+      Set<String> allowedUnrecognizedProperties, boolean allowUndefinedConstants,
+      boolean allowMozDocument,
+      Vendor vendor, boolean allowKeyframes, boolean allowWebkitKeyframes,
       boolean processDependencies, Set<String> allowedAtRules,
       String cssRenamingPrefix, List<String> excludedClassesFromRenaming,
       GssFunctionMapProvider gssFunctionMapProvider,
       SubstitutionMapProvider cssSubstitutionMapProvider,
       OutputRenamingMapFormat outputRenamingMapFormat,
       boolean preserveComments,
-      Map<String, Integer> compileConstants,
+      boolean suppressDependencyCheck, Map<String, Integer> compileConstants,
       boolean createSourceMap,
       SourceMapDetailLevel sourceMapLevel) {
+    this.allowUndefinedConstants = allowUndefinedConstants;
     Preconditions.checkArgument(!inputs.contains(null));
     Preconditions.checkNotNull(outputFormat);
     Preconditions.checkNotNull(inputOrientation);
@@ -152,12 +161,14 @@ public class JobDescription {
     this.swapLeftRightInUrl = swapLeftRightInUrl;
     this.simplifyCss = simplifyCss;
     this.eliminateDeadStyles = eliminateDeadStyles;
+    this.allowDefPropagation = allowDefPropagation;
     this.allowUnrecognizedFunctions = allowUnrecognizedFunctions;
     this.allowedNonStandardFunctions = ImmutableSet.copyOf(
         allowedNonStandardFunctions);
     this.allowUnrecognizedProperties = allowUnrecognizedProperties;
     this.allowedUnrecognizedProperties = ImmutableSet.copyOf(
         allowedUnrecognizedProperties);
+    this.allowMozDocument = allowMozDocument;
     this.vendor = vendor;
     this.allowKeyframes = allowKeyframes;
     this.allowWebkitKeyframes = allowWebkitKeyframes;
@@ -170,6 +181,7 @@ public class JobDescription {
     this.cssSubstitutionMapProvider = cssSubstitutionMapProvider;
     this.outputRenamingMapFormat = outputRenamingMapFormat;
     this.preserveComments = preserveComments;
+    this.suppressDependencyCheck = suppressDependencyCheck;
     this.compileConstants = ImmutableMap.copyOf(compileConstants);
     this.createSourceMap = createSourceMap;
     this.sourceMapLevel = sourceMapLevel;
@@ -203,5 +215,12 @@ public class JobDescription {
     return !(outputOrientation == OutputOrientation.NOCHANGE ||
         JobDescription.orientationsAreTheSame(
             inputOrientation, outputOrientation));
+  }
+
+  /**
+   * Returns a new {@code JobDescriptionBuilder} based on this job.
+   */
+  public JobDescriptionBuilder toBuilder() {
+    return new JobDescriptionBuilder().copyFrom(this);
   }
 }
