@@ -134,7 +134,7 @@ final class BrowserPrefixGenerator {
     builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("flex-shrink")
         .isFunction(false)
-        .addExpandPropertyName("-ms-flex-shrink")
+        .addExpandPropertyName("-ms-flex-negative")
         .addExpandPropertyName("-webkit-flex-shrink")
         .addExpandPropertyName("flex-shrink")
         .build());
