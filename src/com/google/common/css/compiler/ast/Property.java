@@ -606,6 +606,7 @@ public final class Property {
         builder("-webkit-box-reflect"),
         builder("-webkit-box-shadow"),
         builder("-webkit-box-sizing"),
+        builder("-webkit-clip-path"),
         builder("-webkit-color-correction"),
         builder("-webkit-column-axis"),
         builder("-webkit-column-break-after"),
