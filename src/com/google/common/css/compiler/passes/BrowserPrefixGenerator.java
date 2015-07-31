@@ -270,6 +270,15 @@ final class BrowserPrefixGenerator {
         .addExpandPropertyValue("repeating-linear-gradient")
         .build());
 
+    // Needed for Firefox 15, Chrome 25, Safari 6, iOS Safari 6.1 or less
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyValue("calc")
+        .isFunction(true)
+        .addExpandPropertyValue("-webkit-calc")
+        .addExpandPropertyValue("-moz-calc")
+        .addExpandPropertyValue("calc")
+        .build());
+
     builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("perspective")
         .isFunction(false)

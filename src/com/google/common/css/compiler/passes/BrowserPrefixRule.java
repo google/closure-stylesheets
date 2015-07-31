@@ -36,32 +36,30 @@ import javax.annotation.Nullable;
  * A utility for the AutoExpandBrowserPrefix pass, which provides a list of rules
  * that govern automatic addition of browser specific property declarations.
  *
- * <p>A rule could be matched on property name alone or both property name and value.
+ * <p>A rule could be matched on property name or value alone, or both property name and value.
  * If the value is a function, then the function names must match.
  *
  * <p>Each rule, if matched, provides a set of placeholder expansion nodes - which will
  * be cloned and swapped into the tree, as part of AutoExpandBrowserPrefix pass.
  */
 class BrowserPrefixRule {
-  private String matchPropertyName;
-  private Optional<String> matchPropertyValue;
-  private boolean isFunction;
-  private List<CssDeclarationNode> expansionNodes = Lists.newArrayList();
+  private final Optional<String> matchPropertyName;
+  private final Optional<String> matchPropertyValue;
+  private final boolean isFunction;
+  private final List<CssDeclarationNode> expansionNodes = Lists.newArrayList();
+  private final List<CssPropertyValueNode> valueOnlyExpansionNodes = Lists.newArrayList();
 
   private BrowserPrefixRule(Builder builder) {
-    checkState(!builder.matchPropertyName.isEmpty());
-    this.matchPropertyName = builder.matchPropertyName;
-    if (builder.matchPropertyValue != null) {
-      this.matchPropertyValue = Optional.of(builder.matchPropertyValue);
-    } else {
-      this.matchPropertyValue = Optional.absent();
-    }
+    checkState(builder.matchPropertyName != null || builder.matchPropertyValue != null);
+    this.matchPropertyName = Optional.fromNullable(builder.matchPropertyName);
+    this.matchPropertyValue = Optional.fromNullable(builder.matchPropertyValue);
     this.isFunction = builder.isFunction;
 
     // Pre-compute placeholder expansion nodes for this rule.
     // Either expandPropertyValueList or expandPropertyNameList will be non-empty.
     if (builder.expandPropertyValueList.isEmpty()) {
       checkState(!builder.expandPropertyNameList.isEmpty());
+      // Case #1: The value expansion list is empty and there is only a property name to expand.
       for (String propertyName : builder.expandPropertyNameList) {
         CssPropertyNode propertyNode = new CssPropertyNode(propertyName);
         // The property value will be set, when matched.
@@ -74,27 +72,36 @@ class BrowserPrefixRule {
     if (builder.expandPropertyNameList.isEmpty()) {
       checkState(!builder.expandPropertyValueList.isEmpty());
       for (String propertyValue : builder.expandPropertyValueList) {
-        CssPropertyNode propertyNode = new CssPropertyNode(matchPropertyName);
         CssPropertyValueNode valueNode = new CssPropertyValueNode();
         if (isFunction) {
+          // Case #3: Property value is a function
           checkState(!builder.expandPropertyValueList.isEmpty());
           CssFunctionNode functionNode = new CssFunctionNode(
               CssFunctionNode.Function.byName(propertyValue), null);
           // Function args will be set, when matched.
           valueNode.addChildToBack((CssValueNode) functionNode);
         } else {
+          // Case #2: Property value is not a function
           checkState(matchPropertyValue != null);  // Has both name and value
           valueNode.addChildToBack(new CssLiteralNode(propertyValue));
         }
-        CssDeclarationNode node = new CssDeclarationNode(propertyNode, valueNode);
-        node.appendComment(new CssCommentNode("/* @alternate */", null));
-        expansionNodes.add(node);
+        if (matchPropertyName.isPresent()) {
+          // If the property name is present a full declaration expansion can be created.
+          CssPropertyNode propertyNode = new CssPropertyNode(matchPropertyName.get());
+          CssDeclarationNode node = new CssDeclarationNode(propertyNode, valueNode);
+          node.appendComment(new CssCommentNode("/* @alternate */", null));
+          expansionNodes.add(node);
+        } else {
+          // Since the property name is not present there is a value-only expansion added.
+          // The property name will be taken from the original declaration.
+          valueOnlyExpansionNodes.add(valueNode);
+        }
       }
     }
   }
 
-  String getMatchPropertyName() {
-    return matchPropertyName;
+  @Nullable String getMatchPropertyName() {
+    return matchPropertyName.orNull();
   }
 
   @Nullable String getMatchPropertyValue() {
@@ -105,12 +112,24 @@ class BrowserPrefixRule {
     return isFunction;
   }
 
+  /**
+   * @return A list of expansion nodes that contain a property names, and may contain a value.
+   * These nodes should be used when replacing declarations by matching property name.
+   */
   List<CssDeclarationNode> getExpansionNodes() {
     return expansionNodes;
   }
 
+  /**
+   * @return A list of value-only expansion nodes, meaning they do not contain a property name.
+   * These nodes should be used when replacing declarations by matching the value only.
+   */
+  List<CssPropertyValueNode> getValueOnlyExpansionNodes() {
+    return valueOnlyExpansionNodes;
+  }
+
   static class Builder {
-    private String matchPropertyName;
+    @Nullable private String matchPropertyName = null;
     @Nullable private String matchPropertyValue = null;
     List<String> expandPropertyNameList = Lists.newArrayList();
     List<String> expandPropertyValueList = Lists.newArrayList();
