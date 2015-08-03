@@ -391,62 +391,6 @@ public class JobDescriptionBuilder {
     return this;
   }
 
-  public JobDescriptionBuilder setAllowAllGssExtensions(boolean allow) {
-    checkJobIsNotAlreadyCreated();
-    // Do nothing, but allow existing clients to compile.
-    // TODO(flan): Delete this.
-    return this;
-  }
-
-  public JobDescriptionBuilder allowAllGssExtensions() {
-    return setAllowAllGssExtensions(true);
-  }
-
-  public JobDescriptionBuilder setAllowCss3(boolean allow) {
-    checkJobIsNotAlreadyCreated();
-    // Do nothing, but allow existing clients to compile.
-    // TODO(flan): Delete this.
-    return this;
-  }
-
-  public JobDescriptionBuilder allowCss3() {
-    return setAllowCss3(true);
-  }
-
-  public JobDescriptionBuilder setAllowUnrecognizedPseudoTypes(
-      boolean allow) {
-    checkJobIsNotAlreadyCreated();
-    // Do nothing, but allow existing clients to compile.
-    // TODO(flan): Delete this.
-    return this;
-  }
-
-  public JobDescriptionBuilder allowUnrecognizedPseudoTypes() {
-    return setAllowUnrecognizedPseudoTypes(true);
-  }
-
-  public JobDescriptionBuilder setAllowIeFunctionSyntax(boolean allow) {
-    checkJobIsNotAlreadyCreated();
-    // Do nothing, but allow existing clients to compile.
-    // TODO(flan): Delete this.
-    return this;
-  }
-
-  public JobDescriptionBuilder allowIeFunctionSyntax() {
-    return setAllowIeFunctionSyntax(true);
-  }
-
-  public JobDescriptionBuilder setAllowStarPropertyHack(boolean allow) {
-    checkJobIsNotAlreadyCreated();
-    // Do nothing, but allow existing clients to compile.
-    // TODO(flan): Delete this.
-    return this;
-  }
-
-  public JobDescriptionBuilder allowStarPropertyHack() {
-    return setAllowStarPropertyHack(true);
-  }
-
   public JobDescriptionBuilder setAllowMozDocument(boolean allow) {
     checkJobIsNotAlreadyCreated();
     this.allowMozDocument = allow;

@@ -141,7 +141,6 @@ public class JobDescriptionBuilderTest extends TestCase {
   public void testCopyJobDescription() {
     JobDescription otherJob = new JobDescriptionBuilder().
         addInput(new SourceCode("tempFile", "contents")).
-        allowIeFunctionSyntax().
         setCopyrightNotice("/* Copyright Google Inc. */").
         setOutputFormat(JobDescription.OutputFormat.PRETTY_PRINTED).
         setInputOrientation(JobDescription.InputOrientation.RTL).
