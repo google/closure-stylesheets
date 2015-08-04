@@ -94,9 +94,31 @@ final class BrowserPrefixGenerator {
      builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("flex")
         .isFunction(false)
+        .addExpandPropertyName("-webkit-box-flex")
+        .addExpandPropertyName("-moz-box-flex")
         .addExpandPropertyName("-ms-flex")
         .addExpandPropertyName("-webkit-flex")
         .addExpandPropertyName("flex")
+        .build());
+
+    // Needed for Chrome 21, Safari 7, IE 10 or less
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("order")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-box-ordinal-group")
+        .addExpandPropertyName("-moz-box-ordinal-group")
+        .addExpandPropertyName("-ms-flex-order")
+        .addExpandPropertyName("-webkit-order")
+        .addExpandPropertyName("order")
+        .build());
+
+    // Needed for Safari 7, Chrome 21 or less
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("flex-basis")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-flex-basis")
+        .addExpandPropertyName("-ms-flex-preferred-size")
+        .addExpandPropertyName("flex-basis")
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
