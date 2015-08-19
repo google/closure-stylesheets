@@ -61,7 +61,12 @@ public class DisallowDuplicateDeclarations extends DefaultTreeVisitor
     for (CssNode child : node.getDeclarations().childIterable()) {
       // CssPropertyNodes don't get their location set, so just use the
       // location of the containing parent.
-      processDeclaration((CssDeclarationNode)child, node.getSourceCodeLocation());
+      SourceCodeLocation location = node.getSourceCodeLocation();
+      if (location == null && !node.getSelectors().isEmpty()) {
+        // If the ruleset doesn't have a location set, then use location in the selector within.
+        location = node.getSelectors().getChildAt(0).getSourceCodeLocation();
+      }
+      processDeclaration((CssDeclarationNode) child, location);
     }
 
     // Clear the map for future re-use
