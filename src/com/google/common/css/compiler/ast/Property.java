@@ -238,6 +238,7 @@ public final class Property {
         builder("max-width"),
         builder("min-height"),
         builder("min-width"),
+        builder("mix-blend-mode"),
         builder("-moz-animation"),
         builder("-moz-animation-delay"),
         builder("-moz-animation-direction"),
