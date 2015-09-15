@@ -18,6 +18,7 @@ package com.google.common.css.compiler.ast;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.css.SourceCode;
+import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.passes.CompactPrinter;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
 
@@ -897,6 +898,24 @@ public class GssParserTest extends TestCase {
     testValid("@font-face { unicode-range: U+0015-00FF;}");
     testValid("@font-face { unicode-range: U+A015-C0FF;}");
     testValid("@font-face { unicode-range: U+26??;}");
+  }
+
+  public void testNumericNodeLocation() throws GssParserException {
+    CssTree tree = new GssParser(new SourceCode(null, "div{width:99px;}")).parse();
+    final CssNumericNode[] resultHolder = new CssNumericNode[1];
+    tree.getVisitController().startVisit(new DefaultTreeVisitor() {
+      @Override
+      public boolean enterValueNode(CssValueNode value) {
+        if (value instanceof CssNumericNode) {
+          assertNull(resultHolder[0]);
+          resultHolder[0] = (CssNumericNode) value;
+        }
+        return true;
+      }
+    });
+    assertNotNull(resultHolder[0]);
+    SourceCodeLocation location = resultHolder[0].getSourceCodeLocation();
+    assertEquals(3, location.getEndCharacterIndex() - location.getBeginCharacterIndex());
   }
 
   private CssTree parse(List<SourceCode> sources) throws GssParserException {

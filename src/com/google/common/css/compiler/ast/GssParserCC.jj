@@ -1446,7 +1446,13 @@ CssValueNode term() :
   ) ( <S> )*
   {
     if (unit != null) {
-      return nodeBuilder.buildNumericNode(unop + t.image, unit, this.getLocation(t), tokens);
+      SourceCodeLocation location;
+      if (dim != null) {
+        location = this.mergeLocations(this.getLocation(t), this.getLocation(dim));
+      } else {
+        location = this.getLocation(t);
+      }
+      return nodeBuilder.buildNumericNode(unop + t.image, unit, location, tokens);
     } else if (function != null) {
       return function;
     } else if (hexcolor) {
