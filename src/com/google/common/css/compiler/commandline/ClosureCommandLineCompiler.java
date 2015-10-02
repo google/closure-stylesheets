@@ -129,7 +129,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         + " source code location.")
     private String sourceMapFile = "";
 
-    @Option(name = "source_map_output_level", usage = "The level to generate "
+    @Option(name = "--source_map_output_level", usage = "The level to generate "
         + "source maps. You could choose between DEFAULT, which will generate "
         + "source map only for selectors, blocks, rules, variables and symbol "
         + "mappings, and ALL, which outputs mappings for all elements.")
