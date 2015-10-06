@@ -156,6 +156,53 @@ public class GssFunctionsTest extends TestCase {
     testFunctionCallFail(div, ImmutableList.of("42px", "2em"));
   }
 
+  public void testMakeTranslucent() {
+    GssFunctions.MakeTranslucent function = new GssFunctions.MakeTranslucent();
+    // Check alpha conversion. Note that .25 and .5 are not exactly
+    // representable.
+    assertEquals("rgba(255,255,255,1)",
+        function.getCallResultString(ImmutableList.of("#fff", "1")));
+    assertEquals("rgba(255,255,255,0.251)",
+        function.getCallResultString(ImmutableList.of("#fff", "0.25")));
+    assertEquals("rgba(255,255,255,0.502)",
+        function.getCallResultString(ImmutableList.of("#fff", "0.5")));
+    assertEquals("rgba(255,255,255,0)",
+        function.getCallResultString(ImmutableList.of("#fff", "0")));
+
+    // Check that RGB values are preserved
+    assertEquals("rgba(0,0,0,1)",
+        function.getCallResultString(ImmutableList.of("#000", "1")));
+    assertEquals("rgba(17,34,51,1)",
+        function.getCallResultString(ImmutableList.of("#123", "1")));
+
+    // Check various input formats
+    assertEquals("rgba(16,32,48,0.251)",
+        function.getCallResultString(ImmutableList.of("#102030", ".251")));
+    assertEquals("rgba(255,0,0,0.251)",
+        function.getCallResultString(ImmutableList.of("red", ".251")));
+    assertEquals("rgba(1,2,3,0.251)",
+        function.getCallResultString(ImmutableList.of("rgb(1, 2, 3)", ".251")));
+    assertEquals("rgba(1,2,3,0.251)",
+        function.getCallResultString(
+            ImmutableList.of("rgba(1, 2, 3, 0)", ".251")));
+    assertEquals("rgba(1,2,3,0.2)",
+        function.getCallResultString(
+            ImmutableList.of("rgba(1, 2, 3, .7)", ".2")));
+  }
+
+
+  public void testMakeTranslucent_otherLocale() {
+    Locale.setDefault(Locale.FRANCE);
+    try {
+
+      GssFunctions.MakeTranslucent function = new GssFunctions.MakeTranslucent();
+      assertEquals(
+          "rgba(16,32,48,0.251)",
+          function.getCallResultString(ImmutableList.of("#102030", ".251")));
+    } finally {
+      Locale.setDefault(Locale.US);
+    }
+  }
 
   /*
    * Test that calling the function with the given arguments throws a
