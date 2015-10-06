@@ -39,8 +39,10 @@ import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -52,10 +54,10 @@ import java.util.regex.Pattern;
  *
  * @author roozbeh@google.com (Roozbeh Pournader)
  */
-public class BiDiFlipper extends DefaultTreeVisitor
-    implements CssCompilerPass {
+public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
 
-  private final DecimalFormat percentFormatter = new DecimalFormat("#.########");
+  private final DecimalFormat percentFormatter =
+      new DecimalFormat("#.########", DecimalFormatSymbols.getInstance(Locale.US));
   private final MutatingVisitController visitController;
 
   boolean shouldSwapLeftRightInUrl;

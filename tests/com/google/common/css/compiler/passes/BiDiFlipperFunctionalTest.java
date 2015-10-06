@@ -19,6 +19,8 @@ package com.google.common.css.compiler.passes;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
 
+import java.util.Locale;
+
 /**
  * Functional tests for {@link BiDiFlipper}.
  *
@@ -73,7 +75,37 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         "[[foo]{[background:[[90%][3px][red]];]}]");
   }
 
- /**
+  /**
+   * Tests that
+   *   background : 5.43521% 3px red
+   * is flipped to
+   *   background : 94.56479% 3px red
+   */
+  public void test4_withDecimals() {
+    testTreeConstruction(
+        "foo { background: 5.43521% 3px red; }",
+        "[[foo]{[background:[[94.56479%][3px][red]];]}]");
+  }
+
+  /**
+   * Tests that
+   *   background : 5.43521% 3px red
+   * is flipped to
+   *   background : 94.56479% 3px red
+   */
+
+  public void test4_withDecimalsInOtherLocale() {
+    Locale.setDefault(Locale.FRANCE);
+    try {
+      testTreeConstruction(
+          "foo { background: 5.43521% 3px red; }",
+          "[[foo]{[background:[[94.56479%][3px][red]];]}]");
+    } finally {
+      Locale.setDefault(Locale.US);
+    }
+  }
+
+  /**
    * Tests that
    *   background-position-x : 10%; padding-right: 2px
    * is flipped to

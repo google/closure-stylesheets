@@ -40,8 +40,10 @@ import com.google.common.css.compiler.ast.GssFunctionException;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -90,6 +92,12 @@ public class GssFunctions {
    * precision that works well across all browsers. (Yes, this is crazy.)
    */
   private static final String DECIMAL_FORMAT = "#.########";
+
+  /**
+   * US decimal format symbols.
+   */
+  private static final DecimalFormatSymbols US_SYMBOLS =
+      DecimalFormatSymbols.getInstance(Locale.US);
 
   /**
    * This class encapsulates results of background definition calculation and
@@ -645,7 +653,7 @@ public class GssFunctions {
         }
         total = performOperation(total, value);
       }
-      String resultString = new DecimalFormat(DECIMAL_FORMAT).format(total);
+      String resultString = new DecimalFormat(DECIMAL_FORMAT, US_SYMBOLS).format(total);
 
       return new CssNumericNode(resultString,
           overallUnit != null ? overallUnit : CssNumericNode.NO_UNITS,
@@ -750,7 +758,7 @@ public class GssFunctions {
         double value = Double.valueOf(node.getNumericPart());
         total = performOperation(total, value);
       }
-      String resultString = new DecimalFormat(DECIMAL_FORMAT).format(total);
+      String resultString = new DecimalFormat(DECIMAL_FORMAT, US_SYMBOLS).format(total);
 
       return new CssNumericNode(resultString,
           overallUnit != null ? overallUnit : CssNumericNode.NO_UNITS,
@@ -1076,7 +1084,7 @@ public class GssFunctions {
           new CssLiteralNode(
               Integer.toString(outputColor.getBlue()), sourceCodeLocation),
           new CssLiteralNode(
-              new DecimalFormat("#.###").format(outputColor.getAlpha() / 255f),
+              new DecimalFormat("#.###", US_SYMBOLS).format(outputColor.getAlpha() / 255f),
               sourceCodeLocation));
       CssValueNode argsValue = new CssCompositeValueNode(
           argList, CssCompositeValueNode.Operator.COMMA,

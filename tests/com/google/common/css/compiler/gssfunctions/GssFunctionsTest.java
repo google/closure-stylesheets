@@ -22,6 +22,8 @@ import com.google.common.css.compiler.ast.GssFunctionException;
 
 import junit.framework.TestCase;
 
+import java.util.Locale;
+
 /**
  * Unit tests for {@link GssFunctions}. Specifically checks for correctness of
  * getCallResultString results from the GssFunctions since
@@ -90,6 +92,18 @@ public class GssFunctionsTest extends TestCase {
         funct.getCallResultString(ImmutableList.of("30%", "2")));
   }
 
+
+  public void testDivGetCallResultString_otherLocale() throws GssFunctionException {
+    Locale.setDefault(Locale.FRANCE);
+    try {
+      GssFunctions.Div funct = new GssFunctions.Div();
+      assertEquals("103.06748466px",
+          funct.getCallResultString(ImmutableList.of("100800px", "978")));
+    } finally {
+      Locale.setDefault(Locale.US);
+    }
+  }
+
   public void testDivGetCallResultString_noUnits() throws GssFunctionException {
     GssFunctions.Div funct = new GssFunctions.Div();
     assertEquals("30",
@@ -147,8 +161,7 @@ public class GssFunctionsTest extends TestCase {
    * Test that calling the function with the given arguments throws a
    * GssFunctionException.
    */
-  private void testFunctionCallFail(GssFunction funct,
-      ImmutableList<String> args) {
+  private void testFunctionCallFail(GssFunction funct, ImmutableList<String> args) {
     try {
       funct.getCallResultString(args);
       fail();
