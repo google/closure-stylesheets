@@ -216,4 +216,17 @@ public class GssFunctionsTest extends TestCase {
       // Expected to fail.
     }
   }
+
+  public void testConcat() throws Exception {
+    GssFunctions.Concat funct = new GssFunctions.Concat();
+    assertEquals("'ab'", funct.getCallResultString(ImmutableList.of("a", "b")));
+    assertEquals("'a'", funct.getCallResultString(ImmutableList.of("a")));
+    assertEquals("'a'", funct.getCallResultString(ImmutableList.of("'a'")));
+    assertEquals("'a'", funct.getCallResultString(ImmutableList.of("\"a\"")));
+    assertEquals("'abc'", funct.getCallResultString(ImmutableList.of("a", "b", "c")));
+    assertEquals("''", funct.getCallResultString(ImmutableList.<String>of()));
+    assertEquals("'ab'", funct.getCallResultString(ImmutableList.of("'a'", "'b'")));
+    assertEquals("'\"'", funct.getCallResultString(ImmutableList.of("'\"'")));
+    assertEquals("'\\''", funct.getCallResultString(ImmutableList.of("'")));
+  }
 }

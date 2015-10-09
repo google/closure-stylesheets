@@ -32,6 +32,7 @@ import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssHexColorNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNumericNode;
+import com.google.common.css.compiler.ast.CssStringNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
@@ -83,6 +84,9 @@ public class GssFunctions {
 
         // Logic functions.
         .put("selectFrom", new SelectFrom())
+
+        // String functions.
+        .put("concat", new Concat())
 
         .build();
   }
@@ -463,8 +467,8 @@ public class GssFunctions {
    */
   public static class MakeMutedColor implements GssFunction {
 
-    private float LOSS_OF_SATURATION_FOR_MUTED_TONE = 0.2f;
-    private String ARGUMENT_COUNT_ERROR_MESSAGE = "makeMutedColor " +
+    private final float LOSS_OF_SATURATION_FOR_MUTED_TONE = 0.2f;
+    private final String ARGUMENT_COUNT_ERROR_MESSAGE = "makeMutedColor " +
         "expected arguments: backgroundColorStr, foregroundColorStr and an " +
         "optional loss of saturation value (0 <= loss <= 1).";
 
@@ -570,6 +574,44 @@ public class GssFunctions {
       } else {
         throw new GssFunctionException(ARGUMENT_COUNT_ERROR_MESSAGE);
       }
+    }
+  }
+
+  /**
+   * Implementation of the concat(…) GssFunction. It concatenates a variable number of strings.
+   * e.g. concat('a', 'b') yields 'ab'. Mainly useful for use with constants.
+   */
+  public static class Concat implements GssFunction {
+
+    @Override
+    public Integer getNumExpectedArguments() {
+      return null;  // Variable list of arguments
+    }
+
+    @Override
+    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args, ErrorManager errorManager)
+        throws GssFunctionException {
+      StringBuilder result = new StringBuilder();
+      for (CssValueNode arg : args) {
+        result.append(arg.getValue());
+      }
+      return ImmutableList.of((CssValueNode) new CssStringNode(
+          CssStringNode.Type.SINGLE_QUOTED_STRING, result.toString()));
+    }
+
+    @Override
+    public String getCallResultString(List<String> args) throws GssFunctionException {
+      StringBuilder result = new StringBuilder();
+      for (String arg : args) {
+        if (arg.length() > 1 && ((arg.startsWith("'") && arg.endsWith("'"))
+                                    || (arg.startsWith("\"") && arg.endsWith("\"")))) {
+          result.append(CssStringNode.unescape(arg.substring(1, arg.length() - 1)));
+        } else {
+          result.append(arg);
+        }
+      }
+      return new CssStringNode(CssStringNode.Type.SINGLE_QUOTED_STRING, result.toString())
+          .toString();
     }
   }
 

@@ -185,4 +185,14 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         + "); }",
         "A { width: 60px; }");
   }
+
+  public void testConcat() throws GssParserException {
+    test("A { background-image:url(concat('http://', www, '.google.com', \"/example.gif\")); }",
+         "A { background-image:url('http://www.google.com/example.gif'); }");
+    test("A { x:concat(a); }", "A { x:'a'; }");
+    test("A { x:concat(\"'\", \"\\\"\", 'bar','\"', '\\''); }",
+         "A { x:'\\'\"bar\"\\'' }");
+    test("A { x:concat('\\\\\\\\'); }",
+         "A { x:'\\\\\\\\'; }");
+  }
 }
