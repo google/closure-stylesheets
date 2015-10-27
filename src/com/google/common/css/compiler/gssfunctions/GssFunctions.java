@@ -85,9 +85,9 @@ public class GssFunctions {
         .put("makeTranslucent", new MakeTranslucent())
         .put("saturateColor", new SaturateColor())
         .put("desaturateColor", new DesaturateColor())
-        .put("makeGrayscale", new MakeGrayscale())
-        .put("lightenColor", new LightenColor())
-        .put("darkenColor", new DarkenColor())
+        .put("greyscale", new Greyscale())
+        .put("lighten", new Lighten())
+        .put("darken", new Darken())
 
         // Logic functions.
         .put("selectFrom", new SelectFrom())
@@ -687,7 +687,7 @@ public class GssFunctions {
   /**
    * Convert the color to a grayscale (desaturation with amount of 100).
    */
-  public static class MakeGrayscale extends BaseHslColorManipulation implements GssFunction {
+  public static class Greyscale extends BaseHslColorManipulation implements GssFunction {
     @Override
     public Integer getNumExpectedArguments() {
       return 1;
@@ -739,7 +739,7 @@ public class GssFunctions {
    * is the lighten to add, between 0 and 100.
    *
    */
-  public static class LightenColor extends BaseHslColorManipulation implements GssFunction {
+  public static class Lighten extends BaseHslColorManipulation implements GssFunction {
 
     @Override
     public Integer getNumExpectedArguments() {
@@ -802,7 +802,7 @@ public class GssFunctions {
    * is the lighten to remove, between 0 and 100.
    *
    */
-  public static class DarkenColor extends BaseHslColorManipulation implements GssFunction {
+  public static class Darken extends BaseHslColorManipulation implements GssFunction {
     @Override
     public Integer getNumExpectedArguments() {
       return 2;

@@ -220,24 +220,24 @@ public class GssFunctionsTest extends TestCase {
         function.getCallResultString(ImmutableList.of("#80e619", "20")));
   }
 
-  public void testMakeGrayscale() throws GssFunctionException {
-    GssFunctions.MakeGrayscale function = new GssFunctions.MakeGrayscale();
+  public void testGreyscale() throws GssFunctionException {
+    GssFunctions.Greyscale function = new GssFunctions.Greyscale();
     assertEquals("#999999",
         function.getCallResultString(ImmutableList.of("#5a7bd8")));
     assertEquals("#808080",
         function.getCallResultString(ImmutableList.of("#80e619")));
   }
 
-  public void testLightenColor() throws GssFunctionException {
-    GssFunctions.LightenColor function = new GssFunctions.LightenColor();
+  public void testLighten() throws GssFunctionException {
+    GssFunctions.Lighten function = new GssFunctions.Lighten();
     assertEquals("#839CE2",
         function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
     assertEquals("#B3F075",
         function.getCallResultString(ImmutableList.of("#80e619", "20")));
   }
 
-  public void testDarkenColor() throws GssFunctionException {
-    GssFunctions.DarkenColor function = new GssFunctions.DarkenColor();
+  public void testDarken() throws GssFunctionException {
+    GssFunctions.Darken function = new GssFunctions.Darken();
     assertEquals("#315ACE",
         function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
     assertEquals("#4D8A0F",
