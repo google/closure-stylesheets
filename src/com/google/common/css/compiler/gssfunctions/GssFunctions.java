@@ -314,99 +314,6 @@ public class GssFunctions {
   }
 
   /**
-   * Base implementation of color manipulation functions in HSL color space
-   */
-  public abstract static class BaseHslColorManipulation {
-
-    protected String addHslToCssColor(
-      String baseColorString, String hueToAdd, String saturationToAdd,
-      String lightnessToAdd) throws GssFunctionException {
-      try {
-        return addHslToCssColor(
-          baseColorString,
-          Integer.parseInt(hueToAdd),
-          Integer.parseInt(saturationToAdd),
-          Integer.parseInt(lightnessToAdd));
-      } catch (NumberFormatException e) {
-        String message = String.format("Could not parse the integer arguments"
-            + " for the function 'addHslToCssColor'. The list of arguments was:"
-            + " %s, %s, %s, %s. ",
-            baseColorString, hueToAdd, saturationToAdd, lightnessToAdd);
-        throw new GssFunctionException(message);
-      } catch (IllegalArgumentException e) {
-        String message = String.format("Could not parse the color argument"
-            + " for the function 'addHslToCssColor'. The list of arguments was:"
-            + " %s, %s, %s, %s. ",
-            baseColorString, hueToAdd, saturationToAdd, lightnessToAdd);
-        throw new GssFunctionException(message);
-      }
-    }
-
-    /**
-     * Takes a CSS color string, and adds the specified amount of hue,
-     * saturation and lightness to it in HSL color space
-     *
-     * @param baseColorString The string representing the color to change
-     * @param hueToAdd The amount of hue to add (can be negative)
-     * @param saturationToAdd The amount of saturation to add (can be negative)
-     * @param lightnessToAdd The amount of lightness to add (can be negative)
-     * @return A CSS String representing the new color
-     */
-    protected String addHslToCssColor(String baseColorString,
-                                   int hueToAdd,
-                                   int saturationToAdd,
-                                   int lightnessToAdd) {
-
-      // Skip transformation for the transparent color.
-      if ("transparent".equals(baseColorString)) {
-        return baseColorString;
-      }
-
-      Color baseColor = ColorParser.parseAny(baseColorString);
-      Color newColor = addValuesToHslComponents(baseColor,
-                                                hueToAdd,
-                                                saturationToAdd,
-                                                lightnessToAdd);
-
-      return formatColor(newColor);
-    }
-
-    /**
-     * Adds the specified amount to the specified HSL (Hue, Saturation,
-     * Lightness) parameter of the given color. The amount can be negative.
-     *
-     * @param baseColor The color to modify
-     * @param hueToAdd The amount of hue to add
-     * @param saturationToAdd The amount of saturation to add
-     * @param lightnessToAdd The amount of lightness to add
-     * @return The modified color
-     */
-    private Color addValuesToHslComponents(Color baseColor,
-                                          int hueToAdd,
-                                          int saturationToAdd,
-                                          int lightnessToAdd) {
-
-      float[] hslValues = toHsl(baseColor);
-
-      // In HSL color space, Hue goes from 0 to 360, Saturation and Lightness
-      // from 0 to 100. However, in Java all three parameters vary from 0.0 to
-      // 1.0, so we need some basic conversion.
-      hslValues[0] = (float) (hslValues[0] + hueToAdd / 360.0);
-      // The hue needs to wrap around, so just keep hue - floor(hue).
-      hslValues[0] -= (float) Math.floor(hslValues[0]);
-
-      // For saturation and brightness, no wrapping around, we just make sure
-      // we don't go over 1.0 or under 0.0
-      hslValues[1] = (float) Math.min(1.0, Math.max(0,
-          hslValues[1] + saturationToAdd / 100.0));
-      hslValues[2] = (float) Math.min(1.0, Math.max(0,
-          hslValues[2] + lightnessToAdd / 100.0));
-
-      return hslToColor(hslValues);
-    }
-  }
-
-  /**
    * Implementation of the addHsbToCssColor GSS function.
    */
   public static class AddHsbToCssColor implements GssFunction {
@@ -555,6 +462,99 @@ public class GssFunctions {
           hsbValues[2] + brightnessToAdd / 100.0));
 
       return Color.getHSBColor(hsbValues[0], hsbValues[1], hsbValues[2]);
+    }
+  }
+
+  /**
+   * Base implementation of color manipulation functions in HSL color space
+   */
+  public abstract static class BaseHslColorManipulation {
+
+    protected String addHslToCssColor(
+      String baseColorString, String hueToAdd, String saturationToAdd,
+      String lightnessToAdd) throws GssFunctionException {
+      try {
+        return addHslToCssColor(
+          baseColorString,
+          Integer.parseInt(hueToAdd),
+          Integer.parseInt(saturationToAdd),
+          Integer.parseInt(lightnessToAdd));
+      } catch (NumberFormatException e) {
+        String message = String.format("Could not parse the integer arguments"
+            + " for the function 'addHslToCssColor'. The list of arguments was:"
+            + " %s, %s, %s, %s. ",
+            baseColorString, hueToAdd, saturationToAdd, lightnessToAdd);
+        throw new GssFunctionException(message);
+      } catch (IllegalArgumentException e) {
+        String message = String.format("Could not parse the color argument"
+            + " for the function 'addHslToCssColor'. The list of arguments was:"
+            + " %s, %s, %s, %s. ",
+            baseColorString, hueToAdd, saturationToAdd, lightnessToAdd);
+        throw new GssFunctionException(message);
+      }
+    }
+
+    /**
+     * Takes a CSS color string, and adds the specified amount of hue,
+     * saturation and lightness to it in HSL color space
+     *
+     * @param baseColorString The string representing the color to change
+     * @param hueToAdd The amount of hue to add (can be negative)
+     * @param saturationToAdd The amount of saturation to add (can be negative)
+     * @param lightnessToAdd The amount of lightness to add (can be negative)
+     * @return A CSS String representing the new color
+     */
+    protected String addHslToCssColor(String baseColorString,
+                                   int hueToAdd,
+                                   int saturationToAdd,
+                                   int lightnessToAdd) {
+
+      // Skip transformation for the transparent color.
+      if ("transparent".equals(baseColorString)) {
+        return baseColorString;
+      }
+
+      Color baseColor = ColorParser.parseAny(baseColorString);
+      Color newColor = addValuesToHslComponents(baseColor,
+                                                hueToAdd,
+                                                saturationToAdd,
+                                                lightnessToAdd);
+
+      return formatColor(newColor);
+    }
+
+    /**
+     * Adds the specified amount to the specified HSL (Hue, Saturation,
+     * Lightness) parameter of the given color. The amount can be negative.
+     *
+     * @param baseColor The color to modify
+     * @param hueToAdd The amount of hue to add
+     * @param saturationToAdd The amount of saturation to add
+     * @param lightnessToAdd The amount of lightness to add
+     * @return The modified color
+     */
+    private Color addValuesToHslComponents(Color baseColor,
+                                          int hueToAdd,
+                                          int saturationToAdd,
+                                          int lightnessToAdd) {
+
+      float[] hslValues = toHsl(baseColor);
+
+      // In HSL color space, Hue goes from 0 to 360, Saturation and Lightness
+      // from 0 to 100. However, in Java all three parameters vary from 0.0 to
+      // 1.0, so we need some basic conversion.
+      hslValues[0] = (float) (hslValues[0] + hueToAdd / 360.0);
+      // The hue needs to wrap around, so just keep hue - floor(hue).
+      hslValues[0] -= (float) Math.floor(hslValues[0]);
+
+      // For saturation and lightness, no wrapping around, we just make sure
+      // we don't go over 1.0 or under 0.0
+      hslValues[1] = (float) Math.min(1.0, Math.max(0,
+          hslValues[1] + saturationToAdd / 100.0));
+      hslValues[2] = (float) Math.min(1.0, Math.max(0,
+          hslValues[2] + lightnessToAdd / 100.0));
+
+      return hslToColor(hslValues);
     }
   }
 
