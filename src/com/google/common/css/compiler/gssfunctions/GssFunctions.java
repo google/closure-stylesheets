@@ -314,99 +314,6 @@ public class GssFunctions {
   }
 
   /**
-   * Base implementation of color manipulation functions in HSB color space.
-   */
-  public abstract static class BaseHsbColorManipulation {
-
-    protected String addHsbToCssColor(
-        String baseColorString, String hueToAdd, String saturationToAdd,
-        String brightnessToAdd) throws GssFunctionException {
-      try {
-        return addHsbToCssColor(
-            baseColorString,
-            Integer.parseInt(hueToAdd),
-            Integer.parseInt(saturationToAdd),
-            Integer.parseInt(brightnessToAdd));
-      } catch (NumberFormatException e) {
-        String message = String.format("Could not parse the integer arguments"
-            + " for the function 'addHsbToCssColor'. The list of arguments was:"
-            + " %s, %s, %s, %s. ",
-            baseColorString, hueToAdd, saturationToAdd, brightnessToAdd);
-        throw new GssFunctionException(message);
-      } catch (IllegalArgumentException e) {
-        String message = String.format("Could not parse the color argument"
-            + " for the function 'addHsbToCssColor'. The list of arguments was:"
-            + " %s, %s, %s, %s. ",
-            baseColorString, hueToAdd, saturationToAdd, brightnessToAdd);
-        throw new GssFunctionException(message);
-      }
-    }
-
-    /**
-     * Takes a CSS color string, and adds the specified amount of hue,
-     * saturation and brightness to it.
-     *
-     * @param baseColorString The string representing the color to change
-     * @param hueToAdd The amount of hue to add (can be negative)
-     * @param saturationToAdd The amount of saturation to add (can be negative)
-     * @param brightnessToAdd The amount of brightness to add (can be negative)
-     * @return A CSS String representing the new color
-     */
-    protected String addHsbToCssColor(String baseColorString,
-                                   int hueToAdd,
-                                   int saturationToAdd,
-                                   int brightnessToAdd) {
-
-      // Skip transformation for the transparent color.
-      if ("transparent".equals(baseColorString)) {
-        return baseColorString;
-      }
-
-      Color baseColor = ColorParser.parseAny(baseColorString);
-      Color newColor = addValuesToHsbComponents(baseColor,
-                                                hueToAdd,
-                                                saturationToAdd,
-                                                brightnessToAdd);
-
-      return formatColor(newColor);
-    }
-
-    /**
-     * Adds the specified amount to the specified HSB (Hue, Saturation,
-     * Brightness) parameter of the given color. The amount can be negative.
-     *
-     * @param baseColor The color to modify
-     * @param hueToAdd The amount of hue to add
-     * @param saturationToAdd The amount of saturation to add
-     * @param brightnessToAdd The amount of brightness to add
-     * @return The modified color
-     */
-    private Color addValuesToHsbComponents(Color baseColor,
-                                          int hueToAdd,
-                                          int saturationToAdd,
-                                          int brightnessToAdd) {
-
-      float[] hsbValues = toHsb(baseColor);
-
-      // In HSB color space, Hue goes from 0 to 360, Saturation and Brightness
-      // from 0 to 100. However, in Java all three parameters vary from 0.0 to
-      // 1.0, so we need some basic conversion.
-      hsbValues[0] = (float) (hsbValues[0] + hueToAdd / 360.0);
-      // The hue needs to wrap around, so just keep hue - floor(hue).
-      hsbValues[0] -= (float) Math.floor(hsbValues[0]);
-
-      // For saturation and brightness, no wrapping around, we just make sure
-      // we don't go over 1.0 or under 0.0
-      hsbValues[1] = (float) Math.min(1.0, Math.max(0,
-          hsbValues[1] + saturationToAdd / 100.0));
-      hsbValues[2] = (float) Math.min(1.0, Math.max(0,
-          hsbValues[2] + brightnessToAdd / 100.0));
-
-      return Color.getHSBColor(hsbValues[0], hsbValues[1], hsbValues[2]);
-    }
-  }
-
-  /**
    * Base implementation of color manipulation functions in HSL color space
    */
   public abstract static class BaseHslColorManipulation {
@@ -502,7 +409,7 @@ public class GssFunctions {
   /**
    * Implementation of the addHsbToCssColor GSS function.
    */
-  public static class AddHsbToCssColor extends BaseHsbColorManipulation implements GssFunction {
+  public static class AddHsbToCssColor implements GssFunction {
 
     @Override
     public Integer getNumExpectedArguments() {
@@ -561,6 +468,93 @@ public class GssFunctions {
       String baseColorString = args.get(0);
       return addHsbToCssColor(
           baseColorString, args.get(1), args.get(2), args.get(3));
+    }
+
+    protected String addHsbToCssColor(
+        String baseColorString, String hueToAdd, String saturationToAdd,
+        String brightnessToAdd) throws GssFunctionException {
+      try {
+        return addHsbToCssColor(
+            baseColorString,
+            Integer.parseInt(hueToAdd),
+            Integer.parseInt(saturationToAdd),
+            Integer.parseInt(brightnessToAdd));
+      } catch (NumberFormatException e) {
+        String message = String.format("Could not parse the integer arguments"
+            + " for the function 'addHsbToCssColor'. The list of arguments was:"
+            + " %s, %s, %s, %s. ",
+            baseColorString, hueToAdd, saturationToAdd, brightnessToAdd);
+        throw new GssFunctionException(message);
+      } catch (IllegalArgumentException e) {
+        String message = String.format("Could not parse the color argument"
+            + " for the function 'addHsbToCssColor'. The list of arguments was:"
+            + " %s, %s, %s, %s. ",
+            baseColorString, hueToAdd, saturationToAdd, brightnessToAdd);
+        throw new GssFunctionException(message);
+      }
+    }
+
+    /**
+     * Takes a CSS color string, and adds the specified amount of hue,
+     * saturation and brightness to it.
+     *
+     * @param baseColorString The string representing the color to change
+     * @param hueToAdd The amount of hue to add (can be negative)
+     * @param saturationToAdd The amount of saturation to add (can be negative)
+     * @param brightnessToAdd The amount of brightness to add (can be negative)
+     * @return A CSS String representing the new color
+     */
+    public String addHsbToCssColor(String baseColorString,
+                                   int hueToAdd,
+                                   int saturationToAdd,
+                                   int brightnessToAdd) {
+
+      // Skip transformation for the transparent color.
+      if ("transparent".equals(baseColorString)) {
+        return baseColorString;
+      }
+
+      Color baseColor = ColorParser.parseAny(baseColorString);
+      Color newColor = addValuesToHsbComponents(baseColor,
+                                                hueToAdd,
+                                                saturationToAdd,
+                                                brightnessToAdd);
+
+      return formatColor(newColor);
+    }
+
+    /**
+     * Adds the specified amount to the specified HSB (Hue, Saturation,
+     * Brightness) parameter of the given color. The amount can be negative.
+     *
+     * @param baseColor The color to modify
+     * @param hueToAdd The amount of hue to add
+     * @param saturationToAdd The amount of saturation to add
+     * @param brightnessToAdd The amount of brightness to add
+     * @return The modified color
+     */
+    public Color addValuesToHsbComponents(Color baseColor,
+                                          int hueToAdd,
+                                          int saturationToAdd,
+                                          int brightnessToAdd) {
+
+      float[] hsbValues = toHsb(baseColor);
+
+      // In HSB color space, Hue goes from 0 to 360, Saturation and Brightness
+      // from 0 to 100. However, in Java all three parameters vary from 0.0 to
+      // 1.0, so we need some basic conversion.
+      hsbValues[0] = (float) (hsbValues[0] + hueToAdd / 360.0);
+      // The hue needs to wrap around, so just keep hue - floor(hue).
+      hsbValues[0] -= (float) Math.floor(hsbValues[0]);
+
+      // For saturation and brightness, no wrapping around, we just make sure
+      // we don't go over 1.0 or under 0.0
+      hsbValues[1] = (float) Math.min(1.0, Math.max(0,
+          hsbValues[1] + saturationToAdd / 100.0));
+      hsbValues[2] = (float) Math.min(1.0, Math.max(0,
+          hsbValues[2] + brightnessToAdd / 100.0));
+
+      return Color.getHSBColor(hsbValues[0], hsbValues[1], hsbValues[2]);
     }
   }
 
