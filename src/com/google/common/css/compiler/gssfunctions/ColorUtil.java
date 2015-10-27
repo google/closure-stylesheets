@@ -17,6 +17,8 @@
 package com.google.common.css.compiler.gssfunctions;
 
 import java.awt.Color;
+import java.awt.color.ColorSpace;
+import java.lang.Math;
 
 /**
  * Utility functions to deal with colors.
@@ -28,6 +30,7 @@ class ColorUtil {
   static final int H = 0;
   static final int S = 1;
   static final int B = 2;
+  static final int L = 2;
 
   static float[] toHsb(Color color) {
     return Color.RGBtoHSB(
@@ -41,6 +44,39 @@ class ColorUtil {
 
   static Color hsbToColor(float[] inputHsb) {
     return Color.getHSBColor(inputHsb[H], inputHsb[S], inputHsb[B]);
+  }
+
+  public static float[] hsbToHsl(float[] inputHsb) {
+    float hHsb = inputHsb[H];
+    float sHsb = inputHsb[S];
+    float bHsb = inputHsb[B];
+
+    float hHsl = hHsb;
+    float lHsl = bHsb * (2 - sHsb) / 2;
+    float sHsl = bHsb * sHsb / (1 - Math.abs(2 * lHsl - 1));
+
+    float[] hsl = new float[3];
+    hsl[H] = hHsl;
+    hsl[S] = sHsl;
+    hsl[L] = lHsl;
+
+    return hsl;
+  }
+
+  public static float[] toHsl(Color color) {
+    return hsbToHsl(toHsb(color));
+  }
+
+  public static Color hslToColor(float[] inputHsl) {
+    float hHsl = inputHsl[H];
+    float sHsl = inputHsl[S];
+    float lHsl = inputHsl[L];
+
+    float hHsb = hHsl;
+    float bHsb = (2 * lHsl + sHsl * (1 - Math.abs(2 * lHsl - 1))) / 2;
+    float sHsb = 2 * (bHsb - lHsl) / bHsb;
+
+    return Color.getHSBColor(hHsb, sHsb, bHsb);
   }
 
   /**
