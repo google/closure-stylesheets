@@ -492,7 +492,7 @@ public class GssFunctions {
       if (arg2 instanceof CssNumericNode) {
         numeric2 = (CssNumericNode)arg2;
       } else {
-        String message = "Arguments number 2 must be CssNumericNodes";
+        String message = "The second argument must be a CssNumericNode";
         errorManager.report(
           new GssError(message, arg2.getSourceCodeLocation()));
         throw new GssFunctionException(message);
@@ -552,7 +552,7 @@ public class GssFunctions {
       if (arg2 instanceof CssNumericNode) {
         numeric2 = (CssNumericNode) arg2;
       } else {
-        String message = "Arguments number 2 must be CssNumericNodes";
+        String message = "The second argument must be a CssNumericNode";
         errorManager.report(new GssError(message, arg2
           .getSourceCodeLocation()));
         throw new GssFunctionException(message);
@@ -662,7 +662,7 @@ public class GssFunctions {
       if (arg2 instanceof CssNumericNode) {
         numeric2 = (CssNumericNode)arg2;
       } else {
-        String message = "Arguments number 2 must be CssNumericNodes";
+        String message = "The second argument must be a CssNumericNode";
         errorManager.report(
           new GssError(message, arg2.getSourceCodeLocation()));
         throw new GssFunctionException(message);
@@ -723,7 +723,7 @@ public class GssFunctions {
       if (arg2 instanceof CssNumericNode) {
         numeric2 = (CssNumericNode)arg2;
       } else {
-        String message = "Arguments number 2 must be CssNumericNodes";
+        String message = "The second argument must be a CssNumericNode";
         errorManager.report(
           new GssError(message, arg2.getSourceCodeLocation()));
         throw new GssFunctionException(message);
