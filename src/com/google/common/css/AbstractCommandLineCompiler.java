@@ -85,7 +85,7 @@ public class AbstractCommandLineCompiler<T extends JobDescription> {
   protected static void exitOnUnhandledException(Exception e,
       ExitCodeHandler exitCodeHandler) {
     System.err.println(
-        "The compiler encountered an unhadled error condition. " + e);
+        "The compiler encountered an unhandled error condition. " + e);
     e.printStackTrace();
     exitCodeHandler.processExitCode(UNHANDLED_EXCEPTION_EXIT_CODE);
   }
