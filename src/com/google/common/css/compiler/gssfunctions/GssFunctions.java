@@ -464,8 +464,9 @@ public class GssFunctions {
   }
 
   /**
-   * Saturate the specified color. First argument is the color, second is the
-   * amount of saturation (from 0 to 100)
+   * Increase the saturation of the specified color. First argument is the
+   * color, second is the absolute amount of saturation to add (from 0 to
+   * 100).
    */
   public static class SaturateColor implements GssFunction {
     @Override
@@ -525,8 +526,9 @@ public class GssFunctions {
   }
 
   /**
-   * Desaturate the specified color. First argument is the color, second is the
-   * amount of desaturation (from 0 to 100)
+   * Decrease the saturation of the specified color. First argument is the
+   * color, second is the absolute amount of saturation to substract (from
+   * 0 to 100).
    */
   public static class DesaturateColor implements GssFunction {
 
@@ -633,7 +635,8 @@ public class GssFunctions {
   }
 
   /**
-   * Lighten a color. First argument is the color, second is value between 0 and 100
+   * Increase the lightness of a color. First argument is the color, second
+   * is the lighten to add, between 0 and 100.
    *
    */
   public static class LightenColor implements GssFunction {
@@ -695,7 +698,8 @@ public class GssFunctions {
   }
 
   /**
-   * Darken a color. First argument is the color, second is value between 0 and 100
+   * Decrease the lightness of a color. First argument is the color, second
+   * is the lighten to remove, between 0 and 100.
    *
    */
   public static class DarkenColor implements GssFunction {
