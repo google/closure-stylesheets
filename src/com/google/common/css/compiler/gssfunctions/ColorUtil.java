@@ -17,7 +17,6 @@
 package com.google.common.css.compiler.gssfunctions;
 
 import java.awt.Color;
-import java.awt.color.ColorSpace;
 import java.lang.Math;
 
 /**
