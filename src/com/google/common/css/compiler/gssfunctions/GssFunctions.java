@@ -88,6 +88,7 @@ public class GssFunctions {
         .put("greyscale", new Greyscale())
         .put("lighten", new Lighten())
         .put("darken", new Darken())
+        .put("spin", new Spin())
 
         // Logic functions.
         .put("selectFrom", new SelectFrom())
@@ -731,7 +732,6 @@ public class GssFunctions {
   /**
    * Increase the lightness of a color. First argument is the color, second
    * is the lighten to add, between 0 and 100.
-   *
    */
   public static class Lighten extends BaseHslColorManipulation implements GssFunction {
 
@@ -794,7 +794,6 @@ public class GssFunctions {
   /**
    * Decrease the lightness of a color. First argument is the color, second
    * is the lighten to remove, between 0 and 100.
-   *
    */
   public static class Darken extends BaseHslColorManipulation implements GssFunction {
     @Override
@@ -850,6 +849,68 @@ public class GssFunctions {
       String baseColorString = args.get(0);
       return addHslToCssColor(
         baseColorString, "0", "0", "-" + args.get(1));
+    }
+  }
+
+  /**
+   * Increase or decrease the hue of a color. First argument is the color, second
+   * is the hue to add or remove, between 0 and 360.
+   * It's like rotating the color on a color wheel and hue is the angle to apply.
+   */
+  public static class Spin extends BaseHslColorManipulation implements GssFunction {
+    @Override
+    public Integer getNumExpectedArguments() {
+      return 2;
+    }
+
+    @Override
+    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
+        ErrorManager errorManager) throws GssFunctionException {
+      CssValueNode arg1 = args.get(0);
+      CssValueNode arg2 = args.get(1);
+
+      CssHexColorNode hexColor = null;
+      if (!(arg1 instanceof CssHexColorNode
+          || arg1 instanceof CssLiteralNode)) {
+        String message =
+          "The first argument must be a CssHexColorNode or a CssLiteralNode.";
+        errorManager.report(
+          new GssError(message, arg1.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+      CssNumericNode numeric2;
+      if (arg2 instanceof CssNumericNode) {
+        numeric2 = (CssNumericNode)arg2;
+      } else {
+        String message = "The second argument must be a CssNumericNode";
+        errorManager.report(
+          new GssError(message, arg2.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+
+      try {
+        String resultString =
+          addHslToCssColor(args.get(0).getValue(),
+            numeric2.getNumericPart(),
+            "0",
+            "0");
+
+        CssHexColorNode result = new CssHexColorNode(resultString,
+          arg1.getSourceCodeLocation());
+        return ImmutableList.of((CssValueNode)result);
+      } catch (GssFunctionException e) {
+        errorManager.report(
+          new GssError(e.getMessage(), arg2.getSourceCodeLocation()));
+        throw e;
+      }
+    }
+
+    @Override
+    public String getCallResultString(List<String> args)
+        throws GssFunctionException {
+      String baseColorString = args.get(0);
+      return addHslToCssColor(
+        baseColorString, args.get(1), "0", "0");
     }
   }
 

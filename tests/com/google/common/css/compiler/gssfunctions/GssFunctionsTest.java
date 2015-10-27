@@ -244,6 +244,14 @@ public class GssFunctionsTest extends TestCase {
         function.getCallResultString(ImmutableList.of("#80e619", "20")));
   }
 
+  public void testSpin() throws GssFunctionException {
+    GssFunctions.Spin function = new GssFunctions.Spin();
+    assertEquals("#F2A60D",
+        function.getCallResultString(ImmutableList.of("#f2330d", "30")));
+    assertEquals("#F20D5A",
+        function.getCallResultString(ImmutableList.of("#f2330d", "-30")));
+  }
+
   /*
    * Test that calling the function with the given arguments throws a
    * GssFunctionException.
