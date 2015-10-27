@@ -210,34 +210,10 @@ public class GssFunctionsTest extends TestCase {
         function.getCallResultString(ImmutableList.of("#5a7bd8", "20")));
   }
 
-  public void testSaturateColor_otherLocale() throws GssFunctionException {
-    Locale.setDefault(Locale.FRANCE);
-    try {
-
-      GssFunctions.SaturateColor function = new GssFunctions.SaturateColor();
-      assertEquals("#2F5BD8",
-        function.getCallResultString(ImmutableList.of("#5a7bd8", "20")));
-    } finally {
-      Locale.setDefault(Locale.US);
-    }
-  }
-
   public void testDesaturateColor() throws GssFunctionException {
     GssFunctions.DesaturateColor function = new GssFunctions.DesaturateColor();
     assertEquals("#859BD8",
         function.getCallResultString(ImmutableList.of("#5a7bd8", "20")));
-  }
-
-  public void testDesaturateColor_otherLocale() throws GssFunctionException {
-    Locale.setDefault(Locale.FRANCE);
-    try {
-
-      GssFunctions.DesaturateColor function = new GssFunctions.DesaturateColor();
-      assertEquals("#859BD8",
-        function.getCallResultString(ImmutableList.of("#5a7bd8", "20")));
-    } finally {
-      Locale.setDefault(Locale.US);
-    }
   }
 
   public void testMakeGrayscale() throws GssFunctionException {
@@ -246,52 +222,16 @@ public class GssFunctionsTest extends TestCase {
         function.getCallResultString(ImmutableList.of("#5a7bd8")));
   }
 
-  public void testMakeGrayscale_otherLocale() throws GssFunctionException {
-    Locale.setDefault(Locale.FRANCE);
-    try {
-
-      GssFunctions.MakeGrayscale function = new GssFunctions.MakeGrayscale();
-      assertEquals("#D8D8D8",
-        function.getCallResultString(ImmutableList.of("#5a7bd8")));
-    } finally {
-      Locale.setDefault(Locale.US);
-    }
-  }
-
   public void testLightenColor() throws GssFunctionException {
     GssFunctions.LightenColor function = new GssFunctions.LightenColor();
     assertEquals("#7D9BF2",
         function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
   }
 
-  public void testLightenColor_otherLocale() throws GssFunctionException {
-    Locale.setDefault(Locale.FRANCE);
-    try {
-
-      GssFunctions.LightenColor function = new GssFunctions.LightenColor();
-      assertEquals("#7D9BF2",
-        function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
-    } finally {
-      Locale.setDefault(Locale.US);
-    }
-  }
-
   public void testDarkenColor() throws GssFunctionException {
     GssFunctions.DarkenColor function = new GssFunctions.DarkenColor();
     assertEquals("#3C5EBF",
         function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
-  }
-
-  public void testDarkenColor_otherLocale() throws GssFunctionException {
-    Locale.setDefault(Locale.FRANCE);
-    try {
-
-      GssFunctions.DarkenColor function = new GssFunctions.DarkenColor();
-      assertEquals("#3C5EBF",
-        function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
-    } finally {
-      Locale.setDefault(Locale.US);
-    }
   }
 
   /*
