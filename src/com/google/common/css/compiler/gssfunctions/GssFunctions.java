@@ -467,7 +467,7 @@ public class GssFunctions {
   }
 
   /**
-   * Base implementation of color manipulation functions in HSL color space
+   * Abstract base class providing HSL color space manipulation functions.
    */
   public abstract static class BaseHslColorManipulation {
 
