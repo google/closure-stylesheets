@@ -48,28 +48,7 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
         "@media print { foo {} }" +
         "@keyframes my-animation { 0% {} }" +
         "@font-face { font-family:'Roboto'; }";
-
-    Map<String, String> selectorToChunk =
-      new ImmutableMap.Builder<String, String>()
-      .put("foo", "foo")
-      .put("a", "foo")
-      .put("a#a", "foo")
-      .put("a#a b", "foo")
-      .put("b+i", "foo")
-      .put(".bar", "bar")
-      .put("b", "bar")
-      .put("b#b", "bar")
-      .put("b>i+em", "bar")
-      .put("hr", "baz")
-      .put("i", "baz")
-      .put("a i", "baz")
-      .put("a+i", "baz")
-      .put("my-animation", "bar")
-      .put("print", "foo")
-      .build();
-
     parseStyleSheet(sourceCode);
-    new SetSelectorChunk(newTree, selectorToChunk).runPass();
   }
 
   public void testChunkOutput() {
@@ -87,11 +66,36 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
     assertEquals(expected, printer.getCompactPrintedString());
   }
 
+  @Override
+  protected CssTree parseStyleSheet(String sourceCode) {
+    CssTree newTree = super.parseStyleSheet(sourceCode);
+    Map<String, String> selectorToChunk =
+        new ImmutableMap.Builder<String, String>()
+            .put("foo", "foo")
+            .put("a", "foo")
+            .put("a#a", "foo")
+            .put("a#a b", "foo")
+            .put("b+i", "foo")
+            .put(".bar", "bar")
+            .put("b", "bar")
+            .put("b#b", "bar")
+            .put("b>i+em", "bar")
+            .put("hr", "baz")
+            .put("i", "baz")
+            .put("a i", "baz")
+            .put("a+i", "baz")
+            .put("my-animation", "bar")
+            .put("print", "foo")
+            .build();
+    new SetSelectorChunk(newTree, selectorToChunk).runPass();
+    return newTree;
+  }
+
   /**
    * Helper pass to mark selectors with a chunk, uses a map from string
    * representation of a selector to a chunk, given selector belongs to.
    */
-  private static class SetSelectorChunk extends DefaultTreeVisitor
+  protected static class SetSelectorChunk extends DefaultTreeVisitor
       implements CssCompilerPass {
     private CssTree tree;
     private Map<String, String> selectorToChunkMap;

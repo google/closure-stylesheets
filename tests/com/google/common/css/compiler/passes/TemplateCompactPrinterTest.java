@@ -16,6 +16,11 @@
 
 package com.google.common.css.compiler.passes;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import com.google.common.css.compiler.passes.ChunkCompactPrinterTest.SetSelectorChunk;
+
+import java.util.Map;
 
 /**
  * Unit tests for {@link TemplateCompactPrinter}.
@@ -24,16 +29,18 @@ package com.google.common.css.compiler.passes;
  */
 public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
 
-  @Override
-  public void testChunkOutput() {
-    char rS = TemplateCompactPrinter.RULE_START;
-    char rE = TemplateCompactPrinter.RULE_END;
-    char dS = TemplateCompactPrinter.DECLARATION_START;
-    char dE = TemplateCompactPrinter.DECLARATION_END;
+  private static final char rS = TemplateCompactPrinter.RULE_START;
+  private static final char rE = TemplateCompactPrinter.RULE_END;
+  private static final char dS = TemplateCompactPrinter.DECLARATION_START;
+  private static final char dE = TemplateCompactPrinter.DECLARATION_END;
 
+  public void testChunkOutput_initialChunk() {
     setupTestTree();
 
-    assertTemplateOutput("foo",
+    TemplateCompactPrinter<String> printer = createPrinter("foo");
+    printer.runPass();
+
+    assertEquals(
         rS + "foo{}" + rE
         + rS + "a{}" + rE
         + rS + "a#a{}" + rE
@@ -41,27 +48,190 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
         + rS + "b+i{}" + rE
         + rS + "@media print{" + rS + "foo{}" + rE + "}" + rE
         + rS + "@font-face" + "{" + dS
-        + "font-family:'Roboto'" + dE + "}" + rE);
-    assertTemplateOutput("bar",
+        + "font-family:'Roboto'" + dE + "}" + rE,
+        printer.getCompactPrintedString());
+  }
+
+  public void testChunkOutput_middleChunk() {
+    setupTestTree();
+
+    TemplateCompactPrinter<String> printer = createPrinter("bar");
+    printer.runPass();
+
+    assertEquals(
         rS + ".bar{}" + rE
         + rS + "b{}" + rE
         + rS + "b#b{}" + rE
         + rS + "b>i+em{}" + rE
-        + "@keyframes my-animation{" + rS + "0%{}" + rE + "}");
-    assertTemplateOutput("baz",
+        + "@keyframes my-animation{" + rS + "0%{}" + rE + "}",
+        printer.getCompactPrintedString());
+  }
+
+  public void testChunkOutput_endChunk() {
+    setupTestTree();
+
+    TemplateCompactPrinter<String> printer = createPrinter("baz");
+    printer.runPass();
+
+    assertEquals(
         rS + "hr,i{}" + rE
         + rS + "i{}" + rE
         + rS + "hr{}" + rE
         + rS + "i,hr{}" + rE
         + rS + "a i{}" + rE
-        + rS + "a+i{}" + rE);
+        + rS + "a+i{}" + rE,
+        printer.getCompactPrintedString());
   }
 
-  private void assertTemplateOutput(
-      String chunk, String expected) {
-    TemplateCompactPrinter<String> printer =
-        new TemplateCompactPrinter<String>(newTree, chunk);
+  public void testMarkedComments_unpreservedByDefault() {
+    String sourceCode =
+        "/* Header comment\n"
+            + " * @license MIT */\n"
+            + "foo{} "
+            + "/* @preserve Preserved comment 1 */ a{} "
+            + "@media print { foo { /* @preserve Preserved comment 2 */ color: red } }";
+
+    parseStyleSheet(sourceCode);
+
+    TemplateCompactPrinter<String> printer = createPrinter("foo");
     printer.runPass();
-    assertEquals(expected, printer.getCompactPrintedString());
+
+    assertEquals(
+        rS + "foo{}" + rE
+            + rS + "a{}" + rE
+            + rS + "@media print{" + rS + "foo{" + dS + "color:red" + dE + "}" + rE
+            + "}" + rE,
+        printer.getCompactPrintedString());
+  }
+
+  public void testMarkedComments_unpreservedExplicitly() {
+    String sourceCode =
+        "/* Header comment\n"
+            + " * @license MIT */\n"
+            + "foo{} "
+            + "/* @preserve Preserved comment 1 */ a{} "
+            + "@media print { foo { /* @preserve Preserved comment 2 */ color: red } }";
+
+    parseStyleSheet(sourceCode);
+
+    TemplateCompactPrinter<String> printer = createNonCommentPreservingPrinter("foo");
+    printer.runPass();
+
+    assertEquals(
+        rS + "foo{}" + rE
+            + rS + "a{}" + rE
+            + rS + "@media print{" + rS + "foo{" + dS + "color:red" + dE + "}" + rE
+            + "}" + rE,
+        printer.getCompactPrintedString());
+  }
+
+  public void testMarkedComments_preserved() {
+    String sourceCode =
+        "/* Header comment\n"
+            + " * @license MIT */\n"
+            + "foo{} "
+            + "/* @preserve Preserved comment 1 */ a{} "
+            + "@media print { foo { /* @preserve Preserved comment 2 */ color: red } }";
+
+    parseStyleSheet(sourceCode);
+
+    TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
+    printer.runPass();
+
+    assertEquals(
+        rS + "\n/* Header comment\n * @license MIT */\n" + "foo{}" + rE
+            + rS + "\n/* @preserve Preserved comment 1 */\n" + "a{}" + rE
+            + rS + "@media print{" + rS
+            + "foo{" + "\n/* @preserve Preserved comment 2 */\n" + dS + "color:red" + dE + "}" + rE
+            + "}" + rE,
+        printer.getCompactPrintedString());
+  }
+
+  public void testMarkedComments_multipleAdjacentPreserved() {
+    String sourceCode =
+        "/* @license MIT */\n"
+            + "/* @preserve Keep this comment, too */\n"
+            + "foo{}";
+
+    parseStyleSheet(sourceCode);
+
+    TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
+    printer.runPass();
+
+    assertEquals(
+        rS
+            + "\n/* @license MIT *//* @preserve Keep this comment, too */\n"
+            + "foo{}"
+            + rE,
+        printer.getCompactPrintedString());
+  }
+
+  public void testMarkedComments_preservedWithFooterBeforeNextFile() {
+    String sourceCode1 = "/* Header comment\n" + " * @license MIT */\n" + "foo{}";
+
+    String sourceCode2 = "bar{}";
+
+    Map<String, String> selectorToChunk = ImmutableMap.of("foo", "foo");
+
+    newTestBase = new NewFunctionalTestBase();
+    newTestBase.parseAndBuildTree(ImmutableMap.of("fooFile", sourceCode1, "barFile", sourceCode2));
+    newTree = newTestBase.getTree();
+    tree = newTestBase.getTree();
+    runPassesOnNewTree();
+
+    new SetSelectorChunk(newTree, selectorToChunk).runPass();
+
+    TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
+    printer.runPass();
+
+    assertEquals(
+        rS
+            + "\n/* Header comment\n"
+            + " * @license MIT */\n"
+            + "foo{}"
+            + rE
+            + "/* END OF LICENSED CSS FILE */\n",
+        printer.getCompactPrintedString());
+  }
+
+  public void testMarkedComments_preservedButWithBadAnnotations() {
+    String sourceCode = "/* Header comment @licenseless @preservement */\n" + "foo{}";
+
+    parseStyleSheet(sourceCode);
+
+    TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
+    printer.runPass();
+
+    assertEquals(rS + "foo{}" + rE, printer.getCompactPrintedString());
+  }
+
+  public void testMarkedComments_preservedButWithOneBadAnnotationOneGood() {
+    String sourceCode = "/* Header comment @licenseless @preserve */\n" + "foo{}";
+
+    parseStyleSheet(sourceCode);
+
+    TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
+    printer.runPass();
+
+    assertEquals(
+        rS + "\n/* Header comment @licenseless @preserve */\n" + "foo{}" + rE,
+        printer.getCompactPrintedString());
+  }
+
+  private TemplateCompactPrinter<String> createPrinter(String chunkId) {
+    return new TemplateCompactPrinter<String>(newTree, chunkId);
+  }
+
+
+  private TemplateCompactPrinter<String> createCommentPreservingPrinter(String chunkId) {
+    TemplateCompactPrinter<String> printer = new TemplateCompactPrinter<String>(newTree, chunkId);
+    printer.setPreserveMarkedComments(true);
+    return printer;
+  }
+
+  private TemplateCompactPrinter<String> createNonCommentPreservingPrinter(String chunkId) {
+    TemplateCompactPrinter<String> printer = new TemplateCompactPrinter<String>(newTree, chunkId);
+    printer.setPreserveMarkedComments(false);
+    return printer;
   }
 }
