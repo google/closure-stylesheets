@@ -480,14 +480,9 @@ public class GssFunctions {
           Integer.parseInt(hueToAdd),
           Integer.parseInt(saturationToAdd),
           Integer.parseInt(lightnessToAdd));
-      } catch (NumberFormatException e) {
-        String message = String.format("Could not parse the integer arguments"
-            + " for the function 'addHslToCssColor'. The list of arguments was:"
-            + " %s, %s, %s, %s. ",
-            baseColorString, hueToAdd, saturationToAdd, lightnessToAdd);
-        throw new GssFunctionException(message);
       } catch (IllegalArgumentException e) {
-        String message = String.format("Could not parse the color argument"
+        String message = String.format("Could not parse the "
+            + (e instanceof NumberFormatException ? "integer arguments" : "color argument")
             + " for the function 'addHslToCssColor'. The list of arguments was:"
             + " %s, %s, %s, %s. ",
             baseColorString, hueToAdd, saturationToAdd, lightnessToAdd);
