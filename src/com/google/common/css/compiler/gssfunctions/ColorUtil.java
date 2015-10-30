@@ -57,7 +57,7 @@ class ColorUtil {
     return Color.getHSBColor(inputHsb[H], inputHsb[S], inputHsb[B]);
   }
 
-  public static float[] hsbToHsl(float[] inputHsb) {
+  static float[] hsbToHsl(float[] inputHsb) {
     float hHsb = inputHsb[H];
     float sHsb = inputHsb[S];
     float bHsb = inputHsb[B];
@@ -74,11 +74,11 @@ class ColorUtil {
     return hsl;
   }
 
-  public static float[] toHsl(Color color) {
+  static float[] toHsl(Color color) {
     return hsbToHsl(toHsb(color));
   }
 
-  public static float[] hslToHsb(float[] inputHsl) {
+  static float[] hslToHsb(float[] inputHsl) {
     float hHsl = inputHsl[H];
     float sHsl = inputHsl[S];
     float lHsl = inputHsl[L];
@@ -95,7 +95,7 @@ class ColorUtil {
     return hsb;
   }
 
-  public static Color hslToColor(float[] inputHsl) {
+  static Color hslToColor(float[] inputHsl) {
     float[] hsb = hslToHsb(inputHsl);
 
     return Color.getHSBColor(hsb[H], hsb[S], hsb[B]);
