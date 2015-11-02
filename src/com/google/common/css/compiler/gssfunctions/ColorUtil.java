@@ -26,21 +26,13 @@ import java.lang.Math;
  */
 class ColorUtil {
 
-  /**
-   * Index of Hue in HSB and HSL array.
-   */
+  /** Index of Hue in HSB and HSL array. */
   static final int H = 0;
-  /**
-   * Index of Saturation in HSB and HSL array.
-   */
+  /** Index of Saturation in HSB and HSL array. */
   static final int S = 1;
-  /**
-   * Index of Brightness in HSB array.
-   */
+  /** Index of Brightness in HSB array. */
   static final int B = 2;
-  /**
-   * Index of Lightness in HSL array.
-   */
+  /** Index of Lightness in HSL array. */
   static final int L = 2;
 
   static float[] toHsb(Color color) {
