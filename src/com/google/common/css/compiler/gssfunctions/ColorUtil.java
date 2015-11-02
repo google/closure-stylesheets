@@ -25,21 +25,21 @@ import java.awt.Color;
  */
 class ColorUtil {
 
-  public static final int H = 0;
-  public static final int S = 1;
-  public static final int B = 2;
+  static final int H = 0;
+  static final int S = 1;
+  static final int B = 2;
 
-  public static float[] toHsb(Color color) {
+  static float[] toHsb(Color color) {
     return Color.RGBtoHSB(
         color.getRed(), color.getGreen(), color.getBlue(), null);
   }
 
-  public static String formatColor(Color color) {
+  static String formatColor(Color color) {
     return String.format("#%02X%02X%02X",
         color.getRed(), color.getGreen(), color.getBlue());
   }
 
-  public static Color hsbToColor(float[] inputHsb) {
+  static Color hsbToColor(float[] inputHsb) {
     return Color.getHSBColor(inputHsb[H], inputHsb[S], inputHsb[B]);
   }
 
@@ -61,7 +61,7 @@ class ColorUtil {
    * @return whether the given colors are considered contrasting, taking the
    *     leniency margin into account
    */
-  public static boolean testContrast(Color color1, Color color2, float margin) {
+  static boolean testContrast(Color color1, Color color2, float margin) {
     float differenceFraction = 1f - margin;
     return luminanceDiff(color1, color2) > 125 * differenceFraction
         && colorDiff(color1, color2) > 500 * differenceFraction;
@@ -76,7 +76,7 @@ class ColorUtil {
    * @param color2 the second of the two checked colors
    * @return whether the given colors are considered contrasting
    */
-  public static boolean testContrast(Color color1, Color color2) {
+  static boolean testContrast(Color color1, Color color2) {
     return luminanceDiff(color1, color2) > 125
         && colorDiff(color1, color2) > 500;
   }
@@ -86,7 +86,7 @@ class ColorUtil {
    * It is the luminance value equal to the Y component of the YIQ or the YUV
    * color space models.
    */
-  public static int luminanceDiff(Color c1, Color c2) {
+  static int luminanceDiff(Color c1, Color c2) {
     return Math.abs(luminance(c1) - luminance(c2));
   }
 
@@ -95,7 +95,7 @@ class ColorUtil {
    * It is the luminance value equal to the Y component of the YIQ or the YUV
    * color space models.
    */
-  public static int luminance(Color color) {
+  static int luminance(Color color) {
     return luminance(color.getRed(), color.getGreen(), color.getBlue());
   }
 
@@ -104,7 +104,7 @@ class ColorUtil {
    * It is the luminance value equal to the Y component of the YIQ or the YUV
    * color space models.
    */
-  public static int luminance(int red, int green, int blue) {
+  static int luminance(int red, int green, int blue) {
     return (red * 299 + green * 587 + blue * 114) / 1000;
   }
 
@@ -112,7 +112,7 @@ class ColorUtil {
    * Calculates the Manhattan distance of two colors in the RGB color space
    * (a value in range 0-(255*3)).
    */
-  public static int colorDiff(Color color1, Color color2) {
+  static int colorDiff(Color color1, Color color2) {
     return colorDiff(
         color1.getRed(), color1.getGreen(), color1.getBlue(),
         color2.getRed(), color2.getGreen(), color2.getBlue());
@@ -122,7 +122,7 @@ class ColorUtil {
    * Calculates the Manhattan distance of two colors in the RGB color space
    * (a value in range 0-(255*3)).
    */
-  public static int colorDiff(int r1, int g1, int b1, int r2, int g2, int b2) {
+  static int colorDiff(int r1, int g1, int b1, int r2, int g2, int b2) {
     return Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
   }
 
