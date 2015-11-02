@@ -66,10 +66,7 @@ class ColorUtil {
     float lHsl = bHsb * (2 - sHsb) / 2;
     float sHsl = bHsb * sHsb / (1 - Math.abs(2 * lHsl - 1));
 
-    float[] hsl = new float[3];
-    hsl[H] = hHsl;
-    hsl[S] = sHsl;
-    hsl[L] = lHsl;
+    float[] hsl = {hHsl, sHsl, lHsl};
 
     return hsl;
   }
@@ -101,10 +98,7 @@ class ColorUtil {
     float bHsb = (2 * lHsl + sHsl * (1 - Math.abs(2 * lHsl - 1))) / 2;
     float sHsb = 2 * (bHsb - lHsl) / bHsb;
 
-    float[] hsb = new float[3];
-    hsb[H] = hHsb;
-    hsb[S] = sHsb;
-    hsb[B] = bHsb;
+    float[] hsb = {hHsb, sHsb, bHsb};
 
     return hsb;
   }
