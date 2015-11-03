@@ -554,7 +554,6 @@ to create **`dialog.soy.js`**:
 ```
 java -jar SoyToJsSrcCompiler.jar \\
     --shouldProvideRequireSoyNamespaces \\
-    --codeStyle concat \\
     --cssHandlingScheme GOOG \\
     --outputPathFormat '{INPUT_FILE_NAME_NO_EXT}.soy.js' \\
     dialog.soy
