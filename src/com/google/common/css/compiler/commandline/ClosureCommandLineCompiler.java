@@ -18,6 +18,7 @@ package com.google.common.css.compiler.commandline;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -66,7 +67,8 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     super(job, exitCodeHandler, errorManager);
   }
 
-  private static class Flags {
+  @VisibleForTesting
+  static class Flags {
     private static final String USAGE_PREAMBLE =
         Joiner.on("\n").join(new String[] {
         "Closure Stylesheets",
@@ -144,6 +146,10 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         + " The conditions are ignored if GSS extensions are not enabled.")
     private List<String> trueConditions = Lists.newArrayList();
 
+    @Option(name = "--allow-def-propagation", usage = "Allows @defs and @mixins"
+        + " from one file to propagate to other files.")
+    private boolean allowDefPropagation = true;
+
     @Option(name = "--allow-unrecognized-functions", usage =
         "Allow unrecognized functions.")
     private boolean allowUnrecognizedFunctions = false;
@@ -206,7 +212,8 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     /**
      * @return a new {@link JobDescription} using this class's flag values
      */
-    private JobDescription createJobDescription() {
+    @VisibleForTesting
+    JobDescription createJobDescription() {
       JobDescriptionBuilder builder = new JobDescriptionBuilder();
       builder.setInputOrientation(inputOrientation);
       builder.setOutputOrientation(outputOrientation);
@@ -215,6 +222,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
           : JobDescription.OutputFormat.COMPRESSED);
       builder.setCopyrightNotice(copyrightNotice);
       builder.setTrueConditionNames(trueConditions);
+      builder.setAllowDefPropagation(allowDefPropagation);
       builder.setAllowUnrecognizedFunctions(allowUnrecognizedFunctions);
       builder.setAllowedNonStandardFunctions(allowedNonStandardFunctions);
       builder.setAllowedUnrecognizedProperties(allowedUnrecognizedProperties);
@@ -351,7 +359,8 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
    * message, invokes
    * {@link ExitCodeHandler#processExitCode(int)}, and returns null.
    */
-  private static @Nullable Flags parseArgs(String[] args,
+  @VisibleForTesting
+  static @Nullable Flags parseArgs(String[] args,
       ExitCodeHandler exitCodeHandler) {
     Flags flags = new Flags();
     CmdLineParser argsParser = new CmdLineParser(flags) {
