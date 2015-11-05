@@ -135,6 +135,12 @@ for details, but here are the functions and the arguments that they take:
   * `addHsbToCssColor(baseColor, hueToAdd, saturationToAdd, brightnessToAdd)`
   * `makeContrastingColor(color, similarityIndex)`
   * `adjustBrightness(color, brightness)`
+  * `saturateColor(color, saturationToAdd)` increase saturation in HSL color space
+  * `desaturateColor(color, saturationToRemove)` decrease saturation in HSL color space
+  * `greyscale(color)` full desaturation of a color in HSL color space
+  * `lighten(color, lightnessToAdd)` increase the lightness in HSL color space
+  * `darken(color, lightnessToRemove)` decrease the lightness in HSL color space
+  * `spin(color, hueAngle)` increase or decrease hue of the color, like rotating in a color wheel
 
 There is also a `selectFrom()` function that behaves like the ternary operator:
 

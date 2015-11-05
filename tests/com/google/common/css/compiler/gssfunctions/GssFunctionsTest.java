@@ -204,6 +204,88 @@ public class GssFunctionsTest extends TestCase {
     }
   }
 
+  public void testSaturateColor() throws GssFunctionException {
+    GssFunctions.SaturateColor function = new GssFunctions.SaturateColor();
+    assertEquals("#4671EC",
+        function.getCallResultString(ImmutableList.of("#5a7bd8", "20")));
+    // saturation of #80e619 is 80. Adding 20 (to set saturation to 100%)
+    // or more return the same result
+    assertEquals("#80FF00",
+        function.getCallResultString(ImmutableList.of("#80e619", "20")));
+    assertEquals("#80FF00",
+        function.getCallResultString(ImmutableList.of("#80e619", "50")));
+    assertEquals("#80FF00",
+        function.getCallResultString(ImmutableList.of("#80e619", "100")));
+  }
+
+  public void testDesaturateColor() throws GssFunctionException {
+    GssFunctions.DesaturateColor function = new GssFunctions.DesaturateColor();
+    assertEquals("#6E85C4",
+        function.getCallResultString(ImmutableList.of("#5a7bd8", "20")));
+    assertEquals("#80CD32",
+        function.getCallResultString(ImmutableList.of("#80e619", "20")));
+    // saturation of #80e619 is 80.4. Removing 81 (to set saturation to 0%)
+    // or more return the same result
+    assertEquals("#808080",
+        function.getCallResultString(ImmutableList.of("#80e619", "81")));
+    assertEquals("#808080",
+        function.getCallResultString(ImmutableList.of("#80e619", "100")));
+  }
+
+  public void testGreyscale() throws GssFunctionException {
+    GssFunctions.Greyscale function = new GssFunctions.Greyscale();
+    assertEquals("#999999",
+        function.getCallResultString(ImmutableList.of("#5a7bd8")));
+    assertEquals("#808080",
+        function.getCallResultString(ImmutableList.of("#80e619")));
+  }
+
+  public void testLighten() throws GssFunctionException {
+    GssFunctions.Lighten function = new GssFunctions.Lighten();
+    assertEquals("#839CE2",
+        function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
+    assertEquals("#B3F075",
+        function.getCallResultString(ImmutableList.of("#80e619", "20")));
+    // lightness of #80e619 is 50. Adding 50 (to set lightness to 100%
+    // which is white) or more return the same result
+    assertEquals("#FFFFFF",
+        function.getCallResultString(ImmutableList.of("#80e619", "50")));
+    assertEquals("#FFFFFF",
+        function.getCallResultString(ImmutableList.of("#80e619", "60")));
+    assertEquals("#FFFFFF",
+        function.getCallResultString(ImmutableList.of("#80e619", "100")));
+  }
+
+  public void testDarken() throws GssFunctionException {
+    GssFunctions.Darken function = new GssFunctions.Darken();
+    assertEquals("#315ACE",
+        function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
+    assertEquals("#4D8A0F",
+        function.getCallResultString(ImmutableList.of("#80e619", "20")));
+    // lightness of #80e619 is 50. Removing 50 (to set lightness to 0%
+    // which is black) or more return the same result
+    assertEquals("#000000",
+        function.getCallResultString(ImmutableList.of("#80e619", "50")));
+    assertEquals("#000000",
+        function.getCallResultString(ImmutableList.of("#80e619", "60")));
+    assertEquals("#000000",
+        function.getCallResultString(ImmutableList.of("#80e619", "100")));
+  }
+
+  public void testSpin() throws GssFunctionException {
+    GssFunctions.Spin function = new GssFunctions.Spin();
+    String color = "#F2330D";
+    assertEquals("#F2A60D",
+        function.getCallResultString(ImmutableList.of(color, "30")));
+    assertEquals("#F20D5A",
+        function.getCallResultString(ImmutableList.of(color, "-30")));
+    // Value of Hue is modulo 360
+    assertEquals(color,
+        function.getCallResultString(ImmutableList.of(color, "360")));
+    assertEquals(color,
+        function.getCallResultString(ImmutableList.of(color, "-360")));
+  }
+
   /*
    * Test that calling the function with the given arguments throws a
    * GssFunctionException.
