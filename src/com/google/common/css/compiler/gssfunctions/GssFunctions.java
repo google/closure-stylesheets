@@ -20,6 +20,8 @@ import static com.google.common.css.compiler.gssfunctions.ColorUtil.formatColor;
 import static com.google.common.css.compiler.gssfunctions.ColorUtil.hsbToColor;
 import static com.google.common.css.compiler.gssfunctions.ColorUtil.testContrast;
 import static com.google.common.css.compiler.gssfunctions.ColorUtil.toHsb;
+import static com.google.common.css.compiler.gssfunctions.ColorUtil.toHsl;
+import static com.google.common.css.compiler.gssfunctions.ColorUtil.hslToColor;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableList;
@@ -81,6 +83,12 @@ public class GssFunctions {
         .put("makeContrastingColor", new MakeContrastingColor())
         .put("adjustBrightness", new AdjustBrightness())
         .put("makeTranslucent", new MakeTranslucent())
+        .put("saturateColor", new SaturateColor())
+        .put("desaturateColor", new DesaturateColor())
+        .put("greyscale", new Greyscale())
+        .put("lighten", new Lighten())
+        .put("darken", new Darken())
+        .put("spin", new Spin())
 
         // Logic functions.
         .put("selectFrom", new SelectFrom())
@@ -455,6 +463,443 @@ public class GssFunctions {
           hsbValues[2] + brightnessToAdd / 100.0));
 
       return Color.getHSBColor(hsbValues[0], hsbValues[1], hsbValues[2]);
+    }
+  }
+
+  /**
+   * Abstract base class providing HSL color space manipulation functions.
+   */
+  public abstract static class BaseHslColorManipulation {
+
+    protected String addHslToCssColor(
+      String baseColorString, String hueToAdd, String saturationToAdd,
+      String lightnessToAdd) throws GssFunctionException {
+      try {
+        return addHslToCssColor(
+          baseColorString,
+          Integer.parseInt(hueToAdd),
+          Integer.parseInt(saturationToAdd),
+          Integer.parseInt(lightnessToAdd));
+      } catch (IllegalArgumentException e) {
+        String message = String.format("Could not parse the "
+            + (e instanceof NumberFormatException ? "integer arguments" : "color argument")
+            + " for the function 'addHslToCssColor'. The list of arguments was:"
+            + " %s, %s, %s, %s. ",
+            baseColorString, hueToAdd, saturationToAdd, lightnessToAdd);
+        throw new GssFunctionException(message);
+      }
+    }
+
+    /**
+     * Takes a CSS color string, and adds the specified amount of hue,
+     * saturation and lightness to it in HSL color space
+     *
+     * @param baseColorString The string representing the color to change
+     * @param hueToAdd The amount of hue to add (can be negative)
+     * @param saturationToAdd The amount of saturation to add (can be negative)
+     * @param lightnessToAdd The amount of lightness to add (can be negative)
+     * @return A CSS String representing the new color
+     */
+    protected String addHslToCssColor(String baseColorString,
+                                   int hueToAdd,
+                                   int saturationToAdd,
+                                   int lightnessToAdd) {
+
+      // Skip transformation for the transparent color.
+      if ("transparent".equals(baseColorString)) {
+        return baseColorString;
+      }
+
+      Color baseColor = ColorParser.parseAny(baseColorString);
+      Color newColor = addValuesToHslComponents(baseColor,
+                                                hueToAdd,
+                                                saturationToAdd,
+                                                lightnessToAdd);
+
+      return formatColor(newColor);
+    }
+
+    /**
+     * Adds the specified amount to the specified HSL (Hue, Saturation,
+     * Lightness) parameter of the given color. The amount can be negative.
+     *
+     * @param baseColor The color to modify
+     * @param hueToAdd The amount of hue to add
+     * @param saturationToAdd The amount of saturation to add
+     * @param lightnessToAdd The amount of lightness to add
+     * @return The modified color
+     */
+    private Color addValuesToHslComponents(Color baseColor,
+                                          int hueToAdd,
+                                          int saturationToAdd,
+                                          int lightnessToAdd) {
+
+      float[] hslValues = toHsl(baseColor);
+
+      // In HSL color space, Hue goes from 0 to 360, Saturation and Lightness
+      // from 0 to 100. However, in Java all three parameters vary from 0.0 to
+      // 1.0, so we need some basic conversion.
+      hslValues[0] = (float) (hslValues[0] + hueToAdd / 360.0);
+      // The hue needs to wrap around, so just keep hue - floor(hue).
+      hslValues[0] -= (float) Math.floor(hslValues[0]);
+
+      // For saturation and lightness, no wrapping around, we just make sure
+      // we don't go over 1.0 or under 0.0
+      hslValues[1] = (float) Math.min(1.0, Math.max(0,
+          hslValues[1] + saturationToAdd / 100.0));
+      hslValues[2] = (float) Math.min(1.0, Math.max(0,
+          hslValues[2] + lightnessToAdd / 100.0));
+
+      return hslToColor(hslValues);
+    }
+  }
+
+  /**
+   * Increase the saturation of the specified color. First argument is the
+   * color, second is the absolute amount of saturation in HSL color space
+   * to add (from 0 to 100).
+   */
+  public static class SaturateColor extends BaseHslColorManipulation implements GssFunction {
+    @Override
+    public Integer getNumExpectedArguments() {
+      return 2;
+    }
+
+    @Override
+    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
+        ErrorManager errorManager) throws GssFunctionException {
+      CssValueNode arg1 = args.get(0);
+      CssValueNode arg2 = args.get(1);
+
+      if (!(arg1 instanceof CssHexColorNode
+          || arg1 instanceof CssLiteralNode)) {
+        String message =
+          "The first argument must be a CssHexColorNode or a CssLiteralNode.";
+        errorManager.report(
+          new GssError(message, arg1.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+      CssNumericNode numeric2;
+      if (arg2 instanceof CssNumericNode) {
+        numeric2 = (CssNumericNode) arg2;
+      } else {
+        String message = "The second argument must be a CssNumericNode";
+        errorManager.report(
+          new GssError(message, arg2.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+
+      try {
+        String resultString =
+          addHslToCssColor(arg1.getValue(),
+            "0",
+            numeric2.getNumericPart(),
+            "0");
+
+        CssHexColorNode result = new CssHexColorNode(resultString,
+          arg1.getSourceCodeLocation());
+        return ImmutableList.of((CssValueNode) result);
+      } catch (GssFunctionException e) {
+        errorManager.report(
+          new GssError(e.getMessage(), arg2.getSourceCodeLocation()));
+        throw e;
+      }
+    }
+
+    @Override
+    public String getCallResultString(List<String> args)
+        throws GssFunctionException {
+      String baseColorString = args.get(0);
+      return addHslToCssColor(
+        baseColorString, "0", args.get(1), "0");
+    }
+  }
+
+  /**
+   * Decrease the saturation of the specified color. First argument is the
+   * color, second is the absolute amount of saturation in HSL color space
+   * to substract (from 0 to 100).
+   */
+  public static class DesaturateColor extends BaseHslColorManipulation implements GssFunction {
+
+    @Override
+    public Integer getNumExpectedArguments() {
+      return 2;
+    }
+
+    @Override
+    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
+        ErrorManager errorManager) throws GssFunctionException {
+      CssValueNode arg1 = args.get(0);
+      CssValueNode arg2 = args.get(1);
+
+      if (!(arg1 instanceof CssHexColorNode || arg1 instanceof CssLiteralNode)) {
+        String message = "The first argument must be a CssHexColorNode or a CssLiteralNode.";
+        errorManager.report(new GssError(message, arg1
+          .getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+      CssNumericNode numeric2;
+      if (arg2 instanceof CssNumericNode) {
+        numeric2 = (CssNumericNode) arg2;
+      } else {
+        String message = "The second argument must be a CssNumericNode";
+        errorManager.report(new GssError(message, arg2
+          .getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+
+      try {
+        String resultString = addHslToCssColor(arg1.getValue(), "0",
+          "-" + numeric2.getNumericPart(), "0");
+
+        CssHexColorNode result = new CssHexColorNode(resultString,
+          arg1.getSourceCodeLocation());
+        return ImmutableList.of((CssValueNode) result);
+      } catch (GssFunctionException e) {
+        errorManager.report(new GssError(e.getMessage(), arg2
+          .getSourceCodeLocation()));
+        throw e;
+      }
+    }
+
+    @Override
+    public String getCallResultString(List<String> args)
+        throws GssFunctionException {
+      String baseColorString = args.get(0);
+      return addHslToCssColor(baseColorString, "0", "-"
+        + args.get(1), "0");
+    }
+  }
+
+  /**
+   * Convert the color to a grayscale (desaturation with amount of 100).
+   */
+  public static class Greyscale extends BaseHslColorManipulation implements GssFunction {
+    @Override
+    public Integer getNumExpectedArguments() {
+      return 1;
+    }
+
+    @Override
+    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
+        ErrorManager errorManager) throws GssFunctionException {
+      CssValueNode arg1 = args.get(0);
+
+      if (!(arg1 instanceof CssHexColorNode
+          || arg1 instanceof CssLiteralNode)) {
+        String message =
+          "The argument must be a CssHexColorNode or a CssLiteralNode.";
+        errorManager.report(
+          new GssError(message, arg1.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+
+      try {
+        String resultString =
+          addHslToCssColor(arg1.getValue(),
+            "0",
+            "-100",
+            "0");
+
+        CssHexColorNode result = new CssHexColorNode(resultString,
+          arg1.getSourceCodeLocation());
+        return ImmutableList.of((CssValueNode) result);
+      } catch (GssFunctionException e) {
+        errorManager.report(
+          new GssError(e.getMessage(), arg1.getSourceCodeLocation()));
+        throw e;
+      }
+    }
+
+    @Override
+    public String getCallResultString(List<String> args)
+        throws GssFunctionException {
+      String baseColorString = args.get(0);
+      return addHslToCssColor(
+        baseColorString, "0", "-100", "0");
+    }
+  }
+
+  /**
+   * Increase the lightness of a color. First argument is the color, second
+   * is the lighten to add, between 0 and 100.
+   */
+  public static class Lighten extends BaseHslColorManipulation implements GssFunction {
+
+    @Override
+    public Integer getNumExpectedArguments() {
+      return 2;
+    }
+
+    @Override
+    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
+        ErrorManager errorManager) throws GssFunctionException {
+      CssValueNode arg1 = args.get(0);
+      CssValueNode arg2 = args.get(1);
+
+      if (!(arg1 instanceof CssHexColorNode
+          || arg1 instanceof CssLiteralNode)) {
+        String message =
+          "The first argument must be a CssHexColorNode or a CssLiteralNode.";
+        errorManager.report(
+          new GssError(message, arg1.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+      CssNumericNode numeric2;
+      if (arg2 instanceof CssNumericNode) {
+        numeric2 = (CssNumericNode) arg2;
+      } else {
+        String message = "The second argument must be a CssNumericNode";
+        errorManager.report(
+          new GssError(message, arg2.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+
+      try {
+        String resultString =
+          addHslToCssColor(arg1.getValue(),
+            "0",
+            "0",
+            numeric2.getNumericPart());
+
+        CssHexColorNode result = new CssHexColorNode(resultString,
+          arg1.getSourceCodeLocation());
+        return ImmutableList.of((CssValueNode) result);
+      } catch (GssFunctionException e) {
+        errorManager.report(
+          new GssError(e.getMessage(), arg2.getSourceCodeLocation()));
+        throw e;
+      }
+    }
+
+    @Override
+    public String getCallResultString(List<String> args)
+        throws GssFunctionException {
+      String baseColorString = args.get(0);
+      return addHslToCssColor(
+        baseColorString, "0", "0", args.get(1));
+    }
+  }
+
+  /**
+   * Decrease the lightness of a color. First argument is the color, second
+   * is the lighten to remove, between 0 and 100.
+   */
+  public static class Darken extends BaseHslColorManipulation implements GssFunction {
+    @Override
+    public Integer getNumExpectedArguments() {
+      return 2;
+    }
+
+    @Override
+    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
+        ErrorManager errorManager) throws GssFunctionException {
+      CssValueNode arg1 = args.get(0);
+      CssValueNode arg2 = args.get(1);
+
+      if (!(arg1 instanceof CssHexColorNode
+          || arg1 instanceof CssLiteralNode)) {
+        String message =
+          "The first argument must be a CssHexColorNode or a CssLiteralNode.";
+        errorManager.report(
+          new GssError(message, arg1.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+      CssNumericNode numeric2;
+      if (arg2 instanceof CssNumericNode) {
+        numeric2 = (CssNumericNode) arg2;
+      } else {
+        String message = "The second argument must be a CssNumericNode";
+        errorManager.report(
+          new GssError(message, arg2.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+
+      try {
+        String resultString =
+          addHslToCssColor(arg1.getValue(),
+            "0",
+            "0",
+            "-" + numeric2.getNumericPart());
+
+        CssHexColorNode result = new CssHexColorNode(resultString,
+          arg1.getSourceCodeLocation());
+        return ImmutableList.of((CssValueNode) result);
+      } catch (GssFunctionException e) {
+        errorManager.report(
+          new GssError(e.getMessage(), arg2.getSourceCodeLocation()));
+        throw e;
+      }
+    }
+
+    @Override
+    public String getCallResultString(List<String> args)
+        throws GssFunctionException {
+      String baseColorString = args.get(0);
+      return addHslToCssColor(
+        baseColorString, "0", "0", "-" + args.get(1));
+    }
+  }
+
+  /**
+   * Increase or decrease the hue of a color. First argument is the color, second
+   * is the hue to add or remove, between 0 and 360.
+   * It's like rotating the color on a color wheel and hue is the angle to apply.
+   */
+  public static class Spin extends BaseHslColorManipulation implements GssFunction {
+    @Override
+    public Integer getNumExpectedArguments() {
+      return 2;
+    }
+
+    @Override
+    public List<CssValueNode> getCallResultNodes(List<CssValueNode> args,
+        ErrorManager errorManager) throws GssFunctionException {
+      CssValueNode arg1 = args.get(0);
+      CssValueNode arg2 = args.get(1);
+
+      if (!(arg1 instanceof CssHexColorNode
+          || arg1 instanceof CssLiteralNode)) {
+        String message =
+          "The first argument must be a CssHexColorNode or a CssLiteralNode.";
+        errorManager.report(
+          new GssError(message, arg1.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+      CssNumericNode numeric2;
+      if (arg2 instanceof CssNumericNode) {
+        numeric2 = (CssNumericNode) arg2;
+      } else {
+        String message = "The second argument must be a CssNumericNode";
+        errorManager.report(
+          new GssError(message, arg2.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+
+      try {
+        String resultString =
+          addHslToCssColor(arg1.getValue(),
+            numeric2.getNumericPart(),
+            "0",
+            "0");
+
+        CssHexColorNode result = new CssHexColorNode(resultString,
+          arg1.getSourceCodeLocation());
+        return ImmutableList.of((CssValueNode) result);
+      } catch (GssFunctionException e) {
+        errorManager.report(
+          new GssError(e.getMessage(), arg2.getSourceCodeLocation()));
+        throw e;
+      }
+    }
+
+    @Override
+    public String getCallResultString(List<String> args)
+        throws GssFunctionException {
+      String baseColorString = args.get(0);
+      return addHslToCssColor(
+        baseColorString, args.get(1), "0", "0");
     }
   }
 

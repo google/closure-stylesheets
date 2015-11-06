@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.gssfunctions;
 
 import java.awt.Color;
+import java.lang.Math;
 
 /**
  * Utility functions to deal with colors.
@@ -25,9 +26,14 @@ import java.awt.Color;
  */
 class ColorUtil {
 
+  /** Index of Hue in HSB and HSL array. */
   static final int H = 0;
+  /** Index of Saturation in HSB and HSL array. */
   static final int S = 1;
+  /** Index of Brightness in HSB array. */
   static final int B = 2;
+  /** Index of Lightness in HSL array. */
+  static final int L = 2;
 
   static float[] toHsb(Color color) {
     return Color.RGBtoHSB(
@@ -41,6 +47,72 @@ class ColorUtil {
 
   static Color hsbToColor(float[] inputHsb) {
     return Color.getHSBColor(inputHsb[H], inputHsb[S], inputHsb[B]);
+  }
+
+  /**
+   * Convert a color in HSB color space to one in HSL color space.
+   *
+   * @param inputHsb HSB color in a array of three floats, 0 is Hue, 1 is
+   *     Saturation and 2 is Brightness
+   * @return HSL color in array of three floats, 0 is Hue, 1 is
+   *     Saturation and 2 is Lightness
+   */
+  static float[] hsbToHsl(float[] inputHsb) {
+    float hHsb = inputHsb[H];
+    float sHsb = inputHsb[S];
+    float bHsb = inputHsb[B];
+
+    float hHsl = hHsb;
+    float lHsl = bHsb * (2 - sHsb) / 2;
+    float sHsl = bHsb * sHsb / (1 - Math.abs(2 * lHsl - 1));
+
+    float[] hsl = {hHsl, sHsl, lHsl};
+
+    return hsl;
+  }
+
+  /**
+   * Get the HSL values of a color.
+   *
+   * @param color Color to get the HSL values
+   * @return array of floats representing the color in HSL color space
+   */
+  static float[] toHsl(Color color) {
+    return hsbToHsl(toHsb(color));
+  }
+
+  /**
+   * Convert a color in HSL color space to one in HSB color space.
+   *
+   * @param inputHsl HSL color in a array of three floats, 0 is Hue, 1 is
+   *     Saturation and 2 is Lightness
+   * @return HSB color in array of three floats, 0 is Hue, 1 is
+   *     Saturation and 2 is Brightness
+   */
+  static float[] hslToHsb(float[] inputHsl) {
+    float hHsl = inputHsl[H];
+    float sHsl = inputHsl[S];
+    float lHsl = inputHsl[L];
+
+    float hHsb = hHsl;
+    float bHsb = (2 * lHsl + sHsl * (1 - Math.abs(2 * lHsl - 1))) / 2;
+    float sHsb = 2 * (bHsb - lHsl) / bHsb;
+
+    float[] hsb = {hHsb, sHsb, bHsb};
+
+    return hsb;
+  }
+
+  /**
+   * Get the color from the HSL floats
+   *
+   * @param inputHsl HSL color
+   * @return Java color
+   */
+  static Color hslToColor(float[] inputHsl) {
+    float[] hsb = hslToHsb(inputHsl);
+
+    return Color.getHSBColor(hsb[H], hsb[S], hsb[B]);
   }
 
   /**
