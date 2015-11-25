@@ -403,6 +403,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
       // propagate to descendant components).
       if (inAncestorBlock) {
         String parentRefPrefix = parentName + DEF_SEP;
+        // Hack to avoid breaking hacked components with
         // workarounds.  Can be removed when all workarounds are removed.
         String parentRefName = defName.startsWith(parentRefPrefix)
             ? defName : parentRefPrefix + defName;
