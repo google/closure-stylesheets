@@ -238,6 +238,12 @@ public class ProcessComponentsTest extends PassesTestBase {
   // in the output.
   private final ImmutableList<String> prefixingTestInputRules = ImmutableList.of(
       "  .PREFIX_A1.NO_PREFIX_A2,",     // Complex selector
+      "  .PREFIX_A1:not(.NO_PREFIX_A2),",  // :not() selector
+      "  .PREFIX_A1:not(.%PREFIX_A2),",  // :not() selector
+      "  .PREFIX_A1 .NO_PREFIX_B2:not(.NO_PREFIX_B3),",  // :not() selector
+      "  .PREFIX_A1 .NO_PREFIX_B2:not(.%PREFIX_B3),",  // :not() selector
+      "  :not(.PREFIX_A1).NO_PREFIX_A2,",  // :not() selector as first class selector
+      "  :not(.PREFIX_A1).%PREFIX_A2,",  // :not() selector as first class selector
       "  .PREFIX_B1 .NO_PREFIX_B2,",    // Descendant combinator
       "  .PREFIX_C1 > .NO_PREFIX_C2,",  // Child combinator
       "  TD.PREFIX_D1.NO_PREFIX_D2,",   // Element refiner before class refiner
@@ -272,6 +278,12 @@ public class ProcessComponentsTest extends PassesTestBase {
   // errors easier to diagnose.
   private final String prefixingTestComponentOutput =
       "[.someExamplePackagePREFIX_A1.NO_PREFIX_A2," +
+      ".someExamplePackagePREFIX_A1:not(.NO_PREFIX_A2)," +
+      ".someExamplePackagePREFIX_A1:not(.someExamplePackagePREFIX_A2)," +
+      ".someExamplePackagePREFIX_A1 .NO_PREFIX_B2:not(.NO_PREFIX_B3)," +
+      ".someExamplePackagePREFIX_A1 .NO_PREFIX_B2:not(.someExamplePackagePREFIX_B3)," +
+      ":not(.someExamplePackagePREFIX_A1).NO_PREFIX_A2," +
+      ":not(.someExamplePackagePREFIX_A1).someExamplePackagePREFIX_A2," +
       ".someExamplePackagePREFIX_B1 .NO_PREFIX_B2," +
       ".someExamplePackagePREFIX_C1>.NO_PREFIX_C2," +
       "TD.someExamplePackagePREFIX_D1.NO_PREFIX_D2," +

@@ -37,6 +37,7 @@ import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssProvideNode;
+import com.google.common.css.compiler.ast.CssPseudoClassNode;
 import com.google.common.css.compiler.ast.CssRootNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
@@ -273,8 +274,9 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     private final String defPrefix;
     private final String parentName;
     private final SourceCodeLocation sourceCodeLocation;
-    private int inCombinator;
     private boolean firstClassSelector;
+    /** If non-zero, we won't process the first classname in the current selector. */
+    private int nestedSelectorDepth;
 
     public TransformNodes(Set<String> constants, CssComponentNode current, boolean inAncestorBlock,
         MutatingVisitController visitController, ErrorManager errorManager,
@@ -320,13 +322,13 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
 
     @Override
     public boolean enterCombinator(CssCombinatorNode combinator) {
-      inCombinator++;
+      nestedSelectorDepth++;
       return true;
     }
 
     @Override
     public void leaveCombinator(CssCombinatorNode combinator) {
-      inCombinator--;
+      nestedSelectorDepth--;
     }
 
     @Override
@@ -334,7 +336,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
       // Only reset the 'first selector' flag if we're not in a combinator.
       // Otherwise, keep the same flag value (which may or may not have been set
       // depending on whether we saw a class selector in an earlier refiner list.)
-      if (inCombinator == 0) {
+      if (nestedSelectorDepth == 0) {
         firstClassSelector = true;
       }
       return true;
@@ -343,6 +345,18 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     @Override
     public void leaveSelector(CssSelectorNode selector) {
       firstClassSelector = false;
+    }
+
+    // Don't reset firstClassSelector for classes in :not().
+    @Override
+    public boolean enterPseudoClass(CssPseudoClassNode pseudoClass) {
+      nestedSelectorDepth++;
+      return true;
+    }
+
+    @Override
+    public void leavePseudoClass(CssPseudoClassNode pseudoClass) {
+      nestedSelectorDepth--;
     }
 
     @Override
