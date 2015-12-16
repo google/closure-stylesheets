@@ -251,6 +251,7 @@ public class ProcessComponentsTest extends PassesTestBase {
       "  TD.PREFIX_F1 TD.NO_PREFIX_F2,", // Multiple element refiners
       "  #X.PREFIX_G1.NO_PREFIX_G2,",   // ID refiner
       "  #X.PREFIX_H1 .NO_PREFIX_H2,",  // ID refiner with combinator
+      "  .^NO_PREFIX_A1.NO_PREFIX_A2,", // Explicit unscoped with complex selector
       "  .PREFIX_I1.%PREFIX_I2,",       // Explicit scoped with complex selector
       "  .PREFIX_J1 .%PREFIX_J2,",      // Explicit scoped with descendant combinator
       "  .PREFIX_K1 > .%PREFIX_K2,",    // Explicit scoped with child combinator
@@ -291,6 +292,7 @@ public class ProcessComponentsTest extends PassesTestBase {
       "TD.someExamplePackagePREFIX_F1 TD.NO_PREFIX_F2," +
       "#X.someExamplePackagePREFIX_G1.NO_PREFIX_G2," +
       "#X.someExamplePackagePREFIX_H1 .NO_PREFIX_H2," +
+      ".NO_PREFIX_A1.NO_PREFIX_A2," +
       ".someExamplePackagePREFIX_I1.someExamplePackagePREFIX_I2," +
       ".someExamplePackagePREFIX_J1 .someExamplePackagePREFIX_J2," +
       ".someExamplePackagePREFIX_K1>.someExamplePackagePREFIX_K2," +

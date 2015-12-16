@@ -85,7 +85,7 @@ class LoopVariableReplacementPass extends DefaultTreeVisitor implements CssCompi
       visitController.replaceCurrentBlockChildWith(
           ImmutableList.of(new CssClassSelectorNode(
               refinerName,
-              classSelector.isComponentScoped(),
+              classSelector.getScoping(),
               classSelector.getSourceCodeLocation())),
           true);
     }

@@ -28,6 +28,7 @@ import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.CssAtRuleNode;
 import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
+import com.google.common.css.compiler.ast.CssClassSelectorNode.ComponentScoping;
 import com.google.common.css.compiler.ast.CssCombinatorNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssComponentNode;
@@ -141,8 +142,13 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     // Note that this works because enterComponent, above, returns false -
     // this visitor never sees class selectors inside components (the other
     // visitor does).
-    if (node.isComponentScoped()) {
+    if (node.getScoping() == ComponentScoping.FORCE_SCOPED) {
       reportError("'%' prefix for class selectors may only be used in the scope of an @component",
+          node);
+      return false;
+    }
+    if (node.getScoping() == ComponentScoping.FORCE_UNSCOPED) {
+      reportError("'^' prefix for class selectors may only be used in the scope of an @component",
           node);
       return false;
     }
@@ -362,7 +368,13 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
     @Override
     public boolean enterClassSelector(CssClassSelectorNode node) {
       Preconditions.checkState(!isAbstract);
-      if (firstClassSelector || node.isComponentScoped()) {
+      if (!firstClassSelector && node.getScoping() == ComponentScoping.FORCE_UNSCOPED) {
+        errorManager.report(new GssError(
+            "'^' prefix may only be used on the first classname in a selector.",
+            node.getSourceCodeLocation()));
+      }
+      if (firstClassSelector && node.getScoping() != ComponentScoping.FORCE_UNSCOPED
+          || node.getScoping() == ComponentScoping.FORCE_SCOPED) {
         CssClassSelectorNode newNode = new CssClassSelectorNode(
             classPrefix + node.getRefinerName(),
             inAncestorBlock ? sourceCodeLocation : node.getSourceCodeLocation());

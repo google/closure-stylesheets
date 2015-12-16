@@ -345,8 +345,9 @@ public class GssParserCC {
     }
 
     public CssClassSelectorNode buildClassSelectorNode(String name,
-        SourceCodeLocation location, boolean isComponentScoped, List<Token> tokens) {
-      CssClassSelectorNode node = new CssClassSelectorNode(name, isComponentScoped, location);
+        SourceCodeLocation location, CssClassSelectorNode.ComponentScoping scoping,
+        List<Token> tokens) {
+      CssClassSelectorNode node = new CssClassSelectorNode(name, scoping, location);
       attachComments(tokens, node);
       return node;
     }
@@ -595,7 +596,7 @@ PARSER_END(GssParserCC)
   | < #HASH: "#" >
   | < #UNDERSCORE: "_" >
   | < #AMPERSAND: "&" >
-  | < #CARET: "^" >
+  | < CARET: "^" >
   | < #DOLLAR: "$" >
   | < #PIPE: "|" >
   | < AND: <AMPERSAND> <AMPERSAND> >
@@ -863,16 +864,18 @@ CssClassSelectorNode className() :
 {
   Token t;
   List<Token> tokens = Lists.newArrayList();
-  boolean isComponentScoped = false;
+  CssClassSelectorNode.ComponentScoping scoping = CssClassSelectorNode.ComponentScoping.DEFAULT;
 }
 {
   t = <DOT> { tokens.add(t); }
-  ( <PERCENT> { isComponentScoped = true; } )?
+  (
+    ( <PERCENT> { scoping = CssClassSelectorNode.ComponentScoping.FORCE_SCOPED; } ) |
+    ( <CARET> { scoping = CssClassSelectorNode.ComponentScoping.FORCE_UNSCOPED; } )
+  )?
   t = <IDENTIFIER>
   {
     tokens.add(t);
-    return nodeBuilder.buildClassSelectorNode(t.image, this.getLocation(), isComponentScoped,
-        tokens);
+    return nodeBuilder.buildClassSelectorNode(t.image, this.getLocation(), scoping, tokens);
   }
 }
 

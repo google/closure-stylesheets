@@ -26,29 +26,36 @@ import com.google.common.css.compiler.ast.CssSelectorNode.Specificity;
  * @author fbenz@google.com (Florian Benz)
  */
 public class CssClassSelectorNode extends CssRefinerNode {
-  private final boolean componentScoped;
+  /** Specifies the kind or absence of a component scoping prefix. */
+  public static enum ComponentScoping {
+    /** The classname has no prefix. */
+    DEFAULT,
+    /** The classname has a % prefix, to force scoping. */
+    FORCE_SCOPED,
+    /** The classname has a ^ prefix, to prevent scoping. */
+    FORCE_UNSCOPED
+  }
 
-  public CssClassSelectorNode(String refinerName, boolean componentScoped,
+  private final ComponentScoping scoping;
+
+  public CssClassSelectorNode(String refinerName, ComponentScoping scoping,
       SourceCodeLocation sourceCodeLocation) {
     super(Refiner.CLASS, refinerName, sourceCodeLocation);
-    this.componentScoped = componentScoped;
+    this.scoping = scoping;
   }
 
   public CssClassSelectorNode(String refinerName, SourceCodeLocation sourceCodeLocation) {
-    this(refinerName, false, sourceCodeLocation);
+    this(refinerName, ComponentScoping.DEFAULT, sourceCodeLocation);
   }
 
   protected CssClassSelectorNode(CssClassSelectorNode node) {
-    this(node.refinerName, node.componentScoped, node.getSourceCodeLocation());
+    this(node.refinerName, node.scoping, node.getSourceCodeLocation());
     this.setComments(node.getComments());
   }
 
-  /**
-   * Returns {@code true} if this class selector was prefixed with a percent-sign, indicating that
-   * it should be prefixed with the current @component's class prefix.
-   */
-  public boolean isComponentScoped() {
-    return componentScoped;
+  /** Returns the kind or absence of a component scoping prefix. */
+  public ComponentScoping getScoping() {
+    return scoping;
   }
 
   @Override
