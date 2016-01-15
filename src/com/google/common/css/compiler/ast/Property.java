@@ -458,6 +458,7 @@ public final class Property {
         builder("overflow"),
         builder("overflow-x"),
         builder("overflow-y"),
+        builder("overflow-wrap"),
         builder("padding-top"),
         builder("padding-right"),
         builder("padding-bottom"),
