@@ -48,6 +48,7 @@ public class JobDescription {
   public final boolean eliminateDeadStyles;
   public final boolean allowDefPropagation;
   public final boolean allowUnrecognizedFunctions;
+  public final boolean allowDuplicateDeclarations;
   public final Set<String> allowedNonStandardFunctions;
   public final boolean allowUnrecognizedProperties;
   public final Set<String> allowedUnrecognizedProperties;
@@ -125,6 +126,7 @@ public class JobDescription {
       boolean swapLeftRightInUrl, boolean simplifyCss,
       boolean eliminateDeadStyles, boolean allowDefPropagation,
       boolean allowUnrecognizedFunctions,
+      boolean allowDuplicateDeclarations,
       Set<String> allowedNonStandardFunctions,
       boolean allowUnrecognizedProperties,
       Set<String> allowedUnrecognizedProperties, boolean allowUndefinedConstants,
@@ -163,6 +165,7 @@ public class JobDescription {
     this.eliminateDeadStyles = eliminateDeadStyles;
     this.allowDefPropagation = allowDefPropagation;
     this.allowUnrecognizedFunctions = allowUnrecognizedFunctions;
+    this.allowDuplicateDeclarations = allowDuplicateDeclarations;
     this.allowedNonStandardFunctions = ImmutableSet.copyOf(
         allowedNonStandardFunctions);
     this.allowUnrecognizedProperties = allowUnrecognizedProperties;
