@@ -299,6 +299,22 @@ final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("column-count")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-column-count")
+        .addExpandPropertyName("-moz-column-count")
+        .addExpandPropertyName("column-count")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("column-gap")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-column-gap")
+        .addExpandPropertyName("-moz-column-gap")
+        .addExpandPropertyName("column-gap")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("perspective")
         .isFunction(false)
         .addExpandPropertyName("-webkit-perspective")
