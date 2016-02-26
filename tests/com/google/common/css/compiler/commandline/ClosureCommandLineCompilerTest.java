@@ -19,12 +19,15 @@ import com.google.common.css.ExitCodeHandler;
 import com.google.common.css.JobDescription;
 import com.google.common.css.JobDescriptionBuilder;
 import com.google.common.css.SourceCode;
+import com.google.common.css.SplittingSubstitutionMap;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 import junit.framework.TestCase;
 
 public class ClosureCommandLineCompilerTest extends TestCase {
+
+  private static final String TEST_SPLITTER = "-";
 
   static final ExitCodeHandler EXIT_CODE_HANDLER =
       new ExitCodeHandler() {
@@ -63,5 +66,18 @@ public class ClosureCommandLineCompilerTest extends TestCase {
         ClosureCommandLineCompiler.parseArgs(new String[] {"/dev/null"}, EXIT_CODE_HANDLER);
     JobDescription jobDescription = flags.createJobDescription();
     assertTrue(jobDescription.allowDefPropagation);
+  }
+  
+  public void testAssignCustomizedSplitter() throws Exception {
+    ClosureCommandLineCompiler.Flags flags =
+        ClosureCommandLineCompiler.parseArgs(new String[] {"--allow-unrecognized-functions", 
+            "--allow-unrecognized-properties", "--rename", "CLOSURE", 
+            "--css-class-splitter", TEST_SPLITTER, "/dev/null"}, EXIT_CODE_HANDLER);
+    flags.registerSplitterIfExist();
+    assertEquals("Type of RenamingType should be CLOSURE", 
+        flags.getRenamingType().name(), "CLOSURE");
+    assertEquals("The passed splitter should be the same as it in test case.", 
+        TEST_SPLITTER.charAt(0), 
+        ((SplittingSubstitutionMap)(flags.getRenamingType().getCssSubstitutionMapProvider().get())).getSplitterChar());
   }
 }

@@ -52,8 +52,9 @@ enum RenamingType {
 
 
   /**
-   * Each chunk of a CSS class as delimited by '-' is renamed using the
-   * shortest available name.
+   * Each chunk of a CSS class as delimited by specific splitter is 
+   * renamed using the shortest available name. Default specific 
+   * splitter is '-'.
    */
   CLOSURE(new SubstitutionMapProvider() {
     @Override
