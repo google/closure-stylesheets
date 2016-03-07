@@ -1683,7 +1683,7 @@ public class GssFunctions {
 
   /**
    * Helper class for checking if a size string contains units. This class is equivalent to
-   * {@link CharMatcher#JAVA_LETTER} except that it also accepts {@code %}.
+   * {@link CharMatcher#javaLetter} except that it also accepts {@code %}.
    */
   private static final CharMatcher UNIT_MATCHER = new CharMatcher() {
     @Override public boolean matches(char c) {
