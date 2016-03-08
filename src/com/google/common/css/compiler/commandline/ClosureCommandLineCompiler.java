@@ -35,7 +35,6 @@ import com.google.common.css.OutputRenamingMapFormat;
 import com.google.common.css.SourceCode;
 import com.google.common.css.Vendor;
 import com.google.common.css.compiler.ast.ErrorManager;
-import com.google.common.css.compiler.gssfunctions.DefaultGssFunctionMapProvider;
 import com.google.common.io.Files;
 
 import org.kohsuke.args4j.Argument;
@@ -290,8 +289,8 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
    *     "com.google.common.css.compiler.gssfunctions.DefaultGssFunctionMapProvider"
    * @return a new instance of the {@link GssFunctionMapProvider} that
    *     corresponds to the specified class name, or a new instance of
-   *     {@link DefaultGssFunctionMapProvider} if the class name is
-   *     {@code null}.
+   *     {@link com.google.common.css.compiler.gssfunctions.DefaultGssFunctionMapProvider}
+   *     if the class name is {@code null}.
    */
   private static GssFunctionMapProvider getGssFunctionMapProviderForName(
       String gssFunctionMapProviderClassName) {
