@@ -153,6 +153,10 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         "Allow unrecognized functions.")
     private boolean allowUnrecognizedFunctions = false;
 
+    @Option(name = "--allow-duplicate-declarations", usage =
+        "Allow duplicate declarations.")
+    private boolean allowDuplicateDeclarations = false;
+
     @Option(name = "--allowed-non-standard-function", usage =
         "Specify a non-standard function to whitelist, like alpha()")
     private List<String> allowedNonStandardFunctions = Lists.newArrayList();
@@ -223,6 +227,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setTrueConditionNames(trueConditions);
       builder.setAllowDefPropagation(allowDefPropagation);
       builder.setAllowUnrecognizedFunctions(allowUnrecognizedFunctions);
+      builder.setAllowDuplicateDeclarations(allowDuplicateDeclarations);
       builder.setAllowedNonStandardFunctions(allowedNonStandardFunctions);
       builder.setAllowedUnrecognizedProperties(allowedUnrecognizedProperties);
       builder.setAllowUnrecognizedProperties(allowUnrecognizedProperties);
