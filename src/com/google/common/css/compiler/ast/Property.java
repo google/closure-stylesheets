@@ -642,6 +642,7 @@ public final class Property {
         builder("-webkit-font-feature-settings"),
         builder("-webkit-font-size-delta"),
         builder("-webkit-font-smoothing"),
+        builder("-webkit-font-variant-ligatures"),
         builder("-webkit-grid-columns"),
         builder("-webkit-grid-rows"),
         builder("-webkit-highlight"),
