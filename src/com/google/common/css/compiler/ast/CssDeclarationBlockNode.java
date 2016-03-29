@@ -19,7 +19,8 @@ package com.google.common.css.compiler.ast;
 import com.google.common.collect.ImmutableList;
 
 /**
- * A {@link CssAbstractBlockNode} that contains only declarations and @-rules.
+ * A {@link CssAbstractBlockNode} that contains only declarations, @-rules,
+ * and conditional blocks.
  *
  * @author fbenz@google.com (Florian Benz)
  */
@@ -27,7 +28,7 @@ public class CssDeclarationBlockNode extends CssAbstractBlockNode {
 
   private static final ImmutableList<Class<? extends CssNode>>
       VALID_NODE_CLASSES = ImmutableList.of(
-          CssDeclarationNode.class, CssAtRuleNode.class);
+          CssDeclarationNode.class, CssAtRuleNode.class, CssConditionalBlockNode.class);
 
   public CssDeclarationBlockNode() {
     super(true, VALID_NODE_CLASSES);

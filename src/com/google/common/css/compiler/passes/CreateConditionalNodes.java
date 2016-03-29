@@ -16,11 +16,10 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.css.SourceCodeLocation;
+import com.google.common.css.compiler.ast.CssAbstractBlockNode;
 import com.google.common.css.compiler.ast.CssAtRuleNode;
-import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssBooleanExpressionNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
@@ -108,7 +107,7 @@ public class CreateConditionalNodes extends DefaultTreeVisitor
   @Override
   public boolean enterRuleset(CssRulesetNode node) {
     activeBlockNode = null;
-    return false;
+    return true;
   }
 
   @Override
@@ -119,9 +118,7 @@ public class CreateConditionalNodes extends DefaultTreeVisitor
 
   private CssConditionalRuleNode createConditionalRuleNode(
       CssUnknownAtRuleNode node, String name) {
-    Preconditions.checkState(node.getBlock() == null
-        || node.getBlock() instanceof CssBlockNode);
-    CssBlockNode block = (CssBlockNode) node.getBlock();
+    CssAbstractBlockNode block = node.getBlock();
     if (block == null) {
       errorManager.report(new GssError("@" + name + " without block",
                                        node.getSourceCodeLocation()));

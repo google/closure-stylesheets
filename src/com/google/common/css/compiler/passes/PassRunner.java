@@ -96,6 +96,11 @@ public class PassRunner {
     new ProcessRefiners(cssTree.getMutatingVisitController(), errorManager,
         job.simplifyCss).runPass();
 
+    // Eliminate conditional nodes.
+    new EliminateConditionalNodes(
+        cssTree.getMutatingVisitController(),
+        ImmutableSet.copyOf(job.trueConditionNames)).runPass();
+
     // Collect mixin definitions and replace mixins
     CollectMixinDefinitions collectMixinDefinitions =
         new CollectMixinDefinitions(cssTree.getMutatingVisitController(),
@@ -106,10 +111,6 @@ public class PassRunner {
 
     new ProcessComponents<Object>(cssTree.getMutatingVisitController(),
         errorManager).runPass();
-    // Eliminate conditional nodes.
-    new EliminateConditionalNodes(
-        cssTree.getMutatingVisitController(),
-        ImmutableSet.copyOf(job.trueConditionNames)).runPass();
     // Collect constant definitions.
     CollectConstantDefinitions collectConstantDefinitionsPass =
         new CollectConstantDefinitions(cssTree);
