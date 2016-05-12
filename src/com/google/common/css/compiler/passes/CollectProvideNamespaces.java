@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
- * A compiler pass to help find missing {@code &#64;require} lines for def constant references
+ * A compiler pass to help find missing {@code @require} lines for def constant references
  * and mixins.
  * This pass simply collects namespaces that correpond to constant definitions and mixins.
  * Also see the CheckMissingRequire pass that is used in conjunction with this one.

@@ -39,15 +39,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A compiler pass that checks for missing {@code &#64;require} lines for def constant references
+ * A compiler pass that checks for missing {@code @require} lines for def constant references
  * and mixins. This pass is used in conjunction with CollectProvideNamespaces, which provides
  * namespaces for constant definitions and mixins.
  * Example for def references:
- * file foo/gss/button.gss provides namespace {@code &#64;provide 'foo.gss.button';} and has
- *  the def: {@code &#64;def FONT_SIZE 10px;}.
+ * file foo/gss/button.gss provides namespace {@code @provide 'foo.gss.button';} and has
+ *  the def: {@code @def FONT_SIZE 10px;}.
  * File foo/gss/item.gss references the above def as follows:
- * {@code &#64;def ITEM_FONT_SIZE FONT_SIZE;}
- * This pass enforces that file foo/gss/item.gss contains {@code &#64;require 'foo.gss.button';}
+ * {@code @def ITEM_FONT_SIZE FONT_SIZE;}
+ * This pass enforces that file foo/gss/item.gss contains {@code @require 'foo.gss.button';}
  *
  */
 public final class CheckMissingRequire extends DefaultTreeVisitor implements CssCompilerPass {
