@@ -138,6 +138,7 @@ public final class Property {
         builder("clip-path").isSvgOnly(),
         builder("clip-rule").isSvgOnly(),
         builder("color"),
+        builder("color-adjust"),
         builder("color-interpolation").isSvgOnly(),
         builder("color-interpolation-filters").isSvgOnly(),
         builder("color-profile").isSvgOnly(),
