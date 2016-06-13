@@ -33,6 +33,8 @@ import com.google.common.css.JobDescription.SourceMapDetailLevel;
 import com.google.common.css.JobDescriptionBuilder;
 import com.google.common.css.OutputRenamingMapFormat;
 import com.google.common.css.SourceCode;
+import com.google.common.css.SplittingSubstitutionMap;
+import com.google.common.css.SubstitutionMap;
 import com.google.common.css.Vendor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.io.Files;
@@ -60,6 +62,9 @@ import javax.annotation.Nullable;
  * @author bolinfest@google.com (Michael Bolin)
  */
 public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
+
+  private static final String DEFAULT_CSS_CLASS_SLIPPTER_SINGLE_CHARACTER_STRING = 
+      String.valueOf(SplittingSubstitutionMap.DEFAULT_CSS_CLASS_SPLITTER_CHAR);
 
   protected ClosureCommandLineCompiler(JobDescription job,
       ExitCodeHandler exitCodeHandler, ErrorManager errorManager) {
@@ -201,6 +206,12 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         usage = "Specify integer constants to be used in for loops. Invoke for each const, e.g.: "
         + "--const=VAR1=VALUE1 --const=VAR2=VALUE2")
     private Map<String, String> compileConstants = new HashMap<>();
+    
+    @Option(name = "--css-class-splitter", 
+    	usage = "Define your single-character customized splitter when process " 
+        + "css class names. Default value is '-'. If you want to enable this feature, " 
+        + "please choose 'DEBUG' or 'CLOSURE' for '--rename'")
+    private String splitter = DEFAULT_CSS_CLASS_SLIPPTER_SINGLE_CHARACTER_STRING;
 
     /**
      * All remaining arguments are considered input CSS files.
@@ -281,6 +292,43 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         parsedConstants.put(entry.getKey(), Integer.parseInt(entry.getValue()));
       }
       return parsedConstants;
+    }
+    
+    /**
+     * Only following requirements are satisfied, the customized splitter will 
+     * be used:
+     * <ul>
+     * <li>
+     * Option <code>css-class-splitter</code> is NOT Null or empty;
+     * </li>
+     * <li>
+     * Option <code>css-class-splitter</code> only contains <b>ONE</b> character;
+     * </li>
+     * <li>
+     * Option <code>css-class-splitter</code> doesn't equal to default value <b>'-'</b>;
+     * </li>
+     * <li>
+     * Option <code>renamingType</code> is <b>RenamingType.CLOSURE</b> or 
+     * <b>RenamingType.DEBUG</b>;
+     * </li>
+     * </ul>
+     */
+    @VisibleForTesting
+    void registerSplitterIfExist() {
+      if (!Strings.isNullOrEmpty(splitter) 
+            && !splitter.equals(DEFAULT_CSS_CLASS_SLIPPTER_SINGLE_CHARACTER_STRING) 
+            && (renamingType.equals(RenamingType.CLOSURE) 
+            || renamingType.equals(RenamingType.DEBUG))) {
+    	SubstitutionMap map = renamingType.getCssSubstitutionMapProvider().get();
+    	if (map instanceof SplittingSubstitutionMap) {
+    	  ((SplittingSubstitutionMap)map).registerSplitter(splitter.charAt(0));
+    	}
+      }
+    }
+    
+    @VisibleForTesting
+    RenamingType getRenamingType() {
+      return renamingType;
     }
   }
 
@@ -385,8 +433,16 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       return null;
     }
 
+    boolean errorHappen = false;
+    if (!Strings.isNullOrEmpty(flags.splitter) && flags.splitter.length() > 1) {
+      System.err.println("\nERROR: Only single character is supported for --css-class-splitter.\n");
+      errorHappen = true;
+    }
     if (flags.arguments.isEmpty()) {
       System.err.println("\nERROR: No input files specified.\n");
+      errorHappen = true;
+    }
+    if (errorHappen) {
       argsParser.printUsage(System.err);
       exitCodeHandler.processExitCode(
           AbstractCommandLineCompiler.ERROR_MESSAGE_EXIT_CODE);
@@ -403,6 +459,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       return;
     }
 
+    flags.registerSplitterIfExist();
     JobDescription job = flags.createJobDescription();
     OutputInfo info = flags.createOutputInfo();
     executeJob(job, exitCodeHandler, info);
