@@ -153,6 +153,7 @@ public final class Property {
         builder("column-span"),
         builder("column-width"),
         builder("columns"),
+        builder("contain"),
         builder("content"),
         builder("counter-increment"),
         builder("counter-reset"),
