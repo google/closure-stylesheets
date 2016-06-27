@@ -1819,7 +1819,7 @@ String product() :
 }
 
 // unit
-//  : [ NUMBER | DIMENSION | PERCENTAGE | "(" S* sum S* ")" | calc ];
+//  : [ NUMBER | DIMENSION | PERCENTAGE | "(" S* sum S* ")" ];
 //  ;
 String unit() :
 {
@@ -1849,7 +1849,6 @@ String unit() :
           throw e;
         }
       )
-    | (math = calc() {content.append(math.getValue());})
   )
   {
     return content.toString();
