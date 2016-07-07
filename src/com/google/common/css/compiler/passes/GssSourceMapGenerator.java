@@ -51,6 +51,8 @@ public interface GssSourceMapGenerator {
    * @param node the {@link CssNode} to be processed
    * @param endLine the last character's line number when it ends writing output
    * @param endCharIndex the last character's character index when it ends writing output
+   *     or one less than the corresponding {@link #startSourceMapping startCharIndex} if
+   *     a source mapping is empty.
    */
   public void endSourceMapping(CssNode node, int endLine, int endCharIndex);
 
