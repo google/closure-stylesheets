@@ -18,15 +18,13 @@ package com.google.common.css.compiler.ast;
 
 import com.google.common.css.compiler.ast.testing.AstUtilityTestCase;
 
-import junit.framework.TestCase;
-
 /**
  * Unit tests for {@link CssDeclarationNode}
  *
  * @author oana@google.com (Oana Florescu)
  *
  */
-public class CssDeclarationNodeTest extends TestCase {
+public class CssDeclarationNodeTest extends AstUtilityTestCase {
 
   public void testDeclarationNodeCreation() {
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
@@ -54,29 +52,26 @@ public class CssDeclarationNodeTest extends TestCase {
   }
   
   public void testDeepCopyOfDeclarationNode() throws Exception {
-    AstUtilityTestCase tester = new AstUtilityTestCase();
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
     CssDeclarationNode node1 = new CssDeclarationNode(propertyName);
     node1.setStarHack(false);
     
     CssDeclarationNode node2 = new CssDeclarationNode(node1);
     
-    tester.deepEquals(node1, node2);
+    deepEquals(node1, node2);
   }
 
   public void testDeepCopyOfDeclarationNode2() throws Exception {
-    AstUtilityTestCase tester = new AstUtilityTestCase();
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
     CssDeclarationNode node1 = new CssDeclarationNode(propertyName);
     node1.setStarHack(true);
     
     CssDeclarationNode node2 = new CssDeclarationNode(node1);
     
-    tester.deepEquals(node1, node2);
+    deepEquals(node1, node2);
   }
 
   public void testDeepCopyOfDeclarationNode3() throws Exception {
-    AstUtilityTestCase tester = new AstUtilityTestCase();
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
     CssDeclarationNode node1 = new CssDeclarationNode(propertyName);
     node1.setStarHack(true);
@@ -84,6 +79,6 @@ public class CssDeclarationNodeTest extends TestCase {
     
     CssDeclarationNode node2 = new CssDeclarationNode(node1);
     
-    tester.deepEquals(node1, node2);
+    deepEquals(node1, node2);
   }
 }
