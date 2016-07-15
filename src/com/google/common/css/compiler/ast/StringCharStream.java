@@ -214,19 +214,22 @@ public class StringCharStream implements CharStream {
     // Does nothing since no resources need to be freed.
   }
 
-  // Support for older versions of JavaCC's CharStream.
+  @Override
   public void setTabSize(int tabSize) {
     throw new UnsupportedOperationException("setTabSize() is not supported.");
   }
 
+  @Override
   public int getTabSize() {
     return tabSize;
   }
 
+  @Override
   public boolean getTrackLineColumn() {
     return trackLineColumn;
   }
 
+  @Override
   public void setTrackLineColumn(boolean trackLineColumn) {
     this.trackLineColumn = trackLineColumn;
   }
