@@ -32,6 +32,7 @@ import com.google.debugging.sourcemap.SourceMapGeneratorV3;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -154,7 +155,10 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
   public void endSourceMapping(CssNode node, int endLine, int endCharIndex) {
     Preconditions.checkState(node != null);
     Preconditions.checkState(endLine >= 0);
-    Preconditions.checkState(endCharIndex >= 0);
+    // -1 when a node contributes no content at the start of the buffer,
+    // as when a CssImportBlockNode is encountered, and there is no
+    // copyright comment.
+    Preconditions.checkState(endCharIndex >= -1);
     if (!mappings.isEmpty() && mappings.peek().node == node) {
       Mapping mapping = mappings.pop();
       mapping.end = new FilePosition(endLine, endCharIndex);
@@ -173,29 +177,10 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
     ((SourceMapGeneratorV3) generator).setSourceRoot(path);
   }
 
-  private void addMapping(Mapping mapping) {
-    CssNode node = mapping.node;
-    FilePosition outputStartPosition = mapping.start;
-    FilePosition outputEndPosition = mapping.end;
-    String sourceFile = getSourceFileName(node);
-
-    // If the node does not have an associated source file or source location
-    // is unknown, then the node does not have sufficient info for source map.
-    if (sourceFile == null || node.getSourceCodeLocation().isUnknown()) {
-      return;
-    }
-
-    // TODO: could pass in an optional symbol name
-    generator.addMapping(
-        sourceFile, null,
-        new FilePosition(getStartLineno(node), getStartCharIndex(node)),
-        outputStartPosition, outputEndPosition);
-  }
-
   /**
    * Gets the source file file for current node.
    */
-  private String getSourceFileName(CssNode node) {
+  private static String getSourceFileName(CssNode node) {
     return node.getSourceCodeLocation().getSourceCode().getFileName();
   }
 
@@ -204,23 +189,67 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
    *
    * <p>Notes: Gss compiler uses a 1-based line number and source map V3 uses a 0-based line number.
    */
-  private int getStartLineno(CssNode node) {
+  private static int getStartLineno(CssNode node) {
     return node.getSourceCodeLocation().getLineNumber() - 1;
   }
 
   /**
    * Gets the start character index in the output buffer for current {@code node}.
    */
-  private int getStartCharIndex(CssNode node) {
+  private static int getStartCharIndex(CssNode node) {
     return node.getSourceCodeLocation().getCharacterIndex();
   }
+
+
+  private static final class CompleteMapping implements Comparable<CompleteMapping> {
+    final String sourceFile;
+    final FilePosition inputStart;
+    final FilePosition outputStart;
+    final FilePosition outputEnd;
+
+    CompleteMapping(Mapping mapping) {
+      CssNode node = mapping.node;
+      this.sourceFile = getSourceFileName(node);
+      this.inputStart = new FilePosition(
+          getStartLineno(node), getStartCharIndex(node));
+      this.outputStart = mapping.start;
+      this.outputEnd = mapping.end;
+    }
+
+    public int compareTo(CompleteMapping m) {
+      int delta = outputStart.getLine() - m.outputStart.getLine();
+      if (delta == 0) {
+        delta = outputStart.getColumn() - m.outputStart.getColumn();
+      }
+      return delta;
+    }
+  }
+
 
   /**
    * Generates the source map by passing all mappings to {@link #generator}.
    */
-  private void generateSourceMap(){
+  private void generateSourceMap() {
+    List<CompleteMapping> completeMappings = new ArrayList<>(allMappings.size());
     for (Mapping mapping : allMappings) {
-      addMapping(mapping);
+      // If the node does not have an associated source file or source location
+      // is unknown, then the node does not have sufficient info for source map.
+      if (mapping.node.getSourceCodeLocation().isUnknown()) {
+        continue;
+      }
+      CompleteMapping completeMapping = new CompleteMapping(mapping);
+      if (completeMapping.sourceFile == null) {
+        continue;
+      }
+      completeMappings.add(completeMapping);
+    }
+    Collections.sort(completeMappings);
+    for (CompleteMapping completeMapping : completeMappings) {
+      // TODO: could pass in an optional symbol name
+      generator.addMapping(
+          completeMapping.sourceFile, null,
+          completeMapping.inputStart,
+          completeMapping.outputStart, completeMapping.outputEnd);
     }
   }
 }
