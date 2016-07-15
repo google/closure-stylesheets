@@ -31,7 +31,7 @@ import java.util.Iterator;
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class AstUtilityTestCase extends UtilityTestCase {
+public abstract class AstUtilityTestCase extends UtilityTestCase {
 
   /**
    * Utility method for deep equals comparison between two css nodes.
