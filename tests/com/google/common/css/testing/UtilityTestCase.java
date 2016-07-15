@@ -25,7 +25,7 @@ import junit.framework.TestCase;
  * {@code CssParser}'s tests.
  *
  */
-public class UtilityTestCase extends TestCase {
+public abstract class UtilityTestCase extends TestCase {
 
   public UtilityTestCase() {
   }
