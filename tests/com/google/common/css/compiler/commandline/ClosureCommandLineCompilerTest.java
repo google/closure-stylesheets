@@ -68,6 +68,13 @@ public class ClosureCommandLineCompilerTest extends TestCase {
     assertTrue(jobDescription.allowDefPropagation);
   }
 
+  public void testAllowDuplicateDeclarationsDefaultsToFalse() throws Exception {
+    ClosureCommandLineCompiler.Flags flags =
+            ClosureCommandLineCompiler.parseArgs(new String[] {"/dev/null"}, EXIT_CODE_HANDLER);
+    JobDescription jobDescription = flags.createJobDescription();
+    assertFalse(jobDescription.allowDuplicateDeclarations);
+  }
+
 
   public void testEmptyImportBlocks() throws Exception {
     // See b/29995881

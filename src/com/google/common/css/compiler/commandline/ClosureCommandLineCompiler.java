@@ -149,6 +149,10 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         + " from one file to propagate to other files.")
     private boolean allowDefPropagation = true;
 
+    @Option(name = "--allow-duplicate-declarations", usage = "Allow duplicate"
+      + " declarations without needing @alternate")
+    private boolean allowDuplicateDeclarations = false;
+
     @Option(name = "--allow-unrecognized-functions", usage =
         "Allow unrecognized functions.")
     private boolean allowUnrecognizedFunctions = false;
@@ -222,6 +226,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setCopyrightNotice(copyrightNotice);
       builder.setTrueConditionNames(trueConditions);
       builder.setAllowDefPropagation(allowDefPropagation);
+      builder.setAllowDuplicateDeclarations(allowDuplicateDeclarations);
       builder.setAllowUnrecognizedFunctions(allowUnrecognizedFunctions);
       builder.setAllowedNonStandardFunctions(allowedNonStandardFunctions);
       builder.setAllowedUnrecognizedProperties(allowedUnrecognizedProperties);

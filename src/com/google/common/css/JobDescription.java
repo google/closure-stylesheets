@@ -47,6 +47,7 @@ public class JobDescription {
   public final boolean simplifyCss;
   public final boolean eliminateDeadStyles;
   public final boolean allowDefPropagation;
+  public final boolean allowDuplicateDeclarations;
   public final boolean allowUnrecognizedFunctions;
   public final Set<String> allowedNonStandardFunctions;
   public final boolean allowUnrecognizedProperties;
@@ -124,6 +125,7 @@ public class JobDescription {
       boolean useInternalBidiFlipper, boolean swapLtrRtlInUrl,
       boolean swapLeftRightInUrl, boolean simplifyCss,
       boolean eliminateDeadStyles, boolean allowDefPropagation,
+      boolean allowDuplicateDeclarations,
       boolean allowUnrecognizedFunctions,
       Set<String> allowedNonStandardFunctions,
       boolean allowUnrecognizedProperties,
@@ -162,6 +164,7 @@ public class JobDescription {
     this.simplifyCss = simplifyCss;
     this.eliminateDeadStyles = eliminateDeadStyles;
     this.allowDefPropagation = allowDefPropagation;
+    this.allowDuplicateDeclarations = allowDuplicateDeclarations;
     this.allowUnrecognizedFunctions = allowUnrecognizedFunctions;
     this.allowedNonStandardFunctions = ImmutableSet.copyOf(
         allowedNonStandardFunctions);
