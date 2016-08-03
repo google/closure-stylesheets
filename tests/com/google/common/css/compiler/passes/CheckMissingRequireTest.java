@@ -42,7 +42,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
       pass.runPass();
     }
     CollectProvideNamespaces collectProvides = new CollectProvideNamespaces(
-        tree.getVisitController(), errorMgr);
+        tree.getVisitController());
     collectProvides.runPass();
     new CheckMissingRequire(
         tree.getVisitController(),

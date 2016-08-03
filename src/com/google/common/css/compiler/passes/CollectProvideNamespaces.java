@@ -28,12 +28,9 @@ import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
 import com.google.common.css.compiler.ast.CssProvideNode;
 import com.google.common.css.compiler.ast.CssRequireNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
-import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.VisitController;
 
 import java.util.Map;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * A compiler pass to help find missing {@code @require} lines for def constant references
@@ -43,13 +40,7 @@ import java.util.regex.Pattern;
  *
  */
 public final class CollectProvideNamespaces extends DefaultTreeVisitor implements CssCompilerPass {
-  private static final Logger logger = Logger.getLogger(CollectProvideNamespaces.class.getName());
-
-  private static final Pattern OVERRIDE_REGEX = Pattern.compile(
-      "/\\*\\s+@overrideSelector\\s+\\{(.*)\\}\\s+\\*/");
-
   private final VisitController visitController;
-  private final ErrorManager errorManager;
 
   // Key: filename; Value: provide namespace
   private final Map<String, String> filenameProvideMap = Maps.newHashMap();
@@ -78,10 +69,8 @@ public final class CollectProvideNamespaces extends DefaultTreeVisitor implement
     return ImmutableListMultimap.copyOf(defmixinProvideMap);
   }
 
-  public CollectProvideNamespaces(VisitController visitController,
-      ErrorManager errorManager) {
+  public CollectProvideNamespaces(VisitController visitController) {
     this.visitController = visitController;
-    this.errorManager = errorManager;
   }
 
   @Override
