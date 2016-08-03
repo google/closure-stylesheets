@@ -219,6 +219,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
       Set<String> constants, CssComponentNode target, CssComponentNode source) {
     CssBlockNode sourceBlock = source.getBlock();
     CssBlockNode copyBlock = new CssBlockNode(false, sourceBlock.deepCopy().getChildren());
+    copyBlock.setSourceCodeLocation(source.getBlock().getSourceCodeLocation());
     CssTree tree = new CssTree(
         target.getSourceCodeLocation().getSourceCode(), new CssRootNode(copyBlock));
     new TransformNodes(constants, target, target != source,

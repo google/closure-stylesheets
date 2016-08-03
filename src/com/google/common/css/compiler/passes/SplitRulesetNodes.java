@@ -61,6 +61,7 @@ public class SplitRulesetNodes extends SkippingTreeVisitor
       for (CssSelectorNode sel : selectors.childIterable()) {
         for (CssNode child : declarations.childIterable()) {
           CssRulesetNode ruleset = new CssRulesetNode();
+          ruleset.setSourceCodeLocation(node.getSourceCodeLocation());
           ruleset.addDeclaration(child.deepCopy());
           ruleset.addSelector(sel.deepCopy());
 
