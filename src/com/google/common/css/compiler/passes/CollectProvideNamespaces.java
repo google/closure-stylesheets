@@ -17,8 +17,6 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
@@ -38,6 +36,8 @@ import java.util.Map;
  * This pass simply collects namespaces that correpond to constant definitions and mixins.
  * Also see the CheckMissingRequire pass that is used in conjunction with this one.
  *
+ * NOTE: The maps in this class can only be used within the same set of pass runs.
+ *
  */
 public final class CollectProvideNamespaces extends DefaultTreeVisitor implements CssCompilerPass {
   private final VisitController visitController;
@@ -54,19 +54,19 @@ public final class CollectProvideNamespaces extends DefaultTreeVisitor implement
   private final ListMultimap<String, String> defmixinProvideMap = LinkedListMultimap.create();
 
   public Map<String, String> getFilenameProvideMap() {
-    return ImmutableMap.copyOf(filenameProvideMap);
+    return filenameProvideMap;
   }
 
   public ListMultimap<String, String> getFilenameRequireMap() {
-    return ImmutableListMultimap.copyOf(filenameRequireMap);
+    return filenameRequireMap;
   }
 
   public ListMultimap<String, String> getDefProvideMap() {
-    return ImmutableListMultimap.copyOf(defProvideMap);
+    return defProvideMap;
   }
 
   public ListMultimap<String, String> getDefmixinProvideMap() {
-    return ImmutableListMultimap.copyOf(defmixinProvideMap);
+    return defmixinProvideMap;
   }
 
   public CollectProvideNamespaces(VisitController visitController) {
@@ -124,6 +124,10 @@ public final class CollectProvideNamespaces extends DefaultTreeVisitor implement
 
   @Override
   public void runPass() {
+    filenameProvideMap.clear();
+    filenameRequireMap.clear();
+    defProvideMap.clear();
+    defmixinProvideMap.clear();
     visitController.startVisit(this);
   }
 }
