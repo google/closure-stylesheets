@@ -119,7 +119,6 @@
             <configuration>
               <jdkVersion>${java.version}</jdkVersion>
               <javadocFriendlyComments>true</javadocFriendlyComments>
-              <packageName>org.javacc.parser</packageName>
               <sourceDirectory>${project.basedir}/src</sourceDirectory>
               <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
             </configuration>
