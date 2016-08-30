@@ -243,7 +243,9 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
       if (exactMatch) {
         assertEquals(expectedMessages[currentIndex], message);
       } else {
-        assertTrue(message.contains(expectedMessages[currentIndex]));
+        assertTrue("Expected error '" + message + "' to contain '"
+            + expectedMessages[currentIndex] + "'.",
+            message.contains(expectedMessages[currentIndex]));
       }
       currentIndex++;
     }

@@ -367,6 +367,7 @@ public class CssTreeBuilder implements
 
     Preconditions.checkState(ruleset == null);
     ruleset = new CssRulesetNode(comments);
+    ruleset.setSourceCodeLocation(selectorList.getSourceCodeLocation());
     ruleset.setSelectors(selectorList);
     comments.clear();
 

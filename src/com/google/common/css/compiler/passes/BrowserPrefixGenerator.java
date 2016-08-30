@@ -289,6 +289,14 @@ final class BrowserPrefixGenerator {
         .addExpandPropertyValue("repeating-linear-gradient")
         .build());
 
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("cursor")
+        .matchPropertyValue("grab")
+        .isFunction(false)
+        .addExpandPropertyValue("-moz-grab")
+        .addExpandPropertyValue("-webkit-grab")
+        .build());
+
     // Needed for Firefox 15, Chrome 25, Safari 6, iOS Safari 6.1 or less
     builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyValue("calc")
