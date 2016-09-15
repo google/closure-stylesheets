@@ -76,17 +76,19 @@ public class VerifyRecognizedProperties extends DefaultTreeVisitor
       property = Property.byName(propertyName);
     }
 
-    if (!property.isRecognizedProperty() &&
-        !allowedUnrecognizedProperties.contains(property.getName())) {
-      reportError(String.format("%s is an unrecognized property",
-          property.getName()), propertyNode);
-    } else if (property.hasWarning()) {
-      errorManager.reportWarning(new GssError(
-          String.format(
-              "WARNING for use of CSS property %s: %s\n",
-              property.getName(), property.getWarning()),
-          propertyNode.getSourceCodeLocation()));
+    if (!allowedUnrecognizedProperties.contains(property.getName())) {
+      if (!property.isRecognizedProperty()) {
+        reportError(String.format("%s is an unrecognized property",
+                property.getName()), propertyNode);
+      } else if (property.hasWarning()) {
+        errorManager.reportWarning(new GssError(
+            String.format(
+                "WARNING for use of CSS property %s: %s\n",
+                property.getName(), property.getWarning()),
+            propertyNode.getSourceCodeLocation()));
+      }
     }
+
     return true;
   }
 
