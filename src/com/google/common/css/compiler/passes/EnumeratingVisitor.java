@@ -19,14 +19,13 @@ package com.google.common.css.compiler.passes;
 import com.google.common.collect.Maps;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssTree;
-
 import java.util.HashMap;
 
 /**
  * A visitor that maps nodes to their visit ordering.
  *
  */
-public class EnumeratingVisitor extends UniformVisitor {
+public class EnumeratingVisitor implements UniformVisitor {
 
   private int counter;
   private HashMap<CssNode, Integer> enumeration = Maps.newHashMap();
@@ -37,9 +36,12 @@ public class EnumeratingVisitor extends UniformVisitor {
     ++counter;
   }
 
+  @Override
+  public void leave(CssNode node) {}
+
   public static HashMap<CssNode, Integer> enumerate(CssTree t) {
     EnumeratingVisitor v = new EnumeratingVisitor();
-    t.getVisitController().startVisit(v);
+    t.getVisitController().startVisit(UniformVisitor.Adapters.asVisitor(v));
     return v.enumeration;
   }
 }

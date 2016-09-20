@@ -210,9 +210,6 @@ public class DefaultTreeVisitor implements CssTreeVisitor {
   public void leaveComponent(CssComponentNode node) {}
 
   @Override
-  public void visit(CssNode node) {}
-
-  @Override
   public boolean enterKeyframesRule(CssKeyframesNode node) {
     return true;
   }

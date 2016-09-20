@@ -17,7 +17,6 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.base.Preconditions;
-
 import javax.annotation.Nullable;
 
 /**
@@ -54,7 +53,7 @@ public class CodeBuffer {
    */
   private int lastCharIndex;
 
-  CodeBuffer () {
+  public CodeBuffer() {
     this.sb = new StringBuilder();
     resetIndex();
   }

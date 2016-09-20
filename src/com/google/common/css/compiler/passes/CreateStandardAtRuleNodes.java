@@ -45,60 +45,70 @@ import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
 import java.util.List;
 import java.util.Set;
 
 /**
- * A compiler pass that transforms standard {@link CssUnknownAtRuleNode} instances
- * to more specific at-rule nodes, or deletes them.
+ * A compiler pass that transforms standard {@link CssUnknownAtRuleNode} instances to more specific
+ * at-rule nodes, or deletes them.
  *
  */
-public class CreateStandardAtRuleNodes extends UniformVisitor implements CssCompilerPass {
+public class CreateStandardAtRuleNodes implements UniformVisitor, CssCompilerPass {
+
+  @VisibleForTesting static final String NO_BLOCK_ERROR_MESSAGE = "This @-rule has to have a block";
+
   @VisibleForTesting
-  static final String NO_BLOCK_ERROR_MESSAGE =
-    "This @-rule has to have a block";
-  @VisibleForTesting
-  static final String BLOCK_ERROR_MESSAGE =
-    "This @-rule is not allowed to have a block";
+  static final String BLOCK_ERROR_MESSAGE = "This @-rule is not allowed to have a block";
+
   @VisibleForTesting
   static final String ONLY_DECLARATION_BLOCK_ERROR_MESSAGE =
-    "Only declaration blocks are allowed for this @-rule";
+      "Only declaration blocks are allowed for this @-rule";
+
   @VisibleForTesting
-  static final String INVALID_PARAMETERS_ERROR_MESSAGE =
-    "This @-rule has invalid parameters";
+  static final String INVALID_PARAMETERS_ERROR_MESSAGE = "This @-rule has invalid parameters";
 
   @VisibleForTesting
   static final String MEDIA_INVALID_CHILD_ERROR_MESSAGE =
-    "This is not valid inside an @media block";
+      "This is not valid inside an @media block";
+
   @VisibleForTesting
-  static final String MEDIA_WITHOUT_PARAMETERS_ERROR_MESSAGE =
-    "@media without parameters";
+  static final String MEDIA_WITHOUT_PARAMETERS_ERROR_MESSAGE = "@media without parameters";
 
   @VisibleForTesting
   static final String PAGE_SELECTOR_PARAMETERS_ERROR_MESSAGE =
-    "Page selectors are not allowed to have parameters";
+      "Page selectors are not allowed to have parameters";
 
   @VisibleForTesting
   static final String FONT_FACE_PARAMETERS_ERROR_MESSAGE =
-    "@font-face is not allowed to have parameters";
+      "@font-face is not allowed to have parameters";
 
   @VisibleForTesting
   static final String IGNORED_IMPORT_WARNING_MESSAGE =
       "@import rules should occur outside blocks and can only be preceded "
-      + "by @charset and other @import rules.";
+          + "by @charset and other @import rules.";
 
   @VisibleForTesting
   static final String IGNORE_IMPORT_WARNING_MESSAGE =
       "A node after which all @import rule nodes are ignored is here.";
 
   private static final List<Type> PAGE_SELECTORS =
-    ImmutableList.of(Type.TOP_LEFT_CORNER,
-        Type.TOP_LEFT, Type.TOP_CENTER, Type.TOP_RIGHT, Type.TOP_RIGHT_CORNER,
-        Type.LEFT_TOP, Type.LEFT_MIDDLE, Type.LEFT_BOTTOM, Type.RIGHT_TOP,
-        Type.RIGHT_MIDDLE, Type.RIGHT_BOTTOM, Type.BOTTOM_LEFT_CORNER,
-        Type.BOTTOM_LEFT, Type.BOTTOM_CENTER, Type.BOTTOM_RIGHT,
-        Type.BOTTOM_RIGHT_CORNER);
+      ImmutableList.of(
+          Type.TOP_LEFT_CORNER,
+          Type.TOP_LEFT,
+          Type.TOP_CENTER,
+          Type.TOP_RIGHT,
+          Type.TOP_RIGHT_CORNER,
+          Type.LEFT_TOP,
+          Type.LEFT_MIDDLE,
+          Type.LEFT_BOTTOM,
+          Type.RIGHT_TOP,
+          Type.RIGHT_MIDDLE,
+          Type.RIGHT_BOTTOM,
+          Type.BOTTOM_LEFT_CORNER,
+          Type.BOTTOM_LEFT,
+          Type.BOTTOM_CENTER,
+          Type.BOTTOM_RIGHT,
+          Type.BOTTOM_RIGHT_CORNER);
   private static final Set<String> PSEUDO_PAGES = ImmutableSet.of(
       ":left", ":right", ":first");
   // The @-rules are restricted because it only makes sense for them to be used
@@ -120,31 +130,38 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
    */
   private CssNode noMoreImportRules;
 
-  public CreateStandardAtRuleNodes(MutatingVisitController visitController,
-                                   ErrorManager errorManager) {
+  public CreateStandardAtRuleNodes(
+      MutatingVisitController visitController, ErrorManager errorManager) {
     this.visitController = visitController;
     this.errorManager = errorManager;
   }
 
-  @Override
-  public boolean enterTree(CssRootNode root) {
+  private void enterTree(CssRootNode root) {
     this.root = root;
     noMoreImportRules = null;
-    return true;
   }
 
   @Override
   public void leave(CssNode node) {
-    if (node instanceof CssImportRuleNode
-        || node instanceof CssImportBlockNode
-        || node == root.getCharsetRule()) {
-      return;
+    if (!(node instanceof CssImportRuleNode)
+        && !(node instanceof CssImportBlockNode)
+        && node != root.getCharsetRule()) {
+      noMoreImportRules = node;
     }
-    noMoreImportRules = node;
+    if (node instanceof CssRootNode) {
+      leaveTree((CssRootNode) node);
+    }
   }
 
   @Override
-  public boolean enterUnknownAtRule(CssUnknownAtRuleNode node) {
+  public void enter(CssNode cssNode) {
+    if (cssNode instanceof CssRootNode) {
+      enterTree((CssRootNode) cssNode);
+    }
+    if (!(cssNode instanceof CssUnknownAtRuleNode)) {
+      return;
+    }
+    CssUnknownAtRuleNode node = (CssUnknownAtRuleNode) cssNode;
     String charsetName = CssAtRuleNode.Type.CHARSET.getCanonicalName();
     String importName = CssAtRuleNode.Type.IMPORT.getCanonicalName();
     String mediaName = CssAtRuleNode.Type.MEDIA.getCanonicalName();
@@ -157,21 +174,20 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
       // We don't have a specific node class for this, should be handled at the parser level.
       // TODO(user): Give a warning instead that the node has been removed without processing. (?)
       reportError("@" + charsetName + " removed", node);
-      return false;
-
+      return;
     } else if (node.getName().getValue().equals(importName)) {
       if (params.isEmpty()) {
         reportError("@" + importName + " without a following string or uri", node);
-        return false;
+        return;
       }
       if (params.size() > 2) {
         reportError("@" + importName + " with too many parameters", node);
-        return false;
+        return;
       }
       CssValueNode param = params.get(0);
       if (!((param instanceof CssStringNode) || checkIfUri(param))) {
         reportError("@" + importName + "'s first parameter has to be a string or an url", node);
-        return false;
+        return;
       }
       List<CssValueNode> paramlist = Lists.newArrayList(param);
       if (params.size() == 2) {
@@ -180,7 +196,7 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
           paramlist.add(param2);
         } else {
           reportError("@" + importName + " has illegal parameter", node);
-          return false;
+          return;
         }
       }
       CssImportRuleNode importRule = new CssImportRuleNode(node.getComments());
@@ -196,8 +212,7 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
         visitController.removeCurrentNode();
         nonIgnoredImportRules.add(importRule);
       }
-      return false;
-
+      return;
     } else if (node.getName().getValue().equals(mediaName)) {
       createMediaRule(node);
     } else if (node.getName().getValue().equals(pageName)) {
@@ -212,13 +227,11 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
         }
       }
     }
-    return true;
   }
 
-  @Override
-  public void leaveTree(CssRootNode root) {
+  private void leaveTree(CssRootNode root) {
     for (CssImportRuleNode importRule : nonIgnoredImportRules) {
-       root.getImportRules().addChildToBack(importRule);
+      root.getImportRules().addChildToBack(importRule);
     }
   }
 
@@ -407,8 +420,7 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
     if (numParams > 2) {
       reportError(INVALID_PARAMETERS_ERROR_MESSAGE, node);
       return;
-    } else if (numParams == 2
-          && !PSEUDO_PAGES.contains(params.get(1).getValue())) {
+    } else if (numParams == 2 && !PSEUDO_PAGES.contains(params.get(1).getValue())) {
       reportError(INVALID_PARAMETERS_ERROR_MESSAGE, node);
       return;
     } else if (numParams == 1) {
@@ -501,7 +513,7 @@ public class CreateStandardAtRuleNodes extends UniformVisitor implements CssComp
 
   @Override
   public void runPass() {
-    visitController.startVisit(this);
+    visitController.startVisit(UniformVisitor.Adapters.asVisitor(this));
   }
 
 }

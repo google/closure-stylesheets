@@ -32,8 +32,12 @@ import com.google.common.css.compiler.ast.CssRootNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorListNode;
 import com.google.common.css.compiler.ast.CssTree;
+import com.google.common.css.compiler.ast.CssTreeVisitor;
 import com.google.common.css.compiler.ast.CssValueNode;
+import com.google.common.css.compiler.ast.VisitController;
+import com.google.common.css.compiler.passes.CodeBuffer;
 import com.google.common.css.compiler.passes.CompactPrinter;
+import com.google.common.css.compiler.passes.CompactPrintingVisitor;
 
 /**
  * A {@link CompactPrinter} extension that adds square brackets to make the
@@ -60,185 +64,196 @@ public class AstPrinter extends CompactPrinter {
   }
 
   @Override
-  public boolean enterTree(CssRootNode root) {
-    buffer.append('[');
-    return super.enterTree(root);
+  protected CssTreeVisitor createVisitor(VisitController visitController, CodeBuffer buffer) {
+    return new AstPrintingVisitor(visitController, buffer);
   }
 
-  @Override
-  public void leaveTree(CssRootNode root) {
-    super.leaveTree(root);
-    buffer.append(']');
-  }
+  private static class AstPrintingVisitor extends CompactPrintingVisitor {
 
-  @Override
-  public boolean enterDeclarationBlock(CssDeclarationBlockNode block) {
-    super.enterDeclarationBlock(block);
-    buffer.append('[');
-    return true;
-  }
-
-  @Override
-  public void leaveDeclarationBlock(CssDeclarationBlockNode block) {
-    buffer.append(']');
-    super.leaveDeclarationBlock(block);
-  }
-
-  @Override
-  public boolean enterSelectorBlock(CssSelectorListNode block) {
-    buffer.append('[');
-    return super.enterSelectorBlock(block);
-  }
-
-  @Override
-  public void leaveSelectorBlock(CssSelectorListNode block) {
-    super.leaveSelectorBlock(block);
-    buffer.append(']');
-  }
-
-  @Override
-  public boolean enterPropertyValue(CssPropertyValueNode propertyValue) {
-    buffer.append('[');
-    return super.enterPropertyValue(propertyValue);
-  }
-
-  @Override
-  public void leavePropertyValue(CssPropertyValueNode propertyValue) {
-    super.leavePropertyValue(propertyValue);
-    buffer.deleteLastCharIfCharIs(' ');
-    buffer.append(']');
-  }
-
-  @Override
-  public boolean enterCompositeValueNode(CssCompositeValueNode value) {
-    buffer.append('[');
-    return super.enterCompositeValueNode(value);
-  }
-
-  @Override
-  public void leaveCompositeValueNode(CssCompositeValueNode value) {
-    super.leaveCompositeValueNode(value);
-    buffer.deleteLastCharIfCharIs(' ');
-    buffer.append(']');
-  }
-
-  @Override
-  public boolean enterValueNode(CssValueNode value) {
-    buffer.append('[');
-    return super.enterValueNode(value);
-  }
-
-  @Override
-  public void leaveValueNode(CssValueNode value) {
-    super.leaveValueNode(value);
-    buffer.deleteLastCharIfCharIs(' ');
-    buffer.append(']');
-  }
-
-  @Override
-  public boolean enterDefinition(CssDefinitionNode node) {
-    buffer.append("@def ");
-    buffer.append(node.getName());
-    buffer.append(" [");
-    return true;
-  }
-
-  @Override
-  public void leaveDefinition(CssDefinitionNode node) {
-    buffer.deleteLastCharIfCharIs(' ');
-    buffer.append("];");
-  }
-
-  @Override
-  public boolean enterConditionalBlock(CssConditionalBlockNode node) {
-    return true;
-  }
-
-  @Override
-  public boolean enterConditionalRule(CssConditionalRuleNode node) {
-    buffer.append(node.getType());
-    buffer.append('[');
-    for (CssValueNode value : node.getParameters()) {
-      appendValue(value);
-      buffer.append(' ');
+    public AstPrintingVisitor(VisitController visitController, CodeBuffer buffer) {
+      super(visitController, buffer);
     }
-    buffer.deleteLastCharIfCharIs(' ');
-    buffer.append(']').append('{');
-    return true;
-  }
 
-  @Override
-  public void leaveConditionalRule(CssConditionalRuleNode node) {
-    buffer.append('}');
-  }
-
-  @Override
-  public boolean enterRuleset(CssRulesetNode node) {
-    appendComments(node);
-    return super.enterRuleset(node);
-  }
-
-  @Override
-  public boolean enterDeclaration(CssDeclarationNode node) {
-    appendComments(node);
-    return super.enterDeclaration(node);
-  }
-
-  @Override
-  public boolean enterMediaRule(CssMediaRuleNode node) {
-    appendComments(node);
-    return super.enterMediaRule(node);
-  }
-
-  @Override
-  public boolean enterImportRule(CssImportRuleNode node) {
-    appendComments(node);
-    return super.enterImportRule(node);
-  }
-
-  /**
-   * This method appends the representation of a value but does not cover
-   * all cases at the moment.
-   */
-  private void appendValue(CssValueNode node) {
-    if (node instanceof CssBooleanExpressionNode) {
-      appendBooleanExpression((CssBooleanExpressionNode) node);
-    } else {
-      buffer.append(node.getValue());
-    }
-  }
-
-  private void appendBooleanExpression(CssBooleanExpressionNode node) {
-    if (!node.getType().isOperator()) {
-      buffer.append(node.getValue());
-    } else if (node.getType().isBinaryOperator()) {
-      appendBooleanChildExpression(node, node.getLeft());
-      buffer.append(' ');
-      buffer.append(node.getType().getOperatorString());
-      buffer.append(' ');
-      appendBooleanChildExpression(node, node.getRight());
-    } else if (node.getType().isUnaryOperator()) {
-      buffer.append(node.getType().getOperatorString());
-      appendBooleanChildExpression(node, node.getLeft());
-    }
-  }
-
-  private void appendBooleanChildExpression(CssBooleanExpressionNode node,
-      CssBooleanExpressionNode child) {
-    if (child.getType().getPriority() >= node.getType().getPriority()) {
-      appendBooleanExpression(child);
-    } else {
-      buffer.append('(');
-      appendBooleanExpression(child);
-      buffer.append(')');
-    }
-  }
-
-  private void appendComments(CssNode node) {
-    for (CssCommentNode c : node.getComments()) {
+    @Override
+    public boolean enterTree(CssRootNode root) {
       buffer.append('[');
-      buffer.append(c.getValue());
+      return super.enterTree(root);
+    }
+
+    @Override
+    public void leaveTree(CssRootNode root) {
+      super.leaveTree(root);
       buffer.append(']');
+    }
+
+    @Override
+    public boolean enterDeclarationBlock(CssDeclarationBlockNode block) {
+      super.enterDeclarationBlock(block);
+      buffer.append('[');
+      return true;
+    }
+
+    @Override
+    public void leaveDeclarationBlock(CssDeclarationBlockNode block) {
+      buffer.append(']');
+      super.leaveDeclarationBlock(block);
+    }
+
+    @Override
+    public boolean enterSelectorBlock(CssSelectorListNode block) {
+      buffer.append('[');
+      return super.enterSelectorBlock(block);
+    }
+
+    @Override
+    public void leaveSelectorBlock(CssSelectorListNode block) {
+      super.leaveSelectorBlock(block);
+      buffer.append(']');
+    }
+
+    @Override
+    public boolean enterPropertyValue(CssPropertyValueNode propertyValue) {
+      buffer.append('[');
+      return super.enterPropertyValue(propertyValue);
+    }
+
+    @Override
+    public void leavePropertyValue(CssPropertyValueNode propertyValue) {
+      super.leavePropertyValue(propertyValue);
+      buffer.deleteLastCharIfCharIs(' ');
+      buffer.append(']');
+    }
+
+    @Override
+    public boolean enterCompositeValueNode(CssCompositeValueNode value) {
+      buffer.append('[');
+      return super.enterCompositeValueNode(value);
+    }
+
+    @Override
+    public void leaveCompositeValueNode(CssCompositeValueNode value) {
+      super.leaveCompositeValueNode(value);
+      buffer.deleteLastCharIfCharIs(' ');
+      buffer.append(']');
+    }
+
+    @Override
+    public boolean enterValueNode(CssValueNode value) {
+      buffer.append('[');
+      return super.enterValueNode(value);
+    }
+
+    @Override
+    public void leaveValueNode(CssValueNode value) {
+      super.leaveValueNode(value);
+      buffer.deleteLastCharIfCharIs(' ');
+      buffer.append(']');
+    }
+
+    @Override
+    public boolean enterDefinition(CssDefinitionNode node) {
+      buffer.append("@def ");
+      buffer.append(node.getName());
+      buffer.append(" [");
+      return true;
+    }
+
+    @Override
+    public void leaveDefinition(CssDefinitionNode node) {
+      buffer.deleteLastCharIfCharIs(' ');
+      buffer.append("];");
+    }
+
+    @Override
+    public boolean enterConditionalBlock(CssConditionalBlockNode node) {
+      return true;
+    }
+
+    @Override
+    public boolean enterConditionalRule(CssConditionalRuleNode node) {
+      buffer.append(node.getType());
+      buffer.append('[');
+      for (CssValueNode value : node.getParameters()) {
+        appendValue(value);
+        buffer.append(' ');
+      }
+      buffer.deleteLastCharIfCharIs(' ');
+      buffer.append(']').append('{');
+      return true;
+    }
+
+    @Override
+    public void leaveConditionalRule(CssConditionalRuleNode node) {
+      buffer.append('}');
+    }
+
+    @Override
+    public boolean enterRuleset(CssRulesetNode node) {
+      appendComments(node);
+      return super.enterRuleset(node);
+    }
+
+    @Override
+    public boolean enterDeclaration(CssDeclarationNode node) {
+      appendComments(node);
+      return super.enterDeclaration(node);
+    }
+
+    @Override
+    public boolean enterMediaRule(CssMediaRuleNode node) {
+      appendComments(node);
+      return super.enterMediaRule(node);
+    }
+
+    @Override
+    public boolean enterImportRule(CssImportRuleNode node) {
+      appendComments(node);
+      return super.enterImportRule(node);
+    }
+
+    /**
+     * This method appends the representation of a value but does not cover all cases at the moment.
+     */
+    private void appendValue(CssValueNode node) {
+      if (node instanceof CssBooleanExpressionNode) {
+        appendBooleanExpression((CssBooleanExpressionNode) node);
+      } else {
+        buffer.append(node.getValue());
+      }
+    }
+
+    private void appendBooleanExpression(CssBooleanExpressionNode node) {
+      if (!node.getType().isOperator()) {
+        buffer.append(node.getValue());
+      } else if (node.getType().isBinaryOperator()) {
+        appendBooleanChildExpression(node, node.getLeft());
+        buffer.append(' ');
+        buffer.append(node.getType().getOperatorString());
+        buffer.append(' ');
+        appendBooleanChildExpression(node, node.getRight());
+      } else if (node.getType().isUnaryOperator()) {
+        buffer.append(node.getType().getOperatorString());
+        appendBooleanChildExpression(node, node.getLeft());
+      }
+    }
+
+    private void appendBooleanChildExpression(
+        CssBooleanExpressionNode node, CssBooleanExpressionNode child) {
+      if (child.getType().getPriority() >= node.getType().getPriority()) {
+        appendBooleanExpression(child);
+      } else {
+        buffer.append('(');
+        appendBooleanExpression(child);
+        buffer.append(')');
+      }
+    }
+
+    private void appendComments(CssNode node) {
+      for (CssCommentNode c : node.getComments()) {
+        buffer.append('[');
+        buffer.append(c.getValue());
+        buffer.append(']');
+      }
     }
   }
 }

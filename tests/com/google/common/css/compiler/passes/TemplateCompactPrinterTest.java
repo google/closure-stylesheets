@@ -18,8 +18,6 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
-import com.google.common.css.compiler.passes.ChunkCompactPrinterTest.SetSelectorChunk;
-
 import java.util.Map;
 
 /**
