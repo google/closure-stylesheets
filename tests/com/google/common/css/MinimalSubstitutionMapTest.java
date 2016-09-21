@@ -32,12 +32,12 @@ import java.util.Set;
 public class MinimalSubstitutionMapTest extends TestCase {
 
   private static final char[] START_CHARS = new char[] { 'a' };
-
+  
   private static final char[] CHARS = new char[] { '1', '2' };
-
+  
   private MinimalSubstitutionMap map;
 
-  /**
+  /** 
    * @return a MinimalSubstitutionMap that uses fewer characters for CSS class
    *     names
    */
@@ -98,6 +98,7 @@ public class MinimalSubstitutionMapTest extends TestCase {
       for (int i = 0; i < numberOfStringsWithThisLength; ++i) {
         String renamedClass = map.toShortString(n);
 
+        // Use blaze test --test_output=all to see this
         System.out.println("RENAMED CLASS: " + renamedClass);
 
         assertFalse("Already contains a class named: " + renamedClass,
