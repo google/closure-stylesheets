@@ -67,11 +67,12 @@ import java.util.logging.Logger;
  */
 public class CompactPrintingVisitor extends DefaultTreeVisitor {
 
+  private static final Logger logger = Logger.getLogger(CompactPrintingVisitor.class.getName());
+
   protected final VisitController visitController;
   protected final CodeBuffer buffer;
 
   private String compactedPrintedString = null;
-  private static final Logger logger = Logger.getLogger(CompactPrintingVisitor.class.getName());
 
   public CompactPrintingVisitor(VisitController visitController, CodeBuffer buffer) {
     this.visitController = checkNotNull(visitController);

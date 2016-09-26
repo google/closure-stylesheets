@@ -41,9 +41,13 @@ public class DelegatingVisitor {
    * least one element.
    */
   public static CssTreeVisitor from(List<CssTreeVisitor> originalVisitors) {
+    Preconditions.checkArgument(originalVisitors.size() >= 1);
+    if (originalVisitors.size() == 1) {
+      return originalVisitors.get(0);
+    }
+
     final ImmutableList<CssTreeVisitor> visitors = ImmutableList.copyOf(originalVisitors);
     final ImmutableList<CssTreeVisitor> reverseVisitors = visitors.reverse();
-    Preconditions.checkArgument(visitors.size() >= 1);
     return Reflection.newProxy(
         CssTreeVisitor.class,
         new InvocationHandler() {

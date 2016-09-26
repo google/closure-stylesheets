@@ -26,6 +26,14 @@ import com.google.common.css.compiler.ast.FunctionalTestBase;
  * @author dgajda@google.com (Damian Gajda)
  */
 public abstract class AbstractCompactPrinterTest extends FunctionalTestBase {
+  
+  protected boolean preserveMarkedComments; 
+  
+  @Override
+  protected void setUp() throws Exception {
+    preserveMarkedComments = false;
+    super.setUp();
+  }
 
   protected void assertCompactPrintedResult(String expected, String source) {
     parseAndBuildTree(source);
@@ -57,6 +65,7 @@ public abstract class AbstractCompactPrinterTest extends FunctionalTestBase {
   private void assertCompactPrintedResult(String expected,
       CssTree treeToCheck) {
     CompactPrinter pass = new CompactPrinter(treeToCheck);
+    pass.setPreserveMarkedComments(preserveMarkedComments);
     pass.runPass();
     assertEquals(expected, pass.getCompactPrintedString());
   }
