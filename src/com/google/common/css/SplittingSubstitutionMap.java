@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-
 import java.util.Map;
 
 /**
@@ -30,12 +29,19 @@ import java.util.Map;
  * @author dgajda@google.com (Damian Gajda)
  */
 public class SplittingSubstitutionMap implements
-    MultipleMappingSubstitutionMap {
+    MultipleMappingSubstitutionMap, SubstitutionMap.Initializable {
   private static final Splitter DASH = Splitter.on('-');
   private final SubstitutionMap delegate;
 
   public SplittingSubstitutionMap(SubstitutionMap substitutionMap) {
     this.delegate = substitutionMap;
+  }
+
+  @Override
+  public void initializeWithMappings(Map<? extends String, ? extends String> newMappings) {
+    if (!newMappings.isEmpty()) {
+      ((SubstitutionMap.Initializable) delegate).initializeWithMappings(newMappings);
+    }
   }
 
   @Override
@@ -57,7 +63,7 @@ public class SplittingSubstitutionMap implements
     StringBuilder buffer = new StringBuilder();
     // Cannot use an ImmutableMap.Builder because the same key/value pair may be
     // inserted more than once in this loop.
-    Map<String, String> mappings = Maps.newHashMap();
+    Map<String, String> mappings = Maps.newLinkedHashMap();
     for (String part : DASH.split(key)) {
       if (buffer.length() != 0) {
         buffer.append('-');

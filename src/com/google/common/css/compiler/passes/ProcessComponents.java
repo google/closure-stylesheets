@@ -219,6 +219,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
       Set<String> constants, CssComponentNode target, CssComponentNode source) {
     CssBlockNode sourceBlock = source.getBlock();
     CssBlockNode copyBlock = new CssBlockNode(false, sourceBlock.deepCopy().getChildren());
+    copyBlock.setSourceCodeLocation(source.getBlock().getSourceCodeLocation());
     CssTree tree = new CssTree(
         target.getSourceCodeLocation().getSourceCode(), new CssRootNode(copyBlock));
     new TransformNodes(constants, target, target != source,
@@ -403,6 +404,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
       // propagate to descendant components).
       if (inAncestorBlock) {
         String parentRefPrefix = parentName + DEF_SEP;
+        // Hack to avoid breaking hacked components with http://b/3213779
         // workarounds.  Can be removed when all workarounds are removed.
         String parentRefName = defName.startsWith(parentRefPrefix)
             ? defName : parentRefPrefix + defName;

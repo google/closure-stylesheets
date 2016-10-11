@@ -21,8 +21,11 @@ import com.google.common.css.JobDescriptionBuilder;
 import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import com.google.common.io.Files;
 
 import junit.framework.TestCase;
+
+import java.io.File;
 
 public class ClosureCommandLineCompilerTest extends TestCase {
 
@@ -63,5 +66,31 @@ public class ClosureCommandLineCompilerTest extends TestCase {
         ClosureCommandLineCompiler.parseArgs(new String[] {"/dev/null"}, EXIT_CODE_HANDLER);
     JobDescription jobDescription = flags.createJobDescription();
     assertTrue(jobDescription.allowDefPropagation);
+  }
+
+
+  public void testEmptyImportBlocks() throws Exception {
+    // See b/29995881
+    ErrorManager errorManager = new NewFunctionalTestBase.TestErrorManager(new String[0]);
+
+    JobDescription job = new JobDescriptionBuilder()
+      .addInput(new SourceCode("main.css", "@import 'common.css';"))
+      .addInput(new SourceCode("common.css", "/* common */"))
+      .setOptimizeStrategy(JobDescription.OptimizeStrategy.SAFE)
+      .setCreateSourceMap(true)
+      .getJobDescription();
+
+    File outputDir = Files.createTempDir();
+    File sourceMapFile = new File(outputDir, "sourceMap");
+
+    String compiledCss = new ClosureCommandLineCompiler(
+        job, EXIT_CODE_HANDLER, errorManager)
+        .execute(null /*renameFile*/, sourceMapFile);
+
+    // The symptom was an IllegalStateException trapped by the compiler that
+    // resulted in the exit handler being called which causes fail(...),
+    // so if control reaches here, we're ok.
+
+    assertNotNull(compiledCss);
   }
 }

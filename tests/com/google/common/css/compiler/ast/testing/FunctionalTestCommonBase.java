@@ -77,14 +77,19 @@ public abstract class FunctionalTestCommonBase extends AstUtilityTestCase {
     final Object[] holder = new Object[1];
     final VisitController vc = tree.getVisitController();
     vc.startVisit(
-        new UniformVisitor() {
-          @Override public void enter(CssNode n) {
-            if (clazz.isAssignableFrom(n.getClass())) {
-              holder[0] = n;
-              vc.stopVisit();
-            }
-          }
-        });
+        UniformVisitor.Adapters.asVisitor(
+            new UniformVisitor() {
+              @Override
+              public void enter(CssNode n) {
+                if (clazz.isAssignableFrom(n.getClass())) {
+                  holder[0] = n;
+                  vc.stopVisit();
+                }
+              }
+
+              @Override
+              public void leave(CssNode node) {}
+            }));
     return clazz.cast(holder[0]);
   }
 

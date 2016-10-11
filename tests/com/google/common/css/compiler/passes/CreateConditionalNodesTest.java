@@ -18,7 +18,9 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
 import com.google.common.css.compiler.ast.CssConditionalRuleNode;
+import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
 import com.google.common.css.compiler.ast.CssNode;
+import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 /**
@@ -70,6 +72,26 @@ public class CreateConditionalNodesTest extends NewFunctionalTestBase {
     assertEquals("if", elseCondRuleIf.getName().getValue());
     assertEquals(1, elseCondRuleIf.getParametersCount());
     assertEquals("[[d]{[e:[f]]}]", elseCondRuleIf.getBlock().toString());
+  }
+
+  public void testCreateConditionalBlockNodeInRuleset() throws Exception {
+    parseAndRun("a {@if X {b: c} @else {d: e} }");
+    assertTrue(getFirstActualNode() instanceof CssRulesetNode);
+    CssRulesetNode ruleset = (CssRulesetNode) getFirstActualNode();
+    assertEquals("[a]{[[@if[X]{[b:[c]]}, @else[]{[d:[e]]}]]}", ruleset.toString());
+    CssDeclarationBlockNode declarationBlock = ruleset.getDeclarations();
+    assertEquals(1, declarationBlock.getChildren().size());
+    assertTrue(declarationBlock.getChildAt(0) instanceof CssConditionalBlockNode);
+    CssConditionalBlockNode condBlock = (CssConditionalBlockNode) declarationBlock.getChildAt(0);
+    assertEquals(2, condBlock.getChildren().size());
+    CssConditionalRuleNode condRuleIf = condBlock.getChildren().get(0);
+    CssConditionalRuleNode condRuleElse = condBlock.getChildren().get(1);
+    assertEquals("if", condRuleIf.getName().getValue());
+    assertEquals(1, condRuleIf.getParametersCount());
+    assertEquals("[b:[c]]", condRuleIf.getBlock().toString());
+    assertEquals("else", condRuleElse.getName().getValue());
+    assertEquals(0, condRuleElse.getParametersCount());
+    assertEquals("[d:[e]]", condRuleElse.getBlock().toString());
   }
 
   public void testIfWithoutBlockError() throws Exception {

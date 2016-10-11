@@ -77,7 +77,7 @@ public class CssComponentNode extends CssAtRuleNode {
     return getType() == CssAtRuleNode.Type.ABSTRACT_COMPONENT;
   }
 
-  @SuppressWarnings("StringEquality")
+  @SuppressWarnings("ReferenceEquality")
   public boolean isImplicitlyNamed() {
     // Test against the exact string instance.
     return getName().getValue() == IMPLICIT_NODE_NAME;

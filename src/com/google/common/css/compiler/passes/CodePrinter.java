@@ -16,38 +16,36 @@
 
 package com.google.common.css.compiler.passes;
 
+import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssTree;
+import com.google.common.css.compiler.ast.CssTreeVisitor;
 import com.google.common.css.compiler.ast.VisitController;
-
 import javax.annotation.Nullable;
 
 /**
- * An abstract code-printer for {@link CssTree} instances that provides read/write access
- * to the output buffer and performs common tasks during code generation, like creating
- * sourcemaps.
+ * An abstract code-printer for {@link CssTree} instances that provides read/write access to the
+ * output buffer and performs common tasks during code generation, like creating sourcemaps.
  *
  * @author steveyang@google.com (Chenyun Yang)
  */
-public abstract class CodePrinter extends UniformVisitor {
+public abstract class CodePrinter implements CssCompilerPass {
 
-  protected final VisitController visitController;
+  /** The visit controller for the (sub)tree being printed. */
+  private final VisitController visitController;
 
-  /**
-   * CodeBuffer used in this CodePrinter.
-   */
-  protected final CodeBuffer buffer;
+  /** Holds the output of the printing visitor. */
+  private final CodeBuffer buffer;
 
-  /**
-   * The source map generator used by CodePrinter and subclasses.
-   */
+  /** The source map generator used by CodePrinter and subclasses. */
   private final GssSourceMapGenerator generator;
 
   /**
-   * Initializes this instance from the given {@link VisitController}, could optionally
-   * accept {@link CodeBuffer} and {@link GssSourceMapGenerator} to use.
+   * Initializes this instance from the given {@link VisitController}, could optionally accept
+   * {@link CodeBuffer} and {@link GssSourceMapGenerator} to use.
    */
-  protected CodePrinter(VisitController visitController,
+  protected CodePrinter(
+      VisitController visitController,
       @Nullable CodeBuffer buffer,
       @Nullable GssSourceMapGenerator generator) {
     this.visitController = visitController;
@@ -55,60 +53,41 @@ public abstract class CodePrinter extends UniformVisitor {
     this.generator = generator != null ? generator : new NullGssSourceMapGenerator();
   }
 
-  protected CodePrinter(VisitController visitController, CodeBuffer buffer) {
-    this(visitController, buffer, null /* generator */);
-  }
-
-  protected CodePrinter(VisitController visitController) {
-    this(visitController, null /* buffer */);
-  }
-
   /**
-   * Initializes this instance from the given {@link CssNode}, could optionally
-   * accept {@link CodeBuffer} and {@link GssSourceMapGenerator} to use.
+   * Constructs the visitor required by the subclass. This visitor's {@code enter*} methods will be
+   * called after the source map generator's {@code startSourceMapping} method and before its {@code
+   * endSourceMapping} method.
    */
-  protected CodePrinter(CssNode subtree, CodeBuffer buffer, GssSourceMapGenerator generator) {
-    this(subtree.getVisitController(), buffer, generator);
-  }
+  protected abstract CssTreeVisitor createVisitor(
+      VisitController visitController, CodeBuffer codeBuffer);
 
-  protected CodePrinter(CssNode subtree, CodeBuffer buffer) {
-    this(subtree.getVisitController(), buffer, null /* generator */);
-  }
-  protected CodePrinter(CssNode subtree) {
-    this(subtree.getVisitController(), null /* buffer */);
-  }
-
-  /**
-   * Initializes this instance from the given {@link CssTree}, could optionally
-   * accept {@link CodeBuffer} and {@link GssSourceMapGenerator} to use.
-   */
-  protected CodePrinter(CssTree tree, CodeBuffer buffer, GssSourceMapGenerator generator) {
-    this(tree.getVisitController(), buffer, generator);
-  }
-
-  protected CodePrinter(CssTree tree, CodeBuffer buffer) {
-    this(tree.getVisitController(), buffer, null /* generator */);
-  }
-  protected CodePrinter(CssTree tree) {
-    this(tree.getVisitController(), null /* buffer */);
-  }
-
-  @Override
-  public void enter(CssNode node) {
-    generator.startSourceMapping(node, buffer.getNextLineIndex(), buffer.getNextCharIndex());
-  }
-
-  @Override
-  public void leave(CssNode node) {
-    generator.endSourceMapping(node, buffer.getLastLineIndex(), buffer.getLastCharIndex());
+  protected final void visit() {
+    CssTreeVisitor visitor =
+        DelegatingVisitor.from(
+            UniformVisitor.Adapters.asVisitor(new SourceMapVisitor()),
+            createVisitor(visitController, buffer));
+    visitController.startVisit(visitor);
   }
 
   // Proxy method for external usage.
-  protected void resetBuffer() {
+  protected final void resetBuffer() {
     buffer.reset();
   }
 
-  protected String getOutputBuffer() {
+  protected final String getOutputBuffer() {
     return buffer.getOutput();
+  }
+
+  private class SourceMapVisitor implements UniformVisitor {
+
+    @Override
+    public void enter(CssNode node) {
+      generator.startSourceMapping(node, buffer.getNextLineIndex(), buffer.getNextCharIndex());
+    }
+
+    @Override
+    public void leave(CssNode node) {
+      generator.endSourceMapping(node, buffer.getLastLineIndex(), buffer.getLastCharIndex());
+    }
   }
 }

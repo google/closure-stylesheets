@@ -23,30 +23,38 @@ import com.google.common.css.SourceCodeLocationBuilder;
 import com.google.common.css.compiler.ast.CssNode;
 
 /**
- * A pass for finding an approximation to a minimum-size SourceCodeLocation
- * interval that contains a given node.
+ * A pass for finding an approximation to a minimum-size SourceCodeLocation interval that contains a
+ * given node.
  *
- * <p>In typical CssTrees c. April 2013, most nodes do not have
- * SourceCodeLocations, but suppose we have such a node A with
- * descendent nodes D_0, ... D_n that do have locations:
+ * <p>In typical CssTrees c. April 2013, most nodes do not have SourceCodeLocations, but suppose we
+ * have such a node A with descendent nodes D_0, ... D_n that do have locations:
+ *
+ * <pre class="code">
  *     A
  *    / \
  *   -----
  *    |   \
  *   D_0  D_1
+ * </pre>
  *
- * Then we know that the subtree rooted at A includes markup beginning
- * by min_0^n(beginLocation(D_i)) and ending by max_0^n(endLocation(D_i)).
- * Concretely, let
+ * Then we know that the subtree rooted at A includes markup beginning by
+ * min_0^n(beginLocation(D_i)) and ending by max_0^n(endLocation(D_i)). Concretely, let
+ *
+ * <pre class="code">
  *   node  getBeginCharacterIndex  getEndCharacterIndex
  *   ---   ---                     ---
  *   A     ?                       ?
  *   D_0   5                       15
  *   D_1   17                      19
+ * </pre>
+ *
  * Then we can estimate for A:
+ *
+ * <pre class="code">
  *   A     5                       19
+ * </pre>
  */
-public class LocationBoundingVisitor extends UniformVisitor {
+public class LocationBoundingVisitor implements UniformVisitor {
   private SourceCodeLocation result = null;
 
   @Override
@@ -69,13 +77,16 @@ public class LocationBoundingVisitor extends UniformVisitor {
     }
   }
 
+  @Override
+  public void leave(CssNode node) {}
+
   public static SourceCodeLocation bound(CssNode n) {
     SourceCodeLocation location = n.getSourceCodeLocation();
     if (location != null && !location.isUnknown()) {
       return location;
     }
     LocationBoundingVisitor v = new LocationBoundingVisitor();
-    n.getVisitController().startVisit(v);
+    n.getVisitController().startVisit(UniformVisitor.Adapters.asVisitor(v));
     if (v.result == null) {
       return SourceCodeLocation.getUnknownLocation();
     }

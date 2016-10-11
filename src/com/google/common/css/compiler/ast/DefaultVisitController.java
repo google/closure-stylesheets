@@ -851,7 +851,7 @@ class DefaultVisitController implements MutatingVisitController {
   @VisibleForTesting
   class VisitConditionalRuleChildrenState extends VisitReplaceChildrenState<CssNode> {
 
-    VisitConditionalRuleChildrenState(CssBlockNode block) {
+    VisitConditionalRuleChildrenState(CssAbstractBlockNode block) {
       super(block);
     }
   }

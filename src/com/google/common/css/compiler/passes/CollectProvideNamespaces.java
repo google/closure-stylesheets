@@ -17,8 +17,6 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
@@ -28,28 +26,21 @@ import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
 import com.google.common.css.compiler.ast.CssProvideNode;
 import com.google.common.css.compiler.ast.CssRequireNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
-import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.VisitController;
 
 import java.util.Map;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
- * A compiler pass to help find missing {@code &#64;require} lines for def constant references
+ * A compiler pass to help find missing {@code @require} lines for def constant references
  * and mixins.
  * This pass simply collects namespaces that correpond to constant definitions and mixins.
  * Also see the CheckMissingRequire pass that is used in conjunction with this one.
  *
+ * NOTE: The maps in this class can only be used within the same set of pass runs.
+ *
  */
 public final class CollectProvideNamespaces extends DefaultTreeVisitor implements CssCompilerPass {
-  private static final Logger logger = Logger.getLogger(CollectProvideNamespaces.class.getName());
-
-  private static final Pattern OVERRIDE_REGEX = Pattern.compile(
-      "/\\*\\s+@overrideSelector\\s+\\{(.*)\\}\\s+\\*/");
-
   private final VisitController visitController;
-  private final ErrorManager errorManager;
 
   // Key: filename; Value: provide namespace
   private final Map<String, String> filenameProvideMap = Maps.newHashMap();
@@ -63,25 +54,23 @@ public final class CollectProvideNamespaces extends DefaultTreeVisitor implement
   private final ListMultimap<String, String> defmixinProvideMap = LinkedListMultimap.create();
 
   public Map<String, String> getFilenameProvideMap() {
-    return ImmutableMap.copyOf(filenameProvideMap);
+    return filenameProvideMap;
   }
 
   public ListMultimap<String, String> getFilenameRequireMap() {
-    return ImmutableListMultimap.copyOf(filenameRequireMap);
+    return filenameRequireMap;
   }
 
   public ListMultimap<String, String> getDefProvideMap() {
-    return ImmutableListMultimap.copyOf(defProvideMap);
+    return defProvideMap;
   }
 
   public ListMultimap<String, String> getDefmixinProvideMap() {
-    return ImmutableListMultimap.copyOf(defmixinProvideMap);
+    return defmixinProvideMap;
   }
 
-  public CollectProvideNamespaces(VisitController visitController,
-      ErrorManager errorManager) {
+  public CollectProvideNamespaces(VisitController visitController) {
     this.visitController = visitController;
-    this.errorManager = errorManager;
   }
 
   @Override
@@ -135,6 +124,10 @@ public final class CollectProvideNamespaces extends DefaultTreeVisitor implement
 
   @Override
   public void runPass() {
+    filenameProvideMap.clear();
+    filenameRequireMap.clear();
+    defProvideMap.clear();
+    defmixinProvideMap.clear();
     visitController.startVisit(this);
   }
 }

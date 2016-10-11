@@ -16,29 +16,23 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.css.compiler.ast.CssCompilerPass;
-import com.google.common.css.compiler.ast.CssDefinitionNode;
-import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssNode;
-import com.google.common.css.compiler.ast.CssPriorityNode;
 import com.google.common.css.compiler.ast.CssTree;
-import com.google.common.css.compiler.ast.CssValueNode;
+import com.google.common.css.compiler.ast.CssTreeVisitor;
+import com.google.common.css.compiler.ast.VisitController;
 
 /**
- * Printer for definition nodes, which outputs GSS definitions so that
- * they can be re-parsed later.
+ * Printer for definition nodes, which outputs GSS definitions so that they can be re-parsed later.
  *
- * <p>This pass can only be used if {@link MapChunkAwareNodesToChunk}
- * pass has been run before. Otherwise this pass won't work.
+ * <p>This pass can only be used if {@link MapChunkAwareNodesToChunk} pass has been run before.
+ * Otherwise this pass won't work.
  *
  * @param <T> type of chunk id objects
- *
  * @author dgajda@google.com (Damian Gajda)
  */
-public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass {
+public class DefinitionPrinter<T> extends CodePrinter {
 
   private final T chunk;
-  private boolean printDefinition;
 
   /**
    * Create a printer for all the definitions in the given chunk.
@@ -47,7 +41,7 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
    * @param chunk the selected chunk
    */
   public DefinitionPrinter(CssNode subtree, T chunk) {
-    super(subtree);
+    super(subtree.getVisitController(), null /* buffer */, null /* generator */);
     this.chunk = chunk;
   }
 
@@ -58,75 +52,8 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
    * @param chunk the selected chunk
    */
   public DefinitionPrinter(CssTree tree, T chunk) {
-    super(tree);
+    super(tree.getVisitController(), null /* buffer */, null /* generator */);
     this.chunk = chunk;
-  }
-
-  @Override
-  public boolean enterDefinition(CssDefinitionNode definition) {
-    printDefinition = chunk.equals(definition.getChunk());
-    if (printDefinition) {
-      buffer.append("@def ").append(definition.getName()).append(' ');
-    }
-    return printDefinition;
-  }
-
-  @Override
-  public void leaveDefinition(CssDefinitionNode node) {
-    if (printDefinition) {
-      buffer.append(";").startNewLine();
-      printDefinition = false;
-    }
-  }
-
-  @Override
-  public boolean enterValueNode(CssValueNode node) {
-    if (!printDefinition) {
-      return false;
-    }
-    if (node instanceof CssPriorityNode) {
-      buffer.deleteLastChar();
-    }
-    buffer.append(node);
-    return true;
-  }
-
-  @Override
-  public void leaveValueNode(CssValueNode node) {
-    if (!printDefinition) {
-      return;
-    }
-    buffer.append(' ');
-  }
-
-  @Override
-  public boolean enterFunctionNode(CssFunctionNode node) {
-    if (!printDefinition) {
-      return false;
-    }
-    buffer.append(node.getFunctionName());
-    buffer.append('(');
-    return true;
-  }
-
-  @Override
-  public void leaveFunctionNode(CssFunctionNode node) {
-    if (!printDefinition) {
-      return;
-    }
-    buffer.append(") ");
-  }
-
-  @Override
-  public boolean enterArgumentNode(CssValueNode node) {
-    if (!printDefinition) {
-      return false;
-    }
-    // If the previous argument was a function node, then it has a trailing
-    // space that needs to be removed.
-    buffer.deleteLastCharIfCharIs(' ');
-    buffer.append(node);
-    return true;
   }
 
   /**
@@ -139,6 +66,11 @@ public class DefinitionPrinter<T> extends CodePrinter implements CssCompilerPass
   @Override
   public void runPass() {
     resetBuffer();
-    visitController.startVisit(this);
+    visit();
+  }
+
+  @Override
+  protected CssTreeVisitor createVisitor(VisitController visitController, CodeBuffer codeBuffer) {
+    return new DefinitionPrintingVisitor<>(chunk, codeBuffer);
   }
 }

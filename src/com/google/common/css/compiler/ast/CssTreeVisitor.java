@@ -179,7 +179,4 @@ public interface CssTreeVisitor extends AtRuleHandler {
 
   /** Called after visiting a {@code CssForLoopRuleNode}'s sub trees */
   void leaveForLoop(CssForLoopRuleNode node);
-
-  /** Traverse the (sub) tree starting at {@code node} */
-  void visit(CssNode node);
 }

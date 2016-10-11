@@ -47,7 +47,7 @@ public class CssConditionalRuleNode extends CssAtRuleNode {
    */
   public CssConditionalRuleNode(Type type, CssLiteralNode name,
                                 @Nullable CssBooleanExpressionNode condition,
-                                CssBlockNode block) {
+                                CssAbstractBlockNode block) {
     super(type, name, block);
     Preconditions.checkArgument(this.getType().isConditional());
     if (condition != null) {
@@ -98,9 +98,8 @@ public class CssConditionalRuleNode extends CssAtRuleNode {
   }
 
   @Override
-  public CssBlockNode getBlock() {
-    // This type is ensured by the constructor.
-    return (CssBlockNode) super.getBlock();
+  public CssAbstractBlockNode getBlock() {
+    return super.getBlock();
   }
 
   // TODO(user): Make sure that the parameters list is made up of a single

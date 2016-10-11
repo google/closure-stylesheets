@@ -22,6 +22,7 @@ import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
+import com.google.common.css.compiler.ast.CssTreeVisitor;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 /**
@@ -33,7 +34,8 @@ public class LocationBoundingVisitorTest extends NewFunctionalTestBase {
   @Override
   protected void runPass() {
     locationBoundingVisitor = new LocationBoundingVisitor();
-    tree.getVisitController().startVisit(locationBoundingVisitor);
+    tree.getVisitController()
+        .startVisit(UniformVisitor.Adapters.asVisitor(locationBoundingVisitor));
   }
 
   public void testTrivialBound() throws Exception {
@@ -53,11 +55,17 @@ public class LocationBoundingVisitorTest extends NewFunctionalTestBase {
 
   public void testUnknown() throws Exception {
     parseAndRun("div { color: red; }");
-    UniformVisitor eraseLocations = new UniformVisitor() {
-        @Override public void enter(CssNode n) {
-          n.setSourceCodeLocation(SourceCodeLocation.getUnknownLocation());
-        }
-      };
+    CssTreeVisitor eraseLocations =
+        UniformVisitor.Adapters.asVisitor(
+            new UniformVisitor() {
+              @Override
+              public void enter(CssNode n) {
+                n.setSourceCodeLocation(SourceCodeLocation.getUnknownLocation());
+              }
+
+              @Override
+              public void leave(CssNode node) {}
+            });
     tree.getMutatingVisitController().startVisit(eraseLocations);
     SourceCodeLocation actual = LocationBoundingVisitor.bound(tree.getRoot());
     assertEquals(

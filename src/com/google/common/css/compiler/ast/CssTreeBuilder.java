@@ -61,7 +61,7 @@ public class CssTreeBuilder implements
   private boolean treeIsConstructed = false;
 
   // TODO(user): Use Collections.asLifoQueue(new ArrayDeque()) for openBlocks
-  private List<CssBlockNode> openBlocks = null;
+  private List<CssAbstractBlockNode> openBlocks = null;
   private List<CssConditionalBlockNode> openConditionalBlocks = null;
   private CssDeclarationBlockNode declarationBlock = null;
   private CssDeclarationNode declaration = null;
@@ -114,11 +114,11 @@ public class CssTreeBuilder implements
     }
   }
 
-  private CssBlockNode getEnclosingBlock() {
+  private CssAbstractBlockNode getEnclosingBlock() {
     return openBlocks.get(openBlocks.size() - 1);
   }
 
-  private void pushEnclosingBlock(CssBlockNode block) {
+  private void pushEnclosingBlock(CssAbstractBlockNode block) {
     openBlocks.add(block);
   }
 
@@ -367,6 +367,7 @@ public class CssTreeBuilder implements
 
     Preconditions.checkState(ruleset == null);
     ruleset = new CssRulesetNode(comments);
+    ruleset.setSourceCodeLocation(selectorList.getSourceCodeLocation());
     ruleset.setSelectors(selectorList);
     comments.clear();
 

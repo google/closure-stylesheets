@@ -20,7 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +30,7 @@ import java.util.Set;
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public class MinimalSubstitutionMap implements SubstitutionMap {
+public class MinimalSubstitutionMap implements SubstitutionMap.Initializable {
 
   /** Possible first chars in a CSS class name */
   private static final char[] START_CHARS = {
@@ -91,7 +90,7 @@ public class MinimalSubstitutionMap implements SubstitutionMap {
   /**
    * A set of CSS class names that may not be output from this substitution map.
    */
-  private final Set<String> outputValueBlacklist;
+  private ImmutableSet<String> outputValueBlacklist;
 
   public MinimalSubstitutionMap() {
     this(ImmutableSet.<String>of());
@@ -154,6 +153,14 @@ public class MinimalSubstitutionMap implements SubstitutionMap {
       renamedCssClasses.put(key, value);
     }
     return value;
+  }
+
+  @Override
+  public void initializeWithMappings(Map<? extends String, ? extends String> m) {
+    Preconditions.checkState(renamedCssClasses.isEmpty());
+    this.outputValueBlacklist =
+        ImmutableSet.<String>builder().addAll(outputValueBlacklist).addAll(m.values()).build();
+    this.renamedCssClasses.putAll(m);
   }
 
   /**
