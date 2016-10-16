@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+import com.google.common.css.SourceCodeLocation;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -188,5 +189,14 @@ public abstract class CssNodesListNode<T extends CssNode> extends CssNode {
     }
 
     return output.toString();
+  }
+
+  @Override
+  public SourceCodeLocation getSourceCodeLocation() {
+    SourceCodeLocation location = super.getSourceCodeLocation();
+    if (location == null) {
+      location = SourceCodeLocation.merge(children);
+    }
+    return location;
   }
 }

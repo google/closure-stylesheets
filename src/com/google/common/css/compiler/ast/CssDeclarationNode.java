@@ -18,6 +18,7 @@ package com.google.common.css.compiler.ast;
 
 import com.google.common.base.Preconditions;
 
+import com.google.common.css.SourceCodeLocation;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -39,63 +40,55 @@ public class CssDeclarationNode extends CssNode {
    */
   private boolean hasStarHack;
 
-  /**
-   * Constructor of a node representing a CSS declaration.
-   *
-   * @param propertyName
-   */
+  /** Constructor of a node representing a CSS declaration. */
   public CssDeclarationNode(CssPropertyNode propertyName) {
-    this(propertyName, new CssPropertyValueNode());
+    this(propertyName, new CssPropertyValueNode(), null /* sourceCodeLocation */);
   }
 
-  /**
-   * Constructor of a node representing a CSS declaration.
-   *
-   * @param propertyName
-   * @param comments
-   */
-  public CssDeclarationNode(CssPropertyNode propertyName,
-                            List<CssCommentNode> comments) {
-    this(propertyName, new CssPropertyValueNode(), comments);
+  /** Constructor of a node representing a CSS declaration. */
+  public CssDeclarationNode(
+      CssPropertyNode propertyName, @Nullable SourceCodeLocation sourceCodeLocation) {
+    this(propertyName, new CssPropertyValueNode(), sourceCodeLocation);
   }
 
-  /**
-   * Constructor of a node representing a CSS declaration.
-   *
-   * @param propertyName
-   * @param propertyValue
-   */
-  public CssDeclarationNode(CssPropertyNode propertyName,
-                            CssPropertyValueNode propertyValue) {
-    this(propertyName, propertyValue, null);
+  /** Constructor of a node representing a CSS declaration. */
+  public CssDeclarationNode(CssPropertyNode propertyName, List<CssCommentNode> comments) {
+    this(propertyName, comments, null /* sourceCodeLocation */);
   }
 
-  /**
-   * Constructor of a node representing a CSS declaration.
-   *
-   * @param propertyName
-   * @param propertyValue
-   * @param comments
-   */
-  public CssDeclarationNode(CssPropertyNode propertyName,
-                            CssPropertyValueNode propertyValue,
-                            @Nullable List<CssCommentNode> comments) {
-    this(propertyName, propertyValue, comments, false);
+  /** Constructor of a node representing a CSS declaration. */
+  public CssDeclarationNode(
+      CssPropertyNode propertyName,
+      List<CssCommentNode> comments,
+      @Nullable SourceCodeLocation sourceCodeLocation) {
+    this(propertyName, new CssPropertyValueNode(), comments, sourceCodeLocation);
   }
 
-  /**
-   * Constructor of a node representing a CSS declaration.
-   *
-   * @param propertyName
-   * @param propertyValue
-   * @param comments
-   * @param hasStarHack
-   */
-  public CssDeclarationNode(CssPropertyNode propertyName,
-                            CssPropertyValueNode propertyValue,
-                            @Nullable List<CssCommentNode> comments,
-                            boolean hasStarHack) {
-    super(null, comments, null);
+  /** Constructor of a node representing a CSS declaration. */
+  public CssDeclarationNode(
+      CssPropertyNode propertyName,
+      CssPropertyValueNode propertyValue,
+      @Nullable SourceCodeLocation sourceCodeLocation) {
+    this(propertyName, propertyValue, null, sourceCodeLocation);
+  }
+
+  /** Constructor of a node representing a CSS declaration. */
+  public CssDeclarationNode(
+      CssPropertyNode propertyName,
+      CssPropertyValueNode propertyValue,
+      @Nullable List<CssCommentNode> comments,
+      @Nullable SourceCodeLocation sourceCodeLocation) {
+    this(propertyName, propertyValue, comments, sourceCodeLocation, false);
+  }
+
+  /** Constructor of a node representing a CSS declaration. */
+  public CssDeclarationNode(
+      CssPropertyNode propertyName,
+      CssPropertyValueNode propertyValue,
+      @Nullable List<CssCommentNode> comments,
+      @Nullable SourceCodeLocation sourceCodeLocation,
+      boolean hasStarHack) {
+    super(null, comments, sourceCodeLocation);
     this.propertyName = propertyName;
     this.propertyValue = propertyValue;
     becomeParentForNode(this.propertyName);
@@ -103,17 +96,19 @@ public class CssDeclarationNode extends CssNode {
     this.setStarHack(hasStarHack);
   }
 
-  /**
-   * Copy constructor.
-   *
-   * @param node
-   */
+  /** Copy constructor. */
   public CssDeclarationNode(CssDeclarationNode node) {
     this(
         node.getPropertyName().deepCopy(),
         node.getPropertyValue().deepCopy(),
         node.getComments(),
+        node.getSourceCodeLocation(),
         node.hasStarHack());
+  }
+
+  public CssDeclarationNode(CssPropertyNode propertyNode,
+      CssPropertyValueNode cssPropertyValueNode) {
+    this(propertyNode, cssPropertyValueNode, null /* sourceCodeLocation */);
   }
 
   @Override
