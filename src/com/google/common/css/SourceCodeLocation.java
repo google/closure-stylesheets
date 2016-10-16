@@ -18,8 +18,9 @@ package com.google.common.css;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.primitives.Ints;
-
+import java.util.Iterator;
 import javax.annotation.Nullable;
 
 /**
@@ -198,6 +199,37 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
     return result;
   }
 
+  /**
+   * Returns a new SourceCodeLocation which covers everything between the
+   * beginning of the first location and the end of the second location.
+   */
+  public static SourceCodeLocation merge(SourceCodeLocation beginLocation,
+      SourceCodeLocation endLocation) {
+    Preconditions.checkArgument(beginLocation.sourceCode.equals(endLocation.sourceCode));
+    return new SourceCodeLocation(beginLocation.sourceCode,
+        beginLocation.getBeginCharacterIndex(),
+        beginLocation.getBeginLineNumber(),
+        beginLocation.getBeginIndexInLine(),
+        endLocation.getEndCharacterIndex(),
+        endLocation.getEndLineNumber(),
+        endLocation.getEndIndexInLine());
+  }
+
+  public static SourceCodeLocation merge(
+      Iterable<? extends CssNode> locations) {
+    Iterator<? extends CssNode> i = locations.iterator();
+    if (!i.hasNext()) {
+      return getUnknownLocation();
+    }
+    SourceCodeLocation loc = i.next().getSourceCodeLocation();
+    while (i.hasNext()) {
+      SourceCodeLocation iLoc = i.next().getSourceCodeLocation();
+      if (iLoc == null || iLoc.isUnknown()) continue;
+      loc = merge(loc, iLoc);
+    }
+    return loc;
+  }
+
   private final SourceCode sourceCode;
 
   /**
@@ -241,10 +273,18 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
     return begin.getCharacterIndex();
   }
 
+  /**
+   * The index of the line that contains the first character of the node. Indexes start at 1; 0
+   * means the location is not known.
+   */
   public int getBeginLineNumber() {
     return begin.getLineNumber();
   }
 
+  /**
+   * The index of the column that contains the first character of the node. Indexes start at 1; 0
+   * means the location is not known.
+   */
   public int getBeginIndexInLine() {
     return begin.getIndexInLine();
   }
@@ -253,10 +293,18 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
     return end.getCharacterIndex();
   }
 
+  /**
+   * The index of the line that contains the last character of the node. Indexes start at 1; 0
+   * means the location is not known.
+   */
   public int getEndLineNumber() {
     return end.getLineNumber();
   }
 
+  /**
+   * The index of the column that comes after the last character of the node. Indexes start at 1; 0
+   * means the location is not known.
+   */
   public int getEndIndexInLine() {
     return end.getIndexInLine();
   }
@@ -324,5 +372,16 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
       return startPointsComparison;
     }
     return end.compareTo(o.end);
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "%s: line %d, col %d -> line %d, col %d",
+        sourceCode.getFileName(),
+        begin.getLineNumber(),
+        begin.getIndexInLine(),
+        end.getLineNumber(),
+        end.getIndexInLine());
   }
 }
