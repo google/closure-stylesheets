@@ -112,8 +112,10 @@ public final class AutoExpandBrowserPrefix extends DefaultTreeVisitor
           for (CssPropertyValueNode ruleValueNode : rule.getValueOnlyExpansionNodes()) {
             // For valueOnlyExpansionNodes the property name comes from the declaration.
             CssDeclarationNode expansionNode =
-                new CssDeclarationNode(declaration.getPropertyName(), ruleValueNode.deepCopy());
-            expansionNode.setSourceCodeLocation(declaration.getSourceCodeLocation());
+                new CssDeclarationNode(
+                    declaration.getPropertyName(),
+                    ruleValueNode.deepCopy(),
+                    declaration.getSourceCodeLocation());
             expansionNode.appendComment(new CssCommentNode("/* @alternate */", null));
             expansionNodes.add(expansionNode);
           }
@@ -207,8 +209,8 @@ public final class AutoExpandBrowserPrefix extends DefaultTreeVisitor
       // For valueOnlyExpansionNodes the property name comes from the declaration.
       CssPropertyValueNode expansionValues = new CssPropertyValueNode(expansionNodeValues);
       CssDeclarationNode expansionNode =
-          new CssDeclarationNode(declaration.getPropertyName(), expansionValues);
-      expansionNode.setSourceCodeLocation(declaration.getSourceCodeLocation());
+          new CssDeclarationNode(
+              declaration.getPropertyName(), expansionValues, declaration.getSourceCodeLocation());
       expansionNode.appendComment(new CssCommentNode("/* @alternate */", null));
       expansionNodes.add(expansionNode);
     }
