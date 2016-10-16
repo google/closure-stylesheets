@@ -41,8 +41,6 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   public static final char RULE_START = '\u0118';
   public static final char RULE_END = '\u0119';
 
-  private boolean preserveMarkedComments;
-
   // CodeBuffer with specific behavior for the printer
   private static final class CodeBufferForTemplate extends CodeBuffer {
     @Override
@@ -66,24 +64,8 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
     super(tree, chunk, new CodeBufferForTemplate());
   }
 
-  /**
-   * Whether special comments in the CSS nodes are preserved in the printed
-   * output. Currently supported special comments are annotated with one of the following:
-   * <ul><li>@preserve</li>
-   * <li>@license</li></ul>
-   * Comments marked with @license will cause a special "END OF LICENSED CSS FILE"
-   * comment to be inserted when the parser moves on to a new source file.
-   * <p>Note: Comments layout is not guaranteed, since detailed position
-   * information in the input files is not preserved by the parser.</p>
-   */
-  public TemplateCompactPrinter setPreserveMarkedComments(boolean preserve) {
-    preserveMarkedComments = preserve;
-    return this;
-  }
-
   @Override
   protected CssTreeVisitor createVisitor(VisitController visitController, CodeBuffer buffer) {
-    return new TemplateCompactPrintingVisitor<>(
-        visitController, chunk, buffer, preserveMarkedComments);
+    return new TemplateCompactPrintingVisitor<>(visitController, chunk, buffer);
   }
 }

@@ -87,7 +87,9 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
             + " * @license MIT */\n"
             + "foo{} "
             + "/* @preserve Preserved comment 1 */ a{} "
-            + "@media print { foo { /* @preserve Preserved comment 2 */ color: red } }";
+            + "@media print { foo { /* @preserve Preserved comment 2 */ color: red } } "
+            + "/*! this is important */\n"
+            + "foo{} ";
 
     parseStyleSheet(sourceCode);
 
@@ -98,7 +100,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
         rS + "foo{}" + rE
             + rS + "a{}" + rE
             + rS + "@media print{" + rS + "foo{" + dS + "color:red" + dE + "}" + rE
-            + "}" + rE,
+            + "}" + rE
+            + rS + "foo{}" + rE,
         printer.getCompactPrintedString());
   }
 
@@ -108,7 +111,9 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
             + " * @license MIT */\n"
             + "foo{} "
             + "/* @preserve Preserved comment 1 */ a{} "
-            + "@media print { foo { /* @preserve Preserved comment 2 */ color: red } }";
+            + "@media print { foo { /* @preserve Preserved comment 2 */ color: red } }\n"
+            + "/*! this is important */\n"
+            + "foo{}";
 
     parseStyleSheet(sourceCode);
 
@@ -119,7 +124,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
         rS + "foo{}" + rE
             + rS + "a{}" + rE
             + rS + "@media print{" + rS + "foo{" + dS + "color:red" + dE + "}" + rE
-            + "}" + rE,
+            + "}" + rE
+            + rS + "foo{}" + rE,
         printer.getCompactPrintedString());
   }
 
@@ -129,7 +135,9 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
             + " * @license MIT */\n"
             + "foo{} "
             + "/* @preserve Preserved comment 1 */ a{} "
-            + "@media print { foo { /* @preserve Preserved comment 2 */ color: red } }";
+            + "@media print { foo { /* @preserve Preserved comment 2 */ color: red } }\n"
+            + "/*! this is important */\n"
+            + "foo{}";
 
     parseStyleSheet(sourceCode);
 
@@ -140,8 +148,12 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
         rS + "\n/* Header comment\n * @license MIT */\n" + "foo{}" + rE
             + rS + "\n/* @preserve Preserved comment 1 */\n" + "a{}" + rE
             + rS + "@media print{" + rS
-            + "foo{" + "\n/* @preserve Preserved comment 2 */\n" + dS + "color:red" + dE + "}" + rE
-            + "}" + rE,
+            // TODO(flan): The declaration start should be *before* the comment, not after.
+            // The problem is that the preserved comment printing visitor visits before the
+            // TemplateCompactPrinter.
+            + "foo{\n/* @preserve Preserved comment 2 */\n" + dS + "color:red" + dE + "}" + rE
+            + "}" + rE
+            + rS + "\n/*! this is important */\nfoo{}" + rE,
         printer.getCompactPrintedString());
   }
 
@@ -149,6 +161,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     String sourceCode =
         "/* @license MIT */\n"
             + "/* @preserve Keep this comment, too */\n"
+            + "/*! Me, too! */\n\n"
+            + "/* Not me, I'm just a comment, not important. :-( */\n"
             + "foo{}";
 
     parseStyleSheet(sourceCode);
@@ -158,7 +172,7 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
 
     assertEquals(
         rS
-            + "\n/* @license MIT *//* @preserve Keep this comment, too */\n"
+            + "\n/* @license MIT *//* @preserve Keep this comment, too *//*! Me, too! */\n"
             + "foo{}"
             + rE,
         printer.getCompactPrintedString());
@@ -181,6 +195,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
 
     TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
     printer.runPass();
+    
+    System.out.println(printer.getCompactPrintedString());
 
     assertEquals(
         rS
@@ -193,7 +209,7 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
   }
 
   public void testMarkedComments_preservedButWithBadAnnotations() {
-    String sourceCode = "/* Header comment @licenseless @preservement */\n" + "foo{}";
+    String sourceCode = "/* ! !Header comment @licenseless *! @preservement !*/\n" + "foo{}";
 
     parseStyleSheet(sourceCode);
 
@@ -203,8 +219,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     assertEquals(rS + "foo{}" + rE, printer.getCompactPrintedString());
   }
 
-  public void testMarkedComments_preservedButWithOneBadAnnotationOneGood() {
-    String sourceCode = "/* Header comment @licenseless @preserve */\n" + "foo{}";
+  public void testMarkedComments_preservedButWithSomeBadAnnotationsOneGood() {
+    String sourceCode = "/* ! Header comment @licenseless /*! @preserve */\n" + "foo{}";
 
     parseStyleSheet(sourceCode);
 
@@ -212,7 +228,7 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     printer.runPass();
 
     assertEquals(
-        rS + "\n/* Header comment @licenseless @preserve */\n" + "foo{}" + rE,
+        rS + "\n/* ! Header comment @licenseless /*! @preserve */\n" + "foo{}" + rE,
         printer.getCompactPrintedString());
   }
 

@@ -202,6 +202,11 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         + "--const=VAR1=VALUE1 --const=VAR2=VALUE2")
     private Map<String, String> compileConstants = new HashMap<>();
 
+    @Option(name = "--preserve-important-comments", usage = "Preserve important comments from "
+        + "sources into minified output css. Important comments are marked with "
+        + "/*! */, @license, or @preserve.")
+    private boolean preserveImportantComments = false;
+
     /**
      * All remaining arguments are considered input CSS files.
      */
@@ -239,6 +244,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setPreserveComments(preserveComments);
       builder.setOutputRenamingMapFormat(outputRenamingMapFormat);
       builder.setCompileConstants(parseCompileConstants(compileConstants));
+      builder.setPreserveImportantComments(preserveImportantComments);
 
       GssFunctionMapProvider gssFunctionMapProvider =
           getGssFunctionMapProviderForName(gssFunctionMapProviderClassName);
