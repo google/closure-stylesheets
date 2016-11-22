@@ -527,7 +527,7 @@ public class FixupFontDeclarations extends DefaultTreeVisitor
         ? ImmutableList.<CssValueNode>of()
         : ImmutableList.<CssValueNode>of(reparseFamilies(
             families,
-            getSourceCodeLocation(Iterables.get(families, 0))));
+            SourceCodeLocation.merge(families)));
     ImmutableList.Builder<CssValueNode> resultNodes = ImmutableList.builder();
     resultNodes.addAll(Iterables.concat(preFamily, tail));
     if (priority != null) {
@@ -611,6 +611,8 @@ public class FixupFontDeclarations extends DefaultTreeVisitor
         alternatives.add(stump);
       }
       stump.setValue(stump.getValue() + item.getValue());
+      stump.setSourceCodeLocation(
+          SourceCodeLocation.merge(stump.getSourceCodeLocation(), item.getSourceCodeLocation()));
       for (CssCommentNode c : item.getComments()) {
         stump.appendComment(c);
       }
