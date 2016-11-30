@@ -16,9 +16,9 @@
 
 package com.google.common.css.compiler.ast;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import com.google.common.css.SourceCode;
@@ -33,13 +33,11 @@ import com.google.common.css.compiler.ast.DefaultVisitController.VisitDefinition
 import com.google.common.css.compiler.ast.DefaultVisitController.VisitImportBlockChildrenState;
 import com.google.common.css.compiler.ast.DefaultVisitController.VisitImportRuleState;
 import com.google.common.css.compiler.ast.DefaultVisitController.VisitReplaceChildrenState;
-
-import junit.framework.TestCase;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
-
 import java.util.List;
+import junit.framework.TestCase;
+import org.mockito.InOrder;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 /**
  * Unit tests for {@link DefaultVisitController}.
@@ -49,6 +47,36 @@ import java.util.List;
  * @author oana@google.com (Oana Florescu)
  */
 public class DefaultVisitControllerTest extends TestCase {
+
+  DefaultTreeVisitor testVisitor = mock(DefaultTreeVisitor.class);
+
+  @Override
+  protected void setUp() throws Exception {
+    when(testVisitor.enterTree(Matchers.<CssRootNode>any())).thenReturn(true);
+    when(testVisitor.enterImportBlock(Matchers.<CssImportBlockNode>any())).thenReturn(true);
+    when(testVisitor.enterBlock(Matchers.<CssBlockNode>any())).thenReturn(true);
+    when(testVisitor.enterDefinition(Matchers.<CssDefinitionNode>any())).thenReturn(true);
+    when(testVisitor.enterRuleset(Matchers.<CssRulesetNode>any())).thenReturn(true);
+    when(testVisitor.enterSelectorBlock(Matchers.<CssSelectorListNode>any())).thenReturn(true);
+    when(testVisitor.enterSelector(Matchers.<CssSelectorNode>any())).thenReturn(true);
+    when(testVisitor.enterClassSelector(Matchers.<CssClassSelectorNode>any())).thenReturn(true);
+    when(testVisitor.enterIdSelector(Matchers.<CssIdSelectorNode>any())).thenReturn(true);
+    when(testVisitor.enterPseudoClass(Matchers.<CssPseudoClassNode>any())).thenReturn(true);
+    when(testVisitor.enterPseudoElement(Matchers.<CssPseudoElementNode>any())).thenReturn(true);
+    when(testVisitor.enterAttributeSelector(Matchers.<CssAttributeSelectorNode>any()))
+        .thenReturn(true);
+    when(testVisitor.enterDeclarationBlock(Matchers.<CssDeclarationBlockNode>any()))
+        .thenReturn(true);
+    when(testVisitor.enterDeclaration(Matchers.<CssDeclarationNode>any())).thenReturn(true);
+    when(testVisitor.enterPropertyValue(Matchers.<CssPropertyValueNode>any())).thenReturn(true);
+    when(testVisitor.enterValueNode(Matchers.<CssValueNode>any())).thenReturn(true);
+    when(testVisitor.enterUnknownAtRule(Matchers.<CssUnknownAtRuleNode>any())).thenReturn(true);
+    when(testVisitor.enterMediaTypeListDelimiter(
+            Matchers.<CssNodesListNode<? extends CssNode>>any()))
+        .thenReturn(true);
+    when(testVisitor.enterForLoop(Matchers.<CssForLoopRuleNode>any())).thenReturn(true);
+    when(testVisitor.enterComponent(Matchers.<CssComponentNode>any())).thenReturn(true);
+  }
 
   public void testConstructor() {
     DefaultVisitController visitController = new DefaultVisitController(
@@ -65,34 +93,19 @@ public class DefaultVisitControllerTest extends TestCase {
     CssRootNode root = new CssRootNode(block);
     CssTree tree = new CssTree(null, root);
 
-    IMocksControl mockControl = EasyMock.createStrictControl();
-    DefaultTreeVisitor testVisitor =
-        mockControl.createMock(DefaultTreeVisitor.class);
-
-    // Enter Tree gets the root - there is no enterRoot.
-    expect(testVisitor.enterTree(eq(root))).andReturn(true);
-
-    // There are blocks that get created even if you don't add them.
-    expect(testVisitor.enterImportBlock((CssImportBlockNode)anyObject())).andReturn(true);
-    testVisitor.leaveImportBlock((CssImportBlockNode)anyObject());
-
-    // Then we enter the block.
-    expect(testVisitor.enterBlock(eq(block))).andReturn(true);
-
-    // Then another node that we created.
-    expect(testVisitor.enterDefinition(eq(def))).andReturn(true);
-
-    // Exit the nodes.
-    testVisitor.leaveDefinition(eq(def));
-    testVisitor.leaveBlock(eq(block));
-    testVisitor.leaveTree(eq(root));
-
-    mockControl.replay();
-
     DefaultVisitController controller = new DefaultVisitController(tree, true);
     controller.startVisit(testVisitor);
 
-    mockControl.verify();
+    InOrder inOrder = Mockito.inOrder(testVisitor);
+
+    // Enter Tree gets the root - there is no enterRoot.
+    inOrder.verify(testVisitor).enterTree(root);
+    // There are blocks that get created even if you don't add them.
+    inOrder.verify(testVisitor).enterImportBlock(Matchers.<CssImportBlockNode>any());
+    // Then we enter the block.
+    inOrder.verify(testVisitor).enterBlock(block);
+    // Then another node that we created.
+    inOrder.verify(testVisitor).enterDefinition(def);
   }
 
   public void testVisitProperties() {
@@ -136,53 +149,28 @@ public class DefaultVisitControllerTest extends TestCase {
     CssRootNode root = new CssRootNode(block);
     CssTree tree = new CssTree(null, root);
 
-    IMocksControl mockControl = EasyMock.createStrictControl();
-    DefaultTreeVisitor testVisitor =
-        mockControl.createMock(DefaultTreeVisitor.class);
-
-    // After all of that to get to a multi-valued property list, we
-    // visit the tree and check what we see.
-    expect(testVisitor.enterTree(eq(root))).andReturn(true);
-    expect(testVisitor.enterImportBlock((CssImportBlockNode)anyObject())).andReturn(true);
-    testVisitor.leaveImportBlock((CssImportBlockNode)anyObject());
-    expect(testVisitor.enterBlock(eq(block))).andReturn(true);
-    expect(testVisitor.enterRuleset(eq(ruleset))).andReturn(true);
-    expect(testVisitor.enterSelectorBlock((CssSelectorListNode) anyObject())).andReturn(true);
-    expect(testVisitor.enterSelector(eq(selector))).andReturn(true);
-    expect(testVisitor.enterClassSelector(eq(classSelector))).andReturn(true);
-    testVisitor.leaveClassSelector(eq(classSelector));
-    expect(testVisitor.enterIdSelector(eq(idSelector))).andReturn(true);
-    testVisitor.leaveIdSelector(eq(idSelector));
-    expect(testVisitor.enterPseudoClass(eq(pseudoClass))).andReturn(true);
-    testVisitor.leavePseudoClass(eq(pseudoClass));
-    expect(testVisitor.enterPseudoElement(eq(pseudoElement))).andReturn(true);
-    testVisitor.leavePseudoElement(eq(pseudoElement));
-    expect(testVisitor.enterAttributeSelector(eq(attrSelector))).andReturn(true);
-    testVisitor.leaveAttributeSelector(eq(attrSelector));
-    testVisitor.leaveSelector(eq(selector));
-    testVisitor.leaveSelectorBlock((CssSelectorListNode) anyObject());
-    expect(testVisitor.enterDeclarationBlock(eq(dBlock))).andReturn(true);
-    expect(testVisitor.enterDeclaration(eq(decl))).andReturn(true);
-    expect(testVisitor.enterPropertyValue(eq(propValue))).andReturn(true);
-    expect(testVisitor.enterValueNode(eq(first))).andReturn(true);
-    testVisitor.leaveValueNode(eq(first));
-    expect(testVisitor.enterValueNode(eq(second))).andReturn(true);
-    testVisitor.leaveValueNode(eq(second));
-    expect(testVisitor.enterValueNode(eq(third))).andReturn(true);
-    testVisitor.leaveValueNode(eq(third));
-    testVisitor.leavePropertyValue(eq(propValue));
-    testVisitor.leaveDeclaration(eq(decl));
-    testVisitor.leaveDeclarationBlock(eq(dBlock));
-    testVisitor.leaveRuleset(eq(ruleset));
-    testVisitor.leaveBlock(eq(block));
-    testVisitor.leaveTree(eq(root));
-
-    mockControl.replay();
-
     DefaultVisitController controller = new DefaultVisitController(tree, true);
     controller.startVisit(testVisitor);
 
-    mockControl.verify();
+    InOrder inOrder = Mockito.inOrder(testVisitor);
+
+    inOrder.verify(testVisitor).enterTree(root);
+    inOrder.verify(testVisitor).enterImportBlock(Matchers.<CssImportBlockNode>any());
+    inOrder.verify(testVisitor).enterBlock(block);
+    inOrder.verify(testVisitor).enterRuleset(ruleset);
+    inOrder.verify(testVisitor).enterSelectorBlock(Matchers.<CssSelectorListNode>any());
+    inOrder.verify(testVisitor).enterSelector(selector);
+    inOrder.verify(testVisitor).enterClassSelector(classSelector);
+    inOrder.verify(testVisitor).enterIdSelector(idSelector);
+    inOrder.verify(testVisitor).enterPseudoClass(pseudoClass);
+    inOrder.verify(testVisitor).enterPseudoElement(pseudoElement);
+    inOrder.verify(testVisitor).enterAttributeSelector(attrSelector);
+    inOrder.verify(testVisitor).enterDeclarationBlock(dBlock);
+    inOrder.verify(testVisitor).enterDeclaration(decl);
+    inOrder.verify(testVisitor).enterPropertyValue(propValue);
+    inOrder.verify(testVisitor).enterValueNode(first);
+    inOrder.verify(testVisitor).enterValueNode(second);
+    inOrder.verify(testVisitor).enterValueNode(third);
   }
 
   public void testStateStack() {
@@ -220,9 +208,8 @@ public class DefaultVisitControllerTest extends TestCase {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, true);
-    RootVisitCharsetState state
-        = visitController.new RootVisitCharsetState(tree.getRoot(),
-            tree.getRoot().getCharsetRule());
+    RootVisitCharsetState state =
+        visitController.new RootVisitCharsetState(tree.getRoot(), tree.getRoot().getCharsetRule());
 
     visitController.getStateStack().push(state);
     assertEquals(state, visitController.getStateStack().getTop());
@@ -240,9 +227,9 @@ public class DefaultVisitControllerTest extends TestCase {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, true);
-    RootVisitImportBlockState state
-        = visitController.new RootVisitImportBlockState(tree.getRoot(),
-            tree.getRoot().getImportRules());
+    RootVisitImportBlockState state =
+        visitController
+        .new RootVisitImportBlockState(tree.getRoot(), tree.getRoot().getImportRules());
 
     visitController.getStateStack().push(state);
     assertEquals(state, visitController.getStateStack().getTop());
@@ -305,9 +292,8 @@ public class DefaultVisitControllerTest extends TestCase {
     DefaultVisitController visitController = new DefaultVisitController(
         tree, true);
     visitController.visitor = new DefaultTreeVisitor();
-    RootVisitBodyState state
-        = visitController.new RootVisitBodyState(tree.getRoot(),
-            tree.getRoot().getBody());
+    RootVisitBodyState state =
+        visitController.new RootVisitBodyState(tree.getRoot(), tree.getRoot().getBody());
 
     visitController.getStateStack().push(state);
     assertEquals(state, visitController.getStateStack().getTop());
@@ -452,48 +438,27 @@ public class DefaultVisitControllerTest extends TestCase {
     CssRootNode root = new CssRootNode(block);
     CssTree tree = new CssTree(null, root);
 
-    IMocksControl mockControl = EasyMock.createStrictControl();
-    DefaultTreeVisitor testVisitor =
-        mockControl.createMock(DefaultTreeVisitor.class);
-
-    // Enter Tree gets the root - there is no enterRoot.
-    expect(testVisitor.enterTree(eq(root))).andReturn(true);
-
-    // There are blocks that get created even if you don't add them.
-    expect(testVisitor.enterImportBlock((CssImportBlockNode)anyObject())).andReturn(true);
-    testVisitor.leaveImportBlock((CssImportBlockNode)anyObject());
-
-    // Then we enter the block.
-    expect(testVisitor.enterBlock(eq(block))).andReturn(true);
-
-    // Then we enter the unknown at-rule node that we created.
-    expect(testVisitor.enterUnknownAtRule(eq(atDef))).andReturn(true);
-
-    // Then the media type list params
-    for (int i = 0; i < defParameters.size(); ++i) {
-      expect(
-          testVisitor.enterValueNode(eq(defParameters.get(i)))).andReturn(true);
-      testVisitor.leaveValueNode(eq(defParameters.get(i)));
-      if (i < defParameters.size() - 1) {
-        expect(testVisitor.enterMediaTypeListDelimiter(eq(atDef)))
-            .andReturn(true);
-        testVisitor.leaveMediaTypeListDelimiter(eq(atDef));
-      }
-    }
-
-    // We've got no block associated with this at rule.
-
-    // Exit the nodes.
-    testVisitor.leaveUnknownAtRule(eq(atDef));
-    testVisitor.leaveBlock(eq(block));
-    testVisitor.leaveTree(eq(root));
-
-    mockControl.replay();
-
     DefaultVisitController controller = new DefaultVisitController(tree, true);
     controller.startVisit(testVisitor);
 
-    mockControl.verify();
+    InOrder inOrder = Mockito.inOrder(testVisitor);
+
+    // Enter Tree gets the root - there is no enterRoot.
+    inOrder.verify(testVisitor).enterTree(root);
+    // There are blocks that get created even if you don't add them.
+    inOrder.verify(testVisitor).enterImportBlock(Matchers.<CssImportBlockNode>any());
+    // Then we enter the block.
+    verify(testVisitor).enterBlock(block);
+    // Then we enter the unknown at-rule node that we created.
+    verify(testVisitor).enterUnknownAtRule(atDef);
+    // Then the media type list params
+    for (int i = 0; i < defParameters.size(); ++i) {
+      inOrder.verify(testVisitor).enterValueNode(defParameters.get(i));
+      if (i < defParameters.size() - 1) {
+        inOrder.verify(testVisitor).enterMediaTypeListDelimiter(atDef);
+      }
+    }
+    // We've got no block associated with this at rule.
   }
 
   public void testVisitComplexUnknownAtRule() {
@@ -519,66 +484,41 @@ public class DefaultVisitControllerTest extends TestCase {
     CssRootNode root = new CssRootNode(block);
     CssTree tree = new CssTree(null, root);
 
-    IMocksControl mockControl = EasyMock.createStrictControl();
-    DefaultTreeVisitor testVisitor =
-        mockControl.createMock(DefaultTreeVisitor.class);
+    DefaultVisitController controller = new DefaultVisitController(tree, true);
+    controller.startVisit(testVisitor);
+
+    InOrder inOrder = Mockito.inOrder(testVisitor);
 
     // Enter Tree gets the root - there is no enterRoot.
-    expect(testVisitor.enterTree(eq(root))).andReturn(true);
-
+    inOrder.verify(testVisitor).enterTree(root);
     // There are blocks that get created even if you don't add them.
-    expect(testVisitor.enterImportBlock((CssImportBlockNode)anyObject())).andReturn(true);
-    testVisitor.leaveImportBlock((CssImportBlockNode)anyObject());
-
+    inOrder.verify(testVisitor).enterImportBlock(Matchers.<CssImportBlockNode>any());
     // Then we enter the block.
-    expect(testVisitor.enterBlock(eq(block))).andReturn(true);
-
+    verify(testVisitor).enterBlock(block);
     // Then we enter the unknown 'if' at-rule node that we created.
-    expect(testVisitor.enterUnknownAtRule(eq(atIf))).andReturn(true);
+    verify(testVisitor).enterUnknownAtRule(atIf);
 
     // Then the media type list params for 'if'
     for (int i = 0; i < ifParameters.size(); ++i) {
-      expect(
-          testVisitor.enterValueNode(eq(ifParameters.get(i)))).andReturn(true);
-      testVisitor.leaveValueNode(eq(ifParameters.get(i)));
+      inOrder.verify(testVisitor).enterValueNode(ifParameters.get(i));
       if (i < ifParameters.size() - 1) {
-        expect(testVisitor.enterMediaTypeListDelimiter(eq(atIf)))
-            .andReturn(true);
-        testVisitor.leaveMediaTypeListDelimiter(eq(atIf));
+        inOrder.verify(testVisitor).enterMediaTypeListDelimiter(atIf);
       }
     }
 
     // Then we enter the defBlock.
-    expect(testVisitor.enterBlock(eq(defBlock))).andReturn(true);
+    inOrder.verify(testVisitor).enterBlock(defBlock);
 
     // Then we enter the unknown 'def' at-rule node within the 'if'.
-    expect(testVisitor.enterUnknownAtRule(eq(atDef))).andReturn(true);
+    inOrder.verify(testVisitor).enterUnknownAtRule(atDef);
 
     // Then the media type list params for 'def'
     for (int i = 0; i < defParameters.size(); ++i) {
-      expect(
-          testVisitor.enterValueNode(eq(defParameters.get(i)))).andReturn(true);
-      testVisitor.leaveValueNode(eq(defParameters.get(i)));
+      inOrder.verify(testVisitor).enterValueNode(defParameters.get(i));
       if (i < defParameters.size() - 1) {
-        expect(testVisitor.enterMediaTypeListDelimiter(eq(atDef)))
-            .andReturn(true);
-        testVisitor.leaveMediaTypeListDelimiter(eq(atDef));
+        inOrder.verify(testVisitor).enterMediaTypeListDelimiter(atDef);
       }
     }
-
-    // Exit the nodes.
-    testVisitor.leaveUnknownAtRule(eq(atDef));
-    testVisitor.leaveBlock(eq(defBlock));
-    testVisitor.leaveUnknownAtRule(eq(atIf));
-    testVisitor.leaveBlock(eq(block));
-    testVisitor.leaveTree(eq(root));
-
-    mockControl.replay();
-
-    DefaultVisitController controller = new DefaultVisitController(tree, true);
-    controller.startVisit(testVisitor);
-
-    mockControl.verify();
   }
 
   public void testVisitComponent() {
@@ -597,43 +537,25 @@ public class DefaultVisitControllerTest extends TestCase {
     CssRootNode root = new CssRootNode(block);
     CssTree tree = new CssTree(null, root);
 
-    IMocksControl mockControl = EasyMock.createStrictControl();
-    DefaultTreeVisitor testVisitor =
-        mockControl.createMock(DefaultTreeVisitor.class);
-
-    // Enter Tree gets the root - there is no enterRoot.
-    expect(testVisitor.enterTree(eq(root))).andReturn(true);
-
-    // There are blocks that get created even if you don't add them.
-    expect(testVisitor.enterImportBlock((CssImportBlockNode)anyObject())).andReturn(true);
-    testVisitor.leaveImportBlock((CssImportBlockNode)anyObject());
-
-    // Then we enter the block.
-    expect(testVisitor.enterBlock(eq(block))).andReturn(true);
-
-    // Then we enter the component that we created.
-    expect(testVisitor.enterComponent(eq(comp))).andReturn(true);
-
-    // Then we enter the definition within the component.
-    expect(testVisitor.enterDefinition(eq(def))).andReturn(true);
-
-    // Exit the nodes.
-    testVisitor.leaveDefinition(eq(def));
-    testVisitor.leaveComponent(eq(comp));
-    testVisitor.leaveBlock(eq(block));
-    testVisitor.leaveTree(eq(root));
-
-    mockControl.replay();
-
     DefaultVisitController controller = new DefaultVisitController(tree, true);
     controller.startVisit(testVisitor);
 
-    mockControl.verify();
+    InOrder inOrder = Mockito.inOrder(testVisitor);
+    // Enter Tree gets the root - there is no enterRoot.
+    inOrder.verify(testVisitor).enterTree(root);
+    // There are blocks that get created even if you don't add them.
+    inOrder.verify(testVisitor).enterImportBlock(Matchers.<CssImportBlockNode>any());
+    // Then we enter the block.
+    inOrder.verify(testVisitor).enterBlock(block);
+    // Then we enter the component that we created.
+    inOrder.verify(testVisitor).enterComponent(comp);
+    // Then we enter the definition within the component.
+    inOrder.verify(testVisitor).enterDefinition(def);
   }
 
   public void testVisitValueNodes() {
     List<CssValueNode> simpleValues = Lists.newLinkedList();
-    for (String v : new String [] {"a", "b", "c"}) {
+    for (String v : new String[] {"a", "b", "c"}) {
       simpleValues.add(new CssLiteralNode(v, null));
     }
     CssCompositeValueNode parent =
@@ -656,18 +578,20 @@ public class DefaultVisitControllerTest extends TestCase {
 
     final List<CssValueNode> cNodes = Lists.newLinkedList();
     final List<CssValueNode> evnNodes = Lists.newLinkedList();
-    DefaultTreeVisitor testVisitor = new DefaultTreeVisitor() {
-        @Override
-        public boolean enterCompositeValueNode(CssCompositeValueNode c) {
-          cNodes.add(c);
-          return true;
-        }
-        @Override
-        public boolean enterValueNode(CssValueNode n) {
-          evnNodes.add(n);
-          return true;
-        }
-      };
+    DefaultTreeVisitor testVisitor =
+        new DefaultTreeVisitor() {
+          @Override
+          public boolean enterCompositeValueNode(CssCompositeValueNode c) {
+            cNodes.add(c);
+            return true;
+          }
+
+          @Override
+          public boolean enterValueNode(CssValueNode n) {
+            evnNodes.add(n);
+            return true;
+          }
+        };
     DefaultVisitController controller = new DefaultVisitController(t, true);
     controller.startVisit(testVisitor);
 
@@ -706,56 +630,26 @@ public class DefaultVisitControllerTest extends TestCase {
 
     final List<CssValueNode> compositeNode = Lists.newLinkedList();
     final List<CssValueNode> functionNodes = Lists.newLinkedList();
-    DefaultTreeVisitor testVisitor = new DefaultTreeVisitor() {
-        @Override
-        public boolean enterCompositeValueNode(CssCompositeValueNode c) {
-          compositeNode.add(c);
-          return true;
-        }
-        @Override
-        public boolean enterFunctionNode(CssFunctionNode n) {
-          functionNodes.add(n);
-          return true;
-        }
-      };
+    DefaultTreeVisitor testVisitor =
+        new DefaultTreeVisitor() {
+          @Override
+          public boolean enterCompositeValueNode(CssCompositeValueNode c) {
+            compositeNode.add(c);
+            return true;
+          }
+
+          @Override
+          public boolean enterFunctionNode(CssFunctionNode n) {
+            functionNodes.add(n);
+            return true;
+          }
+        };
     DefaultVisitController controller = new DefaultVisitController(t, true);
     controller.startVisit(testVisitor);
 
     assertEquals(2, functionNodes.size());
     assertEquals(1, compositeNode.size());
     assertTrue(compositeNode.contains(parent));
-  }
-
-  private static class ValueDetector extends DefaultTreeVisitor {
-    private final String quarry;
-    private final boolean[] foundValue = {false};
-    @Override public boolean enterValueNode(CssValueNode node) {
-      if (quarry.equals(node.getValue())) {
-        foundValue[0] = true;
-      }
-      return true;
-    }
-    private ValueDetector(String quarry) { this.quarry = quarry; }
-    public static boolean detect(CssTree t, String quarry) {
-      ValueDetector detector = new ValueDetector(quarry);
-      new DefaultVisitController(
-          t, false /* allowMutating */).startVisit(detector);
-      return detector.foundValue[0];
-    }
-  }
-
-  private static class FunctionDetector extends DefaultTreeVisitor {
-    private final boolean[] foundValue = {false};
-    @Override public boolean enterFunctionNode(CssFunctionNode node) {
-      foundValue[0] = true;
-      return true;
-    }
-    public static boolean detect(CssTree t) {
-      FunctionDetector detector = new FunctionDetector();
-      new DefaultVisitController(
-          t, false /* allowMutating */).startVisit(detector);
-      return detector.foundValue[0];
-    }
   }
 
   public void verifyRemoveablePropertyValueElement(String backgroundValue) {
@@ -765,30 +659,30 @@ public class DefaultVisitControllerTest extends TestCase {
               String.format("p { background: %s; }", backgroundValue)))
           .parse();
       assertTrue(
-          "This test assumes we start with a stylesheet containing detectable "
-          + "function nodes.",
+          "This test assumes we start with a stylesheet containing detectable " + "function nodes.",
           FunctionDetector.detect(t));
       final DefaultVisitController vc =
           new DefaultVisitController(t, true /* allowMutating */);
-      CssTreeVisitor functionRemover = new DefaultTreeVisitor() {
-          @Override public boolean enterFunctionNode(CssFunctionNode node) {
-            System.err.println(node.getParent().getClass().getName());
-            vc.removeCurrentNode();
-            return true;
-          }
-        };
+      CssTreeVisitor functionRemover =
+          new DefaultTreeVisitor() {
+            @Override
+            public boolean enterFunctionNode(CssFunctionNode node) {
+              System.err.println(node.getParent().getClass().getName());
+              vc.removeCurrentNode();
+              return true;
+            }
+          };
       vc.startVisit(functionRemover);
       assertFalse(
-          "We should be able to remove function nodes that occur as property "
-          + "values.",
+          "We should be able to remove function nodes that occur as property " + "values.",
           FunctionDetector.detect(t));
       assertTrue(
           "Removing one composite element within a property value should not "
-          + "affect its siblings.",
+              + "affect its siblings.",
           ValueDetector.detect(t, "red"));
       assertTrue(
           "Removing one composite element within a property value should not "
-          + "affect its siblings.",
+              + "affect its siblings.",
           ValueDetector.detect(t, "fixed"));
     } catch (GssParserException e) {
       throw new RuntimeException(e);
@@ -830,37 +724,61 @@ public class DefaultVisitControllerTest extends TestCase {
     CssRootNode root = new CssRootNode(block);
     CssTree tree = new CssTree(null, root);
 
-    IMocksControl mockControl = EasyMock.createStrictControl();
-    DefaultTreeVisitor testVisitor =
-        mockControl.createMock(DefaultTreeVisitor.class);
-
-    // Enter Tree gets the root - there is no enterRoot.
-    expect(testVisitor.enterTree(eq(root))).andReturn(true);
-
-    // There are blocks that get created even if you don't add them.
-    expect(testVisitor.enterImportBlock((CssImportBlockNode) anyObject())).andReturn(true);
-    testVisitor.leaveImportBlock((CssImportBlockNode) anyObject());
-
-    // Then we enter the block.
-    expect(testVisitor.enterBlock(eq(block))).andReturn(true);
-
-    // Then we enter the for loop node.
-    expect(testVisitor.enterForLoop(eq(loop))).andReturn(true);
-
-    // Then we enter the definition within the for loop.
-    expect(testVisitor.enterDefinition(eq(def))).andReturn(true);
-
-    // Exit the nodes.
-    testVisitor.leaveDefinition(eq(def));
-    testVisitor.leaveForLoop(eq(loop));
-    testVisitor.leaveBlock(eq(block));
-    testVisitor.leaveTree(eq(root));
-
-    mockControl.replay();
-
     DefaultVisitController controller = new DefaultVisitController(tree, true);
     controller.startVisit(testVisitor);
 
-    mockControl.verify();
+    InOrder inOrder = Mockito.inOrder(testVisitor);
+
+    // Enter Tree gets the root - there is no enterRoot.
+    inOrder.verify(testVisitor).enterTree(root);
+    // There are blocks that get created even if you don't add them.
+    inOrder.verify(testVisitor).enterImportBlock(Matchers.<CssImportBlockNode>any());
+    // Then we enter the block.
+    inOrder.verify(testVisitor).enterBlock(block);
+    // Then we enter the for loop node.
+    inOrder.verify(testVisitor).enterForLoop(loop);
+    // Then we enter the definition within the for loop.
+    inOrder.verify(testVisitor).enterDefinition(def);
+  }
+
+  private static class ValueDetector extends DefaultTreeVisitor {
+
+    private final String quarry;
+    private final boolean[] foundValue = {false};
+
+    private ValueDetector(String quarry) {
+      this.quarry = quarry;
+    }
+
+    public static boolean detect(CssTree t, String quarry) {
+      ValueDetector detector = new ValueDetector(quarry);
+      new DefaultVisitController(t, false /* allowMutating */).startVisit(detector);
+      return detector.foundValue[0];
+    }
+
+    @Override
+    public boolean enterValueNode(CssValueNode node) {
+      if (quarry.equals(node.getValue())) {
+        foundValue[0] = true;
+      }
+      return true;
+    }
+  }
+
+  private static class FunctionDetector extends DefaultTreeVisitor {
+
+    private final boolean[] foundValue = {false};
+
+    public static boolean detect(CssTree t) {
+      FunctionDetector detector = new FunctionDetector();
+      new DefaultVisitController(t, false /* allowMutating */).startVisit(detector);
+      return detector.foundValue[0];
+    }
+
+    @Override
+    public boolean enterFunctionNode(CssFunctionNode node) {
+      foundValue[0] = true;
+      return true;
+    }
   }
 }
