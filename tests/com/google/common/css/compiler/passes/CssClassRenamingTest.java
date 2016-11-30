@@ -16,7 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
-import static org.easymock.EasyMock.expect;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.google.common.css.SubstitutionMap;
 import com.google.common.css.compiler.ast.BackDoorNodeMutation;
@@ -30,11 +31,7 @@ import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
-
 import junit.framework.TestCase;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
 
 /**
  * Unit tests the {@link CssClassRenaming} compiler pass.
@@ -44,17 +41,11 @@ import org.easymock.IMocksControl;
 public class CssClassRenamingTest extends TestCase {
 
   public void testRunPass() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    
-    CssClassRenaming pass = 
-        new CssClassRenaming(visitController, null, null);
-    visitController.startVisit(pass);
-    controller.replay();
+    MutatingVisitController visitController = mock(MutatingVisitController.class);
 
+    CssClassRenaming pass = new CssClassRenaming(visitController, null, null);
+    visitController.startVisit(pass);
     pass.runPass();
-    controller.verify();
   }
 
   public void testNoSubstitutionWithNullMap() {
@@ -65,26 +56,23 @@ public class CssClassRenamingTest extends TestCase {
 
   public void testNoClassSubstitutionWhenClassNotFoundInMap() {
     CssClassSelectorNode refinerNode = new CssClassSelectorNode("FOO", null);
-    IMocksControl controller = EasyMock.createStrictControl();
-    SubstitutionMap cssClassRenamingMap = controller.createMock(
-        SubstitutionMap.class);
-    expect(cssClassRenamingMap.get("FOO")).andReturn(null).anyTimes();
-    controller.replay();
-    
+    SubstitutionMap cssClassRenamingMap = mock(SubstitutionMap.class);
+
     CssClassRenaming pass
         = new CssClassRenaming(null, cssClassRenamingMap, null);
     pass.enterClassSelector(refinerNode);
+
+    verify(cssClassRenamingMap).get("FOO");
   }
 
   public void testNoIdSubstitutionWhenIdNotFoundInMap() {
     CssIdSelectorNode refinerNode = new CssIdSelectorNode("ID", null);
-    IMocksControl controller = EasyMock.createStrictControl();
-    SubstitutionMap idRenamingMap = controller.createMock(
-        SubstitutionMap.class);
-    expect(idRenamingMap.get("ID")).andReturn(null).anyTimes();
-    controller.replay();
+    SubstitutionMap idRenamingMap = mock(SubstitutionMap.class);
+
     CssClassRenaming pass = new CssClassRenaming(null, null, idRenamingMap);
     pass.enterIdSelector(refinerNode);
+
+    verify(idRenamingMap).get("ID");
   }
   
   public void testEnterClassRefiner() {
