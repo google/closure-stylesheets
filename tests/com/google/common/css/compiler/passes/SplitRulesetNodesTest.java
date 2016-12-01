@@ -16,6 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.BackDoorNodeMutation;
 import com.google.common.css.compiler.ast.CssBlockNode;
@@ -27,49 +30,42 @@ import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import junit.framework.TestCase;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
-
 import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link SplitRulesetNodes}.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
-public class SplitRulesetNodesTest extends TestCase {
+@RunWith(JUnit4.class)
+public class SplitRulesetNodesTest {
 
+  @Test
   public void testRunPass() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
+    MutatingVisitController visitController = mock(MutatingVisitController.class);
     SplitRulesetNodes pass = new SplitRulesetNodes(visitController);
     visitController.startVisit(pass);
-    controller.replay();
 
     pass.runPass();
-    controller.verify();
   }
 
+  @Test
   public void testEnterRulesetNode() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
+    MutatingVisitController visitController = mock(MutatingVisitController.class);
     SplitRulesetNodes pass = new SplitRulesetNodes(visitController);
 
     CssRulesetNode node = new CssRulesetNode();
     List<CssNode> replacementNodes = Lists.newArrayList();
     
     visitController.replaceCurrentBlockChildWith(replacementNodes, false);
-    controller.replay();
 
     pass.enterRuleset(node);
-    controller.verify();
   }
 
+  @Test
   public void testPassResult() {
     CssPropertyNode prop1 = new CssPropertyNode("padding", null);
     CssPropertyNode prop2 = new CssPropertyNode("color", null);
@@ -103,12 +99,11 @@ public class SplitRulesetNodesTest extends TestCase {
         tree.getMutatingVisitController());
 
     pass.runPass();
-    assertEquals(tree.getRoot().getBody().toString(), 
-        "[[foo]{[padding:[]]}, [foo]{[color:[]]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo("[[foo]{[padding:[]]}, [foo]{[color:[]]}]");
 
-    assertTrue("Nodes shouldn't appear twice in AST!",
-        getFirstSelectorByRuleIndex(tree, 0)
-        != getFirstSelectorByRuleIndex(tree, 1));
+    assertThat(getFirstSelectorByRuleIndex(tree, 0))
+        .isNotEqualTo(getFirstSelectorByRuleIndex(tree, 1));
   }
 
   private CssSelectorNode getFirstSelectorByRuleIndex(CssTree tree, int index) {
