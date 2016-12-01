@@ -16,6 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
 import com.google.common.css.compiler.ast.BackDoorNodeMutation;
 import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
@@ -33,51 +36,42 @@ import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import junit.framework.TestCase;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link BiDiFlipper}.
  *
  */
-public class BiDiFlipperTest extends TestCase {
+@RunWith(JUnit4.class)
+public class BiDiFlipperTest {
 
+  @Test
   public void testRunPass() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
+    MutatingVisitController visitController = mock(MutatingVisitController.class);
 
     BiDiFlipper pass = new BiDiFlipper(visitController, true, true);
     visitController.startVisit(pass);
-    controller.replay();
 
     pass.runPass();
-    controller.verify();
   }
 
   // Test when the node is set to be non-flippable.
+  @Test
   public void testEnterDeclaration1() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
+    MutatingVisitController visitController = mock(MutatingVisitController.class);
     CssDeclarationNode node = new CssDeclarationNode(new CssPropertyNode("foo"));
     node.setShouldBeFlipped(false);
-
-    controller.replay();
 
     // Perform action.
     BiDiFlipper pass
         = new BiDiFlipper(visitController, true, true);
     pass.enterDeclaration(node);
-
-    // Verify.
-    controller.verify();
   }
 
   // Test when the node is set to be flippable.
+  @Test
   public void testEnterDeclaration2() {
     // padding: 5px 1px 2px 3px;
     CssPropertyNode prop1 = new CssPropertyNode("padding", null);
@@ -196,6 +190,7 @@ public class BiDiFlipperTest extends TestCase {
         + "]}]");
   }
 
+  @Test
   public void testSubPercentValues() {
     // background-position-x: 1.12345678%;
     CssPropertyNode prop1 = new CssPropertyNode("background-position-x", null);
@@ -234,6 +229,7 @@ public class BiDiFlipperTest extends TestCase {
         + "]}]");
   }
 
+  @Test
   public void testBidiImportant() {
     // margin: 1px 2px 3px 4px !important;
     CssPropertyNode prop1 = new CssPropertyNode("margin", null);
