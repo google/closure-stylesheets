@@ -16,29 +16,29 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.BackDoorNodeMutation;
 import com.google.common.css.compiler.ast.CssAtRuleNode.Type;
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
 import com.google.common.css.compiler.ast.CssConditionalRuleNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-import com.google.common.css.testing.UtilityTestCase;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Unit tests for {@link HasConditionalNodes}.
  *
  */
-public class HasConditionalNodesTest extends UtilityTestCase {
-  public void testEnterConditionalBlock() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    visitController.stopVisit();
-    controller.replay();
+@RunWith(MockitoJUnitRunner.class)
+public class HasConditionalNodesTest {
+  @Mock MutatingVisitController visitController;
 
+  @Test
+  public void testEnterConditionalBlock() {
     HasConditionalNodes pass
         = new HasConditionalNodes(visitController);
 
@@ -48,23 +48,16 @@ public class HasConditionalNodesTest extends UtilityTestCase {
     BackDoorNodeMutation.addRuleToConditionalBlock(node, rule);
 
     pass.enterConditionalBlock(node);
-    controller.verify();
   }
 
+  @Test
   public void testRunPassAndHasConditionalNodes() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-
     HasConditionalNodes pass
         = new HasConditionalNodes(visitController);
 
     visitController.startVisit(pass);
-    controller.replay();
 
     pass.runPass();
-    assertFalse(pass.hasConditionalNodes());
-
-    controller.verify();
+    assertThat(pass.hasConditionalNodes()).isFalse();
   }
 }
