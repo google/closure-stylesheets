@@ -16,10 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Sets;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
@@ -28,7 +26,6 @@ import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssTree.RulesetNodesToRemove;
 import com.google.common.css.compiler.ast.VisitController;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
-
 import java.util.Iterator;
 import java.util.Set;
 
@@ -40,19 +37,14 @@ import java.util.Set;
 public class MarkRemovableRulesetNodesTest extends PassesTestBase {
 
   public void testRunPass() {
-    VisitController visitController = createMock(
-        VisitController.class);
-    tree = createMock(CssTree.class);
-    expect(tree.getVisitController()).andReturn(visitController)
-        .anyTimes();
-    replay(tree);
+    VisitController visitController = mock(VisitController.class);
+    tree = mock(CssTree.class);
+    when(tree.getVisitController()).thenReturn(visitController);
 
     MarkRemovableRulesetNodes pass = new MarkRemovableRulesetNodes(tree);
     visitController.startVisit(pass);
-    replay(visitController);
 
     pass.runPass();
-    verify(visitController);
   }
 
   public void testMarkRemovableRulesetNode1() {
