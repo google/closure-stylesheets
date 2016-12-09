@@ -19,6 +19,7 @@ package com.google.common.css.compiler.ast;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.UnmodifiableIterator;
+import com.google.common.css.Locatable;
 import com.google.common.css.SourceCodeLocation;
 
 import java.util.Iterator;
@@ -33,7 +34,7 @@ import javax.annotation.Nullable;
  * public abstract class CssNode<T extends CssNode> {...}
  *
  */
-public abstract class CssNode {
+public abstract class CssNode implements Locatable {
   /** The parent of this node. */
   private CssNode parent;
   /** The source code corresponding to this node. */
@@ -111,6 +112,7 @@ public abstract class CssNode {
     this.parent = parent;
   }
 
+  @Override
   public SourceCodeLocation getSourceCodeLocation() {
     return sourceCodeLocation;
   }
@@ -283,6 +285,7 @@ public abstract class CssNode {
    */
   public Iterable<CssNode> ancestors() {
     return new Iterable<CssNode>() {
+      @Override
       public Iterator<CssNode> iterator() {
         return new UnmodifiableIterator<CssNode>() {
 

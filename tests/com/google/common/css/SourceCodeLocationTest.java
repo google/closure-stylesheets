@@ -16,6 +16,9 @@
 
 package com.google.common.css;
 
+import static com.google.common.css.compiler.ast.testing.SourceCodeLocationSubject.assertThat;
+
+import com.google.common.collect.ImmutableList;
 import junit.framework.TestCase;
 
 /**
@@ -133,5 +136,90 @@ public class SourceCodeLocationTest extends TestCase {
       new SourceCodeLocation(sourceCode2, 0, 1, 1, 2, 1, 3);
     assertFalse(loc1.equals(loc2));
     assertFalse(loc2.equals(loc1));
+  }
+
+  public void testMergeTwo_sameFileInOrder() {
+    SourceCode sourceCode = new SourceCode("testfile", "abcdef");
+    SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
+    SourceCodeLocation loc2 = new SourceCodeLocation(sourceCode, 1, 1, 2, 2, 1, 3);
+
+    SourceCodeLocation loc3 = SourceCodeLocation.merge(loc1, loc2);
+    assertThat(loc3).hasSpan(1, 1, 1, 3);
+    assertThat(loc3).matches("ab");
+  }
+
+  public void testMergeTwo_sameFileInWrongOrder() {
+    SourceCode sourceCode = new SourceCode("testfile", "abcdef");
+    SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
+    SourceCodeLocation loc2 = new SourceCodeLocation(sourceCode, 1, 1, 2, 2, 1, 3);
+
+    try {
+      SourceCodeLocation loc3 = SourceCodeLocation.merge(loc2, loc1);
+      fail("merge should have thrown an exception for out of order locations");
+    } catch (Exception expected) {}
+  }
+
+  public void testMergeTwo_differentFiles() {
+    SourceCode sourceCode1 = new SourceCode("testfile1", "abcdef");
+    SourceCode sourceCode2 = new SourceCode("testfile2", "abcdef");
+    SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode1, 0, 1, 1, 2, 1, 3);
+    SourceCodeLocation loc2 = new SourceCodeLocation(sourceCode2, 1, 1, 2, 2, 1, 3);
+
+    try {
+      SourceCodeLocation loc3 = SourceCodeLocation.merge(loc1, loc2);
+      fail("merge should have thrown an exception for locations in different files");
+    } catch (Exception expected) {}
+  }
+
+  public void testMergeIterable_sameFileInOrderTwo() {
+    SourceCode sourceCode = new SourceCode("testfile", "abcdef");
+    SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
+    SourceCodeLocation loc2 = new SourceCodeLocation(sourceCode, 1, 1, 2, 2, 1, 3);
+
+    SourceCodeLocation loc3 = SourceCodeLocation.mergeAll(ImmutableList.of(loc1, loc2));
+    assertThat(loc3).hasSpan(1, 1, 1, 3);
+    assertThat(loc3).matches("ab");
+  }
+
+  public void testMergeIterable_sameFileInOrderThree() {
+    SourceCode sourceCode = new SourceCode("testfile", "abcdef");
+    SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
+    SourceCodeLocation loc2 = new SourceCodeLocation(sourceCode, 1, 1, 2, 2, 1, 3);
+    SourceCodeLocation loc3 = new SourceCodeLocation(sourceCode, 4, 1, 5, 5, 1, 6);
+    assertThat(loc1).matches("ab");
+    assertThat(loc2).matches("b");
+    assertThat(loc3).matches("e");
+
+    SourceCodeLocation loc4 = SourceCodeLocation.mergeAll(ImmutableList.of(loc1, loc2, loc3));
+    assertThat(loc4).hasSpan(1, 1, 1, 6);
+    assertThat(loc4).matches("abcde");
+  }
+
+  public void testMergeIterable_sameFileOutOfOrderThree() {
+    SourceCode sourceCode = new SourceCode("testfile", "abcdef");
+    SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
+    SourceCodeLocation loc2 = new SourceCodeLocation(sourceCode, 1, 1, 2, 2, 1, 3);
+    SourceCodeLocation loc3 = new SourceCodeLocation(sourceCode, 4, 1, 5, 5, 1, 6);
+    assertThat(loc1).matches("ab");
+    assertThat(loc2).matches("b");
+    assertThat(loc3).matches("e");
+
+    SourceCodeLocation loc4 = SourceCodeLocation.mergeAll(ImmutableList.of(loc1, loc3, loc2));
+    assertThat(loc4).hasSpan(1, 1, 1, 6);
+    assertThat(loc4).matches("abcde");
+  }
+
+  public void testMergeIterable_sameFileReverseOrderThree() {
+    SourceCode sourceCode = new SourceCode("testfile", "abcdef");
+    SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
+    SourceCodeLocation loc2 = new SourceCodeLocation(sourceCode, 1, 1, 2, 2, 1, 3);
+    SourceCodeLocation loc3 = new SourceCodeLocation(sourceCode, 4, 1, 5, 5, 1, 6);
+    assertThat(loc1).matches("ab");
+    assertThat(loc2).matches("b");
+    assertThat(loc3).matches("e");
+
+    SourceCodeLocation loc4 = SourceCodeLocation.mergeAll(ImmutableList.of(loc3, loc2, loc1));
+    assertThat(loc4).hasSpan(1, 1, 1, 6);
+    assertThat(loc4).matches("abcde");
   }
 }

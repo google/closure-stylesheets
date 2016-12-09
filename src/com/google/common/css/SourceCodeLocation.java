@@ -17,9 +17,11 @@
 package com.google.common.css;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.primitives.Ints;
-
+import java.util.Iterator;
 import javax.annotation.Nullable;
 
 /**
@@ -180,6 +182,14 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
   private static final SourceCode UNKNOWN_SOURCE_CODE =
       new SourceCode("unknown", "");
 
+  private static final Function<Locatable, SourceCodeLocation> LOCATABLE_TO_LOCATION =
+      new Function<Locatable, SourceCodeLocation>() {
+        @Override
+        public SourceCodeLocation apply(Locatable locatable) {
+          return locatable.getSourceCodeLocation();
+        }
+      };
+
   /**
    * Returns an unknown location.
    */
@@ -196,6 +206,76 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
     Preconditions.checkState(result.begin.hasValidUnknownCoordinates());
     Preconditions.checkState(result.end.hasValidUnknownCoordinates());
     return result;
+  }
+
+  /**
+   * Returns a new SourceCodeLocation which covers everything between the beginning of the first
+   * location and the end of the second location.
+   */
+  public static SourceCodeLocation merge(
+      SourceCodeLocation beginLocation, SourceCodeLocation endLocation) {
+    Preconditions.checkNotNull(beginLocation, "Begin location can not be null");
+    Preconditions.checkNotNull(endLocation, "End location can not be null");
+    Preconditions.checkArgument(
+        beginLocation.sourceCode.equals(endLocation.sourceCode),
+        "Locations %s and %s come from different files; they cannot be merged",
+        beginLocation,
+        endLocation);
+    Preconditions.checkArgument(
+        beginLocation.compareTo(endLocation) <= 0,
+        "Begin location %s must be less than or equal to end location %s",
+        beginLocation,
+        endLocation);
+    return new SourceCodeLocation(
+        beginLocation.sourceCode,
+        beginLocation.getBeginCharacterIndex(),
+        beginLocation.getBeginLineNumber(),
+        beginLocation.getBeginIndexInLine(),
+        endLocation.getEndCharacterIndex(),
+        endLocation.getEndLineNumber(),
+        endLocation.getEndIndexInLine());
+  }
+
+  /**
+   * Merges the locations of all of the given locations. If the locations span {@code SourceCode}s,
+   * only the locations in the first {@code SourceCode} are used. If locations are out of order,
+   * the bounding locations are used.
+   */
+  public static SourceCodeLocation mergeAll(Iterable<SourceCodeLocation> locations) {
+    Iterator<SourceCodeLocation> i = locations.iterator();
+
+    SourceCodeLocation loc = null;
+    while (i.hasNext() && loc == null) {
+      loc = i.next();
+    }
+    if (!i.hasNext()) {
+      return loc; // NOTE(flan): Many places assume that missing locations are null, not unknown.
+    }
+
+    SourceCode sourceCode = loc.sourceCode;
+    SourceCodePoint begin = loc.begin;
+    SourceCodePoint end = loc.end;
+    while (i.hasNext()) {
+      loc = i.next();
+      if (loc == null || loc.isUnknown() || !loc.sourceCode.equals(sourceCode)) {
+        continue;
+      }
+      if (loc.begin.compareTo(begin) < 0) {
+        begin = loc.begin;
+      }
+      if (loc.end.compareTo(end) > 0) {
+        end = loc.end;
+      }
+    }
+    return new SourceCodeLocation(sourceCode, begin, end);
+  }
+
+  /**
+   * Merges the locations of all of the given locations. If the locations span {@code SourceCode}s,
+   * only the locations in the first {@code SourceCode} are used.
+   */
+  public static SourceCodeLocation merge(Iterable<? extends Locatable> locations) {
+    return mergeAll(Iterables.transform(locations, LOCATABLE_TO_LOCATION));
   }
 
   private final SourceCode sourceCode;
@@ -215,17 +295,28 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
   private final SourceCodePoint end;
 
   @VisibleForTesting
-  public SourceCodeLocation(SourceCode sourceCode, int beginCharacterIndex,
-      int beginLineNumber, int beginIndexInLine, int endCharacterIndex,
-      int endLineNumber, int endIndexInLine) {
+  public SourceCodeLocation(SourceCode sourceCode, SourceCodePoint begin, SourceCodePoint end) {
     Preconditions.checkNotNull(sourceCode);
     this.sourceCode = sourceCode;
-    this.begin = new SourceCodePoint(beginCharacterIndex, beginLineNumber,
-        beginIndexInLine);
-    this.end = new SourceCodePoint(endCharacterIndex, endLineNumber,
-        endIndexInLine);
+    this.begin = begin;
+    this.end = end;
     Preconditions.checkArgument(begin.compareTo(end) <= 0,
         "Beginning location must come before the end location.");
+  }
+
+  @VisibleForTesting
+  public SourceCodeLocation(
+      SourceCode sourceCode,
+      int beginCharacterIndex,
+      int beginLineNumber,
+      int beginIndexInLine,
+      int endCharacterIndex,
+      int endLineNumber,
+      int endIndexInLine) {
+    this(
+        sourceCode,
+        new SourceCodePoint(beginCharacterIndex, beginLineNumber, beginIndexInLine),
+        new SourceCodePoint(endCharacterIndex, endLineNumber, endIndexInLine));
   }
 
   public SourceCode getSourceCode() {
@@ -241,10 +332,18 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
     return begin.getCharacterIndex();
   }
 
+  /**
+   * The index of the line that contains the first character of the node. Indexes start at 1; 0
+   * means the location is not known.
+   */
   public int getBeginLineNumber() {
     return begin.getLineNumber();
   }
 
+  /**
+   * The index of the column that contains the first character of the node. Indexes start at 1; 0
+   * means the location is not known.
+   */
   public int getBeginIndexInLine() {
     return begin.getIndexInLine();
   }
@@ -253,10 +352,18 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
     return end.getCharacterIndex();
   }
 
+  /**
+   * The index of the line that contains the last character of the node. Indexes start at 1; 0 means
+   * the location is not known.
+   */
   public int getEndLineNumber() {
     return end.getLineNumber();
   }
 
+  /**
+   * The index of the column that comes after the last character of the node. Indexes start at 1; 0
+   * means the location is not known.
+   */
   public int getEndIndexInLine() {
     return end.getIndexInLine();
   }
@@ -324,5 +431,16 @@ public class SourceCodeLocation implements Comparable<SourceCodeLocation> {
       return startPointsComparison;
     }
     return end.compareTo(o.end);
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "%s: [line %d, col %d -> line %d, col %d)", // half-open interval notation
+        sourceCode.getFileName(),
+        begin.getLineNumber(),
+        begin.getIndexInLine(),
+        end.getLineNumber(),
+        end.getIndexInLine());
   }
 }

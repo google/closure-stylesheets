@@ -208,6 +208,34 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
         printer.getCompactPrintedString());
   }
 
+  public void testMarkedComments_preservedWithFooterAfterPreviousFile() {
+    String sourceCode1 = "foo{}";
+    String sourceCode2 = "/* Header comment\n" + " * @license MIT */\n" + "bar{}";
+
+    Map<String, String> selectorToChunk = ImmutableMap.of("foo", "foo", "bar", "bar");
+
+    newTestBase = new NewFunctionalTestBase();
+    newTestBase.parseAndBuildTree(ImmutableMap.of("fooFile", sourceCode1, "barFile", sourceCode2));
+    newTree = newTestBase.getTree();
+    tree = newTestBase.getTree();
+    runPassesOnNewTree();
+
+    new SetSelectorChunk(newTree, selectorToChunk).runPass();
+
+    TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("bar");
+    printer.runPass();
+    
+    System.out.println(printer.getCompactPrintedString());
+
+    assertEquals(
+        rS
+            + "\n/* Header comment\n"
+            + " * @license MIT */\n"
+            + "bar{}"
+            + rE,
+        printer.getCompactPrintedString());
+  }
+
   public void testMarkedComments_preservedButWithBadAnnotations() {
     String sourceCode = "/* ! !Header comment @licenseless *! @preservement !*/\n" + "foo{}";
 

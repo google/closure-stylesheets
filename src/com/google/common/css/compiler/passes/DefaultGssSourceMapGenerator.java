@@ -159,6 +159,7 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
     // as when a CssImportBlockNode is encountered, and there is no
     // copyright comment.
     Preconditions.checkState(endCharIndex >= -1);
+    endCharIndex++; //
     if (!mappings.isEmpty() && mappings.peek().node == node) {
       Mapping mapping = mappings.pop();
       mapping.end = new FilePosition(endLine, endCharIndex);
