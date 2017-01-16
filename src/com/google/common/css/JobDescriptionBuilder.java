@@ -70,6 +70,7 @@ public class JobDescriptionBuilder {
   boolean preserveComments;
   boolean suppressDependencyCheck;
   Map<String, Integer> compileConstants;
+  boolean preserveImportantComments;
 
   JobDescription job = null;
   boolean createSourceMap;
@@ -110,6 +111,7 @@ public class JobDescriptionBuilder {
     this.compileConstants = new HashMap<>();
     this.createSourceMap = false;
     this.sourceMapLevel = SourceMapDetailLevel.DEFAULT;
+    this.preserveImportantComments = false;
   }
 
   public JobDescriptionBuilder copyFrom(JobDescription jobToCopy) {
@@ -149,6 +151,7 @@ public class JobDescriptionBuilder {
     setCompileConstants(jobToCopy.compileConstants);
     this.createSourceMap = jobToCopy.createSourceMap;
     this.sourceMapLevel = jobToCopy.sourceMapLevel;
+    this.preserveImportantComments = jobToCopy.preserveImportantComments;
     return this;
   }
 
@@ -455,6 +458,16 @@ public class JobDescriptionBuilder {
     return this;
   }
 
+  public JobDescriptionBuilder setPreserveImportantComments(boolean preserve) {
+    checkJobIsNotAlreadyCreated();
+    this.preserveImportantComments = preserve;
+    return this;
+  }
+
+  public JobDescriptionBuilder preserveImportantComments() {
+    return setPreserveImportantComments(true);
+  }
+
   public JobDescription getJobDescription() {
     if (job != null) {
       return job;
@@ -485,7 +498,7 @@ public class JobDescriptionBuilder {
         allowedAtRules, cssRenamingPrefix, excludedClassesFromRenaming,
         gssFunctionMapProvider, cssSubstitutionMapProvider,
         outputRenamingMapFormat, preserveComments, suppressDependencyCheck, compileConstants,
-        createSourceMap, sourceMapLevel);
+        createSourceMap, sourceMapLevel, preserveImportantComments);
     return job;
   }
 

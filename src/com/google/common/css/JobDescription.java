@@ -69,6 +69,7 @@ public class JobDescription {
   public final Map<String, Integer> compileConstants;
   public final boolean createSourceMap;
   public final SourceMapDetailLevel sourceMapLevel;
+  public final boolean preserveImportantComments;
 
   static final String CONDITION_FOR_LTR = "GSS_LTR";
   static final String CONDITION_FOR_RTL = "GSS_RTL";
@@ -140,7 +141,8 @@ public class JobDescription {
       boolean preserveComments,
       boolean suppressDependencyCheck, Map<String, Integer> compileConstants,
       boolean createSourceMap,
-      SourceMapDetailLevel sourceMapLevel) {
+      SourceMapDetailLevel sourceMapLevel,
+      boolean preserveImportantComments) {
     this.allowUndefinedConstants = allowUndefinedConstants;
     Preconditions.checkArgument(!inputs.contains(null));
     Preconditions.checkNotNull(outputFormat);
@@ -188,6 +190,7 @@ public class JobDescription {
     this.compileConstants = ImmutableMap.copyOf(compileConstants);
     this.createSourceMap = createSourceMap;
     this.sourceMapLevel = sourceMapLevel;
+    this.preserveImportantComments = preserveImportantComments;
   }
 
   /**

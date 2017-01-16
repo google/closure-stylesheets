@@ -361,4 +361,74 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             + "transparent 100%);",
             "}"));
   }
+
+  public void testRemovesComments() throws Exception {
+    assertNewCompactPrintedResult(
+        ".foo{}.bar{color:red}",
+        lines(
+            "/* Goodbye world! */",
+            ".foo {",
+            "}",
+            "/*! I'm important. */",
+            ".bar {",
+            "  color: red;",
+            "}"));
+  }
+
+  public void testPreservesImportantCommentsWhenSet() throws Exception {
+    preserveMarkedComments = true;
+    assertNewCompactPrintedResult(
+        ".foo{}\n/*! I'm important. */\n.bar{color:red}",
+        lines(
+            "/* Goodbye world! */",
+            ".foo {",
+            "}",
+            "/*! I'm important. */",
+            ".bar {",
+            "  color: red;",
+            "}"));
+  }
+
+  public void testPreservesImportantCommentsWhenSet2() throws Exception {
+    preserveMarkedComments = true;
+    assertNewCompactPrintedResult(
+        ".foo{}\n/* I'm @license */\n.bar{color:red}",
+        lines(
+            "/* Goodbye world! */",
+            ".foo {",
+            "}",
+            "/* I'm @license */",
+            ".bar {",
+            "  color: red;",
+            "}"));
+  }
+
+  public void testPreservesImportantCommentsWhenSet3() throws Exception {
+    preserveMarkedComments = true;
+    assertNewCompactPrintedResult(
+        ".foo{}\n/* I'm @preserve */\n.bar{color:red}",
+        lines(
+            "/* Goodbye world! */",
+            ".foo {",
+            "}",
+            "/* I'm @preserve */",
+            ".bar {",
+            "  color: red;",
+            "}"));
+  }
+
+  public void testPreservesMultipleImportantCommentsWhenSet() throws Exception {
+    preserveMarkedComments = true;
+    assertNewCompactPrintedResult(
+        "\n/* I'm @preserve */\n.foo{}\n/*! Save me *//* @license hi */\n.bar{color:red}",
+        lines(
+            "/* I'm @preserve */",
+            "/* Goodbye world! */",
+            ".foo {",
+            "}",
+            "/*! Save me *//* ! don't save me *//* @license hi */",
+            ".bar {",
+            "  color: red;",
+            "}"));
+  }
 }

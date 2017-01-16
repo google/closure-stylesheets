@@ -39,12 +39,10 @@ import com.google.common.css.compiler.passes.NullGssSourceMapGenerator;
 import com.google.common.css.compiler.passes.PassRunner;
 import com.google.common.css.compiler.passes.PrettyPrinter;
 import com.google.common.io.Files;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
-
 import javax.annotation.Nullable;
 
 /**
@@ -132,6 +130,7 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler<JobD
 
     if (job.outputFormat == OutputFormat.COMPRESSED) {
       CompactPrinter compactPrinterPass = new CompactPrinter(cssTree, gssSourceMapGenerator);
+      compactPrinterPass.setPreserveMarkedComments(job.preserveImportantComments);
       compactPrinterPass.runPass();
       result.append(compactPrinterPass.getCompactPrintedString());
     } else {

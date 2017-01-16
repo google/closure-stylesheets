@@ -27,9 +27,8 @@ public class CompactPrinter extends CodePrinter {
 
   private String compactedPrintedString = null;
 
-  public CompactPrinter(CssNode subtree,
-      @Nullable CodeBuffer buffer,
-      @Nullable GssSourceMapGenerator generator) {
+  public CompactPrinter(
+      CssNode subtree, @Nullable CodeBuffer buffer, @Nullable GssSourceMapGenerator generator) {
     super(subtree.getVisitController(), buffer, generator);
   }
 
@@ -41,9 +40,8 @@ public class CompactPrinter extends CodePrinter {
     this(subtree, null /* buffer */);
   }
 
-  public CompactPrinter(CssTree tree,
-      @Nullable CodeBuffer buffer,
-      @Nullable GssSourceMapGenerator generator) {
+  public CompactPrinter(
+      CssTree tree, @Nullable CodeBuffer buffer, @Nullable GssSourceMapGenerator generator) {
     super(tree.getVisitController(), buffer, generator);
   }
 
@@ -64,9 +62,7 @@ public class CompactPrinter extends CodePrinter {
     return new CompactPrintingVisitor(visitController, buffer);
   }
 
-  /**
-   * Returns the CSS compacted printed output.
-   */
+  /** Returns the CSS compacted printed output. */
   public String getCompactPrintedString() {
     return compactedPrintedString;
   }
