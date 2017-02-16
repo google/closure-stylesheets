@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +63,9 @@ public class JobDescription {
   public final List<String> excludedClassesFromRenaming;
   public final GssFunctionMapProvider gssFunctionMapProvider;
   public final SubstitutionMapProvider cssSubstitutionMapProvider;
-  public final OutputRenamingMapFormat outputRenamingMapFormat;
+  public final RenamingMapFormat outputRenamingMapFormat;
+  public final RenamingMapFormat inputRenamingMapFormat;
+  public final Reader inputRenamingMapReader;
   public final boolean preserveComments;
   public final boolean suppressDependencyCheck;
   public final Map<String, Integer> compileConstants;
@@ -135,7 +138,9 @@ public class JobDescription {
       String cssRenamingPrefix, List<String> excludedClassesFromRenaming,
       GssFunctionMapProvider gssFunctionMapProvider,
       SubstitutionMapProvider cssSubstitutionMapProvider,
-      OutputRenamingMapFormat outputRenamingMapFormat,
+      RenamingMapFormat outputRenamingMapFormat,
+      RenamingMapFormat inputRenamingMapFormat,
+      Reader inputRenamingMapReader,
       boolean preserveComments,
       boolean suppressDependencyCheck, Map<String, Integer> compileConstants,
       boolean createSourceMap,
@@ -182,6 +187,8 @@ public class JobDescription {
     this.gssFunctionMapProvider = gssFunctionMapProvider;
     this.cssSubstitutionMapProvider = cssSubstitutionMapProvider;
     this.outputRenamingMapFormat = outputRenamingMapFormat;
+    this.inputRenamingMapFormat = inputRenamingMapFormat;
+    this.inputRenamingMapReader = inputRenamingMapReader;
     this.preserveComments = preserveComments;
     this.suppressDependencyCheck = suppressDependencyCheck;
     this.compileConstants = ImmutableMap.copyOf(compileConstants);

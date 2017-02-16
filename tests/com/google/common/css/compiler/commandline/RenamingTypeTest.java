@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.commandline;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.IdentitySubstitutionMap;
 import com.google.common.css.RecordingSubstitutionMap;
@@ -33,6 +34,8 @@ import java.util.Set;
  * @author bolinfest@google.com (Michael Bolin)
  */
 public class RenamingTypeTest extends TestCase {
+
+  private static final ImmutableMap<String, String> IMPUT_CLOSURE_MAPPING = ImmutableMap.of("dialog", "e", "content", "b", "settings", "m", "unused", "T");
 
   public void testNone() {
     SubstitutionMapProvider provider = RenamingType.NONE
@@ -78,6 +81,41 @@ public class RenamingTypeTest extends TestCase {
         "d-e-c-c-f", map.get("goog-imageless-button-button-pos"));
 
     testRenamingTypeThatWrapsASplittingSubstitutionMap(RenamingType.CLOSURE);
+  }
+
+  public void testClosureWithInputRenamingMap() {
+    SubstitutionMapProvider provider = RenamingType.CLOSURE
+        .getCssSubstitutionMapProvider();
+    RecordingSubstitutionMap map = new RecordingSubstitutionMap(provider.get(),
+        Predicates.alwaysTrue());
+
+    map.initializeWithMappings(IMPUT_CLOSURE_MAPPING);
+
+    assertEquals("e", map.get("dialog"));
+    assertEquals("m", map.get("settings"));
+    assertEquals("e-a", map.get("dialog-button"));
+    assertEquals("a", map.get("button"));
+    assertEquals("c", map.get("title"));
+    assertEquals(
+        "A CSS class may include a part with the same name multiple times even with a input renaming map.",
+        "d-f-a-a-g-e", map.get("goog-imageless-button-button-pos-dialog"));
+
+    Set<String> expectedMappings = ImmutableSet.of(
+        "dialog",
+        "content",
+        "settings",
+        "unused",
+        "button",
+        "goog",
+        "imageless",
+        "pos",
+        "title"
+        );
+    Set<String> observedMappings = map.getMappings().keySet();
+    assertEquals("There should be entries for both 'dialog' and 'content' in"
+        + "case someone does: "
+        + "goog.getCssName(goog.getCssName('dialog'), 'content')",
+        expectedMappings, observedMappings);
   }
 
   private void testRenamingTypeThatWrapsASplittingSubstitutionMap(RenamingType

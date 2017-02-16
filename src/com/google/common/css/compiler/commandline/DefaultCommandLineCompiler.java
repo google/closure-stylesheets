@@ -68,9 +68,10 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler<JobD
    *
    * @param job The inputs the compiler should process and the options to use.
    * @param errorManager The error manager to use for error reporting.
+   * @throws IOException
    */
   protected DefaultCommandLineCompiler(JobDescription job,
-      ExitCodeHandler exitCodeHandler, ErrorManager errorManager) {
+      ExitCodeHandler exitCodeHandler, ErrorManager errorManager) throws IOException {
     super(job, exitCodeHandler);
     this.errorManager = errorManager;
     this.passRunner = new PassRunner(job, errorManager);
