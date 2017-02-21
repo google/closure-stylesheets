@@ -205,7 +205,7 @@
     <dependency>
       <groupId>com.google.truth</groupId>
       <artifactId>truth</artifactId>
-      <version>0.25</version>
+      <version>0.30</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>

@@ -38,8 +38,6 @@ public class CssMediaRuleNode extends CssAtRuleNode implements ChunkAware {
 
   /**
    * Constructor of a media rule.
-   *
-   * @param comments
    */
   public CssMediaRuleNode(List<CssCommentNode> comments) {
     super(CssAtRuleNode.Type.MEDIA, new CssLiteralNode("media"), comments);
@@ -55,8 +53,6 @@ public class CssMediaRuleNode extends CssAtRuleNode implements ChunkAware {
 
   /**
    * Copy constructor.
-   *
-   * @param node
    */
   public CssMediaRuleNode(CssMediaRuleNode node) {
     super(node);

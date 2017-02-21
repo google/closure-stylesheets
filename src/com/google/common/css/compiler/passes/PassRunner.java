@@ -27,9 +27,7 @@ import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssFunction;
-
 import java.util.Map;
-
 import javax.annotation.Nullable;
 
 /**
@@ -205,8 +203,14 @@ public class PassRunner {
         if (!job.cssRenamingPrefix.isEmpty()) {
           map = new PrefixingSubstitutionMap(baseMap, job.cssRenamingPrefix);
         }
-        return new RecordingSubstitutionMap(map,
-            Predicates.not(Predicates.in(job.excludedClassesFromRenaming)));
+        RecordingSubstitutionMap recording =
+            new RecordingSubstitutionMap.Builder()
+                .withSubstitutionMap(map)
+                .shouldRecordMappingForCodeGeneration(
+                    Predicates.not(Predicates.in(job.excludedClassesFromRenaming)))
+                .build();
+        recording.initializeWithMappings(job.inputRenamingMap);
+        return recording;
       }
     }
     return null;
