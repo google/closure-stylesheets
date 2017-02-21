@@ -118,8 +118,8 @@ public class CssStringNode extends CssValueNode {
                      .substring(location.getBeginCharacterIndex()
                                 // for the quote
                                 + 1,
-                                // we end on the quote, so no need to adjust
-                                location.getEndCharacterIndex()));
+                                // we end after the quote, so adjust
+                                location.getEndCharacterIndex() - 1));
     this.type = type;
   }
 

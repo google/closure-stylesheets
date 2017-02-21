@@ -915,7 +915,8 @@ public class GssParserTest extends TestCase {
     });
     assertNotNull(resultHolder[0]);
     SourceCodeLocation location = resultHolder[0].getSourceCodeLocation();
-    assertEquals(3, location.getEndCharacterIndex() - location.getBeginCharacterIndex());
+    assertEquals(
+        "99px".length(), location.getEndCharacterIndex() - location.getBeginCharacterIndex());
   }
 
   private CssTree parse(List<SourceCode> sources) throws GssParserException {

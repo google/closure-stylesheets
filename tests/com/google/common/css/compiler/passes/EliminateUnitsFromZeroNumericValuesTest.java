@@ -16,148 +16,130 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssNumericNode;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import junit.framework.TestCase;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Unit tests for {@link EliminateUnitsFromZeroNumericValues}.
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class EliminateUnitsFromZeroNumericValuesTest extends TestCase {
+@RunWith(MockitoJUnitRunner.class)
+public class EliminateUnitsFromZeroNumericValuesTest {
 
+  @Mock MutatingVisitController mockVisitController;
+
+  @Test
   public void testRunPass() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
-    visitController.startVisit(pass);
-    controller.replay();
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
+    mockVisitController.startVisit(pass);
 
     pass.runPass();
-    controller.verify();
   }
 
+  @Test
   public void testEnterValueNode1() {
-    MutatingVisitController visitController = EasyMock.createMock(
-        MutatingVisitController.class);
-
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
 
     CssNumericNode node = new CssNumericNode("3", "px");
     pass.enterValueNode(node);
-    assertEquals("3", node.getNumericPart());
-    assertEquals("px", node.getUnit());
+    assertThat(node.getNumericPart()).isEqualTo("3");
+    assertThat(node.getUnit()).isEqualTo("px");
   }
 
+  @Test
   public void testEnterValueNode2() {
-    MutatingVisitController visitController = EasyMock.createMock(
-        MutatingVisitController.class);
-
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
 
     CssNumericNode node = new CssNumericNode("0", "px");
     pass.enterValueNode(node);
-    assertEquals("0", node.getNumericPart());
-    assertEquals("", node.getUnit());
+    assertThat(node.getNumericPart()).isEqualTo("0");
+    assertThat(node.getUnit()).isEqualTo("");
   }
 
+  @Test
   public void testEnterValueNode3() {
-    MutatingVisitController visitController = EasyMock.createMock(
-        MutatingVisitController.class);
-
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
 
     CssNumericNode node = new CssNumericNode("0.000", "px");
     pass.enterValueNode(node);
-    assertEquals("0", node.getNumericPart());
-    assertEquals("", node.getUnit());
+    assertThat(node.getNumericPart()).isEqualTo("0");
+    assertThat(node.getUnit()).isEqualTo("");
   }
 
+  @Test
   public void testEnterValueNode4() {
-    MutatingVisitController visitController = EasyMock.createMock(
-        MutatingVisitController.class);
-
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
 
     CssNumericNode node = new CssNumericNode("3.0", "px");
     pass.enterValueNode(node);
-    assertEquals("3", node.getNumericPart());
-    assertEquals("px", node.getUnit());
+    assertThat(node.getNumericPart()).isEqualTo("3");
+    assertThat(node.getUnit()).isEqualTo("px");
   }
 
+  @Test
   public void testEnterValueNode5() {
-    MutatingVisitController visitController = EasyMock.createMock(
-        MutatingVisitController.class);
-
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
 
     CssNumericNode node = new CssNumericNode("003.0", "px");
     pass.enterValueNode(node);
-    assertEquals("3", node.getNumericPart());
-    assertEquals("px", node.getUnit());
+    assertThat(node.getNumericPart()).isEqualTo("3");
+    assertThat(node.getUnit()).isEqualTo("px");
   }
 
+  @Test
   public void testEnterValueNode6() {
-    MutatingVisitController visitController = EasyMock.createMock(
-        MutatingVisitController.class);
-
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
 
     CssNumericNode node = new CssNumericNode("0.3", "px");
     pass.enterValueNode(node);
-    assertEquals(".3", node.getNumericPart());
-    assertEquals("px", node.getUnit());
+    assertThat(node.getNumericPart()).isEqualTo(".3");
+    assertThat(node.getUnit()).isEqualTo("px");
   }
 
+  @Test
   public void testEnterValueNode7() {
-    MutatingVisitController visitController = EasyMock.createMock(
-        MutatingVisitController.class);
-
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
 
     CssNumericNode node = new CssNumericNode("0.3000", "px");
     pass.enterValueNode(node);
-    assertEquals(".3", node.getNumericPart());
-    assertEquals("px", node.getUnit());
+    assertThat(node.getNumericPart()).isEqualTo(".3");
+    assertThat(node.getUnit()).isEqualTo("px");
   }
 
+  @Test
   public void testEnterValueNode8() {
-    MutatingVisitController visitController = EasyMock.createMock(
-        MutatingVisitController.class);
-
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
 
     CssNumericNode node = new CssNumericNode("002.3000", "px");
     pass.enterValueNode(node);
-    assertEquals("2.3", node.getNumericPart());
-    assertEquals("px", node.getUnit());
+    assertThat(node.getNumericPart()).isEqualTo("2.3");
+    assertThat(node.getUnit()).isEqualTo("px");
   }
 
+  @Test
   public void testEnterValueNode9() {
-    MutatingVisitController visitController = EasyMock.createMock(
-        MutatingVisitController.class);
-
-    EliminateUnitsFromZeroNumericValues pass
-        = new EliminateUnitsFromZeroNumericValues(visitController);
+    EliminateUnitsFromZeroNumericValues pass =
+        new EliminateUnitsFromZeroNumericValues(mockVisitController);
 
     CssNumericNode node = new CssNumericNode("woo34", "px");
     pass.enterValueNode(node);
-    assertEquals("woo34", node.getNumericPart());
-    assertEquals("px", node.getUnit());
+    assertThat(node.getNumericPart()).isEqualTo("woo34");
+    assertThat(node.getUnit()).isEqualTo("px");
   }
 }

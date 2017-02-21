@@ -16,10 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.common.base.Joiner;
 import com.google.common.css.SourceCode;
@@ -36,44 +35,44 @@ import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
-
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link MergeAdjacentRulesetNodesWithSameSelector}.
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class MergeAdjacentRulesetNodesWithSameSelectorTest extends TestCase {
+@RunWith(JUnit4.class)
+public class MergeAdjacentRulesetNodesWithSameSelectorTest {
 
+  @Test
   public void testRunPass() {
-    MutatingVisitController visitController = createMock(
-        MutatingVisitController.class);
-    CssTree tree = createMock(CssTree.class);
-    expect(tree.getMutatingVisitController()).andReturn(visitController)
-        .anyTimes();
-    replay(tree);
+    MutatingVisitController visitController = mock(MutatingVisitController.class);
+    CssTree tree = mock(CssTree.class);
+    when(tree.getMutatingVisitController()).thenReturn(visitController);
 
     MergeAdjacentRulesetNodesWithSameSelector pass =
         new MergeAdjacentRulesetNodesWithSameSelector(tree);
     visitController.startVisit(pass);
-    replay(visitController);
 
     pass.runPass();
-    verify(visitController);
   }
 
+  @Test
   public void testEnterTree() {
     CssTree tree = new CssTree((SourceCode) null);
     tree.getRulesetNodesToRemove().addRulesetNode(new CssRulesetNode());
-    assertFalse(tree.getRulesetNodesToRemove().getRulesetNodes().isEmpty());
+    assertThat(tree.getRulesetNodesToRemove().getRulesetNodes()).isNotEmpty();
 
     MergeAdjacentRulesetNodesWithSameSelector pass =
         new MergeAdjacentRulesetNodesWithSameSelector(tree);
     pass.enterTree(tree.getRoot());
-    assertTrue(tree.getRulesetNodesToRemove().getRulesetNodes().isEmpty());
+    assertThat(tree.getRulesetNodesToRemove().getRulesetNodes()).isEmpty();
   }
 
+  @Test
   public void testPassResult() throws Exception {
     CssTree tree = new GssParser(new SourceCode(null, lines(
         "@-moz-document url-prefix() {",
@@ -91,26 +90,27 @@ public class MergeAdjacentRulesetNodesWithSameSelectorTest extends TestCase {
         "  margin: 2px;",
         "}"))).parse();
 
-    assertEquals(
-        "[@-moz-document [url-prefix()]"
-        + "{[foo]{[padding:[[6px]];]}[foo]{[margin:[[4px]];]}}"
-        + "[foo,.bar #id]{[padding:[[5px]];]}"
-        + "[foo,.bar #id]{[margin:[[2px]];]}]",
-        AstPrinter.print(tree));
+    assertThat(AstPrinter.print(tree))
+        .isEqualTo(
+            "[@-moz-document [url-prefix()]"
+                + "{[foo]{[padding:[[6px]];]}[foo]{[margin:[[4px]];]}}"
+                + "[foo,.bar #id]{[padding:[[5px]];]}"
+                + "[foo,.bar #id]{[margin:[[2px]];]}]");
 
     MergeAdjacentRulesetNodesWithSameSelector pass =
         new MergeAdjacentRulesetNodesWithSameSelector(tree);
     pass.runPass();
     // As the elimination pass is not run here, we still have the one of the old
     // rulesets in each place.
-    assertEquals(
-        "[@-moz-document [url-prefix()]"
-        + "{[foo]{[padding:[[6px]];margin:[[4px]];]}[foo]{[margin:[[4px]];]}}"
-        + "[foo,.bar #id]{[padding:[[5px]];margin:[[2px]];]}"
-        + "[foo,.bar #id]{[margin:[[2px]];]}]",
-        AstPrinter.print(tree));
+    assertThat(AstPrinter.print(tree))
+        .isEqualTo(
+            "[@-moz-document [url-prefix()]"
+                + "{[foo]{[padding:[[6px]];margin:[[4px]];]}[foo]{[margin:[[4px]];]}}"
+                + "[foo,.bar #id]{[padding:[[5px]];margin:[[2px]];]}"
+                + "[foo,.bar #id]{[margin:[[2px]];]}]");
   }
 
+  @Test
   public void testPassResult2() {
     CssPropertyNode prop1 = new CssPropertyNode("padding", null);
     CssPropertyValueNode value1 = new CssPropertyValueNode();
@@ -140,15 +140,15 @@ public class MergeAdjacentRulesetNodesWithSameSelectorTest extends TestCase {
 
     CssRootNode root = new CssRootNode(body);
     CssTree tree = new CssTree(null, root);
-    assertEquals(tree.getRoot().getBody().toString(),
-      "[[foo]{[padding:[5px]]}, [foo]{[display:[2px]]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo("[[foo]{[padding:[5px]]}, [foo]{[display:[2px]]}]");
 
     MergeAdjacentRulesetNodesWithSameSelector pass =
       new MergeAdjacentRulesetNodesWithSameSelector(tree, true);
     pass.runPass();
     // skip merging rules with display -> we expect output == input
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[[foo]{[padding:[5px]]}, [foo]{[display:[2px]]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo("[[foo]{[padding:[5px]]}, [foo]{[display:[2px]]}]");
   }
 
   private String lines(String... lines) {

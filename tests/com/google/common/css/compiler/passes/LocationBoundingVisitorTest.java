@@ -91,8 +91,8 @@ public class LocationBoundingVisitorTest extends NewFunctionalTestBase {
         red.getSourceCodeLocation().isUnknown());
     CssDeclarationBlockNode block =
         findFirstNodeOf(CssDeclarationBlockNode.class);
-    assertTrue(
-        "There should be a node with an unknown location",
+    assertFalse(
+        "There should be a node with an known location",
         block.getSourceCodeLocation() == null
         || block.getSourceCodeLocation().isUnknown());
 
@@ -154,6 +154,6 @@ public class LocationBoundingVisitorTest extends NewFunctionalTestBase {
     // For good measure: some specific, empirical, and reasonable-looking
     // assertions.
     assertEquals(0, actual.getBeginCharacterIndex());
-    assertEquals(18, actual.getEndCharacterIndex());
+    assertEquals(19, actual.getEndCharacterIndex());
   }
 }
