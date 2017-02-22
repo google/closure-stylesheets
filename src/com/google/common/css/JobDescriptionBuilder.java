@@ -51,6 +51,7 @@ public class JobDescriptionBuilder {
   boolean simplifyCss;
   boolean eliminateDeadStyles;
   boolean allowDefPropagation;
+  boolean allowDuplicateDeclarations;
   boolean allowUnrecognizedFunctions;
   Set<String> allowedNonStandardFunctions;
   boolean allowUnrecognizedProperties;
@@ -90,6 +91,7 @@ public class JobDescriptionBuilder {
     this.simplifyCss = false;
     this.eliminateDeadStyles = false;
     this.allowDefPropagation = false;
+    this.allowDuplicateDeclarations = false;
     this.allowUnrecognizedFunctions = false;
     this.allowedNonStandardFunctions = Sets.newHashSet();
     this.allowUnrecognizedProperties = false;
@@ -424,6 +426,16 @@ public class JobDescriptionBuilder {
     return setAllowDefPropagation(true);
   }
 
+  public JobDescriptionBuilder setAllowDuplicateDeclarations(boolean allow) {
+    checkJobIsNotAlreadyCreated();
+    this.allowDuplicateDeclarations = allow;
+    return this;
+  }
+
+  public JobDescriptionBuilder allowDuplicateDeclarations() {
+    return setAllowDuplicateDeclarations(true);
+  }
+
   public JobDescriptionBuilder setAllowUndefinedConstants(boolean allow) {
     checkJobIsNotAlreadyCreated();
     this.allowUndefinedConstants = allow;
@@ -487,7 +499,7 @@ public class JobDescriptionBuilder {
         copyrightNotice, outputFormat, inputOrientation, outputOrientation,
         optimize, trueConditionNames, useInternalBidiFlipper, swapLtrRtlInUrl,
         swapLeftRightInUrl, simplifyCss, eliminateDeadStyles,
-        allowDefPropagation, allowUnrecognizedFunctions, allowedNonStandardFunctions,
+        allowDefPropagation, allowDuplicateDeclarations, allowUnrecognizedFunctions, allowedNonStandardFunctions,
         allowUnrecognizedProperties, allowedUnrecognizedProperties, allowUndefinedConstants,
         allowMozDocument, vendor,
         allowKeyframes, allowWebkitKeyframes, processDependencies,

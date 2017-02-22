@@ -142,9 +142,11 @@ public class PassRunner {
           cssTree.getMutatingVisitController()).runPass();
     }
     if (job.eliminateDeadStyles) {
-      // Report errors for duplicate declarations
-      new DisallowDuplicateDeclarations(
-          cssTree.getVisitController(), errorManager).runPass();
+      if (!job.allowDuplicateDeclarations) {
+        // Report errors for duplicate declarations
+        new DisallowDuplicateDeclarations(
+                cssTree.getVisitController(), errorManager).runPass();
+      }
       // Split rules by selector and declaration.
       new SplitRulesetNodes(cssTree.getMutatingVisitController()).runPass();
       // Dead code elimination.
