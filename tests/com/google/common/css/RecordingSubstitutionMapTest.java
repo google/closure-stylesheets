@@ -36,7 +36,7 @@ public final class RecordingSubstitutionMapTest extends TestCase {
   }
 
   public final void testReadAndWrite() throws IOException {
-    for (OutputRenamingMapFormat format : OutputRenamingMapFormat.values()) {
+    for (RenamingMapFormat format : RenamingMapFormat.values()) {
       RecordingSubstitutionMap recording =
           new RecordingSubstitutionMap.Builder().withSubstitutionMap(createDelegate()).build();
       // Put some stuff into the map.

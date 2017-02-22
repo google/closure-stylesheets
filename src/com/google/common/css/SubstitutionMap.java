@@ -46,11 +46,11 @@ public interface SubstitutionMap {
    *
    * <p>After the first compilation,
    * {@link RecordingSubstitutionMap#getRenameMap} may be used with
-   * an {@link OutputRenamingMapFormat} to serialize the renaming map
+   * an {@link RenamingMapFormat} to serialize the renaming map
    * in a form that can be used with Closure Library code or Closure
    * Templates.
    *
-   * <p>Before a re-compile, {@link OutputRenamingMapFormat#readRenamingMap}
+   * <p>Before a re-compile, {@link RenamingMapFormat#readRenamingMap}
    * can be used to generate a set of initial mappings that can be
    * passed to {@link Initializable#initializeWithMappings} to prepare
    * a structurally equivalent substitution map to produce IDs that do

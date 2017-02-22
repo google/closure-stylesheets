@@ -28,6 +28,7 @@ import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssFunction;
 
+import java.io.IOException;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -47,7 +48,7 @@ public class PassRunner {
   private final ErrorManager errorManager;
   private final RecordingSubstitutionMap recordingSubstitutionMap;
 
-  public PassRunner(JobDescription job, ErrorManager errorManager) {
+  public PassRunner(JobDescription job, ErrorManager errorManager) throws IOException {
     this(job, errorManager, createSubstitutionMap(job));
   }
 
@@ -195,9 +196,10 @@ public class PassRunner {
    * Wraps it in a substitution map that optionally prefixes all of the renamed
    * classes. Additionaly wraps in a recording substituion map which excludes a
    * blacklist of classnames and allows the map to produced as an output.
+   * @throws IOException
    */
   private static RecordingSubstitutionMap createSubstitutionMap(
-      JobDescription job) {
+      JobDescription job) throws IOException {
     if (job.cssSubstitutionMapProvider != null) {
       SubstitutionMap baseMap = job.cssSubstitutionMapProvider.get();
       if (baseMap != null) {
@@ -205,8 +207,14 @@ public class PassRunner {
         if (!job.cssRenamingPrefix.isEmpty()) {
           map = new PrefixingSubstitutionMap(baseMap, job.cssRenamingPrefix);
         }
-        return new RecordingSubstitutionMap(map,
+        RecordingSubstitutionMap recording = new RecordingSubstitutionMap(map,
             Predicates.not(Predicates.in(job.excludedClassesFromRenaming)));
+        if (job.inputRenamingMapReader != null) {
+          Map<String, String> inputMap = job.inputRenamingMapFormat.readRenamingMap(job.inputRenamingMapReader);
+          if (!inputMap.isEmpty())
+            recording.initializeWithMappings(inputMap);
+        }
+        return recording;
       }
     }
     return null;

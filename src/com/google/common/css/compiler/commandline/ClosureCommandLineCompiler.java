@@ -31,7 +31,7 @@ import com.google.common.css.JobDescription.InputOrientation;
 import com.google.common.css.JobDescription.OutputOrientation;
 import com.google.common.css.JobDescription.SourceMapDetailLevel;
 import com.google.common.css.JobDescriptionBuilder;
-import com.google.common.css.OutputRenamingMapFormat;
+import com.google.common.css.RenamingMapFormat;
 import com.google.common.css.SourceCode;
 import com.google.common.css.Vendor;
 import com.google.common.css.compiler.ast.ErrorManager;
@@ -43,10 +43,12 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +64,7 @@ import javax.annotation.Nullable;
 public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
 
   protected ClosureCommandLineCompiler(JobDescription job,
-      ExitCodeHandler exitCodeHandler, ErrorManager errorManager) {
+      ExitCodeHandler exitCodeHandler, ErrorManager errorManager) throws IOException {
     super(job, exitCodeHandler, errorManager);
   }
 
@@ -121,9 +123,18 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
 
     @Option(name = "--output-renaming-map-format", usage = "How to format the"
         + " output from the CSS class renaming.")
-    private OutputRenamingMapFormat outputRenamingMapFormat =
-        OutputRenamingMapFormat.JSON;
+    private RenamingMapFormat outputRenamingMapFormat =
+        RenamingMapFormat.JSON;
 
+    @Option(name = "--input-renaming-map", usage = "The input filename for"
+        + " the CSS class renaming. The file must provide a map of class names"
+        + " that will be used for renaming. If a class name is not found in"
+        + " file, a new name will be generated.")
+    private String inputRenamingMapFileName = null;
+
+    @Option(name = "--input-renaming-map-format", usage = "How the input"
+        + " renaiming map file is formatted. Default value is value used in --output-renaming-map-format.")
+    private RenamingMapFormat inputRenamingMapFormat = null;
 
     @Option(name = "--output-source-map", usage = "The source map output."
         + " Provides a mapping from the generated output to their original"
@@ -252,6 +263,22 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setSourceMapLevel(sourceMapLevel);
       builder.setCreateSourceMap(!Strings.isNullOrEmpty(sourceMapFile));
 
+      if (inputRenamingMapFileName != null) {
+        if (inputRenamingMapFormat == null) {
+          inputRenamingMapFormat = outputRenamingMapFormat;
+        }
+        builder.setInputRenamingMapFormat(inputRenamingMapFormat);
+
+        try {
+          File inputRenamingMapFile = new File(inputRenamingMapFileName);
+          Reader inputRenamingMapReader = Files.newReader(inputRenamingMapFile, UTF_8);
+          builder.setInputRenamingMapReader(inputRenamingMapReader);
+        } catch (FileNotFoundException e) {
+          throw new RuntimeException(String.format(
+              "Input renaming map file %s does not exist", inputRenamingMapFileName));
+        }
+      }
+
       for (String fileName : arguments) {
         File file = new File(fileName);
         if (!file.exists()) {
@@ -342,19 +369,19 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       OutputInfo outputInfo) {
     CompilerErrorManager errorManager = new CompilerErrorManager();
 
-    ClosureCommandLineCompiler compiler =
-        new ClosureCommandLineCompiler(job, exitCodeHandler, errorManager);
+    try {
+      ClosureCommandLineCompiler compiler =
+          new ClosureCommandLineCompiler(job, exitCodeHandler, errorManager);
 
-    String compilerOutput = compiler.execute(outputInfo.renameFile, outputInfo.sourceMapFile);
+      String compilerOutput = compiler.execute(outputInfo.renameFile, outputInfo.sourceMapFile);
 
-    if (outputInfo.outputFile == null) {
-      System.out.print(compilerOutput);
-    } else {
-      try {
-        Files.write(compilerOutput, outputInfo.outputFile, UTF_8);
-      } catch (IOException e) {
-        AbstractCommandLineCompiler.exitOnUnhandledException(e, exitCodeHandler);
+      if (outputInfo.outputFile == null) {
+        System.out.print(compilerOutput);
+      } else {
+          Files.write(compilerOutput, outputInfo.outputFile, UTF_8);
       }
+    } catch (IOException e) {
+      AbstractCommandLineCompiler.exitOnUnhandledException(e, exitCodeHandler);
     }
   }
 

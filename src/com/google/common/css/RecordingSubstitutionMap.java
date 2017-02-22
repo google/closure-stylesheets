@@ -87,7 +87,7 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
 
   /**
    * @return The recorded mappings in the order they were created. This output may be used with
-   *     {@link OutputRenamingMapFormat#writeRenamingMap}
+   *     {@link RenamingMapFormat#writeRenamingMap}
    */
   public Map<String, String> getMappings() {
     return ImmutableMap.copyOf(mappings);
@@ -128,8 +128,8 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
     /**
      * Specifies mappings to {@linkplain Initializable initialize} the delegate with. Multiple calls
      * putAll. This can be used to reconstitute a map that was written out by {@link
-     * OutputRenamingMapFormat#writeRenamingMap} from the output of {@link
-     * OutputRenamingMapFormat#readRenamingMap}.
+     * RenamingMapFormat#writeRenamingMap} from the output of {@link
+     * RenamingMapFormat#readRenamingMap}.
      */
     public Builder withMappings(Map<? extends String, ? extends String> m) {
       this.mappings.putAll(m);
