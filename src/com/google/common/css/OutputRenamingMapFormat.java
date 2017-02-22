@@ -47,14 +47,14 @@ import java.util.Properties;
  */
 public enum OutputRenamingMapFormat {
   /**
-   * Writes the mapping as JSON, passed as an argument to
+   * Reads/Writes the mapping as JSON, passed as an argument to
    * {@code goog.setCssNameMapping()}. Designed for use with the Closure
    * Library in compiled mode.
    */
   CLOSURE_COMPILED("goog.setCssNameMapping(%s);\n"),
 
   /**
-   * Writes the mapping as JSON, passed as an argument to
+   * Reads/Writes the mapping as JSON, passed as an argument to
    * {@code goog.setCssNameMapping()} using the 'BY_WHOLE' mapping style.
    * Designed for use with the Closure Library in compiled mode where the CSS
    * name substitutions are taken as-is, which allows, e.g., using
@@ -75,19 +75,19 @@ public enum OutputRenamingMapFormat {
   },
 
   /**
-   * Writes the mapping as JSON, assigned to the global JavaScript variable
+   * Reads/Writes the mapping as JSON, assigned to the global JavaScript variable
    * {@code CLOSURE_CSS_NAME_MAPPING}. Designed for use with the Closure
    * Library in uncompiled mode.
    */
   CLOSURE_UNCOMPILED("CLOSURE_CSS_NAME_MAPPING = %s;\n"),
 
   /**
-   * Writes the mapping as JSON.
+   * Reads/Writes the mapping as JSON.
    */
   JSON,
 
   /**
-   * Writes the mapping in a .properties file format, such that it can be read
+   * Reads/Writes the mapping from/in a .properties file format, such that it can be read
    * by {@link Properties}.
    */
   PROPERTIES {

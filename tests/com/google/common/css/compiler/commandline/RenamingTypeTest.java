@@ -16,16 +16,18 @@
 
 package com.google.common.css.compiler.commandline;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.IdentitySubstitutionMap;
 import com.google.common.css.RecordingSubstitutionMap;
 import com.google.common.css.SubstitutionMap;
 import com.google.common.css.SubstitutionMapProvider;
-
-import junit.framework.TestCase;
-
+import java.util.Map;
 import java.util.Set;
+import junit.framework.TestCase;
 
 /**
  * {@link RenamingTypeTest} is a unit test for {@link RenamingType}.
@@ -78,6 +80,42 @@ public class RenamingTypeTest extends TestCase {
         "d-e-c-c-f", map.get("goog-imageless-button-button-pos"));
 
     testRenamingTypeThatWrapsASplittingSubstitutionMap(RenamingType.CLOSURE);
+  }
+
+  public void testClosureWithInputRenamingMap() {
+    SubstitutionMapProvider provider = RenamingType.CLOSURE.getCssSubstitutionMapProvider();
+    RecordingSubstitutionMap map =
+        new RecordingSubstitutionMap.Builder()
+            .withSubstitutionMap(provider.get())
+            .shouldRecordMappingForCodeGeneration(Predicates.alwaysTrue())
+            .build();
+
+    ImmutableMap<String, String> inputRenamingMap =
+        ImmutableMap.of("dialog", "e", "content", "b", "settings", "m", "unused", "T");
+    map.initializeWithMappings(inputRenamingMap);
+
+    assertEquals("e", map.get("dialog"));
+    assertEquals("m", map.get("settings"));
+    assertEquals("e-a", map.get("dialog-button"));
+    assertEquals("a", map.get("button"));
+    assertEquals("c", map.get("title"));
+    assertEquals(
+        "Should accept same part multiple times even with a input renaming map.",
+        "d-f-a-a-g-e",
+        map.get("goog-imageless-button-button-pos-dialog"));
+
+    Map<String, String> expectedMappings =
+        ImmutableMap.<String, String>builder()
+            .putAll(inputRenamingMap)
+            .put("button", "a")
+            .put("goog", "d")
+            .put("imageless", "f")
+            .put("pos", "g")
+            .put("title", "c")
+            .build();
+    Map<String, String> observedMappings = map.getMappings();
+    // "content" wasn't observed, but it should still be in the output
+    assertThat(observedMappings).containsExactlyEntriesIn(expectedMappings);
   }
 
   private void testRenamingTypeThatWrapsASplittingSubstitutionMap(RenamingType

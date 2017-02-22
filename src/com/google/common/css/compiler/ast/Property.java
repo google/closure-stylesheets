@@ -751,6 +751,7 @@ public final class Property {
         builder("-webkit-wrap-shape-inside"),
         builder("-webkit-wrap-shape-outside"),
         builder("-webkit-wrap-through"),
+        builder("-webkit-writing-mode"),
         builder("white-space"),
         builder("windows"),
         builder("will-change"),
@@ -758,7 +759,7 @@ public final class Property {
         builder("word-break"),
         builder("word-spacing"),
         builder("word-wrap"),
-        builder("writing-mode").isSvgOnly(),
+        builder("writing-mode"),
         builder("z-index"),
         builder("zoom").setVendor(Vendor.MICROSOFT)
     );

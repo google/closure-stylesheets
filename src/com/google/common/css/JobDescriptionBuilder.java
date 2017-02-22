@@ -18,6 +18,7 @@ package com.google.common.css;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -26,7 +27,6 @@ import com.google.common.css.JobDescription.OptimizeStrategy;
 import com.google.common.css.JobDescription.OutputFormat;
 import com.google.common.css.JobDescription.OutputOrientation;
 import com.google.common.css.JobDescription.SourceMapDetailLevel;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +66,7 @@ public class JobDescriptionBuilder {
   GssFunctionMapProvider gssFunctionMapProvider;
   SubstitutionMapProvider cssSubstitutionMapProvider;
   OutputRenamingMapFormat outputRenamingMapFormat;
+  Map<String, String> inputRenamingMap;
   boolean preserveComments;
   boolean suppressDependencyCheck;
   Map<String, Integer> compileConstants;
@@ -104,6 +105,7 @@ public class JobDescriptionBuilder {
     this.gssFunctionMapProvider = null;
     this.cssSubstitutionMapProvider = null;
     this.outputRenamingMapFormat = OutputRenamingMapFormat.JSCOMP_VARIABLE_MAP;
+    this.inputRenamingMap = ImmutableMap.of();
     this.preserveComments = false;
     this.suppressDependencyCheck = false;
     this.compileConstants = new HashMap<>();
@@ -143,6 +145,7 @@ public class JobDescriptionBuilder {
     this.gssFunctionMapProvider = jobToCopy.gssFunctionMapProvider;
     this.cssSubstitutionMapProvider = jobToCopy.cssSubstitutionMapProvider;
     this.outputRenamingMapFormat = jobToCopy.outputRenamingMapFormat;
+    this.inputRenamingMap = jobToCopy.inputRenamingMap;
     this.preserveComments = jobToCopy.preserveComments;
     this.suppressDependencyCheck = jobToCopy.suppressDependencyCheck;
     setCompileConstants(jobToCopy.compileConstants);
@@ -388,9 +391,16 @@ public class JobDescriptionBuilder {
   }
 
   public JobDescriptionBuilder setOutputRenamingMapFormat(
-      OutputRenamingMapFormat format) {
+      OutputRenamingMapFormat outputFormat) {
     checkJobIsNotAlreadyCreated();
-    this.outputRenamingMapFormat = format;
+    this.outputRenamingMapFormat = outputFormat;
+    return this;
+  }
+
+  public JobDescriptionBuilder setInputRenamingMap(Map<String, String> inputRenamingMap) {
+    checkJobIsNotAlreadyCreated();
+    Preconditions.checkNotNull(inputRenamingMap);
+    this.inputRenamingMap = ImmutableMap.copyOf(inputRenamingMap);
     return this;
   }
 
@@ -483,7 +493,8 @@ public class JobDescriptionBuilder {
         allowKeyframes, allowWebkitKeyframes, processDependencies,
         allowedAtRules, cssRenamingPrefix, excludedClassesFromRenaming,
         gssFunctionMapProvider, cssSubstitutionMapProvider,
-        outputRenamingMapFormat, preserveComments, suppressDependencyCheck, compileConstants,
+        outputRenamingMapFormat, inputRenamingMap, preserveComments,
+        suppressDependencyCheck, compileConstants,
         createSourceMap, sourceMapLevel, preserveImportantComments);
     return job;
   }

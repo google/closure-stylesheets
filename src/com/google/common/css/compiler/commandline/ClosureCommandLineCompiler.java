@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.css.AbstractCommandLineCompiler;
 import com.google.common.css.DefaultExitCodeHandler;
@@ -36,22 +37,20 @@ import com.google.common.css.SourceCode;
 import com.google.common.css.Vendor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.io.Files;
-
-import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Nullable;
+import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
 
 /**
  * {@link ClosureCommandLineCompiler} is the command-line compiler for Closure
@@ -124,6 +123,16 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     private OutputRenamingMapFormat outputRenamingMapFormat =
         OutputRenamingMapFormat.JSON;
 
+    @Option(name = "--input-renaming-map", usage = "The input filename for"
+        + " the CSS class renaming. The file must provide a map of class names"
+        + " that will be used for renaming. If a class name is not found in"
+        + " file, a new name will be generated.")
+    private String inputRenamingMapFileName = null;
+
+    @Option(name = "--input-renaming-map-format", usage = "How the input"
+        + " renaiming map file is formatted. Default value is value used in"
+        + " --output-renaming-map-format.")
+    private OutputRenamingMapFormat inputRenamingMapFormat = null;
 
     @Option(name = "--output-source-map", usage = "The source map output."
         + " Provides a mapping from the generated output to their original"
@@ -252,6 +261,23 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       builder.setSourceMapLevel(sourceMapLevel);
       builder.setCreateSourceMap(!Strings.isNullOrEmpty(sourceMapFile));
 
+      if (inputRenamingMapFileName != null) {
+        if (inputRenamingMapFormat == null) {
+          inputRenamingMapFormat = outputRenamingMapFormat;
+        }
+
+        try {
+          File inputRenamingMapFile = new File(inputRenamingMapFileName);
+          Reader inputRenamingMapReader = Files.newReader(inputRenamingMapFile, UTF_8);
+          ImmutableMap<String, String> inputRenamingMap =
+              inputRenamingMapFormat.readRenamingMap(inputRenamingMapReader);
+          builder.setInputRenamingMap(inputRenamingMap);
+        } catch (IOException e) {
+          throw new RuntimeException(String.format(
+              "Input renaming map file %s can not be read", inputRenamingMapFileName), e);
+        }
+      }
+
       for (String fileName : arguments) {
         File file = new File(fileName);
         if (!file.exists()) {
@@ -261,7 +287,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
 
         String fileContents;
         try {
-          fileContents = Files.toString(file, UTF_8);
+          fileContents = Files.asCharSource(file, UTF_8).read();
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -338,8 +364,8 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
     }
   }
 
-  private static void executeJob(JobDescription job, ExitCodeHandler exitCodeHandler,
-      OutputInfo outputInfo) {
+  private static void executeJob(
+      JobDescription job, ExitCodeHandler exitCodeHandler, OutputInfo outputInfo) {
     CompilerErrorManager errorManager = new CompilerErrorManager();
 
     ClosureCommandLineCompiler compiler =
