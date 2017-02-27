@@ -711,6 +711,7 @@ PARSER_END(GssParserCC)
   // Special handling needed because ':not' takes simple selectors as
   // an argument.
   | < NOTFUNCTION: "not" <LEFTROUND> >
+  | < SLOTTEDFUNCTION: ":slotted" <LEFTROUND> >
   | < LANGFUNCTION: "lang" <LEFTROUND> >
 
   // "calc("
@@ -913,11 +914,22 @@ CssRefinerNode pseudo() :
   String pseudo = null;
   String argument = null;
   List<Token> tokens = Lists.newArrayList();
-  CssSelectorNode notSelector = null;
+  CssSelectorNode innerSelector = null;
 }
 {
   t = <COLON>  { beginLocation = this.getLocation(); tokens.add(t); }
   ( ( t = <IDENTIFIER> { pseudo = t.image; tokens.add(t); } )
+    |
+    ( // ::slotted( simple_selector )
+      t = <SLOTTEDFUNCTION> ( <S> )* { beginLocation = this.getLocation();
+          pseudo = t.image; tokens.add(t); }
+      innerSelector = simpleSelector()
+      ( <S> )*
+      t = <RIGHTROUND> { tokens.add(t);
+          endLocation = this.getLocation();
+          return nodeBuilder.buildPseudoClassNode(pseudo, innerSelector,
+              this.mergeLocations(beginLocation, endLocation), tokens); }
+    )
     |
     ( // ::identifier (pseudo-element)
       t = <COLON>  { tokens.add(t); }
@@ -930,11 +942,11 @@ CssRefinerNode pseudo() :
     ( // :not( simple_selector )
       t = <NOTFUNCTION> ( <S> )* { beginLocation = this.getLocation();
           pseudo = t.image; tokens.add(t); }
-      notSelector = simpleSelector()
+      innerSelector = simpleSelector()
       ( <S> )*
       t = <RIGHTROUND> { tokens.add(t);
           endLocation = this.getLocation();
-          return nodeBuilder.buildPseudoClassNode(pseudo, notSelector,
+          return nodeBuilder.buildPseudoClassNode(pseudo, innerSelector,
               this.mergeLocations(beginLocation, endLocation), tokens); }
     )
     |
