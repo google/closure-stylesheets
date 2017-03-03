@@ -37,14 +37,11 @@ import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -87,149 +84,135 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
   }
 
   /**
-   * Map with exact strings to match and their corresponding flipped value.
-   * For example, in "float: left" we need an exact match to flip "left" because
-   * we don't want to touch things like "background: left.png".
+   * Map with exact strings to match and their corresponding flipped value. For example, in "float:
+   * left" we need an exact match to flip "left" because we don't want to touch things like
+   * "background: left.png".
    */
-  private static final Map<String, String> EXACT_MATCHING_FOR_FLIPPING =
-    new ImmutableMap.Builder<String, String>()
-    .put("ltr", "rtl")
-    .put("rtl", "ltr")
-    .put("left", "right")
-    .put("right", "left")
-    .put("e-resize", "w-resize")
-    .put("w-resize", "e-resize")
-    .put("ne-resize", "nw-resize")
-    .put("nw-resize", "ne-resize")
-    .put("nesw-resize", "nwse-resize")
-    .put("nwse-resize", "nesw-resize")
-    .put("se-resize", "sw-resize")
-    .put("sw-resize", "se-resize")
-    .build();
+  private static final ImmutableMap<String, String> EXACT_MATCHING_FOR_FLIPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("ltr", "rtl")
+          .put("rtl", "ltr")
+          .put("left", "right")
+          .put("right", "left")
+          .put("e-resize", "w-resize")
+          .put("w-resize", "e-resize")
+          .put("ne-resize", "nw-resize")
+          .put("nw-resize", "ne-resize")
+          .put("nesw-resize", "nwse-resize")
+          .put("nwse-resize", "nesw-resize")
+          .put("se-resize", "sw-resize")
+          .put("sw-resize", "se-resize")
+          .build();
 
   /**
-   * Map with the "ends-with" substrings that can be flipped and their
-   * corresponding flipped value.
+   * Map with the "ends-with" substrings that can be flipped and their corresponding flipped value.
    * For example, for
-   * <p>
-   *   padding-right: 2px
-   * <p>
-   * we need to match that the property name ends with "-right".
+   *
+   * <p>padding-right: 2px
+   *
+   * <p>we need to match that the property name ends with "-right".
    */
-  private static final Map<String, String> ENDS_WITH_MATCHING_FOR_FLIPPING =
-    new ImmutableMap.Builder<String, String>()
-    .put("-left", "-right")
-    .put("-right", "-left")
-    .put("-bottomleft", "-bottomright")
-    .put("-topleft", "-topright")
-    .put("-bottomright", "-bottomleft")
-    .put("-topright", "-topleft")
-    .build();
+  private static final ImmutableMap<String, String> ENDS_WITH_MATCHING_FOR_FLIPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("-left", "-right")
+          .put("-right", "-left")
+          .put("-bottomleft", "-bottomright")
+          .put("-topleft", "-topright")
+          .put("-bottomright", "-bottomleft")
+          .put("-topright", "-topleft")
+          .build();
 
   /**
-   * Map with the "contains" substrings that can be flipped and their
-   * corresponding flipped value.
+   * Map with the "contains" substrings that can be flipped and their corresponding flipped value.
    * For example, for
-   * <p>
-   *   border-right-width: 2px
-   * <p>
-   * we need to match that the property name contains "-right-".
+   *
+   * <p>border-right-width: 2px
+   *
+   * <p>we need to match that the property name contains "-right-".
    */
-  private static final Map<String, String> CONTAINS_MATCHING_FOR_FLIPPING =
-    new ImmutableMap.Builder<String, String>()
-    .put("-left-", "-right-")
-    .put("-right-", "-left-")
-    .build();
+  private static final ImmutableMap<String, String> CONTAINS_MATCHING_FOR_FLIPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("-left-", "-right-")
+          .put("-right-", "-left-")
+          .build();
 
-  /**
-   * Set of properties that have flippable percentage values.
-   */
-  private static final Set<String> PROPERTIES_WITH_FLIPPABLE_PERCENTAGE =
-    ImmutableSet.of("background",
-                    "background-position",
-                    "background-position-x",
-                    "-ms-background-position-x");
+  /** Set of properties that have flippable percentage values. */
+  private static final ImmutableSet<String> PROPERTIES_WITH_FLIPPABLE_PERCENTAGE =
+      ImmutableSet.of(
+          "background",
+          "background-position",
+          "background-position-x",
+          "-ms-background-position-x");
 
   /*
    * Set of properties that are equivalent to border-radius.
    * TODO(roozbeh): Replace the explicit listing of prefixes with a general
    * pattern of "-[a-z]+-" to avoid maintaining a prefix list.
    */
-  private static final Set<String> BORDER_RADIUS_PROPERTIES =
-    ImmutableSet.of("border-radius",
-                    "-webkit-border-radius",
-                    "-moz-border-radius");
+  private static final ImmutableSet<String> BORDER_RADIUS_PROPERTIES =
+      ImmutableSet.of(
+          "border-radius",
+          "-webkit-border-radius",
+          "-moz-border-radius");
+
+  /** Set of properties whose property values may flip if they match the four-part pattern. */
+  private static final ImmutableSet<String> FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP =
+      ImmutableSet.of("border-color", "border-style", "border-width", "margin", "padding");
 
   /**
-   * Set of properties whose property values may flip if they match the
-   * four-part pattern.
+   * Map with the patterns to match URLs against if swap_ltr_rtl_in_url flag is true, and their
+   * replacement string. Only the first occurrence of the pattern is flipped. This would match "ltr"
+   * and "rtl" if they occur as a word inside the path specified by the url. For example, for
+   *
+   * <p>background: url(/foo/rtl/bkg.gif)
+   *
+   * <p>the flipped value would be
+   *
+   * <p>background: url(/foo/ltr/bkg.gif)
+   *
+   * <p>whereas for
+   *
+   * <p>background: url(/foo/bkg-ltr.gif)
+   *
+   * <p>the flipped value would be
+   *
+   * <p>background: url(/foo/bkg-rtl.gif)
+   *
+   * <p>
    */
-  private static final Set<String> FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP =
-    ImmutableSet.of("border-color",
-                    "border-style",
-                    "border-width",
-                    "margin",
-                    "padding");
+  private static final ImmutableMap<Pattern, String> URL_LTRTL_PATTERN_FOR_FLIPPING =
+      new ImmutableMap.Builder<Pattern, String>()
+          .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)ltr([-_\\./]+)"), "$1rtl$2")
+          .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)rtl([-_\\./]+)"), "$1ltr$2")
+          .build();
 
   /**
-   * Map with the patterns to match URLs against if swap_ltr_rtl_in_url flag is
-   * true, and their replacement string. Only the first occurrence of the
-   * pattern is flipped. This would match "ltr" and "rtl" if they occur as a
-   * word inside the path specified by the url.
-   * For example, for
-   * <p>
-   *   background: url(/foo/rtl/bkg.gif)
-   * <p>
-   * the flipped value would be
-   * <p>
-   *   background: url(/foo/ltr/bkg.gif)
-   * <p>
-   * whereas for
-   * <p>
-   *   background: url(/foo/bkg-ltr.gif)
-   * <p>
-   * the flipped value would be
-   * <p>
-   *   background: url(/foo/bkg-rtl.gif)
-   * <p>
-   */
-  private static final Map<Pattern, String> URL_LTRTL_PATTERN_FOR_FLIPPING =
-    new ImmutableMap.Builder<Pattern, String>()
-    .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)ltr([-_\\./]+)"),
-        "$1rtl$2")
-    .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)rtl([-_\\./]+)"),
-        "$1ltr$2")
-    .build();
-
-  /**
-   * Map with the patterns to match URLs against if swap_left_right_in_url flag
-   * is true, and their replacement string. Only the first occurrence of the
-   * pattern is flipped. This would match "left" and "right" if they occur as a
-   * word inside the path specified by the url.
-   * For example, for
-   * <p>
-   *   background: url(/foo/right/bkg.gif)
-   * <p>
-   * the flipped value would be
-   * <p>
-   *   background: url(/foo/left/bkg.gif)
-   * <p>
-   * whereas for
-   * <p>
-   *   background: url(/foo/bkg-left.gif)
-   * <p>
-   * the flipped value would be
-   * <p>
-   *   background: url(/foo/bkg-right.gif)
+   * Map with the patterns to match URLs against if swap_left_right_in_url flag is true, and their
+   * replacement string. Only the first occurrence of the pattern is flipped. This would match
+   * "left" and "right" if they occur as a word inside the path specified by the url. For example,
+   * for
+   *
+   * <p>background: url(/foo/right/bkg.gif)
+   *
+   * <p>the flipped value would be
+   *
+   * <p>background: url(/foo/left/bkg.gif)
+   *
+   * <p>whereas for
+   *
+   * <p>background: url(/foo/bkg-left.gif)
+   *
+   * <p>the flipped value would be
+   *
+   * <p>background: url(/foo/bkg-right.gif)
+   *
    * <p>
    */
-  private static final Map<Pattern, String> URL_LEFTRIGHT_PATTERN_FOR_FLIPPING =
-    new ImmutableMap.Builder<Pattern, String>()
-    .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)left([-_\\./]+)"),
-        "$1right$2")
-    .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)right([-_\\./]+)"),
-        "$1left$2")
-    .build();
+  private static final ImmutableMap<Pattern, String> URL_LEFTRIGHT_PATTERN_FOR_FLIPPING =
+      new ImmutableMap.Builder<Pattern, String>()
+          .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)left([-_\\./]+)"), "$1right$2")
+          .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)right([-_\\./]+)"), "$1left$2")
+          .build();
 
   /**
    * Return if the string is "left" or "center" or "right".
