@@ -25,11 +25,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.css.Vendor;
-
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
 import javax.annotation.Nullable;
 
 /**
@@ -999,52 +996,50 @@ public final class Property {
       return this;
     }
 
-    /**
-     * The set of all standard shorthand properties.
-     */
-    private static final Set<String> SHORTHAND_PROPERTIES = ImmutableSet.of(
-        "background",
-        "border",
-        "border-bottom",
-        "border-color",
-        "border-left",
-        "border-right",
-        "border-style",
-        "border-top",
-        "border-width",
-        "font",
-        "list-style",
-        "margin",
-        "outline",
-        "padding",
-        "pause");
+    /** The set of all standard shorthand properties. */
+    private static final ImmutableSet<String> SHORTHAND_PROPERTIES =
+        ImmutableSet.of(
+            "background",
+            "border",
+            "border-bottom",
+            "border-color",
+            "border-left",
+            "border-right",
+            "border-style",
+            "border-top",
+            "border-width",
+            "font",
+            "list-style",
+            "margin",
+            "outline",
+            "padding",
+            "pause");
 
     /**
-     * The set of standard properties that seem to have shorthands as defined by
-     * {@link #computeShorthandPropertiesFor}, but don't.
+     * The set of standard properties that seem to have shorthands as defined by {@link
+     * #computeShorthandPropertiesFor}, but don't.
      */
-    private static final Set<String> NO_SHORTHAND = ImmutableSet.of(
-        "border-collapse",
-        "border-spacing");
+    private static final ImmutableSet<String> NO_SHORTHAND =
+        ImmutableSet.of("border-collapse", "border-spacing");
 
-    private static final Map<String, String> BORDER_RADIUS_PROPERTIES =
+    private static final ImmutableMap<String, String> BORDER_RADIUS_PROPERTIES =
         ImmutableMap.<String, String>builder()
-        .put("border-radius", "border-radius")
-        .put("border-top-left-radius", "border-radius")
-        .put("border-top-right-radius", "border-radius")
-        .put("border-bottom-right-radius", "border-radius")
-        .put("border-bottom-left-radius", "border-radius")
-        .put("-webkit-border-radius", "-webkit-border-radius")
-        .put("-webkit-border-top-left-radius", "-webkit-border-radius")
-        .put("-webkit-border-top-right-radius", "-webkit-border-radius")
-        .put("-webkit-border-bottom-right-radius", "-webkit-border-radius")
-        .put("-webkit-border-bottom-left-radius", "-webkit-border-radius")
-        .put("-moz-border-radius", "-moz-border-radius")
-        .put("-moz-border-radius-topleft", "-moz-border-radius")
-        .put("-moz-border-radius-topright", "-moz-border-radius")
-        .put("-moz-border-radius-bottomright", "-moz-border-radius")
-        .put("-moz-border-radius-bottomleft", "-moz-border-radius")
-        .build();
+            .put("border-radius", "border-radius")
+            .put("border-top-left-radius", "border-radius")
+            .put("border-top-right-radius", "border-radius")
+            .put("border-bottom-right-radius", "border-radius")
+            .put("border-bottom-left-radius", "border-radius")
+            .put("-webkit-border-radius", "-webkit-border-radius")
+            .put("-webkit-border-top-left-radius", "-webkit-border-radius")
+            .put("-webkit-border-top-right-radius", "-webkit-border-radius")
+            .put("-webkit-border-bottom-right-radius", "-webkit-border-radius")
+            .put("-webkit-border-bottom-left-radius", "-webkit-border-radius")
+            .put("-moz-border-radius", "-moz-border-radius")
+            .put("-moz-border-radius-topleft", "-moz-border-radius")
+            .put("-moz-border-radius-topright", "-moz-border-radius")
+            .put("-moz-border-radius-bottomright", "-moz-border-radius")
+            .put("-moz-border-radius-bottomleft", "-moz-border-radius")
+            .build();
 
     /**
      * Computes the set of shorthand properties for a given standard property.
