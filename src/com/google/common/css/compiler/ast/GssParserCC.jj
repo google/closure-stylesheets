@@ -711,6 +711,7 @@ PARSER_END(GssParserCC)
   // Special handling needed because ':not' takes simple selectors as
   // an argument.
   | < NOTFUNCTION: "not" <LEFTROUND> >
+  | < HOSTFUNCTION: "host" ("-context")? <LEFTROUND> >
   | < SLOTTEDFUNCTION: ":slotted" <LEFTROUND> >
   | < LANGFUNCTION: "lang" <LEFTROUND> >
 
@@ -903,8 +904,15 @@ CssRefinerNode id() :
 }
 
 // pseudo
-//   : ':' [ IDENT | [ ':' IDENT ] | [ 'not(' S* simple_selector S* ')' ]
-//         | [ 'lang(' S* IDENT S* ')' ] | [ FUNCTION S* nth S* ')' ] ]?
+//   : ':' [ IDENT
+//         | [ ':' IDENT ]
+//         | [ 'not(' S* simple_selector S* ')' ]
+//         | [ 'lang(' S* IDENT S* ')' ]
+//         | [ FUNCTION S* nth S* ')' ]
+//         | [ ':slotted(' S* simple_selector S* ')' ]
+//         | [ ':host(' S* selector S* ')' ]
+//         | [ ':host-context(' S* selector S* ')' ]
+//         ]?
 //   ;
 CssRefinerNode pseudo() :
 {
@@ -943,6 +951,17 @@ CssRefinerNode pseudo() :
       t = <NOTFUNCTION> ( <S> )* { beginLocation = this.getLocation();
           pseudo = t.image; tokens.add(t); }
       innerSelector = simpleSelector()
+      ( <S> )*
+      t = <RIGHTROUND> { tokens.add(t);
+          endLocation = this.getLocation();
+          return nodeBuilder.buildPseudoClassNode(pseudo, innerSelector,
+              this.mergeLocations(beginLocation, endLocation), tokens); }
+    )
+    |
+    ( // :host( complex > selector ) or :host-context( complex > selector )
+      t = <HOSTFUNCTION> ( <S> )* { beginLocation = this.getLocation();
+          pseudo = t.image; tokens.add(t); }
+      innerSelector = selector()
       ( <S> )*
       t = <RIGHTROUND> { tokens.add(t);
           endLocation = this.getLocation();
