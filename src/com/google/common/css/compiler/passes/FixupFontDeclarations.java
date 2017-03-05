@@ -50,13 +50,11 @@ import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -116,20 +114,18 @@ public class FixupFontDeclarations extends DefaultTreeVisitor
   private static final String FONT_FAMILY = "font-family";
   private static final String NORMAL = "normal";
   private static final String INHERIT = "inherit";
-  private static final Set<String> SYSTEM_FONTS = ImmutableSet.of(
-      "caption", "icon", "menu", "message-box", "small-caption", "status-bar");
-  private static final Set<String> FONT_ABSOLUTE_SIZES = ImmutableSet.of(
-      "xx-small", "x-small", "small", "medium", "large", "x-large", "xx-large");
-  private static final Set<String> FONT_RELATIVE_SIZES = ImmutableSet.of(
-      "larger", "smaller");
-  private static final Set<String> DEFINITELY_STYLE = ImmutableSet.of(
-      "italic", "oblique");
-  private static final Set<String> DEFINITELY_VARIANT = ImmutableSet.of(
-      "small-caps");
-  private static final Set<String> DEFINITELY_WEIGHT = ImmutableSet.of(
-      "bold", "bolder", "lighter");
-  private static final Set<String> NUMERIC_WEIGHTS = ImmutableSet.of(
-      "100", "200", "300", "400", "500", "600", "700", "800", "900");
+  private static final ImmutableSet<String> SYSTEM_FONTS =
+      ImmutableSet.of("caption", "icon", "menu", "message-box", "small-caption", "status-bar");
+  private static final ImmutableSet<String> FONT_ABSOLUTE_SIZES =
+      ImmutableSet.of("xx-small", "x-small", "small", "medium", "large", "x-large", "xx-large");
+  private static final ImmutableSet<String> FONT_RELATIVE_SIZES =
+      ImmutableSet.of("larger", "smaller");
+  private static final ImmutableSet<String> DEFINITELY_STYLE = ImmutableSet.of("italic", "oblique");
+  private static final ImmutableSet<String> DEFINITELY_VARIANT = ImmutableSet.of("small-caps");
+  private static final ImmutableSet<String> DEFINITELY_WEIGHT =
+      ImmutableSet.of("bold", "bolder", "lighter");
+  private static final ImmutableSet<String> NUMERIC_WEIGHTS =
+      ImmutableSet.of("100", "200", "300", "400", "500", "600", "700", "800", "900");
 
   /**
    * No point looking through lots of nodes for clues that are only allowed
@@ -173,19 +169,15 @@ public class FixupFontDeclarations extends DefaultTreeVisitor
       + "simple inherit";
 
   @VisibleForTesting
-  static final Map<FontProperty, String> TOO_MANY =
+  static final ImmutableMap<FontProperty, String> TOO_MANY =
       ImmutableMap.<FontProperty, String>builder()
-      .put(FontProperty.LINE_HEIGHT,
-           "The '/' can occur at most once in a font shorthand value")
-      .put(FontProperty.SIZE,
-           "Font size can occur at most once in a font shorthand value")
-      .put(FontProperty.STYLE,
-           "Font style can occur at most once in a font shorthand value")
-      .put(FontProperty.VARIANT,
-           "Font variant can occur at most once in a font shorthand value")
-      .put(FontProperty.WEIGHT,
-           "Font weight can occur at most once in a font shorthand value")
-      .build();
+          .put(FontProperty.LINE_HEIGHT, "The '/' can occur at most once in a font shorthand value")
+          .put(FontProperty.SIZE, "Font size can occur at most once in a font shorthand value")
+          .put(FontProperty.STYLE, "Font style can occur at most once in a font shorthand value")
+          .put(
+              FontProperty.VARIANT, "Font variant can occur at most once in a font shorthand value")
+          .put(FontProperty.WEIGHT, "Font weight can occur at most once in a font shorthand value")
+          .build();
 
   private static final ImmutableSortedSet<FontProperty> SLOTTABLE_PROPERTIES =
       ImmutableSortedSet.of(
