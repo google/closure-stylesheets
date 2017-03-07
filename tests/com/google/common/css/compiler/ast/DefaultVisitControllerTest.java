@@ -16,13 +16,16 @@
 
 package com.google.common.css.compiler.ast;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.CssAttributeSelectorNode.MatchType;
+import com.google.common.css.compiler.ast.CssCompositeValueNode.Operator;
 import com.google.common.css.compiler.ast.DefaultVisitController.RootVisitAfterChildrenState;
 import com.google.common.css.compiler.ast.DefaultVisitController.RootVisitBeforeChildrenState;
 import com.google.common.css.compiler.ast.DefaultVisitController.RootVisitBodyState;
@@ -739,6 +742,40 @@ public class DefaultVisitControllerTest extends TestCase {
     inOrder.verify(testVisitor).enterForLoop(loop);
     // Then we enter the definition within the for loop.
     inOrder.verify(testVisitor).enterDefinition(def);
+  }
+
+  public void testCssCompositeValueNodeBecomesParentForNewChildren() {
+    CssLiteralNode foo = new CssLiteralNode("foo");
+    CssLiteralNode bar = new CssLiteralNode("bar");
+    CssCompositeValueNode composite =
+        new CssCompositeValueNode(ImmutableList.<CssValueNode>of(foo, bar), Operator.COMMA, null);
+
+    final MutatingVisitController controller = new DefaultVisitController(composite, true);
+    controller.startVisit(
+        new DefaultTreeVisitor() {
+          @Override
+          public boolean enterValueNode(CssValueNode value) {
+            if (value.getValue().equals("bar")) {
+              CssLiteralNode baz = new CssLiteralNode("baz");
+              CssLiteralNode quux = new CssLiteralNode("quux");
+              CssCompositeValueNode newNode =
+                  new CssCompositeValueNode(ImmutableList.<CssValueNode>of(baz, quux), Operator.COMMA, null);
+              controller.replaceCurrentBlockChildWith(ImmutableList.of(newNode), false);
+            }
+            return true;
+          }
+        });
+
+    assertThat(composite.toString()).isEqualTo("foo,baz,quux");
+
+    CssValueNode fooValue = composite.getValues().get(0);
+    assertThat(fooValue.getParent()).isSameAs(composite);
+
+    CssValueNode bazValue = composite.getValues().get(1);
+    assertThat(bazValue.getParent()).isSameAs(composite);
+
+    CssValueNode quuxValue = composite.getValues().get(1);
+    assertThat(quuxValue.getParent()).isSameAs(composite);
   }
 
   private static class ValueDetector extends DefaultTreeVisitor {

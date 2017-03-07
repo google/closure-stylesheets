@@ -1529,6 +1529,7 @@ class DefaultVisitController implements MutatingVisitController {
       }
 
       children.addAll(currentIndex, replacementNodes);
+      node.becomeParentForNodes(replacementNodes);
       if (!visitTheReplacementNodes) {
         currentIndex += replacementNodes.size() - 1;
       } else {
