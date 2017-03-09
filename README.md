@@ -232,7 +232,7 @@ The above is compiled to:
 }
 ```
 
-See the section on [linting](#Linting.md) for more details on the
+See the section on [linting](#linting) for more details on the
 **`@alternate`** annotation.
 
 ### Conditionals
