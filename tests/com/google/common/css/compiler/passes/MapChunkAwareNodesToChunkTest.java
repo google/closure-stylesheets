@@ -27,11 +27,9 @@ import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssValueNode;
-
-import junit.framework.TestCase;
-
 import java.util.List;
 import java.util.Map;
+import junit.framework.TestCase;
 
 /**
  * Unit tests for {@link MapChunkAwareNodesToChunk}.
@@ -55,8 +53,8 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
   protected static final String CB = "B";
   protected static final String CC = "C";
 
-  protected static final Map<String, String> FILE_TO_CHUNK =
-      ImmutableMap.<String ,String>builder()
+  protected static final ImmutableMap<String, String> FILE_TO_CHUNK =
+      ImmutableMap.<String, String>builder()
           .put(F1, CA)
           .put(F2, CA)
           .put(F3, CB)

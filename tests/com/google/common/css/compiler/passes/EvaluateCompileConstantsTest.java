@@ -21,14 +21,13 @@ import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssForLoopRuleNode;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
 
-import java.util.Map;
 
 /**
  * Unit tests for {@link EvaluateCompileConstants}.
  */
 public class EvaluateCompileConstantsTest extends PassesTestBase {
 
-  private static final Map<String, Integer> CONSTANTS =
+  private static final ImmutableMap<String, Integer> CONSTANTS =
       ImmutableMap.of("FOO", 2, "BAR", 7, "BAZ", 3);
 
   @Override
