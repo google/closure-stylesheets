@@ -46,7 +46,6 @@ import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A compiler pass that transforms standard {@link CssUnknownAtRuleNode} instances to more specific
@@ -91,7 +90,7 @@ public class CreateStandardAtRuleNodes implements UniformVisitor, CssCompilerPas
   static final String IGNORE_IMPORT_WARNING_MESSAGE =
       "A node after which all @import rule nodes are ignored is here.";
 
-  private static final List<Type> PAGE_SELECTORS =
+  private static final ImmutableList<Type> PAGE_SELECTORS =
       ImmutableList.of(
           Type.TOP_LEFT_CORNER,
           Type.TOP_LEFT,
@@ -109,14 +108,14 @@ public class CreateStandardAtRuleNodes implements UniformVisitor, CssCompilerPas
           Type.BOTTOM_CENTER,
           Type.BOTTOM_RIGHT,
           Type.BOTTOM_RIGHT_CORNER);
-  private static final Set<String> PSEUDO_PAGES = ImmutableSet.of(
-      ":left", ":right", ":first");
+  private static final ImmutableSet<String> PSEUDO_PAGES =
+      ImmutableSet.of(":left", ":right", ":first");
   // The @-rules are restricted because it only makes sense for them to be used
   // inside an @media block. Especially @def should never be allowed because it
   // can be misleading; @def rules are processed by the compiler but @media
   // rules are handled by the browser.
-  private static final Set<String> ALLOWED_AT_RULES_IN_MEDIA = ImmutableSet.of(
-      "page", "if", "elseif", "else", "for");
+  private static final ImmutableSet<String> ALLOWED_AT_RULES_IN_MEDIA =
+      ImmutableSet.of("page", "if", "elseif", "else", "for");
 
   private final MutatingVisitController visitController;
   private final ErrorManager errorManager;
