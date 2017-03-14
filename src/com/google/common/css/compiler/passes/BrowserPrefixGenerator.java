@@ -168,6 +168,15 @@ final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("text-size-adjust")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-text-size-adjust")
+        .addExpandPropertyName("-moz-text-size-adjust")
+        .addExpandPropertyName("-ms-text-size-adjust")
+        .addExpandPropertyName("text-size-adjust")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("animation")
         .isFunction(false)
         .addExpandPropertyName("-webkit-animation")
