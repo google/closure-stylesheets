@@ -47,7 +47,7 @@ public class TestParser {
   private List<SourceCode> sources = new ArrayList<>();
   private TestErrorManager errorManager = new TestErrorManager(new String[0]);
   private GssSourceMapGenerator generator =
-      new DefaultGssSourceMapGenerator(SourceMapDetailLevel.ALL);
+      new DefaultGssSourceMapGenerator(SourceMapDetailLevel.ALL, true);
   private String output = null;
   private SourceMapping sourceMap = null;
   private String sourceMapString = null;
