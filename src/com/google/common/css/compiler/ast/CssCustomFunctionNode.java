@@ -267,14 +267,12 @@ public class CssCustomFunctionNode extends CssFunctionNode
             // includes CssLiteralNode(" ") to explicitly represent
             // function argument delimiters. We need to avoid adding
             // extra space here, just as printing passes do.
-          } else if (!(lastArg instanceof CssLiteralNode)) {
+          } else {
             arguments.remove(lastArg);
             lastArg =
                 new CssLiteralNode(
                     lastArg.toString() + " " + value.toString(), value.getSourceCodeLocation());
             arguments.add(lastArg);
-          } else {
-            lastArg.setValue(lastArg.getValue() + " " + value.toString());
           }
         }
       }
