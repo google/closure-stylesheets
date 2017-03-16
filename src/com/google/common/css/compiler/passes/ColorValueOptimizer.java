@@ -47,7 +47,6 @@ public class ColorValueOptimizer extends DefaultTreeVisitor
       ColorValueOptimizer.class.getName());
 
   private static final Function RGB = Function.byName("rgb");
-  private static final Function RGBA = Function.byName("rgba");
   
   private MutatingVisitController visitController;
 
@@ -57,7 +56,7 @@ public class ColorValueOptimizer extends DefaultTreeVisitor
 
   @Override
   public boolean enterFunctionNode(CssFunctionNode function) {
-    if (function.getFunction() == RGB || function.getFunction() == RGBA) {
+    if (function.getFunction() == RGB) {
       try {
         String hexValue = parseRgbArguments(function);
         if (canShortenHexString(hexValue)) {
