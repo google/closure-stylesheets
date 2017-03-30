@@ -122,8 +122,8 @@ public class RenamingTypeTest extends TestCase {
       renamingType) {
     SubstitutionMapProvider provider = renamingType
         .getCssSubstitutionMapProvider();
-    RecordingSubstitutionMap map = new RecordingSubstitutionMap(provider.get(),
-        Predicates.alwaysTrue());
+    RecordingSubstitutionMap map =
+        new RecordingSubstitutionMap.Builder().withSubstitutionMap(provider.get()).build();
 
     map.get("dialog-content");
     map.get("dialog-title");

@@ -16,7 +16,6 @@
 
 package com.google.common.css.compiler.passes;
 
-import static com.google.common.base.Predicates.alwaysTrue;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.base.Predicate;
@@ -33,7 +32,6 @@ import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.testing.UtilityTestCase;
-
 import java.util.Map;
 
 /**
@@ -89,8 +87,11 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
         }
       }
     };
-    RecordingSubstitutionMap recordingMap = new RecordingSubstitutionMap(
-        substitutionMap, predicate);
+    RecordingSubstitutionMap recordingMap =
+        new RecordingSubstitutionMap.Builder()
+            .withSubstitutionMap(substitutionMap)
+            .shouldRecordMappingForCodeGeneration(predicate)
+            .build();
     assertEquals("a", recordingMap.get("CSS_FOO"));
     assertEquals("b", recordingMap.get("CSS_BAR"));
     assertEquals("CSS_BAZ", recordingMap.get("CSS_BAZ"));
@@ -117,8 +118,10 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
         ".eight { color: red; }",
         ".nine { color: red; }"
         );
-    RecordingSubstitutionMap map = new RecordingSubstitutionMap(
-        new SimpleSubstitutionMap(), alwaysTrue());
+    RecordingSubstitutionMap map =
+        new RecordingSubstitutionMap.Builder()
+            .withSubstitutionMap(new SimpleSubstitutionMap())
+            .build();
     parse(styleSheet, map);
 
     mappings = map.getMappings();
@@ -146,16 +149,22 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
   }
 
   public void testMapWithTypeIdentity() {
-    RecordingSubstitutionMap map = new RecordingSubstitutionMap(
-        new SimpleSubstitutionMap(), predicate);
+    RecordingSubstitutionMap map =
+        new RecordingSubstitutionMap.Builder()
+            .withSubstitutionMap(new SimpleSubstitutionMap())
+            .shouldRecordMappingForCodeGeneration(predicate)
+            .build();
     setupWithMap(map);
     assertEquals(1, mappings.size());
     assertEquals("CSS_SPRITE_", mappings.get("CSS_SPRITE"));
   }
 
   public void testMapWithTypeMinimal() {
-    RecordingSubstitutionMap map = new RecordingSubstitutionMap(
-        new MinimalSubstitutionMap(), predicate);
+    RecordingSubstitutionMap map =
+        new RecordingSubstitutionMap.Builder()
+            .withSubstitutionMap(new MinimalSubstitutionMap())
+            .shouldRecordMappingForCodeGeneration(predicate)
+            .build();
     setupWithMap(map);
     assertEquals(1, mappings.size());
     assertEquals(1, mappings.get("CSS_SPRITE").length());
