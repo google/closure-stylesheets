@@ -362,6 +362,11 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  public void testCalc() {
+    assertNewCompactPrintedResult(
+        ".test{width:calc((100% - 24px)*0.375)}", ".test { width:calc((100% - 24px)*0.375);}");
+  }
+
   public void testRemovesComments() throws Exception {
     assertNewCompactPrintedResult(
         ".foo{}.bar{color:red}",

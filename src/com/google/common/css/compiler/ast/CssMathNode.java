@@ -16,35 +16,44 @@
 
 package com.google.common.css.compiler.ast;
 
-import com.google.common.css.SourceCodeLocation;
-
-import javax.annotation.Nullable;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 /**
- * A CSS node that holds a mathematical expression. The expression is stored in the value of this
- * node as a whitespace-normalized string. In particular, this means:
- * <ul>
- * <li>No {@code @def} substitution.
- * <li>No unit validation. For example, {@code calc(10s + 5px)}, {@code calc(5foo * 1bar)},
- *     etc. compile without error.
- * <li>No constant folding. For example, {@code calc(5px + 5px)} and {@code calc(5px/0)} are
- *     output verbatim.
- * </ul>
+ * A CSS node that holds a mathematical expression.
  *
  * <p>See http://www.w3.org/TR/css3-values/#calc
- *
  */
-public class CssMathNode extends CssValueNode {
+public final class CssMathNode extends CssCompositeValueNode {
 
-  public CssMathNode(String contents) {
-    super(contents, null);
+  private CssMathNode(
+      CssValueNode operand1,
+      CssCompositeValueNode.Operator operator,
+      CssValueNode operand2,
+      boolean hasParenthesis) {
+    super(ImmutableList.of(operand1, operand2), operator, hasParenthesis, null);
   }
 
-  public CssMathNode(String contents, @Nullable SourceCodeLocation sourceCodeLocation) {
-    super(contents, sourceCodeLocation);
-  }
-
-  public CssMathNode deepCopy() {
-    return new CssMathNode(this.getValue());
+  public static CssValueNode createFromOperandsAndOperators(
+      List<CssValueNode> operands,
+      List<CssCompositeValueNode.Operator> operators,
+      boolean hasParenthesis) {
+    Preconditions.checkArgument(
+        operands.size() == operators.size() + 1,
+        "There should be one more operands than operators");
+    if (operators.size() == 0) {
+      return operands.get(0);
+    }
+    if (operators.size() == 1) {
+      return new CssMathNode(operands.get(0), operators.get(0), operands.get(1), hasParenthesis);
+    } else {
+      return new CssMathNode(
+          operands.get(0),
+          operators.get(0),
+          createFromOperandsAndOperators(
+              operands.subList(1, operands.size()), operators.subList(1, operators.size()), false),
+          hasParenthesis);
+    }
   }
 }
