@@ -546,17 +546,7 @@ public class PrettyPrintingVisitor extends DefaultTreeVisitor {
   @Override
   public boolean enterCompositeValueNode(CssCompositeValueNode value) {
     maybeAppendComments(value);
-    if (value.hasParenthesis()) {
-      buffer.append('(');
-    }
     return true;
-  }
-
-  @Override
-  public void leaveCompositeValueNode(CssCompositeValueNode value) {
-    if (value.hasParenthesis()) {
-      buffer.append(')');
-    }
   }
 
   @Override

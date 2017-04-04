@@ -58,31 +58,33 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
   }
 
   public void testMatchValueOnlyFunction() {
-    testTreeConstruction(
-        "p { margin: calc(100% - 24px) auto; }",
-        ""
-            + "[[p]{[[/* @alternate */]margin:[-webkit-calc([[100%] - [24px]]) [auto]];"
-            + "[/* @alternate */]margin:[-moz-calc([[100%] - [24px]]) [auto]];"
-            + "[/* @alternate */]margin:[calc([[100%] - [24px]]) [auto]];]}]");
+    testTreeConstruction(linesToString(
+        "p {",
+        "  margin: calc(100% - 24px) auto;",
+        "}"),
+        "[[p]{[[/* @alternate */]margin:[-webkit-calc(100% - 24px) [auto]];"
+        + "[/* @alternate */]margin:[-moz-calc(100% - 24px) [auto]];"
+        + "[/* @alternate */]margin:[calc(100% - 24px) [auto]];]}]");
   }
 
   public void testMatchValueOnlyFunctionLast() {
-    testTreeConstruction(
-        "p { margin: 10px calc(100% - 24px); }",
-        ""
-            + "[[p]{[[/* @alternate */]margin:[[10px]-webkit-calc([[100%] - [24px]])];"
-            + "[/* @alternate */]margin:[[10px]-moz-calc([[100%] - [24px]])];"
-            + "[/* @alternate */]margin:[[10px]calc([[100%] - [24px]])];]}]");
+    testTreeConstruction(linesToString(
+        "p {",
+        "  margin: 10px calc(100% - 24px);",
+        "}"),
+        "[[p]{[[/* @alternate */]margin:[[10px]-webkit-calc(100% - 24px)];"
+        + "[/* @alternate */]margin:[[10px]-moz-calc(100% - 24px)];"
+        + "[/* @alternate */]margin:[[10px]calc(100% - 24px)];]}]");
   }
 
   public void testMatchValueOnlyMultipleFunctions() {
-    testTreeConstruction(
-        "p { margin: calc(100% - 24px) calc(50% + 16px); }",
-        ""
-            + "[[p]{[[/* @alternate */]margin:[-webkit-calc([[100%] - [24px]]) "
-            + "-webkit-calc([[50%] + [16px]])];"
-            + "[/* @alternate */]margin:[-moz-calc([[100%] - [24px]]) -moz-calc([[50%] + [16px]])];"
-            + "[/* @alternate */]margin:[calc([[100%] - [24px]]) calc([[50%] + [16px]])];]}]");
+    testTreeConstruction(linesToString(
+        "p {",
+        "  margin: calc(100% - 24px) calc(50% + 16px);",
+        "}"),
+        "[[p]{[[/* @alternate */]margin:[-webkit-calc(100% - 24px) -webkit-calc(50% + 16px)];"
+        + "[/* @alternate */]margin:[-moz-calc(100% - 24px) -moz-calc(50% + 16px)];"
+        + "[/* @alternate */]margin:[calc(100% - 24px) calc(50% + 16px)];]}]");
   }
 
   public void testDefMixinUnaffected() {

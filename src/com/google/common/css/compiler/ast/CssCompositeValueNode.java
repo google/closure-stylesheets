@@ -17,47 +17,39 @@
 package com.google.common.css.compiler.ast;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.common.css.SourceCodeLocation;
-import java.util.ArrayList;
+
 import java.util.List;
+
 import javax.annotation.Nullable;
 
 /**
- * A node that contains a list of value nodes that together represent one logical value. For
- * example, font-family alternatives like {@code Arial, Helvetica, Sans-serif} are logically one
- * value in the {@code font} declaration. Likewise the font size specification {@code 12pt/14pt}
- * contains two values (the font size and line height) that are really logically one value.
+ * A node that contains a list of value nodes that together represent one logical
+ * value. For example, font-family alternatives like {@code Arial, Helvetica,
+ * Sans-sherif} are logically one value in the {@code font} declaration. Likewise
+ * the font size specification {@code 12pt/14pt} contains two values (the font
+ * size and line height) that are really logically one value.
  *
  * @author oana@google.com (Oana Florescu)
  */
 public class CssCompositeValueNode extends CssValueNode {
-  private final List<CssValueNode> values;
-  private final Operator operator;
-  private final boolean hasParenthesis;
+  private List<CssValueNode> values;
+  private Operator operator;
 
-  /** Recognized operators. */
+  /**
+   * Contains the list of recognized operators.
+   */
   public enum Operator {
     SPACE(" "),
     COMMA(","),
     SLASH("/"),
     EQUALS("="),
-    /**
-     * Must be space-separated to distinguish from unary plus. See
-     * https://www.w3.org/TR/css3-values/#calc-syntax.
-     */
-    ADD(" + "),
-    /**
-     * Must be space-separated to distinguish from unary minus. See
-     * https://www.w3.org/TR/css3-values/#calc-syntax.
-     */
-    SUB(" - "),
-    MULT("*"),
-    DIV("/"),
     UNKNOWN(null);
 
     private final String operatorName;
 
-    Operator(String operatorName) {
+    private Operator(String operatorName) {
       this.operatorName = operatorName;
     }
 
@@ -96,30 +88,14 @@ public class CssCompositeValueNode extends CssValueNode {
    * @param operator Operator that connects the values
    * @param sourceCodeLocation The location of the code
    */
-  CssCompositeValueNode(
-      List<CssValueNode> compositeValues,
-      Operator operator,
-      boolean hasParenthesis,
-      @Nullable SourceCodeLocation sourceCodeLocation) {
-    super(null, sourceCodeLocation);
-    this.operator = operator;
-    this.values = new ArrayList<>(compositeValues);
-    becomeParentForNodes(values);
-    this.hasParenthesis = hasParenthesis;
-  }
-
-  /**
-   * Constructor of a composite value node.
-   *
-   * @param compositeValues List of composite values
-   * @param operator Operator that connects the values
-   * @param sourceCodeLocation The location of the code
-   */
   public CssCompositeValueNode(
       List<CssValueNode> compositeValues,
       Operator operator,
       @Nullable SourceCodeLocation sourceCodeLocation) {
-    this(compositeValues, operator, false, sourceCodeLocation);
+    super(null, sourceCodeLocation);
+    this.operator = operator;
+    this.values = Lists.newArrayList(compositeValues);
+    becomeParentForNodes(values);
   }
 
   /**
@@ -128,16 +104,13 @@ public class CssCompositeValueNode extends CssValueNode {
    * @param node The composite node to copy
    */
   public CssCompositeValueNode(CssCompositeValueNode node) {
-    this(
-        deepCopyCompositeValues(node.getValues()),
-        node.getOperator(),
-        node.hasParenthesis(),
+    this(deepCopyCompositeValues(node.getValues()), node.getOperator(),
         node.getSourceCodeLocation());
   }
 
   private static List<CssValueNode> deepCopyCompositeValues(
       List<CssValueNode> compositeValues) {
-    List<CssValueNode> copy = new ArrayList<>(compositeValues.size());
+    List<CssValueNode> copy = Lists.newArrayList();
     for (CssValueNode child : compositeValues) {
       copy.add(child.deepCopy());
     }
@@ -153,8 +126,12 @@ public class CssCompositeValueNode extends CssValueNode {
     return values;
   }
 
-  /** Adds a value to the list of values. */
-  void addValue(CssValueNode value) {
+  /**
+   * Adds a value to the list of values.
+   *
+   * @param value The value to be added to the list
+   */
+  public void addValue(CssValueNode value) {
     values.add(value);
     becomeParentForNode(value);
   }
@@ -163,13 +140,8 @@ public class CssCompositeValueNode extends CssValueNode {
     return operator;
   }
 
-  public boolean hasParenthesis() {
-    return hasParenthesis;
-  }
-
   @Override
   public String toString() {
-    String value = Joiner.on(operator.getOperatorName()).join(values);
-    return hasParenthesis ? "(" + value + ")" : value;
+    return Joiner.on(operator.getOperatorName()).join(values);
   }
 }

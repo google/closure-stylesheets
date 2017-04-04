@@ -247,21 +247,6 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     assertEquals(rS + "foo{}" + rE, printer.getCompactPrintedString());
   }
 
-  public void testCalc() {
-    String sourceCode =
-        "/* Header comment @licenseless @preservement */\n"
-            + "foo{ width: calc((100% - 24px)*0.375);}";
-
-    parseStyleSheet(sourceCode);
-
-    TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
-    printer.runPass();
-
-    assertEquals(
-        rS + "foo{" + dS + "width:calc((100% - 24px)*0.375)" + dE + "}" + rE,
-        printer.getCompactPrintedString());
-  }
-
   public void testMarkedComments_preservedButWithSomeBadAnnotationsOneGood() {
     String sourceCode = "/* ! Header comment @licenseless /*! @preserve */\n" + "foo{}";
 

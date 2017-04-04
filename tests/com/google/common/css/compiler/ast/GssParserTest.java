@@ -21,8 +21,10 @@ import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.passes.CompactPrinter;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
-import java.util.List;
+
 import junit.framework.TestCase;
+
+import java.util.List;
 
 /**
  * Unit tests for the {@link GssParser}.
@@ -30,7 +32,7 @@ import junit.framework.TestCase;
  * @author fbenz@google.com (Florian Benz)
  */
 
-public final class GssParserTest extends TestCase {
+public class GssParserTest extends TestCase {
 
   private CssTree testValid(String gss) throws GssParserException {
     CssTree tree = parse(gss);
@@ -898,60 +900,8 @@ public final class GssParserTest extends TestCase {
     testValid("@font-face { unicode-range: U+26??;}");
   }
 
-  public void testCalc_simple_noUnits() throws Exception {
-    testValid(".elem { width: calc(5*2) }");
-    testTree(".elem { width: calc(5*2) }", "[[.elem]{[width:[calc([[5]*[2]])];]}]");
-  }
-
-  public void testCalc_simple() throws Exception {
-    testValid(".elem { width: calc(5px*2) }");
-    testTree(".elem { width: calc(5px*2) }", "[[.elem]{[width:[calc([[5px]*[2]])];]}]");
-  }
-
-  public void testCalc_simpleConstant() throws Exception {
-    testValid("@def A 5px; .elem { width: calc(A*2) }");
-    testTree(
-        "@def A 5px; .elem { width: calc(A*2) }",
-        "[@def [A] [5px];[.elem]{[width:[calc([[A]*[2]])];]}]");
-  }
-
-  public void testCalc_complexConstant() throws Exception {
-    testValid("@def A 5px+2; .elem { width: calc(A*2) }");
-    testTree(
-        "@def A 5px; .elem { width: calc(A*2) }",
-        "[@def [A] [5px];[.elem]{[width:[calc([[A]*[2]])];]}]");
-  }
-
-  public void testCalc_complexConstant_unaryOperator() throws Exception {
-    testValid("@def A -5px; .elem { width: calc(A/2) }");
-    testTree(
-        "@def A -5px; .elem { width: calc(A/2) }",
-        "[@def [A] [-5px];[.elem]{[width:[calc([[A]/[2]])];]}]");
-  }
-
-  public void testCalc_withParenthesizedSums() throws Exception {
-    testValid("p { width: calc(4 * (5px * 2)); }");
-    testTree(
-        "p { width: calc(4 * (5px * 2)); }", "[[p]{[width:[calc([[4]*[([5px]*[2])]])];]}]");
-  }
-
-  public void testCalc_fourOperands() throws Exception {
-    testValid("p { width: calc(4 + 5 + 6 + 7);}");
-    testTree(
-        "p { width: calc(4 + 5 + 6 + 7);}", "[[p]{[width:[calc([[4] + [[5] + [[6] + [7]]]])];]}]");
-  }
-
-  public void testCalc_nestedConstant() throws Exception {
-    testValid("@def A 5px; p { width: calc((A + 4) - (A * A)); }");
-    testTree(
-        "@def A 5px; p { width: calc((A + 4) - (A * A)); }",
-        "[@def [A] [5px];[p]{[width:[calc([[([A] + [4])] - [([A]*[A])]])];]}]");
-  }
-
   public void testNumericNodeLocation() throws GssParserException {
-    String value = "99px";
-    CssTree tree = new GssParser(
-        new SourceCode(null, String.format("div{width:%s;}", value))).parse();
+    CssTree tree = new GssParser(new SourceCode(null, "div{width:99px;}")).parse();
     final CssNumericNode[] resultHolder = new CssNumericNode[1];
     tree.getVisitController().startVisit(new DefaultTreeVisitor() {
       @Override
@@ -965,8 +915,8 @@ public final class GssParserTest extends TestCase {
     });
     assertNotNull(resultHolder[0]);
     SourceCodeLocation location = resultHolder[0].getSourceCodeLocation();
-    int actualLength = location.getEndCharacterIndex() - location.getBeginCharacterIndex();
-    assertEquals(value.length(), actualLength);
+    assertEquals(
+        "99px".length(), location.getEndCharacterIndex() - location.getBeginCharacterIndex());
   }
 
   private CssTree parse(List<SourceCode> sources) throws GssParserException {
