@@ -377,7 +377,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
       System.out.print(compilerOutput);
     } else {
       try {
-        Files.write(compilerOutput, outputInfo.outputFile, UTF_8);
+        Files.asCharSink(outputInfo.outputFile, UTF_8).write(compilerOutput);
       } catch (IOException e) {
         AbstractCommandLineCompiler.exitOnUnhandledException(e, exitCodeHandler);
       }
