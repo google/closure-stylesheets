@@ -39,20 +39,10 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
   // Use a LinkedHashMap so getMappings() is deterministic.
   private final Map<String, String> mappings = Maps.newLinkedHashMap();
 
-  /**
-   * Creates a new instance.
-   *
-   * @param map A SubstitutionMap decorated by this class
-   * @param shouldRecordMappingForCodeGeneration A predicate that returns true if the mapping should
-   *     be recorded for code-generation purposes
-   * @deprecated Use {@link Builder} instead.
-   */
-  @Deprecated
-  public RecordingSubstitutionMap(
+  private RecordingSubstitutionMap(
       SubstitutionMap map, Predicate<? super String> shouldRecordMappingForCodeGeneration) {
     this.delegate = map;
-    this.shouldRecordMappingForCodeGeneration =
-        shouldRecordMappingForCodeGeneration;
+    this.shouldRecordMappingForCodeGeneration = shouldRecordMappingForCodeGeneration;
   }
 
   /**
