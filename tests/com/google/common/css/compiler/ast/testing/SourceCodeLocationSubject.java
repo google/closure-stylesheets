@@ -48,37 +48,37 @@ public class SourceCodeLocationSubject
   }
 
   public void hasSpan(int beginLine, int beginIndex, int endLine, int endIndex) {
-    check().that(getSubject()).isNotNull();
-    if (!(beginLine == getSubject().getBeginLineNumber()
-        && beginIndex == getSubject().getBeginIndexInLine()
-        && endLine == getSubject().getEndLineNumber()
-        && endIndex == getSubject().getEndIndexInLine())) {
+    check().that(actual()).isNotNull();
+    if (!(beginLine == actual().getBeginLineNumber()
+        && beginIndex == actual().getBeginIndexInLine()
+        && endLine == actual().getEndLineNumber()
+        && endIndex == actual().getEndIndexInLine())) {
       failWithRawMessage(
           "Location did not match <%s,%s -> %s,%s>, was <%s,%s -> %s,%s>",
           String.valueOf(beginLine),
           String.valueOf(beginIndex),
           String.valueOf(endLine),
           String.valueOf(endIndex),
-          String.valueOf(getSubject().getBeginLineNumber()),
-          String.valueOf(getSubject().getBeginIndexInLine()),
-          String.valueOf(getSubject().getEndLineNumber()),
-          String.valueOf(getSubject().getEndIndexInLine()));
+          String.valueOf(actual().getBeginLineNumber()),
+          String.valueOf(actual().getBeginIndexInLine()),
+          String.valueOf(actual().getEndLineNumber()),
+          String.valueOf(actual().getEndIndexInLine()));
     }
   }
 
   public void matches(String text) {
-    check().that(getSubject()).isNotNull();
+    check().that(actual()).isNotNull();
     String source =
-        getSubject()
+        actual()
             .getSourceCode()
             .getFileContents()
             .substring(
-                getSubject().getBeginCharacterIndex(), getSubject().getEndCharacterIndex());
+                actual().getBeginCharacterIndex(), actual().getEndCharacterIndex());
     check().that(source).isEqualTo(text);
   }
 
   public void isUnknown() {
-    check().that(getSubject()).isNotNull();
-    check().that(getSubject().isUnknown()).named("isUnknown").isTrue();
+    check().that(actual()).isNotNull();
+    check().that(actual().isUnknown()).named("isUnknown").isTrue();
   }
 }
