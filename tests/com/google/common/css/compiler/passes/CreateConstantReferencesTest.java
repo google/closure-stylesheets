@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
 import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
@@ -32,8 +34,8 @@ public class CreateConstantReferencesTest extends NewFunctionalTestBase {
     parseAndRun(".X { color: SOME_COLOR }");
 
     CssValueNode colorValue = getFirstPropertyValue().getChildAt(0);
-    assertTrue(colorValue instanceof CssConstantReferenceNode);
-    assertEquals("SOME_COLOR", colorValue.getValue());
+    assertThat(colorValue).isInstanceOf(CssConstantReferenceNode.class);
+    assertThat(colorValue.getValue()).isEqualTo("SOME_COLOR");
   }
 
   public void testCreateFunRef() throws Exception {
@@ -42,15 +44,15 @@ public class CreateConstantReferencesTest extends NewFunctionalTestBase {
     CssFunctionNode funCall = (CssFunctionNode) getFirstPropertyValue().getChildAt(0);
 
     CssValueNode x0Value = funCall.getArguments().getChildAt(0);
-    assertTrue(x0Value instanceof CssConstantReferenceNode);
-    assertEquals("X0", x0Value.getValue());
+    assertThat(x0Value).isInstanceOf(CssConstantReferenceNode.class);
+    assertThat(x0Value.getValue()).isEqualTo("X0");
 
     CssValueNode commaValue = funCall.getArguments().getChildAt(1);
-    assertTrue(commaValue instanceof CssLiteralNode);
+    assertThat(commaValue).isInstanceOf(CssLiteralNode.class);
 
     CssValueNode y0Value = funCall.getArguments().getChildAt(2);
-    assertTrue(y0Value instanceof CssConstantReferenceNode);
-    assertEquals("Y0", y0Value.getValue());
+    assertThat(y0Value).isInstanceOf(CssConstantReferenceNode.class);
+    assertThat(y0Value.getValue()).isEqualTo("Y0");
   }
 
   @Override

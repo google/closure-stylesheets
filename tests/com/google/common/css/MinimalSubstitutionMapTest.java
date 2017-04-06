@@ -16,13 +16,14 @@
 
 package com.google.common.css;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-
-import junit.framework.TestCase;
-
 import java.math.BigInteger;
 import java.util.Set;
+import junit.framework.TestCase;
 
 /**
  * Test for MinimalSubstitutionMap.
@@ -51,16 +52,16 @@ public class MinimalSubstitutionMapTest extends TestCase {
    */
   public void testGet() {
     map = createTestMap();
-    assertEquals("a", map.get("foo"));
+    assertThat(map.get("foo")).isEqualTo("a");
 
     // Note that the order the secondary characters appear in the generated CSS
     // class names does not match the order they appear in the CHARS array. This
     // is acceptable; the only important thing is that the names are unique,
     // which is confirmed by test_toShortString().
-    assertEquals("a2", map.get("bar"));
-    assertEquals("a1", map.get("baz"));
+    assertThat(map.get("bar")).isEqualTo("a2");
+    assertThat(map.get("baz")).isEqualTo("a1");
 
-    assertEquals("a", map.get("foo"));
+    assertThat(map.get("foo")).isEqualTo("a");
   }
 
   /**
@@ -70,11 +71,11 @@ public class MinimalSubstitutionMapTest extends TestCase {
     map = new MinimalSubstitutionMap(START_CHARS, CHARS, ImmutableSet.of("a"));
 
     // We skipped over "a".  See testGet().
-    assertEquals("a2", map.get("foo"));
+    assertThat(map.get("foo")).isEqualTo("a2");
 
     // Move on to a new value, and then go back to "foo" to prove repeatability
-    assertEquals("a1", map.get("bar"));
-    assertEquals("a2", map.get("foo"));
+    assertThat(map.get("bar")).isEqualTo("a1");
+    assertThat(map.get("foo")).isEqualTo("a2");
   }
 
   /**
@@ -101,20 +102,22 @@ public class MinimalSubstitutionMapTest extends TestCase {
         // Use blaze test --test_output=all to see this
         System.out.println("RENAMED CLASS: " + renamedClass);
 
-        assertFalse("Already contains a class named: " + renamedClass,
-            classes.contains(renamedClass));
-        assertEquals("Class name did not match expected length", stringLength,
-            renamedClass.length());
+        assertWithMessage("Already contains a class named: " + renamedClass)
+            .that(classes)
+            .doesNotContain(renamedClass);
+        assertWithMessage("Class name did not match expected length")
+            .that(renamedClass)
+            .hasLength(stringLength);
         classes.add(renamedClass);
         ++n;
       }
-      assertEquals("Does not contain all possible CSS class names of length "
-          + stringLength, NUM_CHARS.pow(power + 1).intValue() - 1,
-          classes.size());
+      assertWithMessage("Does not contain all possible CSS class names of length " + stringLength)
+          .that(classes)
+          .hasSize(NUM_CHARS.pow(power + 1).intValue() - 1);
     }
 
-    assertEquals("Does not contain all possible CSS class names of length "
-        + (MAX_POWER + 1), NUM_CHARS.pow(MAX_POWER + 1).intValue() - 1,
-        classes.size());
+    assertWithMessage("Does not contain all possible CSS class names of length " + (MAX_POWER + 1))
+        .that(classes)
+        .hasSize(NUM_CHARS.pow(MAX_POWER + 1).intValue() - 1);
   }
 }

@@ -16,6 +16,8 @@
 
 package com.google.common.css;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import junit.framework.TestCase;
 
 /**
@@ -26,14 +28,14 @@ public class PrefixingSubstitutionMapTest extends TestCase {
   public void testNoPrefix() throws Exception {
     SubstitutionMap map = new PrefixingSubstitutionMap(
         new SimpleSubstitutionMap(), "");
-    assertEquals("foo_", map.get("foo"));
-    assertEquals("foo-bar_", map.get("foo-bar"));
+    assertThat(map.get("foo")).isEqualTo("foo_");
+    assertThat(map.get("foo-bar")).isEqualTo("foo-bar_");
   }
 
   public void testPrefix() throws Exception {
     SubstitutionMap map = new PrefixingSubstitutionMap(
         new SimpleSubstitutionMap(), "PREFIX_");
-    assertEquals("PREFIX_foo_", map.get("foo"));
-    assertEquals("PREFIX_foo-bar_", map.get("foo-bar"));
+    assertThat(map.get("foo")).isEqualTo("PREFIX_foo_");
+    assertThat(map.get("foo-bar")).isEqualTo("PREFIX_foo-bar_");
   }
 }

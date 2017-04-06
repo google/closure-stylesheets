@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssKeyNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
@@ -110,23 +112,23 @@ public class ProcessKeyframesTest extends NewFunctionalTestBase {
       process.compactRepresentation(node, -1);
     }
     String actual = node.getKeyValue();
-    assertEquals(expected, actual);
+    assertThat(actual).isEqualTo(expected);
   }
 
   public void testFromTo() throws Exception {
     keyframesAllowed = true;
     simplifyCss = false;
     parseAndRun(TEST_CODE_FROM_TO);
-    assertEquals("@-webkit-keyframes bounce{from{left:0px}to{left:200px}}",
-        compactPrintedResult);
+    assertThat(compactPrintedResult)
+        .isEqualTo("@-webkit-keyframes bounce{from{left:0px}to{left:200px}}");
   }
 
   public void testMozFromTo() throws Exception {
     keyframesAllowed = true;
     simplifyCss = false;
     parseAndRun(TEST_MOZ_CODE_FROM_TO);
-    assertEquals("@-moz-keyframes bounce{from{left:0px}to{left:200px}}",
-        compactPrintedResult);
+    assertThat(compactPrintedResult)
+        .isEqualTo("@-moz-keyframes bounce{from{left:0px}to{left:200px}}");
   }
 
 
@@ -135,16 +137,16 @@ public class ProcessKeyframesTest extends NewFunctionalTestBase {
     simplifyCss = false;
     parseAndRun(TEST_CODE_FROM_TO,
         ProcessKeyframes.KEYFRAMES_NOT_ALLOWED_ERROR_MESSAGE);
-    assertEquals("@-webkit-keyframes bounce{from{left:0px}to{left:200px}}",
-        compactPrintedResult);
+    assertThat(compactPrintedResult)
+        .isEqualTo("@-webkit-keyframes bounce{from{left:0px}to{left:200px}}");
   }
 
   public void testFromToSimplified() throws Exception {
     keyframesAllowed = true;
     simplifyCss = true;
     parseAndRun(TEST_CODE_FROM_TO);
-    assertEquals("@-webkit-keyframes bounce{0%{left:0px}to{left:200px}}",
-        compactPrintedResult);
+    assertThat(compactPrintedResult)
+        .isEqualTo("@-webkit-keyframes bounce{0%{left:0px}to{left:200px}}");
   }
 
   public void testFromToBad1() throws Exception {
@@ -179,32 +181,29 @@ public class ProcessKeyframesTest extends NewFunctionalTestBase {
     keyframesAllowed = true;
     simplifyCss = false;
     parseAndRun(TEST_CODE_PERCENTAGE_1);
-    assertEquals("@-webkit-keyframes pulse{0%{}33.33%{}100%{}}", 
-        compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("@-webkit-keyframes pulse{0%{}33.33%{}100%{}}");
   }
 
   public void testPercentage2() throws Exception {
     keyframesAllowed = true;
     simplifyCss = false;
     parseAndRun(TEST_CODE_PERCENTAGE_2);
-    assertEquals("@-webkit-keyframes pulse{0.000000%{}100.0000000%{}}", 
-        compactPrintedResult);
+    assertThat(compactPrintedResult)
+        .isEqualTo("@-webkit-keyframes pulse{0.000000%{}100.0000000%{}}");
   }
 
   public void testPercentageSimplified1() throws Exception {
     keyframesAllowed = true;
     simplifyCss = true;
     parseAndRun(TEST_CODE_PERCENTAGE_1);
-    assertEquals("@-webkit-keyframes pulse{0%{}33.33%{}to{}}", 
-        compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("@-webkit-keyframes pulse{0%{}33.33%{}to{}}");
   }
 
   public void testPercentageSimplified2() throws Exception {
     keyframesAllowed = true;
     simplifyCss = true;
     parseAndRun(TEST_CODE_PERCENTAGE_3);
-    assertEquals("@-webkit-keyframes pulse{.82%{}12.0034%{}98%{}}", 
-        compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("@-webkit-keyframes pulse{.82%{}12.0034%{}98%{}}");
   }
 
   public void testPercentageBad1() throws Exception {

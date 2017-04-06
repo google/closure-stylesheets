@@ -63,7 +63,7 @@ public class EliminateUnitsFromZeroNumericValuesTest {
     CssNumericNode node = new CssNumericNode("0", "px");
     pass.enterValueNode(node);
     assertThat(node.getNumericPart()).isEqualTo("0");
-    assertThat(node.getUnit()).isEqualTo("");
+    assertThat(node.getUnit()).isEmpty();
   }
 
   @Test
@@ -74,7 +74,7 @@ public class EliminateUnitsFromZeroNumericValuesTest {
     CssNumericNode node = new CssNumericNode("0.000", "px");
     pass.enterValueNode(node);
     assertThat(node.getNumericPart()).isEqualTo("0");
-    assertThat(node.getUnit()).isEqualTo("");
+    assertThat(node.getUnit()).isEmpty();
   }
 
   @Test

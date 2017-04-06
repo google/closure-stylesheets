@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.ast;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import junit.framework.TestCase;
 
 /**
@@ -29,8 +31,8 @@ public class CssNodeTest extends TestCase {
   public void testNodeCreation() {
     CssLiteralNode node = new CssLiteralNode("");
 
-    assertNull(node.getParent());
-    assertNull(node.getSourceCodeLocation());
+    assertThat(node.getParent()).isNull();
+    assertThat(node.getSourceCodeLocation()).isNull();
   }
 
   public void testBecomeParent() {
@@ -38,16 +40,16 @@ public class CssNodeTest extends TestCase {
     CssLiteralNode childNode = new CssLiteralNode("");
     parentNode.becomeParentForNode(childNode);
 
-    assertEquals(parentNode, childNode.getParent());
+    assertThat(childNode.getParent()).isEqualTo(parentNode);
   }
 
   public void testDeleteAsParent() {
     CssPropertyValueNode parentNode = new CssPropertyValueNode();
     CssLiteralNode childNode = new CssLiteralNode("");
     parentNode.becomeParentForNode(childNode);
-    assertEquals(parentNode, childNode.getParent());
+    assertThat(childNode.getParent()).isEqualTo(parentNode);
     
     parentNode.removeAsParentOfNode(childNode);
-    assertNull(childNode.getParent());
+    assertThat(childNode.getParent()).isNull();
   }
 }

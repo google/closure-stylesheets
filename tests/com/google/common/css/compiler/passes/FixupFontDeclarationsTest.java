@@ -16,6 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -32,7 +35,6 @@ import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
-
 import junit.framework.TestCase;
 
 /**
@@ -49,16 +51,16 @@ public class FixupFontDeclarationsTest extends TestCase {
     CssRulesetNode rules = (CssRulesetNode) r.getBody().getChildAt(0);
     CssDeclarationNode decl =
         (CssDeclarationNode) rules.getDeclarations().getChildAt(0);
-    assertEquals("font-family", decl.getPropertyName().getPropertyName());
+    assertThat(decl.getPropertyName().getPropertyName()).isEqualTo("font-family");
     CssPropertyValueNode valueNode = decl.getPropertyValue();
-    assertEquals(1, valueNode.numChildren());
+    assertThat(valueNode.numChildren()).isEqualTo(1);
     CssCompositeValueNode alternatives =
         (CssCompositeValueNode) valueNode.getChildAt(0);
-    assertEquals(4, alternatives.getValues().size());
-    assertEquals("a", alternatives.getValues().get(0).getValue());
-    assertEquals("b c d", alternatives.getValues().get(1).getValue());
-    assertEquals("e f g h i", alternatives.getValues().get(2).getValue());
-    assertEquals("jkl", alternatives.getValues().get(3).getValue());
+    assertThat(alternatives.getValues()).hasSize(4);
+    assertThat(alternatives.getValues().get(0).getValue()).isEqualTo("a");
+    assertThat(alternatives.getValues().get(1).getValue()).isEqualTo("b c d");
+    assertThat(alternatives.getValues().get(2).getValue()).isEqualTo("e f g h i");
+    assertThat(alternatives.getValues().get(3).getValue()).isEqualTo("jkl");
   }
 
   // TODO(user): when we have string parsing, test that this pass
@@ -290,8 +292,8 @@ public class FixupFontDeclarationsTest extends TestCase {
       FixupFontDeclarations.InputMode mode, String gss, String output)
       throws Exception {
     CssTree tree = testValid(mode, gss);
-    assertEquals(output.replace("[", "(").replace("]", ")"),
-                 AstPrinter.print(tree).replace("[", "(").replace("]", ")"));
+    assertThat(AstPrinter.print(tree).replace("[", "(").replace("]", ")"))
+        .isEqualTo(output.replace("[", "(").replace("]", ")"));
     //assertEquals(output, AstPrinter.print(tree));
     return tree;
   }
@@ -303,15 +305,20 @@ public class FixupFontDeclarationsTest extends TestCase {
   private CssTree testValid(
       FixupFontDeclarations.InputMode mode, String css) throws Exception {
     CssTree tree = runPass(mode, parse(css));
-    assertNotNull(tree);
-    assertFalse(Joiner.on("\n").join(
-        Iterables.transform(errorManager.getErrors(),
-                            new Function<GssError, String>() {
-                              @Override public String apply(GssError e) {
-                                return e.format();
-                              }
-                            })),
-                errorManager.hasErrors());
+    assertThat(tree).isNotNull();
+    assertWithMessage(
+            Joiner.on("\n")
+                .join(
+                    Iterables.transform(
+                        errorManager.getErrors(),
+                        new Function<GssError, String>() {
+                          @Override
+                          public String apply(GssError e) {
+                            return e.format();
+                          }
+                        })))
+        .that(errorManager.hasErrors())
+        .isFalse();
     return tree;
   }
 
@@ -324,15 +331,18 @@ public class FixupFontDeclarationsTest extends TestCase {
       final String expectedError, String css)
       throws Exception {
     CssTree tree = runPass(mode, parse(css));
-    assertNotNull(tree);
-    assertTrue(errorManager.hasErrors());
-    assertTrue(
-        Iterables.any(errorManager.getErrors(),
-                      new Predicate<GssError>() {
-                        @Override public boolean apply(GssError e) {
-                          return expectedError.equals(e.getMessage());
-                        }
-                      }));
+    assertThat(tree).isNotNull();
+    assertThat(errorManager.hasErrors()).isTrue();
+    assertThat(
+            Iterables.any(
+                errorManager.getErrors(),
+                new Predicate<GssError>() {
+                  @Override
+                  public boolean apply(GssError e) {
+                    return expectedError.equals(e.getMessage());
+                  }
+                }))
+        .isTrue();
     return tree;
   }
 }

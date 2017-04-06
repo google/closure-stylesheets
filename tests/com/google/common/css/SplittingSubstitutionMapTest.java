@@ -16,6 +16,8 @@
 
 package com.google.common.css;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import junit.framework.TestCase;
 
 /**
@@ -29,10 +31,10 @@ public class SplittingSubstitutionMapTest extends TestCase {
   public void testGet() throws Exception {
     SubstitutionMap map = new SplittingSubstitutionMap(
         new SimpleSubstitutionMap());
-    assertEquals("a_", map.get("a"));
-    assertEquals("a_-b_", map.get("a-b"));
-    assertEquals("a_-b_-c_", map.get("a-b-c"));
-    assertEquals("a_-b_-c_-d_", map.get("a-b-c-d"));
+    assertThat(map.get("a")).isEqualTo("a_");
+    assertThat(map.get("a-b")).isEqualTo("a_-b_");
+    assertThat(map.get("a-b-c")).isEqualTo("a_-b_-c_");
+    assertThat(map.get("a-b-c-d")).isEqualTo("a_-b_-c_-d_");
   }
 
   public void testSameObjectReturnedIfNoDash() {
@@ -42,7 +44,7 @@ public class SplittingSubstitutionMapTest extends TestCase {
     String input = new String("abc");
     SubstitutionMap map = new SplittingSubstitutionMap(
         new PassThroughSubstitutionMap());
-    assertSame(input, map.get(input));
+    assertThat(map.get(input)).isSameAs(input);
   }
 
   private static class PassThroughSubstitutionMap implements SubstitutionMap {

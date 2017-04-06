@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.FunctionalTestBase;
@@ -37,7 +39,7 @@ public class MarkDefaultDefinitionsTest extends FunctionalTestBase {
 
     // Check each of the value nodes in the definition.
     for (CssValueNode node : definition.getParameters()) {
-      assertTrue(node.getIsDefault());
+      assertThat(node.getIsDefault()).isTrue();
     }
   }
   
@@ -51,7 +53,7 @@ public class MarkDefaultDefinitionsTest extends FunctionalTestBase {
 
     // Check each of the value nodes in the definitions.
     for (CssValueNode node : definition.getParameters()) {
-      assertTrue(node.getIsDefault());
+      assertThat(node.getIsDefault()).isTrue();
     }
   }
   
@@ -65,7 +67,7 @@ public class MarkDefaultDefinitionsTest extends FunctionalTestBase {
 
     // Check each of the value nodes in the definitions.
     for (CssValueNode node : definition.getParameters()) {
-      assertTrue(node.getIsDefault());
+      assertThat(node.getIsDefault()).isTrue();
     }
   }
 
@@ -79,7 +81,7 @@ public class MarkDefaultDefinitionsTest extends FunctionalTestBase {
 
     // Check each of the value nodes in the definitions.
     for (CssValueNode node : definition.getParameters()) {
-      assertFalse(node.getIsDefault());
+      assertThat(node.getIsDefault()).isFalse();
     }
   }
 

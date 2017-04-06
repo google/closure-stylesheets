@@ -16,9 +16,10 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.passes.testing.AstPrinter;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
-
 import java.util.Locale;
 
 /**
@@ -366,7 +367,7 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         + "padding:[[1px][4px][3px][2px]];"
         + "padding:[[1px][4px][3px][2px]];"
         + "]}]";
-    assertEquals(expectedOutput, AstPrinter.print(tree));
+    assertThat(AstPrinter.print(tree)).isEqualTo(expectedOutput);
   }
 
   /**

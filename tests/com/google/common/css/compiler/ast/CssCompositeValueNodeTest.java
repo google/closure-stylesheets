@@ -16,8 +16,9 @@
 
 package com.google.common.css.compiler.ast;
 
-import com.google.common.collect.ImmutableList;
+import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import junit.framework.TestCase;
 
 /**
@@ -33,20 +34,20 @@ public class CssCompositeValueNodeTest extends TestCase {
         CssCompositeValueNode.Operator.SPACE, null);
 
     CssCompositeValueNode clone = node.deepCopy();
-    assertNotSame(node, clone);
-    assertNotSame(node.getValues(), clone.getValues());
+    assertThat(clone).isNotSameAs(node);
+    assertThat(clone.getValues()).isNotSameAs(node.getValues());
     // Operator is enum.
-    assertSame(node.getOperator(), clone.getOperator());
-    assertEquals(2, clone.getValues().size());
+    assertThat(clone.getOperator()).isSameAs(node.getOperator());
+    assertThat(clone.getValues()).hasSize(2);
 
     CssValueNode clonedChild1 = clone.getValues().get(0);
-    assertNotSame(node.getValues().get(0), clonedChild1);
-    assertEquals(node.getValues().get(0).getClass(), clonedChild1.getClass());
-    assertEquals("foo", clonedChild1.getValue());
+    assertThat(clonedChild1).isNotSameAs(node.getValues().get(0));
+    assertThat(clonedChild1.getClass()).isEqualTo(node.getValues().get(0).getClass());
+    assertThat(clonedChild1.getValue()).isEqualTo("foo");
 
     CssValueNode clonedChild2 = clone.getValues().get(1);
-    assertNotSame(node.getValues().get(1), clonedChild2);
-    assertEquals(node.getValues().get(1).getClass(), clonedChild2.getClass());
-    assertEquals("bar", clonedChild2.getValue());
+    assertThat(clonedChild2).isNotSameAs(node.getValues().get(1));
+    assertThat(clonedChild2.getClass()).isEqualTo(node.getValues().get(1).getClass());
+    assertThat(clonedChild2.getValue()).isEqualTo("bar");
   }
 }

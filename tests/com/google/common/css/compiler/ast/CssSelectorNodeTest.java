@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.ast;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
@@ -39,11 +41,11 @@ public class CssSelectorNodeTest extends NewFunctionalTestBase {
     refiner.appendComment(new CssCommentNode("/* @noflip */", null));
 
     CssSelectorNode copy = node.deepCopy();
-    assertEquals(node.getChunk(), copy.getChunk());
-    assertEquals(node.getSelectorName(), copy.getSelectorName());
-    assertEquals(node.getSourceCodeLocation(), copy.getSourceCodeLocation());
-    assertEquals(node.getRefiners().getChildAt(0).getComments(),
-        copy.getRefiners().getChildAt(0).getComments());
+    assertThat(copy.getChunk()).isEqualTo(node.getChunk());
+    assertThat(copy.getSelectorName()).isEqualTo(node.getSelectorName());
+    assertThat(copy.getSourceCodeLocation()).isEqualTo(node.getSourceCodeLocation());
+    assertThat(copy.getRefiners().getChildAt(0).getComments())
+        .isEqualTo(node.getRefiners().getChildAt(0).getComments());
   }
 
   // Examples from http://www.w3.org/TR/CSS2/cascade.html#specificity
@@ -111,9 +113,9 @@ public class CssSelectorNodeTest extends NewFunctionalTestBase {
       fail(e.getMessage());
     }
     CssNode node = tree.getRoot().getBody().getChildAt(0);
-    assertTrue(node instanceof CssRulesetNode);
+    assertThat(node).isInstanceOf(CssRulesetNode.class);
     CssRulesetNode rulesetNode = (CssRulesetNode) node;
     CssSelectorNode selectorNode = rulesetNode.getSelectors().getChildAt(0);
-    assertEquals(expected, selectorNode.getSpecificity().toString());
+    assertThat(selectorNode.getSpecificity().toString()).isEqualTo(expected);
   }
 }

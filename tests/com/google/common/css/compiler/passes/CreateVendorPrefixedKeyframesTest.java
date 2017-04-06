@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 /**
@@ -41,16 +43,16 @@ public class CreateVendorPrefixedKeyframesTest extends NewFunctionalTestBase {
         + "0%{top:0}"
         + "100%{top:1%}"
         + "}");
-    assertEquals(
-        "@keyframes A{"
-        + "0%{top:0}"
-        + "100%{top:1%}"
-        + "}"
-        + "@-webkit-keyframes A{"
-        + "0%{top:0}"
-        + "100%{top:1%}"
-        + "}",
-        compactPrintedResult);
+    assertThat(compactPrintedResult)
+        .isEqualTo(
+            "@keyframes A{"
+                + "0%{top:0}"
+                + "100%{top:1%}"
+                + "}"
+                + "@-webkit-keyframes A{"
+                + "0%{top:0}"
+                + "100%{top:1%}"
+                + "}");
   }
 
   public void testWithoutComment() throws Exception {
@@ -59,11 +61,7 @@ public class CreateVendorPrefixedKeyframesTest extends NewFunctionalTestBase {
         + "0%{top:0}"
         + "100%{top:1%}"
         + "}");
-    assertEquals(
-        "@keyframes A{"
-        + "0%{top:0}"
-        + "100%{top:1%}"
-        + "}",
-        compactPrintedResult);
+    assertThat(compactPrintedResult)
+        .isEqualTo("@keyframes A{" + "0%{top:0}" + "100%{top:1%}" + "}");
   }
 }

@@ -17,6 +17,7 @@
 package com.google.common.css;
 
 import static com.google.common.css.compiler.ast.testing.SourceCodeLocationSubject.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import junit.framework.TestCase;
@@ -32,18 +33,18 @@ public class SourceCodeLocationTest extends TestCase {
     SourceCodeLocation l = new SourceCodeLocation(
         new SourceCode("testfile", testSource),
         2, 1, 3, 7, 2, 4);
-    assertEquals("testfile", l.getSourceCode().getFileName());
-    assertEquals(testSource, l.getSourceCode().getFileContents());
-    assertEquals(2, l.getBeginCharacterIndex());
-    assertEquals(1, l.getBeginLineNumber());
-    assertEquals(3, l.getBeginIndexInLine());
-    assertEquals(7, l.getEndCharacterIndex());
-    assertEquals(2, l.getEndLineNumber());
-    assertEquals(4, l.getEndIndexInLine());
-    assertEquals('c', testSource.charAt(l.getBeginCharacterIndex()));
-    assertEquals('g', testSource.charAt(l.getEndCharacterIndex()));
-    assertEquals('c', "abc".charAt(l.getBeginIndexInLine() - 1));
-    assertEquals('g', "defg".charAt(l.getEndIndexInLine() - 1));
+    assertThat(l.getSourceCode().getFileName()).isEqualTo("testfile");
+    assertThat(l.getSourceCode().getFileContents()).isEqualTo(testSource);
+    assertThat(l.getBeginCharacterIndex()).isEqualTo(2);
+    assertThat(l.getBeginLineNumber()).isEqualTo(1);
+    assertThat(l.getBeginIndexInLine()).isEqualTo(3);
+    assertThat(l.getEndCharacterIndex()).isEqualTo(7);
+    assertThat(l.getEndLineNumber()).isEqualTo(2);
+    assertThat(l.getEndIndexInLine()).isEqualTo(4);
+    assertThat(testSource.charAt(l.getBeginCharacterIndex())).isEqualTo('c');
+    assertThat(testSource.charAt(l.getEndCharacterIndex())).isEqualTo('g');
+    assertThat("abc".charAt(l.getBeginIndexInLine() - 1)).isEqualTo('c');
+    assertThat("defg".charAt(l.getEndIndexInLine() - 1)).isEqualTo('g');
   }
 
   public void testBadCreation1() {
@@ -52,8 +53,9 @@ public class SourceCodeLocationTest extends TestCase {
       new SourceCodeLocation(sourceCode, 7, 2, 4, 2, 1, 3);
       fail();
     } catch (IllegalArgumentException expected) {
-      assertEquals("Beginning location must come before the end location.",
-          expected.getMessage());
+      assertThat(expected)
+          .hasMessageThat()
+          .isEqualTo("Beginning location must come before the end location.");
     }
   }
 
@@ -63,15 +65,15 @@ public class SourceCodeLocationTest extends TestCase {
       new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
     SourceCodeLocation loc2 =
       new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
-    assertTrue(loc1.equals(loc1));
-    assertTrue(loc1.equals(loc2));
-    assertTrue(loc2.equals(loc1));
-    assertTrue(loc2.equals(loc2));
-    assertEquals(0, loc1.compareTo(loc2));
-    assertEquals(0, loc1.compareTo(loc1));
-    assertEquals(0, loc2.compareTo(loc1));
-    assertEquals(0, loc2.compareTo(loc2));
-    assertEquals(loc1.hashCode(), loc2.hashCode());
+    assertThat(loc1.equals(loc1)).isTrue();
+    assertThat(loc1.equals(loc2)).isTrue();
+    assertThat(loc2.equals(loc1)).isTrue();
+    assertThat(loc2.equals(loc2)).isTrue();
+    assertThat(loc1.compareTo(loc2)).isEqualTo(0);
+    assertThat(loc1.compareTo(loc1)).isEqualTo(0);
+    assertThat(loc2.compareTo(loc1)).isEqualTo(0);
+    assertThat(loc2.compareTo(loc2)).isEqualTo(0);
+    assertThat(loc2.hashCode()).isEqualTo(loc1.hashCode());
   }
 
   public void testComparisonOfEqualLocations2() {
@@ -80,15 +82,15 @@ public class SourceCodeLocationTest extends TestCase {
       new SourceCodeLocation(sourceCode, -1, 0, 0, -1, 0, 0);
     SourceCodeLocation loc2 =
       new SourceCodeLocation(sourceCode, -1, 0, 0, -1, 0, 0);
-    assertTrue(loc1.equals(loc1));
-    assertTrue(loc1.equals(loc2));
-    assertTrue(loc2.equals(loc1));
-    assertTrue(loc2.equals(loc2));
-    assertEquals(0, loc1.compareTo(loc2));
-    assertEquals(0, loc1.compareTo(loc1));
-    assertEquals(0, loc2.compareTo(loc1));
-    assertEquals(0, loc2.compareTo(loc2));
-    assertEquals(loc1.hashCode(), loc2.hashCode());
+    assertThat(loc1.equals(loc1)).isTrue();
+    assertThat(loc1.equals(loc2)).isTrue();
+    assertThat(loc2.equals(loc1)).isTrue();
+    assertThat(loc2.equals(loc2)).isTrue();
+    assertThat(loc1.compareTo(loc2)).isEqualTo(0);
+    assertThat(loc1.compareTo(loc1)).isEqualTo(0);
+    assertThat(loc2.compareTo(loc1)).isEqualTo(0);
+    assertThat(loc2.compareTo(loc2)).isEqualTo(0);
+    assertThat(loc2.hashCode()).isEqualTo(loc1.hashCode());
   }
 
   public void testComparisonOfEqualLocations3() {
@@ -97,10 +99,10 @@ public class SourceCodeLocationTest extends TestCase {
       new SourceCodeLocation(sourceCode, -1, 0, 0, -1, 0, 0);
     SourceCodeLocation loc2 =
       new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
-    assertFalse(loc1.equals(loc2));
-    assertFalse(loc2.equals(loc1));
-    assertEquals(-1, loc1.compareTo(loc2));
-    assertEquals(1, loc2.compareTo(loc1));
+    assertThat(loc1.equals(loc2)).isFalse();
+    assertThat(loc2.equals(loc1)).isFalse();
+    assertThat(loc1.compareTo(loc2)).isEqualTo(-1);
+    assertThat(loc2.compareTo(loc1)).isEqualTo(1);
   }
 
   public void testComparisonOfEqualLocations4() {
@@ -109,10 +111,10 @@ public class SourceCodeLocationTest extends TestCase {
       new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
     SourceCodeLocation loc2 =
       new SourceCodeLocation(sourceCode, 0, 1, 1, 3, 1, 4);
-    assertFalse(loc1.equals(loc2));
-    assertFalse(loc2.equals(loc1));
-    assertEquals(-1, loc1.compareTo(loc2));
-    assertEquals(1, loc2.compareTo(loc1));
+    assertThat(loc1.equals(loc2)).isFalse();
+    assertThat(loc2.equals(loc1)).isFalse();
+    assertThat(loc1.compareTo(loc2)).isEqualTo(-1);
+    assertThat(loc2.compareTo(loc1)).isEqualTo(1);
   }
 
   public void testComparisonOfEqualLocations5() {
@@ -121,10 +123,10 @@ public class SourceCodeLocationTest extends TestCase {
       new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
     SourceCodeLocation loc2 =
       new SourceCodeLocation(sourceCode, 1, 1, 2, 2, 1, 3);
-    assertFalse(loc1.equals(loc2));
-    assertFalse(loc2.equals(loc1));
-    assertEquals(-1, loc1.compareTo(loc2));
-    assertEquals(1, loc2.compareTo(loc1));
+    assertThat(loc1.equals(loc2)).isFalse();
+    assertThat(loc2.equals(loc1)).isFalse();
+    assertThat(loc1.compareTo(loc2)).isEqualTo(-1);
+    assertThat(loc2.compareTo(loc1)).isEqualTo(1);
   }
 
   public void testComparisonOfEqualLocations6() {
@@ -134,8 +136,8 @@ public class SourceCodeLocationTest extends TestCase {
     SourceCode sourceCode2 = new SourceCode("testfile2", "abcdef");
     SourceCodeLocation loc2 =
       new SourceCodeLocation(sourceCode2, 0, 1, 1, 2, 1, 3);
-    assertFalse(loc1.equals(loc2));
-    assertFalse(loc2.equals(loc1));
+    assertThat(loc1.equals(loc2)).isFalse();
+    assertThat(loc2.equals(loc1)).isFalse();
   }
 
   public void testMergeTwo_sameFileInOrder() {

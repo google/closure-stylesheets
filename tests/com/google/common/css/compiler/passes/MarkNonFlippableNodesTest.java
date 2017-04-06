@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
 import com.google.common.css.compiler.ast.CssConditionalRuleNode;
 import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
@@ -53,14 +55,14 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
     CssRulesetNode ruleset =
         (CssRulesetNode) tree.getRoot().getBody().getChildren().get(0);
     // The ruleset itself has to be marked as flippable.
-    assertTrue(ruleset.getShouldBeFlipped());
+    assertThat(ruleset.getShouldBeFlipped()).isTrue();
 
     CssDeclarationBlockNode block = ruleset.getDeclarations();
-    assertEquals(2, block.getChildren().size());
+    assertThat(block.getChildren()).hasSize(2);
     // The first declaration has to be marked as not flippable.
-    assertFalse(block.getChildren().get(0).getShouldBeFlipped());
+    assertThat(block.getChildren().get(0).getShouldBeFlipped()).isFalse();
     // The second declaration has to be marked as flippable.
-    assertTrue(block.getChildren().get(1).getShouldBeFlipped());
+    assertThat(block.getChildren().get(1).getShouldBeFlipped()).isTrue();
   }
 
   public void testMarkNonFlippableRuleset() {
@@ -74,13 +76,13 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
     CssRulesetNode ruleset =
         (CssRulesetNode) tree.getRoot().getBody().getChildren().get(0);
     // The ruleset itself has to be marked as not flippable.
-    assertFalse(ruleset.getShouldBeFlipped());
+    assertThat(ruleset.getShouldBeFlipped()).isFalse();
 
     // All declaration in the ruleset have to be marked as flippable.
     CssDeclarationBlockNode block = ruleset.getDeclarations();
-    assertEquals(2, block.getChildren().size());
-    assertFalse(block.getChildren().get(0).getShouldBeFlipped());
-    assertFalse(block.getChildren().get(1).getShouldBeFlipped());
+    assertThat(block.getChildren()).hasSize(2);
+    assertThat(block.getChildren().get(0).getShouldBeFlipped()).isFalse();
+    assertThat(block.getChildren().get(1).getShouldBeFlipped()).isFalse();
   }
 
   public void testMarkNonFlippableConditional() {
@@ -97,19 +99,19 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
 
     CssConditionalBlockNode block =
         (CssConditionalBlockNode) tree.getRoot().getBody().getChildren().get(0);
-    assertFalse(block.getShouldBeFlipped());
+    assertThat(block.getShouldBeFlipped()).isFalse();
 
     // Check each of the conditional rules.
     for (CssConditionalRuleNode rule : block.getChildren()) {
-      assertFalse(rule.getShouldBeFlipped());
+      assertThat(rule.getShouldBeFlipped()).isFalse();
       // Check each of the rules inside the conditional rule.
       for (CssNode node : rule.getBlock().getChildren()) {
-        assertTrue(node instanceof CssRulesetNode);
-        assertFalse(node.getShouldBeFlipped());
+        assertThat(node).isInstanceOf(CssRulesetNode.class);
+        assertThat(node.getShouldBeFlipped()).isFalse();
         // Check each of the declarations inside the style rule.
         for (CssNode decl
             : ((CssRulesetNode) node).getDeclarations().getChildren()) {
-          assertFalse(decl.getShouldBeFlipped());
+          assertThat(decl.getShouldBeFlipped()).isFalse();
         }
       }
     }
@@ -129,47 +131,47 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
 
     CssConditionalBlockNode block =
         (CssConditionalBlockNode) tree.getRoot().getBody().getChildren().get(0);
-    assertTrue(block.getShouldBeFlipped());
+    assertThat(block.getShouldBeFlipped()).isTrue();
 
     // Check each of the conditional rules.
 
     // First conditional rule.
     CssConditionalRuleNode rule = block.getChildren().get(0);
-    assertTrue(rule.getShouldBeFlipped());
+    assertThat(rule.getShouldBeFlipped()).isTrue();
     // Check each of the rules inside the conditional rule.
     int i = 0;
     for (CssNode node : rule.getBlock().getChildren()) {
-      assertTrue(node instanceof CssRulesetNode);
+      assertThat(node).isInstanceOf(CssRulesetNode.class);
       if (i == 0) {
         // Only the first rule is non flippable.
-        assertFalse(node.getShouldBeFlipped());
+        assertThat(node.getShouldBeFlipped()).isFalse();
         i++;
         // Check each of the declarations inside the style rule.
         for (CssNode decl
             : ((CssRulesetNode) node).getDeclarations().getChildren()) {
-          assertFalse(decl.getShouldBeFlipped());
+          assertThat(decl.getShouldBeFlipped()).isFalse();
         }
       } else {
-        assertTrue(node.getShouldBeFlipped());
+        assertThat(node.getShouldBeFlipped()).isTrue();
         // Check each of the declarations inside the style rule.
         for (CssNode decl
             : ((CssRulesetNode) node).getDeclarations().getChildren()) {
-          assertTrue(decl.getShouldBeFlipped());
+          assertThat(decl.getShouldBeFlipped()).isTrue();
         }
       }
     }
 
     // Second conditional rule.
     rule = block.getChildren().get(1);
-    assertTrue(rule.getShouldBeFlipped());
+    assertThat(rule.getShouldBeFlipped()).isTrue();
     // Check each of the rules inside the conditional rule.
     for (CssNode node : rule.getBlock().getChildren()) {
-      assertTrue(node instanceof CssRulesetNode);
-      assertTrue(node.getShouldBeFlipped());
+      assertThat(node).isInstanceOf(CssRulesetNode.class);
+      assertThat(node.getShouldBeFlipped()).isTrue();
       // Check each of the declarations inside the style rule.
       for (CssNode decl
           : ((CssRulesetNode) node).getDeclarations().getChildren()) {
-        assertTrue(decl.getShouldBeFlipped());
+        assertThat(decl.getShouldBeFlipped()).isTrue();
       }
     }
   }
@@ -193,43 +195,43 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
     runPass();
 
     CssNode rule = tree.getRoot().getBody().getChildren().get(0);
-    assertTrue(rule instanceof CssMediaRuleNode);
-    assertFalse(rule.getShouldBeFlipped());
+    assertThat(rule).isInstanceOf(CssMediaRuleNode.class);
+    assertThat(rule.getShouldBeFlipped()).isFalse();
 
     // Check the rules inside the media rule.
     for (CssNode ruleset : ((CssMediaRuleNode) rule).getBlock().getChildren()) {
-      assertTrue(ruleset instanceof CssRulesetNode);
-      assertFalse(ruleset.getShouldBeFlipped());
+      assertThat(ruleset).isInstanceOf(CssRulesetNode.class);
+      assertThat(ruleset.getShouldBeFlipped()).isFalse();
       // Check the declarations inside the ruleset.
       for (CssNode decl
           : ((CssRulesetNode) ruleset).getDeclarations().getChildren()) {
-        assertFalse(decl.getShouldBeFlipped());
+        assertThat(decl.getShouldBeFlipped()).isFalse();
       }
     }
 
     // Check the second media rule.
     rule = tree.getRoot().getBody().getChildren().get(1);
-    assertTrue(rule instanceof CssMediaRuleNode);
-    assertTrue(rule.getShouldBeFlipped());
+    assertThat(rule).isInstanceOf(CssMediaRuleNode.class);
+    assertThat(rule.getShouldBeFlipped()).isTrue();
 
     for (CssNode ruleset : ((CssMediaRuleNode) rule).getBlock().getChildren()) {
-      assertTrue(ruleset instanceof CssRulesetNode);
-      assertFalse(ruleset.getShouldBeFlipped());
+      assertThat(ruleset).isInstanceOf(CssRulesetNode.class);
+      assertThat(ruleset.getShouldBeFlipped()).isFalse();
       // Check the declarations inside the ruleset.
       for (CssNode decl
           : ((CssRulesetNode) ruleset).getDeclarations().getChildren()) {
-        assertFalse(decl.getShouldBeFlipped());
+        assertThat(decl.getShouldBeFlipped()).isFalse();
       }
     }
 
     // Check the ruleset following the media rule.
     rule = tree.getRoot().getBody().getChildren().get(2);
-    assertTrue(rule instanceof CssRulesetNode);
-    assertTrue(rule.getShouldBeFlipped());
+    assertThat(rule).isInstanceOf(CssRulesetNode.class);
+    assertThat(rule.getShouldBeFlipped()).isTrue();
     // Check the declarations inside the ruleset.
     for (CssNode decl
         : ((CssRulesetNode) rule).getDeclarations().getChildren()) {
-      assertFalse(decl.getShouldBeFlipped());
+      assertThat(decl.getShouldBeFlipped()).isFalse();
     }
   }
 

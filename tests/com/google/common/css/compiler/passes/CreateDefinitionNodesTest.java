@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
@@ -34,26 +36,26 @@ public class CreateDefinitionNodesTest extends NewFunctionalTestBase {
 
   public void testCreateDefNode1() throws Exception {
     parseAndRun("@def X Y;");
-    assertTrue(getFirstActualNode() instanceof CssDefinitionNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssDefinitionNode.class);
     CssDefinitionNode def = (CssDefinitionNode) getFirstActualNode();
-    assertEquals("X", def.getName().getValue());
-    assertEquals(1, def.getParametersCount());
+    assertThat(def.getName().getValue()).isEqualTo("X");
+    assertThat(def.getParametersCount()).isEqualTo(1);
   }
 
   public void testBlockError() throws Exception {
     parseAndRun("@def X { a {b: c} }", "@def with block");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testNoNameError() throws Exception {
     parseAndRun("@def;", "@def without name");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testNameError() throws Exception {
     parseAndRun("@def 1px 2px 3px;",
         "@def without a valid literal as name");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testNameSyntacticallyInvalid() throws Exception {

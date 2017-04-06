@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
 import com.google.common.css.compiler.ast.CssMixinNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
@@ -37,14 +39,14 @@ public class CreateMixinsTest extends PassesTestBase{
 
   public void testCreateMixin() throws Exception {
     parseAndRun("div { @mixin test(10px, 20%); }");
-    assertTrue(getFirstActualNode() instanceof CssRulesetNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssRulesetNode.class);
     CssRulesetNode ruleset = (CssRulesetNode) getFirstActualNode();
-    assertEquals(1, ruleset.getDeclarations().numChildren());
-    assertTrue(ruleset.getDeclarations().getChildAt(0) instanceof CssMixinNode);
+    assertThat(ruleset.getDeclarations().numChildren()).isEqualTo(1);
+    assertThat(ruleset.getDeclarations().getChildAt(0)).isInstanceOf(CssMixinNode.class);
     CssMixinNode mixin =
         (CssMixinNode) ruleset.getDeclarations().getChildAt(0);
-    assertEquals("test", mixin.getDefinitionName());
-    assertEquals(3, mixin.getArguments().numChildren());
+    assertThat(mixin.getDefinitionName()).isEqualTo("test");
+    assertThat(mixin.getArguments().numChildren()).isEqualTo(3);
   }
 
   public void testMixinWithBlockError() throws Exception {
@@ -59,12 +61,12 @@ public class CreateMixinsTest extends PassesTestBase{
 
   public void testCreateMixinDefinition() throws Exception {
     parseAndRun("@defmixin test(A,B) { a:b }");
-    assertTrue(getFirstActualNode() instanceof CssMixinDefinitionNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssMixinDefinitionNode.class);
     CssMixinDefinitionNode mixinDefinition =
         (CssMixinDefinitionNode) getFirstActualNode();
-    assertEquals("test", mixinDefinition.getDefinitionName());
+    assertThat(mixinDefinition.getDefinitionName()).isEqualTo("test");
     // The comma counts as an argument.
-    assertEquals(3, mixinDefinition.getArguments().numChildren());
+    assertThat(mixinDefinition.getArguments().numChildren()).isEqualTo(3);
   }
 
   public void testMixinDefinitionWithoutBlockError() throws Exception {

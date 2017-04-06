@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssForLoopRuleNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssLoopVariableNode;
@@ -35,35 +37,35 @@ public class CreateForLoopNodesTest extends NewFunctionalTestBase {
 
   public void testCreateLoopNodeWithNumbers() throws Exception {
     parseAndRun("@for $i from 1 to 3 step 2 {}");
-    assertTrue(getFirstActualNode() instanceof CssForLoopRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssForLoopRuleNode.class);
     CssForLoopRuleNode loop = (CssForLoopRuleNode) getFirstActualNode();
-    assertEquals("1", loop.getFrom().toString());
-    assertEquals("3", loop.getTo().toString());
-    assertEquals("2", loop.getStep().toString());
+    assertThat(loop.getFrom().toString()).isEqualTo("1");
+    assertThat(loop.getTo().toString()).isEqualTo("3");
+    assertThat(loop.getStep().toString()).isEqualTo("2");
   }
 
   public void testCreateLoopNodeWithVariables() throws Exception {
     parseAndRun("@for $i from $x to $y step $z {}");
-    assertTrue(getFirstActualNode() instanceof CssForLoopRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssForLoopRuleNode.class);
     CssForLoopRuleNode loop = (CssForLoopRuleNode) getFirstActualNode();
-    assertTrue(loop.getFrom() instanceof CssLoopVariableNode);
-    assertEquals("$x", loop.getFrom().getValue());
-    assertTrue(loop.getTo() instanceof CssLoopVariableNode);
-    assertEquals("$y", loop.getTo().getValue());
-    assertTrue(loop.getStep() instanceof CssLoopVariableNode);
-    assertEquals("$z", loop.getStep().getValue());
+    assertThat(loop.getFrom()).isInstanceOf(CssLoopVariableNode.class);
+    assertThat(loop.getFrom().getValue()).isEqualTo("$x");
+    assertThat(loop.getTo()).isInstanceOf(CssLoopVariableNode.class);
+    assertThat(loop.getTo().getValue()).isEqualTo("$y");
+    assertThat(loop.getStep()).isInstanceOf(CssLoopVariableNode.class);
+    assertThat(loop.getStep().getValue()).isEqualTo("$z");
   }
 
   public void testCreateLoopNodeWithConstants() throws Exception {
     parseAndRun("@for $i from X to Y step Z {}");
-    assertTrue(getFirstActualNode() instanceof CssForLoopRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssForLoopRuleNode.class);
     CssForLoopRuleNode loop = (CssForLoopRuleNode) getFirstActualNode();
-    assertTrue(loop.getFrom() instanceof CssLiteralNode);
-    assertEquals("X", loop.getFrom().getValue());
-    assertTrue(loop.getTo() instanceof CssLiteralNode);
-    assertEquals("Y", loop.getTo().getValue());
-    assertTrue(loop.getStep() instanceof CssLiteralNode);
-    assertEquals("Z", loop.getStep().getValue());
+    assertThat(loop.getFrom()).isInstanceOf(CssLiteralNode.class);
+    assertThat(loop.getFrom().getValue()).isEqualTo("X");
+    assertThat(loop.getTo()).isInstanceOf(CssLiteralNode.class);
+    assertThat(loop.getTo().getValue()).isEqualTo("Y");
+    assertThat(loop.getStep()).isInstanceOf(CssLiteralNode.class);
+    assertThat(loop.getStep().getValue()).isEqualTo("Z");
   }
 
   public void testLoopWithoutBlock() throws Exception {

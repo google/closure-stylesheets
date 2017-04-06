@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.ast;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.testing.AstUtilityTestCase;
 
 /**
@@ -30,10 +32,10 @@ public class CssDeclarationNodeTest extends AstUtilityTestCase {
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
     CssDeclarationNode node = new CssDeclarationNode(propertyName);
 
-    assertNull(node.getParent());
-    assertNull(node.getSourceCodeLocation());
-    assertEquals(propertyName.toString(), node.getPropertyName().toString());
-    assertTrue(node.getPropertyValue().isEmpty());
+    assertThat(node.getParent()).isNull();
+    assertThat(node.getSourceCodeLocation()).isNull();
+    assertThat(node.getPropertyName().toString()).isEqualTo(propertyName.toString());
+    assertThat(node.getPropertyValue().isEmpty()).isTrue();
   }
 
   public void testCompleteDeclarationNodeCreation() {
@@ -45,10 +47,10 @@ public class CssDeclarationNodeTest extends AstUtilityTestCase {
     CssDeclarationNode node = new CssDeclarationNode(propertyName,
                                                      propertyValue);
 
-    assertNull(node.getParent());
-    assertNull(node.getSourceCodeLocation());
-    assertEquals(propertyValue, node.getPropertyValue());
-    assertEquals("color:[red]", node.toString());
+    assertThat(node.getParent()).isNull();
+    assertThat(node.getSourceCodeLocation()).isNull();
+    assertThat(node.getPropertyValue()).isEqualTo(propertyValue);
+    assertThat(node.toString()).isEqualTo("color:[red]");
   }
   
   public void testDeepCopyOfDeclarationNode() throws Exception {

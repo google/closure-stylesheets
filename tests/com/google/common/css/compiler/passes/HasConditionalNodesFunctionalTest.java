@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.FunctionalTestBase;
 
 /**
@@ -34,7 +36,7 @@ public class HasConditionalNodesFunctionalTest extends FunctionalTestBase {
         "  foo { top : expression('!cond') }",
         "}"));
     runPass();
-    assertEquals(true, passResult);
+    assertThat(passResult).isTrue();
   }
 
   public void testComplexTrue() {
@@ -54,7 +56,7 @@ public class HasConditionalNodesFunctionalTest extends FunctionalTestBase {
         "  }",
         "}"));
     runPass();
-    assertEquals(true, passResult);
+    assertThat(passResult).isTrue();
   }
 
   public void testSimpleFalse() {
@@ -72,7 +74,7 @@ public class HasConditionalNodesFunctionalTest extends FunctionalTestBase {
         ".CSS_RULE_3 { /* @noflip */top : expression('cond') }"
         ));
     runPass();
-    assertEquals(false, passResult);
+    assertThat(passResult).isFalse();
   }
 
   @Override

@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 /**
@@ -36,62 +38,62 @@ public class StrictCss3Test extends NewFunctionalTestBase {
 
   public void testPseudoClass1() throws Exception {
     parseAndRun("div :root {}");
-    assertEquals("div :root{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :root{}");
   }
 
   public void testPseudoClass2() throws Exception {
     parseAndRun("div :last-child {}");
-    assertEquals("div :last-child{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :last-child{}");
   }
 
   public void testPseudoClass3() throws Exception {
     parseAndRun("div :empty {}");
-    assertEquals("div :empty{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :empty{}");
   }
 
   public void testPseudoClass4() throws Exception {
     parseAndRun("div :checked {}");
-    assertEquals("div :checked{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :checked{}");
   }
 
   public void testPseudoElement1() throws Exception {
     parseAndRun("p ::first-line {}");
-    assertEquals("p ::first-line{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("p ::first-line{}");
   }
 
   public void testPseudoElement2() throws Exception {
     parseAndRun("h1 ::first-letter {}");
-    assertEquals("h1 ::first-letter{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("h1 ::first-letter{}");
   }
 
   public void testPseudoElement3() throws Exception {
     parseAndRun("div ::after {}");
-    assertEquals("div ::after{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div ::after{}");
   }
 
   public void testPseudoElement4() throws Exception {
     parseAndRun("div ::before {}");
-    assertEquals("div ::before{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div ::before{}");
   }
 
   public void testPseudoClassNth1() throws Exception {
     parseAndRun("ul :nth-child(5n+3) {}");
-    assertEquals("ul :nth-child(5n+3){}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("ul :nth-child(5n+3){}");
   }
 
   public void testPseudoClassNth2() throws Exception {
     parseAndRun("ol :nth-last-child(5) {}");
-    assertEquals("ol :nth-last-child(5){}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("ol :nth-last-child(5){}");
   }
 
   public void testPseudoClassNth3() throws Exception {
     parseAndRun("p :nth-of-type(odd) {}");
-    assertEquals("p :nth-of-type(odd){}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("p :nth-of-type(odd){}");
   }
 
   public void testPseudoClassNth4() throws Exception {
     parseAndRun("div :nth-last-of-type(-2n-3) {}");
-    assertEquals("div :nth-last-of-type(-2n-3){}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :nth-last-of-type(-2n-3){}");
   }
 
   public void testPseudoClassBad1() throws Exception {

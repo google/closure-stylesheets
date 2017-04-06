@@ -16,8 +16,9 @@
 
 package com.google.common.css.compiler.ast;
 
-import com.google.common.css.compiler.ast.CssFunctionNode.Function;
+import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.css.compiler.ast.CssFunctionNode.Function;
 import junit.framework.TestCase;
 
 /**
@@ -32,20 +33,20 @@ public class CssFunctionNodeTest extends TestCase {
 
   public void testConstructor() {
     CssFunctionNode function = new CssFunctionNode((Function) null, null);
-    assertNull(function.getFunction());
-    assertNull(function.getSourceCodeLocation());
-    assertNotNull(function.getArguments());
-    assertTrue(function.getArguments().getChildren().isEmpty());
+    assertThat(function.getFunction()).isNull();
+    assertThat(function.getSourceCodeLocation()).isNull();
+    assertThat(function.getArguments()).isNotNull();
+    assertThat(function.getArguments().getChildren()).isEmpty();
   }
   
   public void testFunctionName() {
     CssFunctionNode function = new CssFunctionNode(RGB, null);
-    assertNotNull(function.getFunction());
-    assertEquals(RGB, function.getFunction());
-    assertEquals("rgb", function.getFunctionName());
-    assertNull(function.getSourceCodeLocation());
-    assertNotNull(function.getArguments());
-    assertTrue(function.getArguments().getChildren().isEmpty());
+    assertThat(function.getFunction()).isNotNull();
+    assertThat(function.getFunction()).isEqualTo(RGB);
+    assertThat(function.getFunctionName()).isEqualTo("rgb");
+    assertThat(function.getSourceCodeLocation()).isNull();
+    assertThat(function.getArguments()).isNotNull();
+    assertThat(function.getArguments().getChildren()).isEmpty();
   }
   
   public void testFunctionArguments() {
@@ -53,13 +54,13 @@ public class CssFunctionNodeTest extends TestCase {
     CssFunctionArgumentsNode args = new CssFunctionArgumentsNode();
     args.addChildToBack(new CssLiteralNode("test"));
     function.setArguments(args);
-    assertNotNull(function.getFunction());
-    assertEquals(RGB, function.getFunction());
-    assertEquals("rgb", function.getFunctionName());
-    assertNull(function.getSourceCodeLocation());
-    assertNotNull(function.getArguments());
-    assertFalse(function.getArguments().getChildren().isEmpty());
-    assertEquals("rgb(test)", function.toString());
-    assertEquals("rgb(test)", function.getValue());
+    assertThat(function.getFunction()).isNotNull();
+    assertThat(function.getFunction()).isEqualTo(RGB);
+    assertThat(function.getFunctionName()).isEqualTo("rgb");
+    assertThat(function.getSourceCodeLocation()).isNull();
+    assertThat(function.getArguments()).isNotNull();
+    assertThat(function.getArguments().getChildren()).isNotEmpty();
+    assertThat(function.toString()).isEqualTo("rgb(test)");
+    assertThat(function.getValue()).isEqualTo("rgb(test)");
   }
 }

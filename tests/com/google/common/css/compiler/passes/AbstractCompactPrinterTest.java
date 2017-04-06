@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.base.Joiner;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.FunctionalTestBase;
@@ -67,6 +69,6 @@ public abstract class AbstractCompactPrinterTest extends FunctionalTestBase {
     CompactPrinter pass = new CompactPrinter(treeToCheck);
     pass.setPreserveMarkedComments(preserveMarkedComments);
     pass.runPass();
-    assertEquals(expected, pass.getCompactPrintedString());
+    assertThat(pass.getCompactPrintedString()).isEqualTo(expected);
   }
 }

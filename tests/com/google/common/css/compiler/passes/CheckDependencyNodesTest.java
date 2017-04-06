@@ -16,7 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.collect.ImmutableList;
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
@@ -42,8 +43,7 @@ public class CheckDependencyNodesTest extends NewFunctionalTestBase {
         "first.css", "@provide 'foo.bar';",
         "second.css", "@require 'foo.bar';");
     parseAndRun(fileNameToGss);
-    assertEquals(ImmutableList.of("foo.bar"),
-        processDependencyNodes.getProvidesInOrder());
+    assertThat(processDependencyNodes.getProvidesInOrder()).containsExactly("foo.bar");
   }
 
   public void testMissingProvide() throws GssParserException {
@@ -65,7 +65,8 @@ public class CheckDependencyNodesTest extends NewFunctionalTestBase {
         "fourth.css", "@provide 'buzz'; @require 'baz';",
         "fifth.css", "@require 'buzz';");
     parseAndRun(fileNameToGss);
-    assertEquals(ImmutableList.of("foo", "bar", "baz", "buzz"),
-        processDependencyNodes.getProvidesInOrder());
+    assertThat(processDependencyNodes.getProvidesInOrder())
+        .containsExactly("foo", "bar", "baz", "buzz")
+        .inOrder();
   }
 }

@@ -16,12 +16,13 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
-
 import java.util.List;
 
 /**
@@ -81,7 +82,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
-    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
   }
 
   public void testBaseCase2() throws GssParserException {
@@ -96,7 +99,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
-    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
   }
 
   public void testMissingRequire() throws GssParserException {
@@ -117,7 +122,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
-    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
   }
 
   public void testMissingRequireFromComponent() throws GssParserException {
@@ -141,7 +148,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
-    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
   }
 
   public void testMissingRequireOfComponent() throws GssParserException {
@@ -164,7 +173,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
-    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
   }
 
   public void testMissingRequireInDef() throws GssParserException {
@@ -184,7 +195,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
-    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
   }
 
   public void testMissingRequireDefMixin() throws GssParserException {
@@ -211,7 +224,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
-    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
   }
 
   public void testMissingOverrideSelectorNamespace() throws GssParserException {
@@ -233,7 +248,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
-    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
   }
 
   public void testMissingOverrideDefNamespace() throws GssParserException {
@@ -253,7 +270,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
     runPasses(errorManager);
     errorManager.generateReport();
-    assertTrue("Encountered all errors.", errorManager.hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
   }
 
 }

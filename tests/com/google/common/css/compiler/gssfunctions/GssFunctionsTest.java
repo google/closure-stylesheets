@@ -16,30 +16,27 @@
 
 package com.google.common.css.compiler.gssfunctions;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.ast.GssFunctionException;
-
+import java.util.Locale;
 import junit.framework.TestCase;
 
-import java.util.Locale;
-
 /**
- * Unit tests for {@link GssFunctions}. Specifically checks for correctness of
- * getCallResultString results from the GssFunctions since
- * {@link DefaultGssFunctionMapProviderTest} tests getCallResultNodes results.
+ * Unit tests for {@link GssFunctions}. Specifically checks for correctness of getCallResultString
+ * results from the GssFunctions since {@link DefaultGssFunctionMapProviderTest} tests
+ * getCallResultNodes results.
  *
  */
 public class GssFunctionsTest extends TestCase {
 
   public void testAddGetCallResultString() throws GssFunctionException {
     GssFunctions.AddToNumericValue funct = new GssFunctions.AddToNumericValue();
-    assertEquals("42px",
-        funct.getCallResultString(ImmutableList.of("12px", "30px")));
-    assertEquals("0px",
-        funct.getCallResultString(ImmutableList.of("10px", "-10px")));
-    assertEquals("22",
-        funct.getCallResultString(ImmutableList.of("10", "12")));
+    assertThat(funct.getCallResultString(ImmutableList.of("12px", "30px"))).isEqualTo("42px");
+    assertThat(funct.getCallResultString(ImmutableList.of("10px", "-10px"))).isEqualTo("0px");
+    assertThat(funct.getCallResultString(ImmutableList.of("10", "12"))).isEqualTo("22");
   }
 
   public void testAddGetCallResultString_mismatchedUnitsFail() {
@@ -50,12 +47,9 @@ public class GssFunctionsTest extends TestCase {
   public void testSubGetCallResultString() throws GssFunctionException {
     GssFunctions.SubtractFromNumericValue funct =
         new GssFunctions.SubtractFromNumericValue();
-    assertEquals("30px",
-        funct.getCallResultString(ImmutableList.of("60px", "30px")));
-    assertEquals("-30px",
-        funct.getCallResultString(ImmutableList.of("0px", "30px")));
-    assertEquals("-8",
-        funct.getCallResultString(ImmutableList.of("1", "9")));
+    assertThat(funct.getCallResultString(ImmutableList.of("60px", "30px"))).isEqualTo("30px");
+    assertThat(funct.getCallResultString(ImmutableList.of("0px", "30px"))).isEqualTo("-30px");
+    assertThat(funct.getCallResultString(ImmutableList.of("1", "9"))).isEqualTo("-8");
   }
 
   public void testSubGetCallResultString_mismatchedUnitsFail() {
@@ -66,30 +60,23 @@ public class GssFunctionsTest extends TestCase {
 
   public void testMultGetCallResultString() throws GssFunctionException {
     GssFunctions.Mult funct = new GssFunctions.Mult();
-    assertEquals("42px",
-        funct.getCallResultString(ImmutableList.of("21px", "2")));
-    assertEquals("-42px",
-        funct.getCallResultString(ImmutableList.of("21px", "-2")));
+    assertThat(funct.getCallResultString(ImmutableList.of("21px", "2"))).isEqualTo("42px");
+    assertThat(funct.getCallResultString(ImmutableList.of("21px", "-2"))).isEqualTo("-42px");
   }
 
   public void testMultGetCallResultString_noUnits() throws GssFunctionException {
     GssFunctions.Mult funct = new GssFunctions.Mult();
-    assertEquals("42",
-        funct.getCallResultString(ImmutableList.of("21", "2")));
-    assertEquals("-42",
-        funct.getCallResultString(ImmutableList.of("21", "-2")));
+    assertThat(funct.getCallResultString(ImmutableList.of("21", "2"))).isEqualTo("42");
+    assertThat(funct.getCallResultString(ImmutableList.of("21", "-2"))).isEqualTo("-42");
   }
 
   public void testDivGetCallResultString() throws GssFunctionException {
     GssFunctions.Div funct = new GssFunctions.Div();
-    assertEquals("30px",
-        funct.getCallResultString(ImmutableList.of("60px", "2")));
-    assertEquals("-30px",
-        funct.getCallResultString(ImmutableList.of("60px", "-2")));
-    assertEquals("103.06748466px",
-        funct.getCallResultString(ImmutableList.of("100800px", "978")));
-    assertEquals("15%",
-        funct.getCallResultString(ImmutableList.of("30%", "2")));
+    assertThat(funct.getCallResultString(ImmutableList.of("60px", "2"))).isEqualTo("30px");
+    assertThat(funct.getCallResultString(ImmutableList.of("60px", "-2"))).isEqualTo("-30px");
+    assertThat(funct.getCallResultString(ImmutableList.of("100800px", "978")))
+        .isEqualTo("103.06748466px");
+    assertThat(funct.getCallResultString(ImmutableList.of("30%", "2"))).isEqualTo("15%");
   }
 
 
@@ -97,8 +84,8 @@ public class GssFunctionsTest extends TestCase {
     Locale.setDefault(Locale.FRANCE);
     try {
       GssFunctions.Div funct = new GssFunctions.Div();
-      assertEquals("103.06748466px",
-          funct.getCallResultString(ImmutableList.of("100800px", "978")));
+      assertThat(funct.getCallResultString(ImmutableList.of("100800px", "978")))
+          .isEqualTo("103.06748466px");
     } finally {
       Locale.setDefault(Locale.US);
     }
@@ -106,22 +93,17 @@ public class GssFunctionsTest extends TestCase {
 
   public void testDivGetCallResultString_noUnits() throws GssFunctionException {
     GssFunctions.Div funct = new GssFunctions.Div();
-    assertEquals("30",
-        funct.getCallResultString(ImmutableList.of("60", "2")));
-    assertEquals("-30",
-        funct.getCallResultString(ImmutableList.of("60", "-2")));
-    assertEquals("103.06748466",
-        funct.getCallResultString(ImmutableList.of("100800", "978")));
+    assertThat(funct.getCallResultString(ImmutableList.of("60", "2"))).isEqualTo("30");
+    assertThat(funct.getCallResultString(ImmutableList.of("60", "-2"))).isEqualTo("-30");
+    assertThat(funct.getCallResultString(ImmutableList.of("100800", "978")))
+        .isEqualTo("103.06748466");
   }
 
   public void testMaxGetCallResultString() throws GssFunctionException {
     GssFunctions.MaxValue funct = new GssFunctions.MaxValue();
-    assertEquals("42px",
-        funct.getCallResultString(ImmutableList.of("42px", "-42px")));
-    assertEquals("0px",
-        funct.getCallResultString(ImmutableList.of("0px", "0px")));
-    assertEquals("11",
-        funct.getCallResultString(ImmutableList.of("-1", "11")));
+    assertThat(funct.getCallResultString(ImmutableList.of("42px", "-42px"))).isEqualTo("42px");
+    assertThat(funct.getCallResultString(ImmutableList.of("0px", "0px"))).isEqualTo("0px");
+    assertThat(funct.getCallResultString(ImmutableList.of("-1", "11"))).isEqualTo("11");
   }
 
   public void testMaxGetCallResultString_mismatchedUnitsFail() {
@@ -131,12 +113,9 @@ public class GssFunctionsTest extends TestCase {
 
   public void testMinGetCallResultString() throws GssFunctionException {
     GssFunctions.MinValue funct = new GssFunctions.MinValue();
-    assertEquals("-42px",
-        funct.getCallResultString(ImmutableList.of("42px", "-42px")));
-    assertEquals("0px",
-        funct.getCallResultString(ImmutableList.of("0px", "0px")));
-    assertEquals("5",
-        funct.getCallResultString(ImmutableList.of("5", "10")));
+    assertThat(funct.getCallResultString(ImmutableList.of("42px", "-42px"))).isEqualTo("-42px");
+    assertThat(funct.getCallResultString(ImmutableList.of("0px", "0px"))).isEqualTo("0px");
+    assertThat(funct.getCallResultString(ImmutableList.of("5", "10"))).isEqualTo("5");
   }
 
   public void testMinGetCallResultString_mismatchedUnitsFail() {
@@ -160,34 +139,32 @@ public class GssFunctionsTest extends TestCase {
     GssFunctions.MakeTranslucent function = new GssFunctions.MakeTranslucent();
     // Check alpha conversion. Note that .25 and .5 are not exactly
     // representable.
-    assertEquals("rgba(255,255,255,1)",
-        function.getCallResultString(ImmutableList.of("#fff", "1")));
-    assertEquals("rgba(255,255,255,0.251)",
-        function.getCallResultString(ImmutableList.of("#fff", "0.25")));
-    assertEquals("rgba(255,255,255,0.502)",
-        function.getCallResultString(ImmutableList.of("#fff", "0.5")));
-    assertEquals("rgba(255,255,255,0)",
-        function.getCallResultString(ImmutableList.of("#fff", "0")));
+    assertThat(function.getCallResultString(ImmutableList.of("#fff", "1")))
+        .isEqualTo("rgba(255,255,255,1)");
+    assertThat(function.getCallResultString(ImmutableList.of("#fff", "0.25")))
+        .isEqualTo("rgba(255,255,255,0.251)");
+    assertThat(function.getCallResultString(ImmutableList.of("#fff", "0.5")))
+        .isEqualTo("rgba(255,255,255,0.502)");
+    assertThat(function.getCallResultString(ImmutableList.of("#fff", "0")))
+        .isEqualTo("rgba(255,255,255,0)");
 
     // Check that RGB values are preserved
-    assertEquals("rgba(0,0,0,1)",
-        function.getCallResultString(ImmutableList.of("#000", "1")));
-    assertEquals("rgba(17,34,51,1)",
-        function.getCallResultString(ImmutableList.of("#123", "1")));
+    assertThat(function.getCallResultString(ImmutableList.of("#000", "1")))
+        .isEqualTo("rgba(0,0,0,1)");
+    assertThat(function.getCallResultString(ImmutableList.of("#123", "1")))
+        .isEqualTo("rgba(17,34,51,1)");
 
     // Check various input formats
-    assertEquals("rgba(16,32,48,0.251)",
-        function.getCallResultString(ImmutableList.of("#102030", ".251")));
-    assertEquals("rgba(255,0,0,0.251)",
-        function.getCallResultString(ImmutableList.of("red", ".251")));
-    assertEquals("rgba(1,2,3,0.251)",
-        function.getCallResultString(ImmutableList.of("rgb(1, 2, 3)", ".251")));
-    assertEquals("rgba(1,2,3,0.251)",
-        function.getCallResultString(
-            ImmutableList.of("rgba(1, 2, 3, 0)", ".251")));
-    assertEquals("rgba(1,2,3,0.2)",
-        function.getCallResultString(
-            ImmutableList.of("rgba(1, 2, 3, .7)", ".2")));
+    assertThat(function.getCallResultString(ImmutableList.of("#102030", ".251")))
+        .isEqualTo("rgba(16,32,48,0.251)");
+    assertThat(function.getCallResultString(ImmutableList.of("red", ".251")))
+        .isEqualTo("rgba(255,0,0,0.251)");
+    assertThat(function.getCallResultString(ImmutableList.of("rgb(1, 2, 3)", ".251")))
+        .isEqualTo("rgba(1,2,3,0.251)");
+    assertThat(function.getCallResultString(ImmutableList.of("rgba(1, 2, 3, 0)", ".251")))
+        .isEqualTo("rgba(1,2,3,0.251)");
+    assertThat(function.getCallResultString(ImmutableList.of("rgba(1, 2, 3, .7)", ".2")))
+        .isEqualTo("rgba(1,2,3,0.2)");
   }
 
 
@@ -196,9 +173,8 @@ public class GssFunctionsTest extends TestCase {
     try {
 
       GssFunctions.MakeTranslucent function = new GssFunctions.MakeTranslucent();
-      assertEquals(
-          "rgba(16,32,48,0.251)",
-          function.getCallResultString(ImmutableList.of("#102030", ".251")));
+      assertThat(function.getCallResultString(ImmutableList.of("#102030", ".251")))
+          .isEqualTo("rgba(16,32,48,0.251)");
     } finally {
       Locale.setDefault(Locale.US);
     }
@@ -206,84 +182,78 @@ public class GssFunctionsTest extends TestCase {
 
   public void testSaturateColor() throws GssFunctionException {
     GssFunctions.SaturateColor function = new GssFunctions.SaturateColor();
-    assertEquals("#4671EC",
-        function.getCallResultString(ImmutableList.of("#5a7bd8", "20")));
+    assertThat(function.getCallResultString(ImmutableList.of("#5a7bd8", "20")))
+        .isEqualTo("#4671EC");
     // saturation of #80e619 is 80. Adding 20 (to set saturation to 100%)
     // or more return the same result
-    assertEquals("#80FF00",
-        function.getCallResultString(ImmutableList.of("#80e619", "20")));
-    assertEquals("#80FF00",
-        function.getCallResultString(ImmutableList.of("#80e619", "50")));
-    assertEquals("#80FF00",
-        function.getCallResultString(ImmutableList.of("#80e619", "100")));
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "20")))
+        .isEqualTo("#80FF00");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "50")))
+        .isEqualTo("#80FF00");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "100")))
+        .isEqualTo("#80FF00");
   }
 
   public void testDesaturateColor() throws GssFunctionException {
     GssFunctions.DesaturateColor function = new GssFunctions.DesaturateColor();
-    assertEquals("#6E85C4",
-        function.getCallResultString(ImmutableList.of("#5a7bd8", "20")));
-    assertEquals("#80CD32",
-        function.getCallResultString(ImmutableList.of("#80e619", "20")));
+    assertThat(function.getCallResultString(ImmutableList.of("#5a7bd8", "20")))
+        .isEqualTo("#6E85C4");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "20")))
+        .isEqualTo("#80CD32");
     // saturation of #80e619 is 80.4. Removing 81 (to set saturation to 0%)
     // or more return the same result
-    assertEquals("#808080",
-        function.getCallResultString(ImmutableList.of("#80e619", "81")));
-    assertEquals("#808080",
-        function.getCallResultString(ImmutableList.of("#80e619", "100")));
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "81")))
+        .isEqualTo("#808080");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "100")))
+        .isEqualTo("#808080");
   }
 
   public void testGreyscale() throws GssFunctionException {
     GssFunctions.Greyscale function = new GssFunctions.Greyscale();
-    assertEquals("#999999",
-        function.getCallResultString(ImmutableList.of("#5a7bd8")));
-    assertEquals("#808080",
-        function.getCallResultString(ImmutableList.of("#80e619")));
+    assertThat(function.getCallResultString(ImmutableList.of("#5a7bd8"))).isEqualTo("#999999");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619"))).isEqualTo("#808080");
   }
 
   public void testLighten() throws GssFunctionException {
     GssFunctions.Lighten function = new GssFunctions.Lighten();
-    assertEquals("#839CE2",
-        function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
-    assertEquals("#B3F075",
-        function.getCallResultString(ImmutableList.of("#80e619", "20")));
+    assertThat(function.getCallResultString(ImmutableList.of("#5a7bd8", "10")))
+        .isEqualTo("#839CE2");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "20")))
+        .isEqualTo("#B3F075");
     // lightness of #80e619 is 50. Adding 50 (to set lightness to 100%
     // which is white) or more return the same result
-    assertEquals("#FFFFFF",
-        function.getCallResultString(ImmutableList.of("#80e619", "50")));
-    assertEquals("#FFFFFF",
-        function.getCallResultString(ImmutableList.of("#80e619", "60")));
-    assertEquals("#FFFFFF",
-        function.getCallResultString(ImmutableList.of("#80e619", "100")));
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "50")))
+        .isEqualTo("#FFFFFF");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "60")))
+        .isEqualTo("#FFFFFF");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "100")))
+        .isEqualTo("#FFFFFF");
   }
 
   public void testDarken() throws GssFunctionException {
     GssFunctions.Darken function = new GssFunctions.Darken();
-    assertEquals("#315ACE",
-        function.getCallResultString(ImmutableList.of("#5a7bd8", "10")));
-    assertEquals("#4D8A0F",
-        function.getCallResultString(ImmutableList.of("#80e619", "20")));
+    assertThat(function.getCallResultString(ImmutableList.of("#5a7bd8", "10")))
+        .isEqualTo("#315ACE");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "20")))
+        .isEqualTo("#4D8A0F");
     // lightness of #80e619 is 50. Removing 50 (to set lightness to 0%
     // which is black) or more return the same result
-    assertEquals("#000000",
-        function.getCallResultString(ImmutableList.of("#80e619", "50")));
-    assertEquals("#000000",
-        function.getCallResultString(ImmutableList.of("#80e619", "60")));
-    assertEquals("#000000",
-        function.getCallResultString(ImmutableList.of("#80e619", "100")));
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "50")))
+        .isEqualTo("#000000");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "60")))
+        .isEqualTo("#000000");
+    assertThat(function.getCallResultString(ImmutableList.of("#80e619", "100")))
+        .isEqualTo("#000000");
   }
 
   public void testSpin() throws GssFunctionException {
     GssFunctions.Spin function = new GssFunctions.Spin();
     String color = "#F2330D";
-    assertEquals("#F2A60D",
-        function.getCallResultString(ImmutableList.of(color, "30")));
-    assertEquals("#F20D5A",
-        function.getCallResultString(ImmutableList.of(color, "-30")));
+    assertThat(function.getCallResultString(ImmutableList.of(color, "30"))).isEqualTo("#F2A60D");
+    assertThat(function.getCallResultString(ImmutableList.of(color, "-30"))).isEqualTo("#F20D5A");
     // Value of Hue is modulo 360
-    assertEquals(color,
-        function.getCallResultString(ImmutableList.of(color, "360")));
-    assertEquals(color,
-        function.getCallResultString(ImmutableList.of(color, "-360")));
+    assertThat(function.getCallResultString(ImmutableList.of(color, "360"))).isEqualTo(color);
+    assertThat(function.getCallResultString(ImmutableList.of(color, "-360"))).isEqualTo(color);
   }
 
   /*
@@ -301,14 +271,14 @@ public class GssFunctionsTest extends TestCase {
 
   public void testConcat() throws Exception {
     GssFunctions.Concat funct = new GssFunctions.Concat();
-    assertEquals("'ab'", funct.getCallResultString(ImmutableList.of("a", "b")));
-    assertEquals("'a'", funct.getCallResultString(ImmutableList.of("a")));
-    assertEquals("'a'", funct.getCallResultString(ImmutableList.of("'a'")));
-    assertEquals("'a'", funct.getCallResultString(ImmutableList.of("\"a\"")));
-    assertEquals("'abc'", funct.getCallResultString(ImmutableList.of("a", "b", "c")));
-    assertEquals("''", funct.getCallResultString(ImmutableList.<String>of()));
-    assertEquals("'ab'", funct.getCallResultString(ImmutableList.of("'a'", "'b'")));
-    assertEquals("'\"'", funct.getCallResultString(ImmutableList.of("'\"'")));
-    assertEquals("'\\''", funct.getCallResultString(ImmutableList.of("'")));
+    assertThat(funct.getCallResultString(ImmutableList.of("a", "b"))).isEqualTo("'ab'");
+    assertThat(funct.getCallResultString(ImmutableList.of("a"))).isEqualTo("'a'");
+    assertThat(funct.getCallResultString(ImmutableList.of("'a'"))).isEqualTo("'a'");
+    assertThat(funct.getCallResultString(ImmutableList.of("\"a\""))).isEqualTo("'a'");
+    assertThat(funct.getCallResultString(ImmutableList.of("a", "b", "c"))).isEqualTo("'abc'");
+    assertThat(funct.getCallResultString(ImmutableList.<String>of())).isEqualTo("''");
+    assertThat(funct.getCallResultString(ImmutableList.of("'a'", "'b'"))).isEqualTo("'ab'");
+    assertThat(funct.getCallResultString(ImmutableList.of("'\"'"))).isEqualTo("'\"'");
+    assertThat(funct.getCallResultString(ImmutableList.of("'"))).isEqualTo("'\\''");
   }
 }

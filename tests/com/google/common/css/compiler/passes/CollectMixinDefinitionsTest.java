@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
-
 import java.util.Map;
 
 /**
@@ -42,7 +41,7 @@ public class CollectMixinDefinitionsTest extends PassesTestBase {
         "@defmixin test1(PAR1, PAR2) { width: PAR1; height: PAR2; }",
         "@defmixin test2() {}",
         "@defmixin test3(PAR1) { color: PAR1; }"));
-    assertNotNull(definitions);
+    assertThat(definitions).isNotNull();
     assertThat(definitions.keySet()).containsExactly("test1", "test2", "test3");
   }
 

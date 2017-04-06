@@ -16,6 +16,7 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -102,7 +103,7 @@ public class CssClassRenamingTest extends TestCase {
     CssClassRenaming pass = new CssClassRenaming(
         tree.getMutatingVisitController(), classMap, null);
     pass.runPass();
-    assertEquals("[[.CSS_FOO_]{[]}]", AstPrinter.print(tree));
+    assertThat(AstPrinter.print(tree)).isEqualTo("[[.CSS_FOO_]{[]}]");
   }
 
   public void testEnterIdRefiner() {
@@ -131,6 +132,6 @@ public class CssClassRenamingTest extends TestCase {
     CssClassRenaming pass
         = new CssClassRenaming(tree.getMutatingVisitController(), null, idMap);
     pass.runPass();
-    assertEquals("[[#ID_FOO_]{[]}]", AstPrinter.print(tree));
+    assertThat(AstPrinter.print(tree)).isEqualTo("[[#ID_FOO_]{[]}]");
   }
 }

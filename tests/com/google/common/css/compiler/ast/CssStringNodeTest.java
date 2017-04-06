@@ -16,10 +16,11 @@
 
 package com.google.common.css.compiler.ast;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.base.Functions;
-
 import junit.framework.TestCase;
 
 /**
@@ -32,7 +33,7 @@ public class CssStringNodeTest extends TestCase {
     for (CssStringNode.Type t : CssStringNode.Type.values()) {
       CssStringNode n = new CssStringNode(t, v);
       n.setValue(v);
-      assertEquals(v, n.getValue());
+      assertThat(n.getValue()).isEqualTo(v);
     }
   }
 
@@ -48,7 +49,7 @@ public class CssStringNodeTest extends TestCase {
         CssStringNode.Type.DOUBLE_QUOTED_STRING, v);
     String v2 = n.getValue();
     n.setValue(v2);
-    assertEquals(v2, n.getValue());
+    assertThat(n.getValue()).isEqualTo(v2);
   }
 
   public void testConcreteRoundtrip() throws Exception {
@@ -74,7 +75,7 @@ public class CssStringNodeTest extends TestCase {
     for (CssStringNode.Type t : CssStringNode.Type.values()) {
       CssStringNode n = new CssStringNode(t, v);
       n.setConcreteValue(v);
-      assertEquals(v, n.getConcreteValue());
+      assertThat(n.getConcreteValue()).isEqualTo(v);
     }
   }
 
@@ -92,7 +93,7 @@ public class CssStringNodeTest extends TestCase {
             new byte[] {(byte) 0xf0, (byte) 0xa0, (byte) 0x8d, (byte) 0xb1},
             UTF_8),
          "\\20371"}}) {
-      assertEquals(io[1], CssStringNode.SHORT_ESCAPER.apply(io[0]));
+      assertThat(CssStringNode.SHORT_ESCAPER.apply(io[0])).isEqualTo(io[1]);
     }
     // Six-hexadecimal-digit codepoints aren't allowed
     // leading-zeros-padding. This is also an interesting case because
@@ -100,13 +101,10 @@ public class CssStringNodeTest extends TestCase {
     // represents codepoints in this range as surrogate pairs.  Let's
     // use UTF-8 to specify the input because it's simpler:
     byte[] puabUtf8 = {(byte) 0xf4, (byte) 0x80, (byte) 0x80, (byte) 0x80};
-    assertEquals("\\100000",
-                 CssStringNode.SHORT_ESCAPER.apply(
-                     new String(puabUtf8, UTF_8)));
-    assertEquals("\\100000a",
-                 CssStringNode.SHORT_ESCAPER.apply(
-                     String.format("%sa",
-                                   new String(puabUtf8, UTF_8))));
+    assertThat(CssStringNode.SHORT_ESCAPER.apply(new String(puabUtf8, UTF_8)))
+        .isEqualTo("\\100000");
+    assertThat(CssStringNode.SHORT_ESCAPER.apply(String.format("%sa", new String(puabUtf8, UTF_8))))
+        .isEqualTo("\\100000a");
   }
 
   public void testInsertsIgnoredWhitespaceAfterEscape() throws Exception {
@@ -120,28 +118,28 @@ public class CssStringNodeTest extends TestCase {
     for (CssStringNode.Type type : CssStringNode.Type.values()) {
       // We produce escape sequences in three cases:
       // (1) newline
-      assertEquals(
-          String.format(cssTemplate, "\\00000a", type.getClass().getName()),
-          CssStringNode.escape(
-              type,
-              CssStringNode.HTML_ESCAPER,
-              String.format(stringTemplate, "\n", type.getClass().getName())));
+      assertThat(
+              CssStringNode.escape(
+                  type,
+                  CssStringNode.HTML_ESCAPER,
+                  String.format(stringTemplate, "\n", type.getClass().getName())))
+          .isEqualTo(String.format(cssTemplate, "\\00000a", type.getClass().getName()));
 
       // (2) no CSS literal representation exists
-      assertEquals(
-          String.format(cssTemplate, "\\a4", type.getClass().getName()),
-          CssStringNode.escape(
-              type,
-              CssStringNode.SHORT_ESCAPER,
-              String.format(stringTemplate, "¤", type.getClass().getName())));
+      assertThat(
+              CssStringNode.escape(
+                  type,
+                  CssStringNode.SHORT_ESCAPER,
+                  String.format(stringTemplate, "¤", type.getClass().getName())))
+          .isEqualTo(String.format(cssTemplate, "\\a4", type.getClass().getName()));
 
       // (3) HTML/SGML special character when using the HTML_ESCAPER
-      assertEquals(
-          String.format(cssTemplate, "\\00003c", type.getClass().getName()),
-          CssStringNode.escape(
-              type,
-              CssStringNode.HTML_ESCAPER,
-              String.format(stringTemplate, "<", type.getClass().getName())));
+      assertThat(
+              CssStringNode.escape(
+                  type,
+                  CssStringNode.HTML_ESCAPER,
+                  String.format(stringTemplate, "<", type.getClass().getName())))
+          .isEqualTo(String.format(cssTemplate, "\\00003c", type.getClass().getName()));
     }
   }
 
@@ -159,13 +157,13 @@ public class CssStringNodeTest extends TestCase {
             new byte[] {(byte) 0xf0, (byte) 0xa0, (byte) 0x8d, (byte) 0xb1},
             UTF_8),
          "\\020371"}}) {
-      assertEquals(io[1], CssStringNode.HTML_ESCAPER.apply(io[0]));
+      assertThat(CssStringNode.HTML_ESCAPER.apply(io[0])).isEqualTo(io[1]);
     }
-    assertEquals("\\000026", CssStringNode.HTML_ESCAPER.apply("&"));
-    assertEquals("\\00003c", CssStringNode.HTML_ESCAPER.apply("<"));
-    assertEquals("\\00003e", CssStringNode.HTML_ESCAPER.apply(">"));
-    assertEquals("\\000022", CssStringNode.HTML_ESCAPER.apply("\""));
-    assertEquals("\\000027", CssStringNode.HTML_ESCAPER.apply("'"));
+    assertThat(CssStringNode.HTML_ESCAPER.apply("&")).isEqualTo("\\000026");
+    assertThat(CssStringNode.HTML_ESCAPER.apply("<")).isEqualTo("\\00003c");
+    assertThat(CssStringNode.HTML_ESCAPER.apply(">")).isEqualTo("\\00003e");
+    assertThat(CssStringNode.HTML_ESCAPER.apply("\"")).isEqualTo("\\000022");
+    assertThat(CssStringNode.HTML_ESCAPER.apply("'")).isEqualTo("\\000027");
   }
 
   public void testEscape() throws Exception {
@@ -176,17 +174,17 @@ public class CssStringNodeTest extends TestCase {
         {"19\\3=6", "19\\\\3=6"},
         {"say \"hello\"", "say \\\"hello\\\""},
         {"say 'goodbye'", "say 'goodbye'"}}) {
-      assertEquals(
-          io[1],
-          CssStringNode.escape(
-              CssStringNode.Type.DOUBLE_QUOTED_STRING,
-              Functions.<String>identity(), io[0]));
+      assertThat(
+              CssStringNode.escape(
+                  CssStringNode.Type.DOUBLE_QUOTED_STRING, Functions.<String>identity(), io[0]))
+          .isEqualTo(io[1]);
     }
-    assertEquals(
-        "say \\'goodbye\\'",
-        CssStringNode.escape(
-            CssStringNode.Type.SINGLE_QUOTED_STRING,
-            Functions.<String>identity(), "say 'goodbye'"));
+    assertThat(
+            CssStringNode.escape(
+                CssStringNode.Type.SINGLE_QUOTED_STRING,
+                Functions.<String>identity(),
+                "say 'goodbye'"))
+        .isEqualTo("say \\'goodbye\\'");
   }
 
   public void testUnescape() throws Exception {
@@ -216,16 +214,14 @@ public class CssStringNodeTest extends TestCase {
         {"\\020371", new String(
             new byte[] {(byte) 0xf0, (byte) 0xa0, (byte) 0x8d, (byte) 0xb1},
             UTF_8)}}) {
-      assertEquals(io[1], CssStringNode.unescape(io[0]));
+      assertThat(CssStringNode.unescape(io[0])).isEqualTo(io[1]);
     }
 
     // Now let's look at a character that requires a max-length escape
     // code in CSS and use of surrogate pairs in the JVM
     byte[] puabUtf8 = {(byte) 0xf4, (byte) 0x80, (byte) 0x80, (byte) 0x80};
-    assertEquals(new String(puabUtf8, UTF_8),
-                 CssStringNode.unescape("\\100000"));
-    assertEquals(new String(puabUtf8, UTF_8) + "a",
-                 CssStringNode.unescape("\\100000a"));
+    assertThat(CssStringNode.unescape("\\100000")).isEqualTo(new String(puabUtf8, UTF_8));
+    assertThat(CssStringNode.unescape("\\100000a")).isEqualTo(new String(puabUtf8, UTF_8) + "a");
 
     // Here's an escape sequence denoting a code point beyond the Java
     // char/String repertoire. According to CSS 2.1, we can replace the
@@ -243,31 +239,30 @@ public class CssStringNodeTest extends TestCase {
         CssStringNode.Type.DOUBLE_QUOTED_STRING, "foo");
     a.setConcreteValue("\\0066oobar");
     CssStringNode b = new CssStringNode(a);
-    assertEquals("\\0066oobar", a.getConcreteValue());
-    assertEquals(a.getConcreteValue(), b.getConcreteValue());
-    assertEquals(a.getValue(), b.getValue());
+    assertThat(a.getConcreteValue()).isEqualTo("\\0066oobar");
+    assertThat(b.getConcreteValue()).isEqualTo(a.getConcreteValue());
+    assertThat(b.getValue()).isEqualTo(a.getValue());
   }
 
   public void testStringCannotDirectlyContainNewline() {
     // See http://www.w3.org/TR/CSS2/syndata.html#strings
     CssStringNode a = new CssStringNode(
         CssStringNode.Type.SINGLE_QUOTED_STRING, "line1\nline2");
-    assertTrue(
-        "We should support the Java String representation of newlines.",
-        a.getValue().contains("\n"));
-    assertFalse(
-        "If we set a Java newline, it should be escaped in the"
-        + " generated concrete value.",
-        a.getConcreteValue().contains("\n"));
-    assertFalse(
-        "If we ask for CSS markup, we should escape newlines per the"
-        + " CSS spec.",
-        a.toString(CssStringNode.HTML_ESCAPER).contains("\n"));
-    assertTrue(
-        "Escaping a new line shouldn't affect the left hand side",
-        a.toString(CssStringNode.HTML_ESCAPER).startsWith("'line1"));
-    assertTrue(
-        "Escaping a new line shouldn't affect the right-hand side",
-        a.toString(CssStringNode.HTML_ESCAPER).endsWith("line2'"));
+    assertWithMessage("We should support the Java String representation of newlines.")
+        .that(a.getValue().contains("\n"))
+        .isTrue();
+    assertWithMessage(
+            "If we set a Java newline, it should be escaped in the" + " generated concrete value.")
+        .that(a.getConcreteValue().contains("\n"))
+        .isFalse();
+    assertWithMessage("If we ask for CSS markup, we should escape newlines per the" + " CSS spec.")
+        .that(a.toString(CssStringNode.HTML_ESCAPER).contains("\n"))
+        .isFalse();
+    assertWithMessage("Escaping a new line shouldn't affect the left hand side")
+        .that(a.toString(CssStringNode.HTML_ESCAPER).startsWith("'line1"))
+        .isTrue();
+    assertWithMessage("Escaping a new line shouldn't affect the right-hand side")
+        .that(a.toString(CssStringNode.HTML_ESCAPER).endsWith("line2'"))
+        .isTrue();
   }
 }

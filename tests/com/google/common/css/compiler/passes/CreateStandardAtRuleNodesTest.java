@@ -16,6 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.css.compiler.ast.CssFontFaceNode;
@@ -44,48 +47,47 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
 
   public void testCharsetRemoval() throws Exception {
     parseAndRun("@charset \"x\";", "@charset removed");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testCreateSimpleImportNode() throws Exception {
     parseAndRun("@import \"name\" ;");
     CssImportRuleNode importRule = findFirstNodeOf(CssImportRuleNode.class);
-    assertEquals("import", importRule.getName().getValue());
-    assertEquals(1, importRule.getParametersCount());
-    assertTrue(
-        "Import rules should occur in the import block.",
-        Iterables.any(
-            importRule.ancestors(),
-            Predicates.instanceOf(CssImportBlockNode.class)));
+    assertThat(importRule.getName().getValue()).isEqualTo("import");
+    assertThat(importRule.getParametersCount()).isEqualTo(1);
+    assertWithMessage("Import rules should occur in the import block.")
+        .that(
+            Iterables.any(importRule.ancestors(), Predicates.instanceOf(CssImportBlockNode.class)))
+        .isTrue();
   }
 
   public void testCreateUriImportNode() throws Exception {
     parseAndRun("@import url('/js/closure/css/common.css');");
     CssImportRuleNode importRule = findFirstNodeOf(CssImportRuleNode.class);
-    assertEquals("import", importRule.getName().getValue());
-    assertEquals(1, importRule.getParametersCount());
+    assertThat(importRule.getName().getValue()).isEqualTo("import");
+    assertThat(importRule.getParametersCount()).isEqualTo(1);
   }
 
   public void testCreateComplexImportNode() throws Exception {
     parseAndRun("@import \"name\" param1, param2, param3;");
     CssImportRuleNode importRule = findFirstNodeOf(CssImportRuleNode.class);
-    assertEquals("import", importRule.getName().getValue());
-    assertEquals(2, importRule.getParametersCount());
+    assertThat(importRule.getName().getValue()).isEqualTo("import");
+    assertThat(importRule.getParametersCount()).isEqualTo(2);
   }
 
   public void testImportWithoutParamError() throws Exception {
     parseAndRun("@import ;", "@import without a following string or uri");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testImportWithWrongParamError() throws Exception {
     parseAndRun("@import abc;", "@import's first parameter has to be a string or an url");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testImportWithTooManyParamsError() throws Exception {
     parseAndRun("@import \"A\" b c,d;" , "@import with too many parameters");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testMisplacedImportWarnings() throws Exception {
@@ -110,27 +112,25 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
 
   public void testPrintableImports() throws Exception {
     String css = "@import url('foo');div{font-family:sans}";
-    assertEquals(
-        css,
-        CompactPrinter.printCompactly(parseAndRun(css).getRoot()));
+    assertThat(CompactPrinter.printCompactly(parseAndRun(css).getRoot())).isEqualTo(css);
   }
 
   public void testCreateMediaNode1() throws Exception {
     parseAndRun("@media a, b, c { e.f { a:b } } ");
-    assertTrue(getFirstActualNode() instanceof CssMediaRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssMediaRuleNode.class);
     CssMediaRuleNode mediaRule = (CssMediaRuleNode) getFirstActualNode();
-    assertEquals("media", mediaRule.getName().getValue());
-    assertEquals(1, mediaRule.getParametersCount());
+    assertThat(mediaRule.getName().getValue()).isEqualTo("media");
+    assertThat(mediaRule.getParametersCount()).isEqualTo(1);
   }
 
   public void testCreateMediaNode2() throws Exception {
     parseAndRun("@media not screen { e.f { a:b } } ");
-    assertTrue(getFirstActualNode() instanceof CssMediaRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssMediaRuleNode.class);
   }
 
   public void testCreateMediaNode3() throws Exception {
     parseAndRun("@media only screen { e.f { a:b } } ");
-    assertTrue(getFirstActualNode() instanceof CssMediaRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssMediaRuleNode.class);
   }
 
   public void testCreateMediaNode4() throws Exception {
@@ -138,7 +138,7 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
         + "tv and (scan:progressive),"
         + "handheld and grid and (max-width:15em)"
         + "{ e.f { a:b } } ");
-    assertTrue(getFirstActualNode() instanceof CssMediaRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssMediaRuleNode.class);
   }
 
   public void testCreateMediaNodeWithConditional() throws Exception {
@@ -146,49 +146,49 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
         + " @if (A) { e.f { a:b } }"
         + "@elseif (B) { e.f { a:b } }"
         + "@else { e.f { a:b } } }");
-    assertTrue(getFirstActualNode() instanceof CssMediaRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssMediaRuleNode.class);
   }
 
   public void testMediaWithoutBlockError() throws Exception {
     parseAndRun("@media a;",
         CreateStandardAtRuleNodes.NO_BLOCK_ERROR_MESSAGE);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testMediaWithWrongBlockError() throws Exception {
     parseAndRun("@media a { @def a b; }",
         CreateStandardAtRuleNodes.MEDIA_INVALID_CHILD_ERROR_MESSAGE);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testMediaWithoutParamError() throws Exception {
     parseAndRun("@media { }",
         CreateStandardAtRuleNodes.MEDIA_WITHOUT_PARAMETERS_ERROR_MESSAGE);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testMediaInvalidParameterError1() throws Exception {
     parseAndRun("@media screen print {}",
         CreateStandardAtRuleNodes.INVALID_PARAMETERS_ERROR_MESSAGE);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testMediaInvalidParameterError2() throws Exception {
     parseAndRun("@media screen a_d print {}",
         CreateStandardAtRuleNodes.INVALID_PARAMETERS_ERROR_MESSAGE);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testMediaInvalidParameterError3() throws Exception {
     parseAndRun("@media screen, print a_d x {}",
         CreateStandardAtRuleNodes.INVALID_PARAMETERS_ERROR_MESSAGE);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testMediaInvalidParameterError4() throws Exception {
     parseAndRun("@media not screen, print a_d x {}",
         CreateStandardAtRuleNodes.INVALID_PARAMETERS_ERROR_MESSAGE);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testMediaInvalidParameterError5() throws Exception {
@@ -198,88 +198,88 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
         + "X Y"
         + "{ e.f { a:b } } ",
         CreateStandardAtRuleNodes.INVALID_PARAMETERS_ERROR_MESSAGE);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testCreatePageNode() throws Exception {
     parseAndRun("@page { a:b }");
-    assertTrue(getFirstActualNode() instanceof CssPageRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssPageRuleNode.class);
     CssPageRuleNode pageRule = (CssPageRuleNode) getFirstActualNode();
-    assertEquals("page", pageRule.getName().getValue());
-    assertEquals(0, pageRule.getParametersCount());
+    assertThat(pageRule.getName().getValue()).isEqualTo("page");
+    assertThat(pageRule.getParametersCount()).isEqualTo(0);
   }
 
   public void testCreatePageWithPseudoClassNode1() throws Exception {
     parseAndRun("@page :left { a:b }");
-    assertTrue(getFirstActualNode() instanceof CssPageRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssPageRuleNode.class);
     CssPageRuleNode pageRule = (CssPageRuleNode) getFirstActualNode();
-    assertEquals("page", pageRule.getName().getValue());
-    assertEquals(1, pageRule.getParametersCount());
-    assertEquals(":left", pageRule.getParameters().get(0).getValue());
+    assertThat(pageRule.getName().getValue()).isEqualTo("page");
+    assertThat(pageRule.getParametersCount()).isEqualTo(1);
+    assertThat(pageRule.getParameters().get(0).getValue()).isEqualTo(":left");
   }
 
   public void testCreatePageWithPseudoClassNode2() throws Exception {
     parseAndRun("@page artsy:right { a:b }");
-    assertTrue(getFirstActualNode() instanceof CssPageRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssPageRuleNode.class);
     CssPageRuleNode pageRule = (CssPageRuleNode) getFirstActualNode();
-    assertEquals("page", pageRule.getName().getValue());
-    assertEquals(2, pageRule.getParametersCount());
-    assertEquals("artsy", pageRule.getParameters().get(0).getValue());
-    assertEquals(":right", pageRule.getParameters().get(1).getValue());
+    assertThat(pageRule.getName().getValue()).isEqualTo("page");
+    assertThat(pageRule.getParametersCount()).isEqualTo(2);
+    assertThat(pageRule.getParameters().get(0).getValue()).isEqualTo("artsy");
+    assertThat(pageRule.getParameters().get(1).getValue()).isEqualTo(":right");
   }
 
   public void testCreatePageWithTypeSelector() throws Exception {
     parseAndRun("@page artsy { a:b }");
-    assertTrue(getFirstActualNode() instanceof CssPageRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssPageRuleNode.class);
     CssPageRuleNode pageRule = (CssPageRuleNode) getFirstActualNode();
-    assertEquals("page", pageRule.getName().getValue());
-    assertEquals(1, pageRule.getParametersCount());
-    assertEquals("artsy", pageRule.getParameters().get(0).getValue());
+    assertThat(pageRule.getName().getValue()).isEqualTo("page");
+    assertThat(pageRule.getParametersCount()).isEqualTo(1);
+    assertThat(pageRule.getParameters().get(0).getValue()).isEqualTo("artsy");
   }
 
   public void testCreatePageInMedia() throws Exception {
     parseAndRun("@media print { @page { a:b } } ");
-    assertTrue(getFirstActualNode() instanceof CssMediaRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssMediaRuleNode.class);
     CssMediaRuleNode mediaRule = (CssMediaRuleNode) getFirstActualNode();
-    assertEquals("media", mediaRule.getName().getValue());
-    assertEquals(1, mediaRule.getParametersCount());
-    assertEquals(1, mediaRule.getBlock().numChildren());
-    assertTrue(mediaRule.getBlock().getChildAt(0) instanceof CssPageRuleNode);
+    assertThat(mediaRule.getName().getValue()).isEqualTo("media");
+    assertThat(mediaRule.getParametersCount()).isEqualTo(1);
+    assertThat(mediaRule.getBlock().numChildren()).isEqualTo(1);
+    assertThat(mediaRule.getBlock().getChildAt(0)).isInstanceOf(CssPageRuleNode.class);
     CssPageRuleNode pageRule =
         (CssPageRuleNode) mediaRule.getBlock().getChildAt(0);
-    assertEquals("page", pageRule.getName().getValue());
-    assertEquals(0, pageRule.getParametersCount());
+    assertThat(pageRule.getName().getValue()).isEqualTo("page");
+    assertThat(pageRule.getParametersCount()).isEqualTo(0);
   }
 
   public void testCreatePageInMediaPseudoClass1() throws Exception {
     parseAndRun("@media print { @page XY:first { a:b } } ");
-    assertTrue(getFirstActualNode() instanceof CssMediaRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssMediaRuleNode.class);
     CssMediaRuleNode mediaRule = (CssMediaRuleNode) getFirstActualNode();
-    assertEquals("media", mediaRule.getName().getValue());
-    assertEquals(1, mediaRule.getParametersCount());
-    assertEquals(1, mediaRule.getBlock().numChildren());
-    assertTrue(mediaRule.getBlock().getChildAt(0) instanceof CssPageRuleNode);
+    assertThat(mediaRule.getName().getValue()).isEqualTo("media");
+    assertThat(mediaRule.getParametersCount()).isEqualTo(1);
+    assertThat(mediaRule.getBlock().numChildren()).isEqualTo(1);
+    assertThat(mediaRule.getBlock().getChildAt(0)).isInstanceOf(CssPageRuleNode.class);
     CssPageRuleNode pageRule =
         (CssPageRuleNode) mediaRule.getBlock().getChildAt(0);
-    assertEquals("page", pageRule.getName().getValue());
-    assertEquals(2, pageRule.getParametersCount());
-    assertEquals("XY", pageRule.getParameters().get(0).getValue());
-    assertEquals(":first", pageRule.getParameters().get(1).getValue());
+    assertThat(pageRule.getName().getValue()).isEqualTo("page");
+    assertThat(pageRule.getParametersCount()).isEqualTo(2);
+    assertThat(pageRule.getParameters().get(0).getValue()).isEqualTo("XY");
+    assertThat(pageRule.getParameters().get(1).getValue()).isEqualTo(":first");
   }
 
   public void testCreatePageInMediaPseudoClass2() throws Exception {
     parseAndRun("@media print { @page :first { a:b } } ");
-    assertTrue(getFirstActualNode() instanceof CssMediaRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssMediaRuleNode.class);
     CssMediaRuleNode mediaRule = (CssMediaRuleNode) getFirstActualNode();
-    assertEquals("media", mediaRule.getName().getValue());
-    assertEquals(1, mediaRule.getParametersCount());
-    assertEquals(1, mediaRule.getBlock().numChildren());
-    assertTrue(mediaRule.getBlock().getChildAt(0) instanceof CssPageRuleNode);
+    assertThat(mediaRule.getName().getValue()).isEqualTo("media");
+    assertThat(mediaRule.getParametersCount()).isEqualTo(1);
+    assertThat(mediaRule.getBlock().numChildren()).isEqualTo(1);
+    assertThat(mediaRule.getBlock().getChildAt(0)).isInstanceOf(CssPageRuleNode.class);
     CssPageRuleNode pageRule =
         (CssPageRuleNode) mediaRule.getBlock().getChildAt(0);
-    assertEquals("page", pageRule.getName().getValue());
-    assertEquals(1, pageRule.getParametersCount());
-    assertEquals(":first", pageRule.getParameters().get(0).getValue());
+    assertThat(pageRule.getName().getValue()).isEqualTo("page");
+    assertThat(pageRule.getParametersCount()).isEqualTo(1);
+    assertThat(pageRule.getParameters().get(0).getValue()).isEqualTo(":first");
   }
 
   public void testPageRuleWithoutBlockError() throws Exception {
@@ -316,15 +316,14 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
 
   private void createPageSelector(String name) throws GssParserException {
     parseAndRun("@page { @" + name + " { a:b } }");
-    assertTrue(getFirstActualNode() instanceof CssPageRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssPageRuleNode.class);
     CssPageRuleNode pageRule = (CssPageRuleNode) getFirstActualNode();
-    assertEquals("page", pageRule.getName().getValue());
-    assertEquals(1, pageRule.getBlock().numChildren());
-    assertTrue(
-        pageRule.getBlock().getChildAt(0) instanceof CssPageSelectorNode);
+    assertThat(pageRule.getName().getValue()).isEqualTo("page");
+    assertThat(pageRule.getBlock().numChildren()).isEqualTo(1);
+    assertThat(pageRule.getBlock().getChildAt(0)).isInstanceOf(CssPageSelectorNode.class);
     CssPageSelectorNode pageSelector =
         (CssPageSelectorNode) pageRule.getBlock().getChildAt(0);
-    assertEquals(name, pageSelector.getName().getValue());
+    assertThat(pageSelector.getName().getValue()).isEqualTo(name);
   }
 
   public void testPageSelectorWithoutBlockError() throws Exception {
@@ -339,10 +338,10 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
 
   public void testCreateFontNode() throws GssParserException {
     parseAndRun("@font-face { font-family: Gentium }");
-    assertTrue(getFirstActualNode() instanceof CssFontFaceNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssFontFaceNode.class);
     CssFontFaceNode fontFace = (CssFontFaceNode) getFirstActualNode();
-    assertEquals("font-face", fontFace.getName().getValue());
-    assertEquals(0, fontFace.getParametersCount());
+    assertThat(fontFace.getName().getValue()).isEqualTo("font-face");
+    assertThat(fontFace.getParametersCount()).isEqualTo(0);
   }
 
   public void testCreateFontNodeWithoutBlockError() throws GssParserException {

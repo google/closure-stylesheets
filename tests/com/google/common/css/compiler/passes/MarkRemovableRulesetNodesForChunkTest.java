@@ -16,13 +16,14 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree.RulesetNodesToRemove;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
-
 import java.util.List;
 
 /**
@@ -42,7 +43,7 @@ public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
               "}"),
         ImmutableList.of("C1", "C1"));
     RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE]{[border:[[2px]];]}]", rule);
   }
@@ -58,7 +59,7 @@ public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
               "}"),
         ImmutableList.of("C1", "C1"));
     RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
-    assertEquals(0, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testDiffChunkHit() {
@@ -72,7 +73,7 @@ public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
               "}"),
         ImmutableList.of("C1", "C2"));
     RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
-    assertEquals(0, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testSameChunkHit() {
@@ -89,7 +90,7 @@ public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
               "}"),
         ImmutableList.of("C1", "C1", "C2"));
     RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE]{[border:[[1px]];]}]", rule);
   }

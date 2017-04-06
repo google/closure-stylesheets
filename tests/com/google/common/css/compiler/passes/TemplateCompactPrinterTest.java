@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import java.util.Map;
@@ -38,16 +40,38 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createPrinter("foo");
     printer.runPass();
 
-    assertEquals(
-        rS + "foo{}" + rE
-        + rS + "a{}" + rE
-        + rS + "a#a{}" + rE
-        + rS + "a#a b{}" + rE
-        + rS + "b+i{}" + rE
-        + rS + "@media print{" + rS + "foo{}" + rE + "}" + rE
-        + rS + "@font-face" + "{" + dS
-        + "font-family:'Roboto'" + dE + "}" + rE,
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(
+            rS
+                + "foo{}"
+                + rE
+                + rS
+                + "a{}"
+                + rE
+                + rS
+                + "a#a{}"
+                + rE
+                + rS
+                + "a#a b{}"
+                + rE
+                + rS
+                + "b+i{}"
+                + rE
+                + rS
+                + "@media print{"
+                + rS
+                + "foo{}"
+                + rE
+                + "}"
+                + rE
+                + rS
+                + "@font-face"
+                + "{"
+                + dS
+                + "font-family:'Roboto'"
+                + dE
+                + "}"
+                + rE);
   }
 
   public void testChunkOutput_middleChunk() {
@@ -56,13 +80,25 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createPrinter("bar");
     printer.runPass();
 
-    assertEquals(
-        rS + ".bar{}" + rE
-        + rS + "b{}" + rE
-        + rS + "b#b{}" + rE
-        + rS + "b>i+em{}" + rE
-        + "@keyframes my-animation{" + rS + "0%{}" + rE + "}",
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(
+            rS
+                + ".bar{}"
+                + rE
+                + rS
+                + "b{}"
+                + rE
+                + rS
+                + "b#b{}"
+                + rE
+                + rS
+                + "b>i+em{}"
+                + rE
+                + "@keyframes my-animation{"
+                + rS
+                + "0%{}"
+                + rE
+                + "}");
   }
 
   public void testChunkOutput_endChunk() {
@@ -71,14 +107,10 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createPrinter("baz");
     printer.runPass();
 
-    assertEquals(
-        rS + "hr,i{}" + rE
-        + rS + "i{}" + rE
-        + rS + "hr{}" + rE
-        + rS + "i,hr{}" + rE
-        + rS + "a i{}" + rE
-        + rS + "a+i{}" + rE,
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(
+            rS + "hr,i{}" + rE + rS + "i{}" + rE + rS + "hr{}" + rE + rS + "i,hr{}" + rE + rS
+                + "a i{}" + rE + rS + "a+i{}" + rE);
   }
 
   public void testMarkedComments_unpreservedByDefault() {
@@ -96,13 +128,28 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createPrinter("foo");
     printer.runPass();
 
-    assertEquals(
-        rS + "foo{}" + rE
-            + rS + "a{}" + rE
-            + rS + "@media print{" + rS + "foo{" + dS + "color:red" + dE + "}" + rE
-            + "}" + rE
-            + rS + "foo{}" + rE,
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(
+            rS
+                + "foo{}"
+                + rE
+                + rS
+                + "a{}"
+                + rE
+                + rS
+                + "@media print{"
+                + rS
+                + "foo{"
+                + dS
+                + "color:red"
+                + dE
+                + "}"
+                + rE
+                + "}"
+                + rE
+                + rS
+                + "foo{}"
+                + rE);
   }
 
   public void testMarkedComments_unpreservedExplicitly() {
@@ -120,13 +167,28 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createNonCommentPreservingPrinter("foo");
     printer.runPass();
 
-    assertEquals(
-        rS + "foo{}" + rE
-            + rS + "a{}" + rE
-            + rS + "@media print{" + rS + "foo{" + dS + "color:red" + dE + "}" + rE
-            + "}" + rE
-            + rS + "foo{}" + rE,
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(
+            rS
+                + "foo{}"
+                + rE
+                + rS
+                + "a{}"
+                + rE
+                + rS
+                + "@media print{"
+                + rS
+                + "foo{"
+                + dS
+                + "color:red"
+                + dE
+                + "}"
+                + rE
+                + "}"
+                + rE
+                + rS
+                + "foo{}"
+                + rE);
   }
 
   public void testMarkedComments_preserved() {
@@ -170,12 +232,12 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
     printer.runPass();
 
-    assertEquals(
-        rS
-            + "\n/* @license MIT *//* @preserve Keep this comment, too *//*! Me, too! */\n"
-            + "foo{}"
-            + rE,
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(
+            rS
+                + "\n/* @license MIT *//* @preserve Keep this comment, too *//*! Me, too! */\n"
+                + "foo{}"
+                + rE);
   }
 
   public void testMarkedComments_preservedWithFooterBeforeNextFile() {
@@ -198,14 +260,14 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     
     System.out.println(printer.getCompactPrintedString());
 
-    assertEquals(
-        rS
-            + "\n/* Header comment\n"
-            + " * @license MIT */\n"
-            + "foo{}"
-            + rE
-            + "/* END OF LICENSED CSS FILE */\n",
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(
+            rS
+                + "\n/* Header comment\n"
+                + " * @license MIT */\n"
+                + "foo{}"
+                + rE
+                + "/* END OF LICENSED CSS FILE */\n");
   }
 
   public void testMarkedComments_preservedWithFooterAfterPreviousFile() {
@@ -227,13 +289,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     
     System.out.println(printer.getCompactPrintedString());
 
-    assertEquals(
-        rS
-            + "\n/* Header comment\n"
-            + " * @license MIT */\n"
-            + "bar{}"
-            + rE,
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(rS + "\n/* Header comment\n" + " * @license MIT */\n" + "bar{}" + rE);
   }
 
   public void testMarkedComments_preservedButWithBadAnnotations() {
@@ -244,7 +301,7 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
     printer.runPass();
 
-    assertEquals(rS + "foo{}" + rE, printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString()).isEqualTo(rS + "foo{}" + rE);
   }
 
   public void testMarkedComments_preservedButWithSomeBadAnnotationsOneGood() {
@@ -255,9 +312,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
     printer.runPass();
 
-    assertEquals(
-        rS + "\n/* ! Header comment @licenseless /*! @preserve */\n" + "foo{}" + rE,
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(rS + "\n/* ! Header comment @licenseless /*! @preserve */\n" + "foo{}" + rE);
   }
 
   private TemplateCompactPrinter<String> createPrinter(String chunkId) {

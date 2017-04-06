@@ -16,6 +16,8 @@
 
 package com.google.common.css;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import junit.framework.TestCase;
 
 /**
@@ -38,8 +40,8 @@ public class IdentitySubstitutionMapTest extends TestCase {
 
   public void testGet() {
     IdentitySubstitutionMap map = new IdentitySubstitutionMap();
-    assertEquals("", map.get(""));
-    assertEquals("a", map.get("a"));
-    assertEquals("foo", map.get("foo"));
+    assertThat(map.get("")).isEmpty();
+    assertThat(map.get("a")).isEqualTo("a");
+    assertThat(map.get("foo")).isEqualTo("foo");
   }
 }

@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.passes;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
@@ -92,17 +93,18 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
             .withSubstitutionMap(substitutionMap)
             .shouldRecordMappingForCodeGeneration(predicate)
             .build();
-    assertEquals("a", recordingMap.get("CSS_FOO"));
-    assertEquals("b", recordingMap.get("CSS_BAR"));
-    assertEquals("CSS_BAZ", recordingMap.get("CSS_BAZ"));
-    assertEquals("BIZ", recordingMap.get("BIZ"));
+    assertThat(recordingMap.get("CSS_FOO")).isEqualTo("a");
+    assertThat(recordingMap.get("CSS_BAR")).isEqualTo("b");
+    assertThat(recordingMap.get("CSS_BAZ")).isEqualTo("CSS_BAZ");
+    assertThat(recordingMap.get("BIZ")).isEqualTo("BIZ");
 
     mappings = recordingMap.getMappings();
-    assertFalse("Predicate for RecordingSubstitutionMap was not honored",
-        mappings.containsKey("BIZ"));
+    assertWithMessage("Predicate for RecordingSubstitutionMap was not honored")
+        .that(mappings)
+        .doesNotContainKey("BIZ");
     Map<String,String> expectedMap = ImmutableMap.of("CSS_FOO", "a", "CSS_BAR",
         "b", "CSS_BAZ", "CSS_BAZ");
-    assertEquals(expectedMap, mappings);
+    assertThat(mappings).containsExactlyEntriesIn(expectedMap).inOrder();
   }
 
   public void testOrderIsPreserved() {
@@ -125,7 +127,7 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
     parse(styleSheet, map);
 
     mappings = map.getMappings();
-    assertEquals(10, mappings.size());
+    assertThat(mappings).hasSize(10);
 
     assertThat(mappings.keySet())
         .containsExactly(
@@ -155,8 +157,7 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
             .shouldRecordMappingForCodeGeneration(predicate)
             .build();
     setupWithMap(map);
-    assertEquals(1, mappings.size());
-    assertEquals("CSS_SPRITE_", mappings.get("CSS_SPRITE"));
+    assertThat(mappings).containsExactly("CSS_SPRITE", "CSS_SPRITE_");
   }
 
   public void testMapWithTypeMinimal() {
@@ -166,7 +167,7 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
             .shouldRecordMappingForCodeGeneration(predicate)
             .build();
     setupWithMap(map);
-    assertEquals(1, mappings.size());
-    assertEquals(1, mappings.get("CSS_SPRITE").length());
+    assertThat(mappings).hasSize(1);
+    assertThat(mappings.get("CSS_SPRITE").length()).isEqualTo(1);
   }
 }

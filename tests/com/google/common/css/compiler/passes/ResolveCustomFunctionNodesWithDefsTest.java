@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -25,7 +27,6 @@ import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
-
 import java.util.List;
 import java.util.Map;
 
@@ -74,8 +75,7 @@ public class ResolveCustomFunctionNodesWithDefsTest
   public void testMultipleArgs() throws Exception {
     parseAndRun("@def BAR 3px left top;" +
         "A { foo: testMultipleArg(first, 30px, BAR) }");
-    assertEquals("[(first) (30px) (3px left top)]",
-        getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[(first) (30px) (3px left top)]");
   }
 
   /**

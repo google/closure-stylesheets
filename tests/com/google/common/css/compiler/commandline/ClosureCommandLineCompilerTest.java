@@ -15,6 +15,8 @@
  */
 package com.google.common.css.compiler.commandline;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.ExitCodeHandler;
 import com.google.common.css.JobDescription;
 import com.google.common.css.JobDescriptionBuilder;
@@ -22,11 +24,8 @@ import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.io.Files;
-
-import junit.framework.TestCase;
-
 import java.io.File;
-
+import junit.framework.TestCase;
 public class ClosureCommandLineCompilerTest extends TestCase {
 
   static final ExitCodeHandler EXIT_CODE_HANDLER =
@@ -57,7 +56,7 @@ public class ClosureCommandLineCompilerTest extends TestCase {
 
     String output = compiler.execute(null /* renameFile */, null /* sourcemapFile */);
 
-    assertEquals(".example{background:url('sprite.png') no-repeat}", output);
+    assertThat(output).isEqualTo(".example{background:url('sprite.png') no-repeat}");
   }
 
 
@@ -65,7 +64,7 @@ public class ClosureCommandLineCompilerTest extends TestCase {
     ClosureCommandLineCompiler.Flags flags =
         ClosureCommandLineCompiler.parseArgs(new String[] {"/dev/null"}, EXIT_CODE_HANDLER);
     JobDescription jobDescription = flags.createJobDescription();
-    assertTrue(jobDescription.allowDefPropagation);
+    assertThat(jobDescription.allowDefPropagation).isTrue();
   }
 
 
@@ -91,6 +90,6 @@ public class ClosureCommandLineCompilerTest extends TestCase {
     // resulted in the exit handler being called which causes fail(...),
     // so if control reaches here, we're ok.
 
-    assertNotNull(compiledCss);
+    assertThat(compiledCss).isNotNull();
   }
 }

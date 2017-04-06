@@ -16,6 +16,7 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,8 +59,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
               "}"), null, null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE]{[border:[[2px]];]}]", rule);
@@ -76,7 +76,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
               "}"), null, null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertTrue(rules.getRulesetNodes().isEmpty());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testMarkRemovableRulesetNode3() {
@@ -92,8 +92,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         "CSS_");
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE_2]{[margin:[[3px]];]}]", rule);
@@ -112,8 +111,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         "CSS_");
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(2, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(2);
 
     Iterator<CssRulesetNode> iter = rules.getRulesetNodes().iterator();
     CssRulesetNode rule = iter.next();
@@ -135,8 +133,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         "CSS_");
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE_2]{[margin:[[3px]];]}]", rule);
@@ -155,7 +152,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         "CSS_");
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertTrue(rules.getRulesetNodes().isEmpty());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testMarkRemovableRulesetNode7() {
@@ -171,8 +168,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         "CSS_");
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[div .CSS_RULE_1]{[border:[[2px]];]}]", rule);
@@ -191,8 +187,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         "CSS_");
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE_1 div]{[border:[[2px]];]}]", rule);
@@ -211,8 +206,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE]{[border:[[2px]];]}]", rule);
@@ -231,8 +225,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         "CSS_");
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[html.CSS_RULE]{[border:[[3px]];]}]", rule);
@@ -254,8 +247,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[selector1]{[*height:[[11px]];]}]", rule);
@@ -274,7 +266,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertTrue(rules.getRulesetNodes().isEmpty());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testMarkRemovableRulesetNode13() {
@@ -293,7 +285,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertTrue(rules.getRulesetNodes().isEmpty());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testMarkRemovableRulesetNode14() {
@@ -321,8 +313,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(2, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(2);
 
     Iterator<CssRulesetNode> iter = rules.getRulesetNodes().iterator();
     CssRulesetNode rule1 = iter.next();
@@ -343,7 +334,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
               "}"), null, null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertTrue(rules.getRulesetNodes().isEmpty());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testMarkRemovableRulesetNode16() {
@@ -358,7 +349,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
               "}"), null, null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertTrue(rules.getRulesetNodes().isEmpty());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testMarkRemovableRulesetNodeImportant() {
@@ -373,7 +364,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
 
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
     CssRulesetNode rule1 = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE]{[font:[[10px]];]}]", rule1);
   }
@@ -391,8 +382,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         "CSS_");
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_C2-CSS_E]{[margin:[[3px]];]}]", rule);
@@ -409,8 +399,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
               "}"), null, null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE]{[border-color:[[red]];]}]", rule);
@@ -427,7 +416,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
               "}"), null, null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertTrue(rules.getRulesetNodes().isEmpty());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testMarkRemovableRulesetNodeShorthandWithAllImportant() {
@@ -441,8 +430,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
               "}"), null, null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE]{[border-color:[[red][!important]];]}]", rule);
@@ -460,8 +448,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
               "}"), null, null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertFalse(rules.getRulesetNodes().isEmpty());
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
 
     CssRulesetNode rule = rules.getRulesetNodes().iterator().next();
     checkRuleset("[[.CSS_RULE]{[border:[[2px]];]}]", rule);
@@ -479,7 +466,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         Sets.<String>newHashSet(),
         null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
-    assertEquals(0, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
   public void testMarkRemovableRulesetNodeAlternate2() {
@@ -499,16 +486,16 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertEquals(2, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(2);
 
     Iterator<CssRulesetNode> iterator = rules.getRulesetNodes().iterator();
     CssRulesetNode alternateRule = iterator.next();
-    assertEquals(1, alternateRule.getDeclarations().numChildren());
+    assertThat(alternateRule.getDeclarations().numChildren()).isEqualTo(1);
     CssDeclarationNode alternateDeclaration =
         (CssDeclarationNode) alternateRule.getDeclarations().getChildAt(0);
     checkRuleset("[[.CSS_RULE]{[[/* @alternate */]border:[[1px]];]}]",
         alternateRule);
-    assertTrue(alternateDeclaration.hasComment("/* @alternate */"));
+    assertThat(alternateDeclaration.hasComment("/* @alternate */")).isTrue();
     checkRuleset("[[.CSS_RULE]{[border:[[0]];]}]", iterator.next());
   }
 
@@ -529,7 +516,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         null);
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
     checkRuleset("[[.CSS_RULE]{[border:[[1px]];]}]",
         rules.getRulesetNodes().iterator().next());
   }
@@ -548,7 +535,7 @@ public class MarkRemovableRulesetNodesTest extends PassesTestBase {
         "");
     final RulesetNodesToRemove rules = tree.getRulesetNodesToRemove();
 
-    assertEquals(1, rules.getRulesetNodes().size());
+    assertThat(rules.getRulesetNodes()).hasSize(1);
     checkRuleset("[[.CSS_RULE]{[display:[[1px]];]}]",
         rules.getRulesetNodes().iterator().next());
   }

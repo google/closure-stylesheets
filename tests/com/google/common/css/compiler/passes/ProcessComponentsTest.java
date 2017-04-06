@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.passes;
 
 import static com.google.common.css.compiler.passes.ResolveCustomFunctionNodesForChunks.DEF_PREFIX;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -32,7 +33,6 @@ import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
-
 import java.util.List;
 
 /**
@@ -423,7 +423,7 @@ public class ProcessComponentsTest extends PassesTestBase {
   public void testUndefinedParentComponentError() throws Exception {
     parseAndRun("@component CSS_X extends CSS_Y { }",
         "parent component is undefined in chunk " + TEST_CHUNK);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testRedefinedComponentError() throws Exception {
@@ -431,18 +431,18 @@ public class ProcessComponentsTest extends PassesTestBase {
             FILE1, "@component CSS_X { }",
             FILE2, "@component CSS_X { }"),
         "cannot redefine component in chunk " + CHUNK2);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testNestedComponentsError1() throws Exception {
     parseAndRun("@component CSS_X { @component CSS_Y {} }", "nested components are not allowed");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testNestedComponentsError2() throws Exception {
     parseAndRun("@component CSS_X { @component CSS_Y {} }\n@component CSS_Z extends CSS_X {}",
         "nested components are not allowed");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testImplicitlyNamed() throws Exception {
@@ -456,7 +456,7 @@ public class ProcessComponentsTest extends PassesTestBase {
   public void testImplicitlyNamedNoPackageError() throws Exception {
     parseAndRun("@component { }",
         "implicitly-named @components require a prior @provide declaration " + TEST_CHUNK);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
   public void testImplicitlyNamedMultiplePackage() throws Exception {
@@ -534,7 +534,7 @@ public class ProcessComponentsTest extends PassesTestBase {
         "CHILD__BASE_COLOR", FILE2,
         "CHILD__SPECIFIC_COLOR", FILE2,
         "CHILD__DERIVED_COLOR", FILE2);
-    assertEquals(expectedDefs, foundDefs.build());
+    assertThat(foundDefs.build()).containsExactlyEntriesIn(expectedDefs).inOrder();
   }
 
   private String joinNl(Iterable<String> lines) {
@@ -556,7 +556,7 @@ public class ProcessComponentsTest extends PassesTestBase {
     private int count = 0;
     @Override
     public String apply(String chunk) {
-      assertNotNull(chunk);
+      assertThat(chunk).isNotNull();
       return String.valueOf(count++);
     }
   }

@@ -16,12 +16,13 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.css.compiler.gssfunctions.GssFunctions;
-
 import java.util.Map;
 
 /**
@@ -62,7 +63,7 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
   public void testUnknownFunctionAllowed() throws Exception {
     allowUnknownFunctions = true;
     parseAndRun("A { width: f(a,b) }");
-    assertEquals("[f(a,b)]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[f(a,b)]");
   }
 
   public void testWrongNumberOfArgsError() throws Exception {
@@ -77,26 +78,26 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
 
   public void testPlus() throws Exception {
     parseAndRun("A { width: plus(2px, 3px) }");
-    assertEquals("[5px]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[5px]");
   }
 
   public void testMinus() throws Exception {
     parseAndRun("A { width: minus(2em, 5.5em) }");
-    assertEquals("[-3.5em]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[-3.5em]");
   }
 
   public void testMax() throws Exception {
     parseAndRun("A { width: max(-2%, -5%) }");
-    assertEquals("[-2%]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[-2%]");
   }
 
   public void testMultiply() throws Exception {
     parseAndRun("A { width: mult(-2, -5) }");
-    assertEquals("[10]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[10]");
   }
 
   public void testFunctionWithinFunction() throws Exception {
     parseAndRun("A { width: max(10px, max(2px, 30px)) }");
-    assertEquals("[30px]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[30px]");
   }
 }

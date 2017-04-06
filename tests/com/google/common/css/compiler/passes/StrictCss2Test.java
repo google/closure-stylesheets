@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 
 /**
@@ -36,57 +38,57 @@ public class StrictCss2Test extends NewFunctionalTestBase {
 
   public void testPseudoClass1() throws Exception {
     parseAndRun("div :first-child {}");
-    assertEquals("div :first-child{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :first-child{}");
   }
 
   public void testPseudoClass2() throws Exception {
     parseAndRun("div :link {}");
-    assertEquals("div :link{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :link{}");
   }
 
   public void testPseudoClass3() throws Exception {
     parseAndRun("div :visited {}");
-    assertEquals("div :visited{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :visited{}");
   }
 
   public void testPseudoClass4() throws Exception {
     parseAndRun("div :focus {}");
-    assertEquals("div :focus{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :focus{}");
   }
 
   public void testPseudoElement1() throws Exception {
     parseAndRun("p :first-line {}");
-    assertEquals("p :first-line{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("p :first-line{}");
   }
 
   public void testPseudoElement2() throws Exception {
     parseAndRun("h1 :first-letter {}");
-    assertEquals("h1 :first-letter{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("h1 :first-letter{}");
   }
 
   public void testPseudoElement3() throws Exception {
     parseAndRun("div :after {}");
-    assertEquals("div :after{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :after{}");
   }
 
   public void testPseudoElement4() throws Exception {
     parseAndRun("div :before {}");
-    assertEquals("div :before{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :before{}");
   }
 
   public void testAttributeSelector1() throws Exception {
     parseAndRun("span[class=example]{}");
-    assertEquals("span[class=example]{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("span[class=example]{}");
   }
 
   public void testAttributeSelector2() throws Exception {
     parseAndRun("a[rel~='copyright']{}");
-    assertEquals("a[rel~='copyright']{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("a[rel~='copyright']{}");
   }
 
   public void testAttributeSelector3() throws Exception {
     parseAndRun("*[lang|=\"en\"]{}");
-    assertEquals("*[lang|=\"en\"]{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("*[lang|=\"en\"]{}");
   }
 
   public void testPseudoClassNthBad1() throws Exception {

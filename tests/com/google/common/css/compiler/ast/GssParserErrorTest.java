@@ -19,11 +19,9 @@ package com.google.common.css.compiler.ast;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.SourceCode;
-
-import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.List;
+import junit.framework.TestCase;
 
 /**
  * Unit tests for error handling of {@link GssParser}.
@@ -39,11 +37,18 @@ public class GssParserErrorTest extends TestCase {
       parse(gss);
       fail();
     } catch (GssParserException e) {
-      assertEquals(
-           "Parse error in test at line " + lineNumber +
-           " column " + indexInLine + ":\n" +
-           line + "\n" + caret + "\n",
-           e.getMessage());
+      assertThat(e)
+          .hasMessageThat()
+          .isEqualTo(
+              "Parse error in test at line "
+                  + lineNumber
+                  + " column "
+                  + indexInLine
+                  + ":\n"
+                  + line
+                  + "\n"
+                  + caret
+                  + "\n");
     }
   }
 
@@ -211,11 +216,11 @@ public class GssParserErrorTest extends TestCase {
     for (GssParserException e : handledErrors) {
       errorMessages.add(e.getMessage());
     }
-    assertNotNull(tree);
+    assertThat(tree).isNotNull();
     CssRootNode root = tree.getRoot();
-    assertNotNull(root);
+    assertThat(root).isNotNull();
     assertThat(errorMessages).containsExactly((Object[]) errors).inOrder();
-    assertEquals(expected, root.toString());
+    assertThat(root.toString()).isEqualTo(expected);
   }
 
   public void testDeclarationErrorHandling() throws GssParserException {

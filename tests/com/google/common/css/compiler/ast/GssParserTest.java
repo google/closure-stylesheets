@@ -16,16 +16,16 @@
 
 package com.google.common.css.compiler.ast;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.passes.CompactPrinter;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
-
-import junit.framework.TestCase;
-
 import java.util.List;
-
+import junit.framework.TestCase;
 /**
  * Unit tests for the {@link GssParser}.
  *
@@ -36,16 +36,16 @@ public class GssParserTest extends TestCase {
 
   private CssTree testValid(String gss) throws GssParserException {
     CssTree tree = parse(gss);
-    assertNotNull(tree);
+    assertThat(tree).isNotNull();
     return tree;
   }
 
   private void testTree(String gss, String output) throws GssParserException {
     CssTree tree = parse(gss);
-    assertNotNull(tree);
+    assertThat(tree).isNotNull();
     CssRootNode root = tree.getRoot();
-    assertNotNull(root);
-    assertEquals(output, AstPrinter.print(tree));
+    assertThat(root).isNotNull();
+    assertThat(AstPrinter.print(tree)).isEqualTo(output);
   }
 
   public void testManySources() throws Exception {
@@ -54,9 +54,8 @@ public class GssParserTest extends TestCase {
         new SourceCode("test2", "@component c { x {y: z} }"),
         new SourceCode("test3", "b {}")));
     CssRootNode root = tree.getRoot();
-    assertNotNull(root);
-    assertEquals("[[a]{[]}@component [c]{[x]{[y:[[z]];]}}[b]{[]}]",
-        AstPrinter.print(tree));
+    assertThat(root).isNotNull();
+    assertThat(AstPrinter.print(tree)).isEqualTo("[[a]{[]}@component [c]{[x]{[y:[[z]];]}}[b]{[]}]");
   }
 
   public void testAst1() throws Exception {
@@ -453,10 +452,11 @@ public class GssParserTest extends TestCase {
         "-webkit-gradient(linear, 0 0, 0 100%, from(#fff), to(#ddd)) }");
 
     CssRootNode root = tree.getRoot();
-    assertNotNull(root);
-    assertEquals("[[.CSS]{[background:[" +
-        "-webkit-gradient(linear,0 0,0 100%,from(#fff),to(#ddd))];]}]",
-        AstPrinter.print(tree));
+    assertThat(root).isNotNull();
+    assertThat(AstPrinter.print(tree))
+        .isEqualTo(
+            "[[.CSS]{[background:["
+                + "-webkit-gradient(linear,0 0,0 100%,from(#fff),to(#ddd))];]}]");
 
     CssRulesetNode ruleset =
         (CssRulesetNode) tree.getRoot().getBody().getChildAt(0);
@@ -465,9 +465,11 @@ public class GssParserTest extends TestCase {
     CssFunctionNode function =
         (CssFunctionNode) decl.getPropertyValue().getChildAt(0);
     CssFunctionArgumentsNode args = function.getArguments();
-    assertEquals("The argument list should be flattened, and contain " +
-        "7 arguments + 6 separators (4 commas and 2 meaningful spaces).",
-        13, args.numChildren());
+    assertWithMessage(
+            "The argument list should be flattened, and contain "
+                + "7 arguments + 6 separators (4 commas and 2 meaningful spaces).")
+        .that(args.numChildren())
+        .isEqualTo(13);
   }
 
   public void testGradients() throws Exception {
@@ -785,11 +787,10 @@ public class GssParserTest extends TestCase {
       parse(css);
       fail("CDO should not be accepted in property values.");
     } catch (GssParserException e) {
-      assertEquals(
-          "The error should reflect that CDO is not accepted in property "
-          + "values.",
-          css.indexOf("<!--"),
-          e.getGssError().getLocation().getBeginCharacterIndex());
+      assertWithMessage(
+              "The error should reflect that CDO is not accepted in property " + "values.")
+          .that(e.getGssError().getLocation().getBeginCharacterIndex())
+          .isEqualTo(css.indexOf("<!--"));
     }
   }
 
@@ -811,8 +812,7 @@ public class GssParserTest extends TestCase {
       // also no exceptions the second time
       CssTree t2 = parse(output1);
       // and the we've reached a fixed point
-      assertEquals(
-          AstPrinter.print(t1), AstPrinter.print(t2));
+      assertThat(AstPrinter.print(t2)).isEqualTo(AstPrinter.print(t1));
     }
   }
 
@@ -903,20 +903,22 @@ public class GssParserTest extends TestCase {
   public void testNumericNodeLocation() throws GssParserException {
     CssTree tree = new GssParser(new SourceCode(null, "div{width:99px;}")).parse();
     final CssNumericNode[] resultHolder = new CssNumericNode[1];
-    tree.getVisitController().startVisit(new DefaultTreeVisitor() {
-      @Override
-      public boolean enterValueNode(CssValueNode value) {
-        if (value instanceof CssNumericNode) {
-          assertNull(resultHolder[0]);
-          resultHolder[0] = (CssNumericNode) value;
-        }
-        return true;
-      }
-    });
-    assertNotNull(resultHolder[0]);
+    tree.getVisitController()
+        .startVisit(
+            new DefaultTreeVisitor() {
+              @Override
+              public boolean enterValueNode(CssValueNode value) {
+                if (value instanceof CssNumericNode) {
+                  assertThat(resultHolder[0]).isNull();
+                  resultHolder[0] = (CssNumericNode) value;
+                }
+                return true;
+              }
+            });
+    assertThat(resultHolder[0]).isNotNull();
     SourceCodeLocation location = resultHolder[0].getSourceCodeLocation();
-    assertEquals(
-        "99px".length(), location.getEndCharacterIndex() - location.getBeginCharacterIndex());
+    assertThat(location.getEndCharacterIndex() - location.getBeginCharacterIndex())
+        .isEqualTo("99px".length());
   }
 
   private CssTree parse(List<SourceCode> sources) throws GssParserException {

@@ -16,6 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -42,18 +45,22 @@ public class ResolveCustomFunctionNodesForChunksTest
     new MapChunkAwareNodesToChunk<String>(
         tree, ImmutableMap.of(TEST_FILENAME, TEST_CHUNK)).runPass();
 
-    resolveForChunksPass = new ResolveCustomFunctionNodesForChunks<String>(
-        tree.getMutatingVisitController(), errorManager,
-        createTestFunctionMap(), allowUnknownFunctions,
-        ImmutableSet.<String>of() /* allowedNonStandardFunctions */,
-        new Function<String, String>() {
-          private int count = 0;
-          @Override
-          public String apply(String chunk) {
-            assertNotNull(chunk);
-            return String.valueOf(count++);
-          }
-        });
+    resolveForChunksPass =
+        new ResolveCustomFunctionNodesForChunks<String>(
+            tree.getMutatingVisitController(),
+            errorManager,
+            createTestFunctionMap(),
+            allowUnknownFunctions,
+            ImmutableSet.<String>of() /* allowedNonStandardFunctions */,
+            new Function<String, String>() {
+              private int count = 0;
+
+              @Override
+              public String apply(String chunk) {
+                assertThat(chunk).isNotNull();
+                return String.valueOf(count++);
+              }
+            });
 
     resolveForChunksPass.runPass();
   }
@@ -112,24 +119,24 @@ public class ResolveCustomFunctionNodesForChunksTest
 
     int defCount = 0;
     for (String constant : constants) {
-      assertNotNull("Definitions expected", constantDefinitions);
+      assertWithMessage("Definitions expected").that(constantDefinitions).isNotNull();
 
       String defName = getDefName(defCount);
       CssDefinitionNode defNode =
         constantDefinitions.getConstantDefinition(defName);
 
-      assertNotNull("Missing definition " + defCount, defNode);
-      assertEquals("@def " + defName + " [" + constant + "]",
-          defNode.toString());
+      assertWithMessage("Missing definition " + defCount).that(defNode).isNotNull();
+      assertThat(defNode.toString()).isEqualTo("@def " + defName + " [" + constant + "]");
 
       defCount++;
     }
 
     if (defCount == 0) {
-      assertNull("No definitions expected", constantDefinitions);
+      assertWithMessage("No definitions expected").that(constantDefinitions).isNull();
     } else {
-      assertNull("Too many definitions! Expected " + defCount,
-          constantDefinitions.getConstantDefinition(getDefName(defCount)));
+      assertWithMessage("Too many definitions! Expected " + defCount)
+          .that(constantDefinitions.getConstantDefinition(getDefName(defCount)))
+          .isNull();
     }
   }
 
