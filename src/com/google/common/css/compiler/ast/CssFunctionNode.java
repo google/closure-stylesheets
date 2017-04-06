@@ -168,7 +168,6 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           }
         };
 
-
     /** The name of the function, as it appears in a CSS stylesheet. */
     private final String functionName;
 
@@ -246,7 +245,7 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
   /**
    * Constructor used by the proxy mechanism, avoids unnecessary arguments node
    * initialization.
-   *
+   * 
    * <p>NOTE(dgajda): The signature of this constructor only differs in argument
    * order from the main constructor of this class.
    *
