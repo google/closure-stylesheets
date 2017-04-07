@@ -290,10 +290,21 @@ public class CompactPrintingVisitor extends DefaultTreeVisitor {
   }
 
   @Override
+  public boolean enterCompositeValueNode(CssCompositeValueNode node) {
+    if (node.hasParenthesis()) {
+      buffer.append('(');
+    }
+    return true;
+  }
+
+  @Override
   public void leaveCompositeValueNode(CssCompositeValueNode node) {
     buffer.deleteLastCharIfCharIs(' ');
     if (node.getParent() instanceof CssPropertyValueNode) {
       buffer.append(' ');
+    }
+    if (node.hasParenthesis()) {
+      buffer.append(')');
     }
   }
 

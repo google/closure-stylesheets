@@ -180,6 +180,30 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
       "[@media [screen] [and] [(min-resolution:96dpi)]{[.A]{[color:[[red]];]}}]");
   }
 
+  public void testCalcReplacement() {
+    testTreeConstruction(
+        "@def A 5px; .elem { width: calc(A * 2) }", "[[.elem]{[width:[calc([[[5px]]*[2]])];]}]");
+  }
+
+  public void testCalcReplacement_Complex1() {
+    testTreeConstruction(
+        "@def A 5px; .elem { width: calc((A * (A + 5) - A) / 2) }",
+        "[[.elem]{[width:[calc([[([([[5px]]*[([[5px]] + [5])])] - [[5px]])]/[2]])];]}]");
+  }
+
+  public void testCalcReplacement_Complex2() {
+    // TODO: the input is identical to GssFunctionEvaluationTest::testDefsInCalc4, but has a
+    // different output! Here, the constant inside the CssMathNode tree is correctly replaced,
+    // but in GssFunctionEvaluationTest it is not.
+    testTreeConstruction(
+        "@def A 5px;"
+            + "@def C calc(2 + A + 10px);"
+            + ".foo {"
+            + "width: C;"
+            + "}",
+        "[[.foo]{[width:[calc([[2] + [[[5px]] + [10px]]])];]}]");
+  }
+
   @Override
   protected void runPass() {
     new CreateDefinitionNodes(tree.getMutatingVisitController(), errorManager).runPass();

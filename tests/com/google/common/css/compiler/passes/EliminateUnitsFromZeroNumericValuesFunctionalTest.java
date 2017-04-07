@@ -75,6 +75,18 @@ public class EliminateUnitsFromZeroNumericValuesFunctionalTest
         "[[foo]{[width:[[0]];]}]");
   }
 
+  public void testUnitInTimesOperandOfCalcExprIsRemoved() {
+    testTreeConstruction(
+        "foo { width: calc(0px * 42) }",
+        "[[foo]{[width:[calc([[0]*[42]])];]}]");
+  }
+
+  public void testUnitInDivOperandOfCalcExprIsRemoved() {
+    testTreeConstruction(
+        "foo { width: calc(0px / 42) }",
+        "[[foo]{[width:[calc([[0]/[42]])];]}]");
+  }
+
   public void testUnremovableUnit1() {
     testTreeConstruction(
         ".html5-progress-item { -webkit-transition:all 0s linear 0s }",
@@ -85,6 +97,24 @@ public class EliminateUnitsFromZeroNumericValuesFunctionalTest
     testTreeConstruction(
         "foo { width: 0.0% }",
         "[[foo]{[width:[[0%]];]}]");
+  }
+
+  public void testUnitInPlusOperandOfCalcExprIsNotRemoved() {
+    testTreeConstruction(
+        "foo { width: calc(0px + 32) }",
+        "[[foo]{[width:[calc([[0px] + [32]])];]}]");
+  }
+
+  public void testUnitInMinusOperandOfCalcExprIsNotRemoved() {
+    testTreeConstruction(
+        "foo { width: calc(32 - 0px) }",
+        "[[foo]{[width:[calc([[32] - [0px]])];]}]");
+  }
+
+  public void testZeroesInComplexCalcExprs() {
+    testTreeConstruction(
+        "foo { width: calc(0px + (0px * (35 - 0px))) }",
+        "[[foo]{[width:[calc([[0px] + [([0]*[([35] - [0px])])]])];]}]");
   }
 
   @Override

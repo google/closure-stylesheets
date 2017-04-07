@@ -900,6 +900,56 @@ public class GssParserTest extends TestCase {
     testValid("@font-face { unicode-range: U+26??;}");
   }
 
+  public void testCalc_simple_noUnits() throws Exception {
+    testValid(".elem { width: calc(5*2) }");
+    testTree(".elem { width: calc(5*2) }", "[[.elem]{[width:[calc([[5]*[2]])];]}]");
+  }
+
+  public void testCalc_simple() throws Exception {
+    testValid(".elem { width: calc(5px*2) }");
+    testTree(".elem { width: calc(5px*2) }", "[[.elem]{[width:[calc([[5px]*[2]])];]}]");
+  }
+
+  public void testCalc_simpleConstant() throws Exception {
+    testValid("@def A 5px; .elem { width: calc(A*2) }");
+    testTree(
+        "@def A 5px; .elem { width: calc(A*2) }",
+        "[@def [A] [5px];[.elem]{[width:[calc([[A]*[2]])];]}]");
+  }
+
+  public void testCalc_complexConstant() throws Exception {
+    testValid("@def A 5px+2; .elem { width: calc(A*2) }");
+    testTree(
+        "@def A 5px; .elem { width: calc(A*2) }",
+        "[@def [A] [5px];[.elem]{[width:[calc([[A]*[2]])];]}]");
+  }
+
+  public void testCalc_complexConstant_unaryOperator() throws Exception {
+    testValid("@def A -5px; .elem { width: calc(A/2) }");
+    testTree(
+        "@def A -5px; .elem { width: calc(A/2) }",
+        "[@def [A] [-5px];[.elem]{[width:[calc([[A]/[2]])];]}]");
+  }
+
+  public void testCalc_withParenthesizedSums() throws Exception {
+    testValid("p { width: calc(4 * (5px * 2)); }");
+    testTree(
+        "p { width: calc(4 * (5px * 2)); }", "[[p]{[width:[calc([[4]*[([5px]*[2])]])];]}]");
+  }
+
+  public void testCalc_fourOperands() throws Exception {
+    testValid("p { width: calc(4 + 5 + 6 + 7);}");
+    testTree(
+        "p { width: calc(4 + 5 + 6 + 7);}", "[[p]{[width:[calc([[4] + [[5] + [[6] + [7]]]])];]}]");
+  }
+
+  public void testCalc_nestedConstant() throws Exception {
+    testValid("@def A 5px; p { width: calc((A + 4) - (A * A)); }");
+    testTree(
+        "@def A 5px; p { width: calc((A + 4) - (A * A)); }",
+        "[@def [A] [5px];[p]{[width:[calc([[([A] + [4])] - [([A]*[A])]])];]}]");
+  }
+
   public void testNumericNodeLocation() throws GssParserException {
     CssTree tree = new GssParser(new SourceCode(null, "div{width:99px;}")).parse();
     final CssNumericNode[] resultHolder = new CssNumericNode[1];
