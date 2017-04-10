@@ -192,9 +192,6 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
   }
 
   public void testCalcReplacement_Complex2() {
-    // TODO: the input is identical to GssFunctionEvaluationTest::testDefsInCalc4, but has a
-    // different output! Here, the constant inside the CssMathNode tree is correctly replaced,
-    // but in GssFunctionEvaluationTest it is not.
     testTreeConstruction(
         "@def A 5px;"
             + "@def C calc(2 + A + 10px);"
