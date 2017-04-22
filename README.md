@@ -153,7 +153,7 @@ This could be used with `@def FOO true;` to have the effect of `@def MYDEF =
 BAR`.
 
 It is also possible to define your own functions in Java by implementing
-[GssFunctionMapProvider](http://code.google.com/p/closure-stylesheets/source/browse/src/com/google/common/css/GssFunctionMapProvider.java)
+[GssFunctionMapProvider](https://github.com/google/closure-stylesheets/blob/master/src/com/google/common/css/GssFunctionMapProvider.java)
 and passing the fully-qualified class name to Closure Stylesheets via the
 **`--gss-function-map-provider`** flag. If you choose to do this, you will
 likely want to compose
@@ -374,7 +374,7 @@ border-color:[rgba(0,0,0,0.1)] in linting-example.gss at line 7 column 1:
 
 In this particular case, the function `urel()` should have been `url()`, though
 if you are using a function that is not on the whitelist (see
-[CssFunctionNode](http://code.google.com/p/closure-stylesheets/source/browse/src/com/google/common/css/compiler/ast/CssFunctionNode.java)
+[CssFunctionNode](https://github.com/google/closure-stylesheets/blob/master/src/com/google/common/css/compiler/ast/CssFunctionNode.java)
 for the list of recognized functions, which is admittedly incomplete), then you
 can specify **`--allowed-non-standard-function`** to identify additional
 functions that should be whitelisted:
@@ -416,7 +416,7 @@ stylesheet, so using the `@alternate` annotation is a simpler solution.
 
 By default, Closure Stylesheets validates the names of CSS properties used in a
 stylesheet. We have attempted to capture all legal properties in the
-[hardcoded list of recognized properties](http://code.google.com/p/closure-stylesheets/source/browse/src/com/google/common/css/compiler/ast/Property.java)
+[hardcoded list of recognized properties](https://github.com/google/closure-stylesheets/blob/master/src/com/google/common/css/compiler/ast/Property.java)
 that is bundled with Closure Stylesheets. However, you can allow properties that
 aren't in the list with the **`--allowed-unrecognized-property`** flag. Consider
 the file **`bleeding-edge.gss`**:
@@ -519,9 +519,9 @@ stylesheet, which helps reduce the size of the CSS that is sent down to your
 users. Of course, this is not particularly useful unless the class names are
 renamed consistently in the HTML and JavaScript files that use the
 CSS. Fortunately, you can use the
-[Closure Compiler](http://code.google.com/closure/compiler/) to update the class
+[Closure Compiler](https://developers.google.com/closure/compiler/) to update the class
 names in your JavaScript and
-[Closure Templates](http://code.google.com/closure/templates/) to update the
+[Closure Templates](https://developers.google.com/closure/templates/) to update the
 class names in your HTML.
 
 To get the benefits of CSS renaming in Closure, instead of referencing a CSS
@@ -535,7 +535,7 @@ var element = goog.dom.getElementByClass(goog.getCssName('dialog-content'));
 
 Similarly, in a Closure Template, you must wrap references to CSS classes with
 the
-[css command](http://code.google.com/closure/templates/docs/commands.html#css):
+[css command](https://developers.google.com/closure/templates/docs/commands#css):
 
 ```html
 {namespace example}
@@ -673,9 +673,9 @@ original name throughout the code.
 
 An astute reader will note that so far, we have reduced only the size of the
 stylesheet, but not the JavaScript. To reduce the size of the JavaScript code,
-we must use the [Closure Compiler](http://code.google.com/closure/compiler/) in
+we must use the [Closure Compiler](https://developers.google.com/closure/compiler/) in
 either
-[SIMPLE or ADVANCED](http://code.google.com/closure/compiler/docs/compilation_levels.html)
+[SIMPLE or ADVANCED](https://developers.google.com/closure/compiler/docs/compilation_levels)
 mode with the **`--process_closure_primitives`** flag enabled (it is enabled by
 default). When enabled, if it finds a call to **`goog.setCssNameMapping()`** in
 any of its inputs, it will use the argument to `goog.setCssNameMapping()` as the
