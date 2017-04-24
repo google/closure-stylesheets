@@ -627,6 +627,13 @@ public class BiDiFlipperFunctionalTest extends PassesTestBase {
         "[[foo]{[border-width:[[thin][2px][thick][medium]];]}]");
   }
 
+  /** TODO(user): BiDiFlipper should support {@code border} shorthand property. */
+  public void testBorderShorthandNotFlipped() {
+    testTreeConstruction(
+        "foo { border: thin medium thick 2px; }",
+        "[[foo]{[border:[[thin][medium][thick][2px]];]}]");
+  }
+
   /**
    * Tests that
    *   border-image-slice: 5% 10% 15% 20%
