@@ -113,8 +113,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
         errorManager).runPass();
     new CreateComponentNodes(tree.getMutatingVisitController(),
         errorManager).runPass();
-    new AutoExpandBrowserPrefix(tree.getMutatingVisitController(),
-        errorManager).runPass();
+    new AutoExpandBrowserPrefix(tree.getMutatingVisitController()).runPass();
 
     // The passes tested here.
     CollectMixinDefinitions collectDefinitions = new CollectMixinDefinitions(
