@@ -23,14 +23,17 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.math.BigInteger;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test for MinimalSubstitutionMap.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public class MinimalSubstitutionMapTest extends TestCase {
+@RunWith(JUnit4.class)
+public class MinimalSubstitutionMapTest {
 
   private static final char[] START_CHARS = new char[] { 'a' };
   
@@ -50,6 +53,7 @@ public class MinimalSubstitutionMapTest extends TestCase {
    * Tests basic get() functionality, and that get() returns the same value when
    * applied to the same key.
    */
+  @Test
   public void testGet() {
     map = createTestMap();
     assertThat(map.get("foo")).isEqualTo("a");
@@ -67,6 +71,7 @@ public class MinimalSubstitutionMapTest extends TestCase {
   /**
    * Tests that the get() function correctly omits values from the blacklist.
    */
+  @Test
   public void testGetWithBlacklist() {
     map = new MinimalSubstitutionMap(START_CHARS, CHARS, ImmutableSet.of("a"));
 
@@ -84,6 +89,7 @@ public class MinimalSubstitutionMapTest extends TestCase {
    * that there are only 2 strings with 2 chars, 4 strings with 3 chars,
    * 8 strings with 4 chars, etc.
    */
+  @Test
   public void testToShortString() {
     map = createTestMap();
 

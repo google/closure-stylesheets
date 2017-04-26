@@ -19,15 +19,19 @@ package com.google.common.css.compiler.ast;
 import static com.google.common.truth.Truth.assertThat;
 
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssNode}
  *
  * @author oana@google.com (Oana Florescu)
- *
  */
+@RunWith(JUnit4.class)
 public class CssNodeTest extends TestCase {
 
+  @Test
   public void testNodeCreation() {
     CssLiteralNode node = new CssLiteralNode("");
 
@@ -35,6 +39,7 @@ public class CssNodeTest extends TestCase {
     assertThat(node.getSourceCodeLocation()).isNull();
   }
 
+  @Test
   public void testBecomeParent() {
     CssPropertyValueNode parentNode = new CssPropertyValueNode();
     CssLiteralNode childNode = new CssLiteralNode("");
@@ -43,6 +48,7 @@ public class CssNodeTest extends TestCase {
     assertThat(childNode.getParent()).isEqualTo(parentNode);
   }
 
+  @Test
   public void testDeleteAsParent() {
     CssPropertyValueNode parentNode = new CssPropertyValueNode();
     CssLiteralNode childNode = new CssLiteralNode("");

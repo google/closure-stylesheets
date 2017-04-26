@@ -20,14 +20,19 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.compiler.ast.CssPseudoClassNode.FunctionType;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssPseudoClassNode}
  *
  * @author fbenz@google.com (Florian Benz)
  */
+@RunWith(JUnit4.class)
 public class CssPseudoClassNodeTest extends TestCase {
 
+  @Test
   public void testNonFunction() {
     String name = "foo";
     CssPseudoClassNode node = new CssPseudoClassNode(name, null);
@@ -39,6 +44,7 @@ public class CssPseudoClassNodeTest extends TestCase {
     assertThat(node.getNotSelector()).isNull();
   }
 
+  @Test
   public void testLangFunction() {
     String name = "foo";
     String arg = "en";
@@ -50,6 +56,7 @@ public class CssPseudoClassNodeTest extends TestCase {
     assertThat(node.getNotSelector()).isNull();
   }
 
+  @Test
   public void testNthFunction() {
     String name = "foo";
     String arg = "2n+1";
@@ -61,6 +68,7 @@ public class CssPseudoClassNodeTest extends TestCase {
     assertThat(node.getNotSelector()).isNull();
   }
 
+  @Test
   public void testNotFunction() {
     String name = "not";
     CssSelectorNode selector = new CssSelectorNode("foo");

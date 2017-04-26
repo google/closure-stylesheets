@@ -21,7 +21,10 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.css.SourceCode;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for error handling of {@link GssParser}.
@@ -29,13 +32,14 @@ import junit.framework.TestCase;
  * @author fbenz@google.com (Florian Benz)
  */
 
-public class GssParserErrorTest extends TestCase {
+@RunWith(JUnit4.class)
+public class GssParserErrorTest {
 
   private void testError(String gss, int lineNumber, int indexInLine,
                          String line, String caret) {
     try {
       parse(gss);
-      fail();
+      Assert.fail();
     } catch (GssParserException e) {
       assertThat(e)
           .hasMessageThat()
@@ -52,12 +56,14 @@ public class GssParserErrorTest extends TestCase {
     }
   }
 
+  @Test
   public void test1() {
     testError("a { exu7y&&rgx: url('http://test.com') }", 1, 10,
               "a { exu7y&&rgx: url('http://test.com') }",
               "         ^");
   }
 
+  @Test
   public void test2() {
     testError(
         "a {\n" +
@@ -67,36 +73,42 @@ public class GssParserErrorTest extends TestCase {
         "         ^");
   }
 
+  @Test
   public void test3() {
     testError("a { b: c,,}", 1, 10,
               "a { b: c,,}",
               "         ^");
   }
 
+  @Test
   public void test4() {
     testError("a", 1, 1,
               "a",
               "^");
   }
 
+  @Test
   public void test5() {
     testError("a { b: c;", 1, 9,
               "a { b: c;",
               "        ^");
   }
 
+  @Test
   public void test6() {
     testError("{}", 1, 1,
               "{}",
               "^");
   }
 
+  @Test
   public void test7() {
     testError("\na { b: c,,}", 2, 10,
               "a { b: c,,}",
               "         ^");
   }
 
+  @Test
   public void testBadToken1() {
     // Should be > not <.
     testError(".foo .bar<td {}", 1, 10,
@@ -104,18 +116,21 @@ public class GssParserErrorTest extends TestCase {
               "         ^");
   }
 
+  @Test
   public void testBadToken2() {
     testError("\n<td {}", 2, 1,
               "<td {}",
               "^");
   }
 
+  @Test
   public void testBadToken3() {
     testError("<td {}", 1, 1,
               "<td {}",
               "^");
   }
 
+  @Test
   public void testBadWebkitKeyframes1() {
     testError("@-webkit-keyframes bounce {\n" +
         "  0 {\n" +
@@ -129,6 +144,7 @@ public class GssParserErrorTest extends TestCase {
         "   ^");
   }
 
+  @Test
   public void testBadWebkitKeyframes2() {
     testError("@-webkit-keyframes bounce {\n" +
         "  2.2 {\n" +
@@ -142,30 +158,35 @@ public class GssParserErrorTest extends TestCase {
         "     ^");
   }
 
+  @Test
   public void testBadWebkitKeyframes3() {
     testError("@-webkit-keyframes foo;", 1, 23,
         "@-webkit-keyframes foo;",
         "                      ^");
   }
 
+  @Test
   public void testBadPseudoNth1() {
     testError("div :nth-child(#id) { }", 1, 16,
         "div :nth-child(#id) { }",
         "               ^");
   }
 
+  @Test
   public void testBadPseudoNth2() {
     testError("div :nth-child(.class) { }", 1, 16,
         "div :nth-child(.class) { }",
         "               ^");
   }
 
+  @Test
   public void testBadPseudoNot1() {
     testError("div :not() { }", 1, 10,
         "div :not() { }",
         "         ^");
   }
 
+  @Test
   public void testBadPseudoNot2() {
     // :not can only take a simple selector as an argument.
     testError("div :not(div p) { }", 1, 14,
@@ -173,12 +194,14 @@ public class GssParserErrorTest extends TestCase {
         "             ^");
   }
 
+  @Test
   public void testBadMixinDefinition() {
     testError("@defmixin name($#%$var) {}", 1, 16,
         "@defmixin name($#%$var) {}",
         "               ^");
   }
 
+  @Test
   public void testBadGradient() {
     testError("div {"
         + "d:-invalid-gradient(bottom left, red 20px, yellow, green,"
@@ -189,6 +212,7 @@ public class GssParserErrorTest extends TestCase {
         "                                                                       ^");
   }
 
+  @Test
   public void testInvalidSpaceInArgumentList() {
     // The parser marks the error at the semicolon because this is the token immediately following
     // the last successfully-consumed production. This is not ideal because the error occurs within
@@ -223,6 +247,7 @@ public class GssParserErrorTest extends TestCase {
     assertThat(root.toString()).isEqualTo(expected);
   }
 
+  @Test
   public void testDeclarationErrorHandling() throws GssParserException {
     testErrorHandling("a { b: c,,; d: e }", "[[a]{[d:[e]]}]",
         "Parse error in test at line 1 column 10:\n"
@@ -238,6 +263,7 @@ public class GssParserErrorTest extends TestCase {
         + "                ^\n");
   }
 
+  @Test
   public void testSelectorErrorHandling() throws GssParserException {
     testErrorHandling("a>>b { b: c } d { e: f }", "[[d]{[e:[f]]}]",
         "Parse error in test at line 1 column 2:\n"
@@ -251,6 +277,7 @@ public class GssParserErrorTest extends TestCase {
     testErrorHandling("a{b:\"{,}\"}", "[[a]{[b:[\"{,}\"]]}]");
   }
 
+  @Test
   public void testAtRuleErrorHandling() throws GssParserException {
     testErrorHandling("@a b (,,); c { d: e }", "[[c]{[d:[e]]}]",
         "Parse error in test at line 1 column 7:\n"
@@ -282,6 +309,7 @@ public class GssParserErrorTest extends TestCase {
         + "    ^\n");
   }
 
+  @Test
   public void testMatchingBraces() throws GssParserException {
     // Inner closed block ignored
     testErrorHandling("a{ b{} } c{}", "[[a]{[]}, [c]{[]}]",
@@ -305,6 +333,7 @@ public class GssParserErrorTest extends TestCase {
         + "   ^\n");
   }
 
+  @Test
   public void testErrorRecoveryWithInvalidArgumentList() throws GssParserException {
     testErrorHandling("div { transform:rotate(180 deg); }", "[[div]{[]}]",
         "Parse error in test at line 1 column 32:\n"
@@ -312,6 +341,7 @@ public class GssParserErrorTest extends TestCase {
         + "                               ^\n");
   }
 
+  @Test
   public void testUnterminatedBlockCommentsWithoutErrorRecovery() throws GssParserException {
     testError("div {}/*comment**p {}", 1, 7,
               "div {}/*comment**p {}",
@@ -333,6 +363,7 @@ public class GssParserErrorTest extends TestCase {
               "                     ^");
   }
 
+  @Test
   public void testUnterminatedBlockCommentsWithErrorRecovery() throws GssParserException {
     testErrorHandling("div {}/*comment**p {}", "[[div]{[]}]",
         "Parse error in test at line 1 column 7:\n"

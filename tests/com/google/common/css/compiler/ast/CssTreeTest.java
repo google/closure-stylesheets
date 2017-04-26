@@ -20,14 +20,18 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.SourceCode;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssTree}
  *
- *
  */
+@RunWith(JUnit4.class)
 public class CssTreeTest extends TestCase {
 
+  @Test
   public void testSimple() {
     CssTree tree = new CssTree(new SourceCode("testfile", ""));
     CssRootNode root = tree.getRoot();
@@ -40,6 +44,7 @@ public class CssTreeTest extends TestCase {
     assertThat(root.getBody()).isNotNull();
   }
 
+  @Test
   public void testCopyConstructor() {
     CssTree tree1 = new CssTree(new SourceCode("testfile", ""));
     CssTree tree2 = new CssTree(tree1);

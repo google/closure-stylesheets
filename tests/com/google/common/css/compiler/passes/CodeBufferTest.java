@@ -18,15 +18,19 @@ package com.google.common.css.compiler.passes;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * Test {@link CodeBuffer} for correct behaviors when writing buffer and update
- * lineIndex and charIndex.
+ * Test {@link CodeBuffer} for correct behaviors when writing buffer and update lineIndex and
+ * charIndex.
  *
  * @author steveyang@google.com (Chenyun Yang)
  */
-public class CodeBufferTest extends TestCase {
+@RunWith(JUnit4.class)
+public class CodeBufferTest {
+  @Test
   public void testInitialSetup() {
     CodeBuffer buffer = new CodeBuffer();
     assertThat(buffer.getNextCharIndex()).isEqualTo(0);
@@ -35,6 +39,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(0);
   }
 
+  @Test
   public void testReset() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo");
@@ -45,6 +50,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(0);
   }
 
+  @Test
   public void testAppendNull() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append(null);
@@ -54,6 +60,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(0);
   }
 
+  @Test
   public void testAppendChar() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append('c');
@@ -63,6 +70,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(0);
   }
 
+  @Test
   public void testAppendStr() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo");
@@ -72,6 +80,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(0);
   }
 
+  @Test
   public void testAppendStrIncludeNewLine() {
     CodeBuffer buffer;
 
@@ -90,6 +99,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(1);
   }
 
+  @Test
   public void testAppendObject() {
     CodeBuffer buffer = new CodeBuffer();
     class TestObject {
@@ -105,6 +115,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(0);
   }
 
+  @Test
   public void testAppendNewLineChar() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo");
@@ -119,6 +130,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastCharIndex()).isEqualTo(2);
     assertThat(buffer.getLastLineIndex()).isEqualTo(1);
   }
+  @Test
   public void testAppendSequenceOfNewLineChar() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo\n\nbar");
@@ -128,6 +140,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(2);
   }
 
+  @Test
   public void testStartNewLine() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo");
@@ -143,6 +156,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(1);
   }
 
+  @Test
   public void testDeleteLastChar() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo");
@@ -163,6 +177,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(0);
   }
 
+  @Test
   public void testDeleteLastChars() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo");
@@ -173,6 +188,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(0);
   }
 
+  @Test
   public void testDeleteLastCharsWhenExceedBufferLength() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo");
@@ -183,6 +199,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(0);
   }
 
+  @Test
   public void testDeleteLastCharForNewLine() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo");
@@ -202,6 +219,7 @@ public class CodeBufferTest extends TestCase {
     assertThat(buffer.getLastLineIndex()).isEqualTo(1);
   }
 
+  @Test
   public void testDeleteEndingIfEndingIs() {
     CodeBuffer buffer = new CodeBuffer();
     buffer.append("foo");

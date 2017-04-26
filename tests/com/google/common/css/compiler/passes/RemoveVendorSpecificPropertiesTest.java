@@ -19,6 +19,8 @@ package com.google.common.css.compiler.passes;
 import com.google.common.css.Vendor;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Unit test for {@link RemoveVendorSpecificProperties}.
@@ -30,6 +32,7 @@ public class RemoveVendorSpecificPropertiesTest extends NewFunctionalTestBase {
   private Vendor vendor;
 
   @Override
+  @Before
   public void setUp() {
     vendor = null;
   }
@@ -41,6 +44,7 @@ public class RemoveVendorSpecificPropertiesTest extends NewFunctionalTestBase {
     pass.runPass();
   }
 
+  @Test
   public void testAllowWebkit() throws GssParserException {
     vendor = Vendor.WEBKIT;
     test(linesToString(
@@ -58,6 +62,7 @@ public class RemoveVendorSpecificPropertiesTest extends NewFunctionalTestBase {
         "}"));
   }
 
+  @Test
   public void testAllowMozilla() throws GssParserException {
     vendor = Vendor.MOZILLA;
     test(linesToString(
@@ -75,6 +80,7 @@ public class RemoveVendorSpecificPropertiesTest extends NewFunctionalTestBase {
         "}"));
   }
 
+  @Test
   public void testAllowMicrosoft() throws GssParserException {
     vendor = Vendor.MICROSOFT;
     test(linesToString(
@@ -92,6 +98,7 @@ public class RemoveVendorSpecificPropertiesTest extends NewFunctionalTestBase {
         "}"));
   }
 
+  @Test
   public void testAllowOpera() throws GssParserException {
     vendor = Vendor.OPERA;
     test(linesToString(

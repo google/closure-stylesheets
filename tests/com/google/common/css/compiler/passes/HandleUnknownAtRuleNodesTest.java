@@ -20,11 +20,15 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.Sets;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link HandleUnknownAtRuleNodes}.
  *
  */
+@RunWith(JUnit4.class)
 public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
 
   private final String errorMessage = HandleUnknownAtRuleNodes.unknownAtRuleErrorMessage;
@@ -61,6 +65,7 @@ public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
     compactPrintedResult = compactPrinterPass.getCompactPrintedString();
   }
 
+  @Test
   public void testReportRemove() throws Exception {
     report = true;
     remove = true;
@@ -69,6 +74,7 @@ public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
     assertThat(compactPrintedResult).isEmpty();
   }
 
+  @Test
   public void testReportDoNotRemove() throws Exception {
     report = true;
     remove = false;
@@ -77,6 +83,7 @@ public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
     assertThat(compactPrintedResult).isEqualTo(testCodeCompactPrintedResult);
   }
 
+  @Test
   public void testDoNotReportRemove() throws Exception {
     report = false;
     remove = true;
@@ -85,6 +92,7 @@ public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
     assertThat(compactPrintedResult).isEmpty();
   }
 
+  @Test
   public void testDoNotReportDoNotRemove() throws Exception {
     report = false;
     remove = false;
@@ -93,6 +101,7 @@ public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
     assertThat(compactPrintedResult).isEqualTo(testCodeCompactPrintedResult);
   }
 
+  @Test
   public void testDoNotReportDoNotRemoveMedia() throws Exception {
     report = true;
     remove = true;
@@ -102,6 +111,7 @@ public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
     assertThat(compactPrintedResult).isEqualTo("@media print{.A{margin:0}}");
   }
 
+  @Test
   public void testDoNotReportDoNotRemoveMediaWithUnknown() throws Exception {
     report = true;
     remove = true;
@@ -110,6 +120,7 @@ public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
     assertThat(compactPrintedResult).isEqualTo("@media print{}");
   }
 
+  @Test
   public void testDoNotReportDoNotRemoveCustomAtRule() throws Exception {
     report = true;
     remove = true;

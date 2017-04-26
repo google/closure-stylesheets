@@ -28,17 +28,19 @@ import com.google.common.css.compiler.ast.CssPropertyNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssValueNode;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link UnsafeMergeRulesetNodes}.
  *
  */
-public class UnsafeMergeRulesetNodesTest extends TestCase {
+@RunWith(JUnit4.class)
+public class UnsafeMergeRulesetNodesTest {
 
-  /**
-   * Tests for {@link UnsafeMergeRulesetNodes#TO_STRING_COMPARATOR}.
-   */
+  /** Tests for {@link UnsafeMergeRulesetNodes#TO_STRING_COMPARATOR}. */
+  @Test
   public void testToStringComparator() {
     assertThat(TO_STRING_COMPARATOR.compare(
         new CssSelectorNode("a"), new CssSelectorNode("a"))).isEqualTo(0);
@@ -46,9 +48,8 @@ public class UnsafeMergeRulesetNodesTest extends TestCase {
         new CssSelectorNode("a"), new CssSelectorNode("b"))).isLessThan(0);
   }
 
-  /**
-   * Tests for {@link UnsafeMergeRulesetNodes#TO_STRING_ITERABLE_COMPARATOR}.
-   */
+  /** Tests for {@link UnsafeMergeRulesetNodes#TO_STRING_ITERABLE_COMPARATOR}. */
+  @Test
   public void testToStringIterableComparator() {
     assertThat(TO_STRING_ITERABLE_COMPARATOR.compare(
         ImmutableList.of("a", "b"), ImmutableList.of("a", "b"))).isEqualTo(0);
@@ -58,9 +59,8 @@ public class UnsafeMergeRulesetNodesTest extends TestCase {
             ImmutableList.of("a"), ImmutableList.of("a", "b"))).isLessThan(0);
   }
 
-  /**
-   * Tests for {@link UnsafeMergeRulesetNodes#DECLARATION_COMPARATOR}.
-   */
+  /** Tests for {@link UnsafeMergeRulesetNodes#DECLARATION_COMPARATOR}. */
+  @Test
   public void testDeclarationComparator() {
     CssPropertyNode padding = new CssPropertyNode("padding");
     CssPropertyNode paddingLeft = new CssPropertyNode("padding-left");

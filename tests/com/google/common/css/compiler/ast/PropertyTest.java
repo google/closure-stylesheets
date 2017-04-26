@@ -18,19 +18,21 @@ package com.google.common.css.compiler.ast;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.css.Vendor;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * Unit test for {@link Property}. For legacy reasons, much of the behavior of
- * {@link Property} is verified by {@link CssPropertyNodeTest} rather than this
- * test.
+ * Unit test for {@link Property}. For legacy reasons, much of the behavior of {@link Property} is
+ * verified by {@link CssPropertyNodeTest} rather than this test.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public class PropertyTest extends TestCase {
+@RunWith(JUnit4.class)
+public class PropertyTest {
 
+  @Test
   public void testBorderRadius() {
     Property borderRadius = Property.byName("border-radius");
     assertThat(borderRadius.isRecognizedProperty()).isTrue();
@@ -45,6 +47,7 @@ public class PropertyTest extends TestCase {
     assertThat(borderRadius.getShorthands()).containsExactly("border-radius");
   }
 
+  @Test
   public void testWebkitBorderRadius() {
     Property webkitBorderRadius = Property.byName("-webkit-border-radius");
     assertThat(webkitBorderRadius.isRecognizedProperty()).isTrue();
@@ -61,6 +64,7 @@ public class PropertyTest extends TestCase {
         .containsExactly("-webkit-border-radius");
   }
 
+  @Test
   public void testMozBorderRadius() {
     Property mozBorderRadius = Property.byName("-moz-border-radius");
     assertThat(mozBorderRadius.isRecognizedProperty()).isTrue();
@@ -76,6 +80,7 @@ public class PropertyTest extends TestCase {
     assertThat(mozBorderRadiusTopLeft.getShorthands()).containsExactly("-moz-border-radius");
   }
 
+  @Test
   public void testCustomBorderProperty() {
     Property borderHeight = Property.byName("border-height");
     assertThat(borderHeight.isRecognizedProperty()).isFalse();

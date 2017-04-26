@@ -18,12 +18,13 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
-
 import java.util.Collections;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@link LoopVariableReplacementPass}.
- */
+/** Unit tests for {@link LoopVariableReplacementPass}. */
+@RunWith(JUnit4.class)
 public class LoopVariableReplacementPassTest extends PassesTestBase {
 
   private static final int LOOP_ID = 3;
@@ -34,6 +35,7 @@ public class LoopVariableReplacementPassTest extends PassesTestBase {
     new CreateConstantReferences(tree.getMutatingVisitController()).runPass();
   }
 
+  @Test
   public void testClassRenaming() throws Exception {
     parseAndRun(".foo-$i {}");
     new LoopVariableReplacementPass(
@@ -42,6 +44,7 @@ public class LoopVariableReplacementPassTest extends PassesTestBase {
     checkTreeDebugString("[[.foo-3]{[]}]");
   }
 
+  @Test
   public void testVariableInProperty() throws Exception {
     parseAndRun(".foo { top: $i; }");
     new LoopVariableReplacementPass(
@@ -50,6 +53,7 @@ public class LoopVariableReplacementPassTest extends PassesTestBase {
     checkTreeDebugString("[[.foo]{[top:[[3]];]}]");
   }
 
+  @Test
   public void testVariableInArgument() throws Exception {
     parseAndRun(".foo { top: mult($i, 4); }");
     new LoopVariableReplacementPass(
@@ -58,6 +62,7 @@ public class LoopVariableReplacementPassTest extends PassesTestBase {
     checkTreeDebugString("[[.foo]{[top:[mult(5,4)];]}]");
   }
 
+  @Test
   public void testDefinitionReplacement() throws Exception {
     parseAndRun("@def XXX $i; .foo { top: XXX; }");
     new LoopVariableReplacementPass(
@@ -65,6 +70,7 @@ public class LoopVariableReplacementPassTest extends PassesTestBase {
     checkTreeDebugString("[@def XXX__LOOP3__2 [[2]];[.foo]{[top:[[XXX__LOOP3__2]];]}]");
   }
 
+  @Test
   public void testBasicPseudoClassReplacement() throws Exception {
     parseAndRun(".foo:nth_child($i) { top: 0; }");
     new LoopVariableReplacementPass(
@@ -73,6 +79,7 @@ public class LoopVariableReplacementPassTest extends PassesTestBase {
     checkTreeDebugString("[[.foo:nth_child(2)]{[top:[[0]];]}]");
   }
 
+  @Test
   public void testArgumentAOnlyPseudoClassReplacement() throws Exception {
     parseAndRun(".foo:nth_child(-$in) { top: 0; }");
     new LoopVariableReplacementPass(
@@ -81,6 +88,7 @@ public class LoopVariableReplacementPassTest extends PassesTestBase {
     checkTreeDebugString("[[.foo:nth_child(-2n)]{[top:[[0]];]}]");
   }
 
+  @Test
   public void testBothArgumentPseudoClassReplacement() throws Exception {
     parseAndRun(".foo:nth_child($in + $i) { top: 0; }");
     new LoopVariableReplacementPass(

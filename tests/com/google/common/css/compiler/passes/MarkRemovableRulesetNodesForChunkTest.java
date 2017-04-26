@@ -25,13 +25,18 @@ import com.google.common.css.compiler.ast.CssTree.RulesetNodesToRemove;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
 import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link MarkRemovableRulesetNodesForChunk}.
  *
  */
+@RunWith(JUnit4.class)
 public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
 
+  @Test
   public void testAllOneChunk() {
     collectRemovableRulesetNodes(
         linesToString(
@@ -48,6 +53,7 @@ public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
     checkRuleset("[[.CSS_RULE]{[border:[[2px]];]}]", rule);
   }
 
+  @Test
   public void testAllOneChunkButSkipping() {
     collectRemovableRulesetNodes(
         linesToString(
@@ -62,6 +68,7 @@ public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
     assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
+  @Test
   public void testDiffChunkHit() {
     collectRemovableRulesetNodes(
         linesToString(
@@ -76,6 +83,7 @@ public class MarkRemovableRulesetNodesForChunkTest extends PassesTestBase {
     assertThat(rules.getRulesetNodes()).isEmpty();
   }
 
+  @Test
   public void testSameChunkHit() {
     collectRemovableRulesetNodes(
         linesToString(

@@ -19,15 +19,19 @@ package com.google.common.css.compiler.ast;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.compiler.ast.testing.AstUtilityTestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssDeclarationNode}
  *
  * @author oana@google.com (Oana Florescu)
- *
  */
+@RunWith(JUnit4.class)
 public class CssDeclarationNodeTest extends AstUtilityTestCase {
 
+  @Test
   public void testDeclarationNodeCreation() {
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
     CssDeclarationNode node = new CssDeclarationNode(propertyName);
@@ -38,6 +42,7 @@ public class CssDeclarationNodeTest extends AstUtilityTestCase {
     assertThat(node.getPropertyValue().isEmpty()).isTrue();
   }
 
+  @Test
   public void testCompleteDeclarationNodeCreation() {
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
     CssLiteralNode colorValue = new CssLiteralNode("red");
@@ -53,6 +58,7 @@ public class CssDeclarationNodeTest extends AstUtilityTestCase {
     assertThat(node.toString()).isEqualTo("color:[red]");
   }
   
+  @Test
   public void testDeepCopyOfDeclarationNode() throws Exception {
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
     CssDeclarationNode node1 = new CssDeclarationNode(propertyName);
@@ -63,6 +69,7 @@ public class CssDeclarationNodeTest extends AstUtilityTestCase {
     deepEquals(node1, node2);
   }
 
+  @Test
   public void testDeepCopyOfDeclarationNode2() throws Exception {
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
     CssDeclarationNode node1 = new CssDeclarationNode(propertyName);
@@ -73,6 +80,7 @@ public class CssDeclarationNodeTest extends AstUtilityTestCase {
     deepEquals(node1, node2);
   }
 
+  @Test
   public void testDeepCopyOfDeclarationNode3() throws Exception {
     CssPropertyNode propertyName = new CssPropertyNode("color", null);
     CssDeclarationNode node1 = new CssDeclarationNode(propertyName);

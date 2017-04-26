@@ -17,14 +17,19 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Functional tests for {@link RemoveDefaultDeclarations}.
  *
  * @author oana@google.com (Oana Florescu)
  */
+@RunWith(JUnit4.class)
 public class RemoveDefaultDeclarationsFunctionalTest extends PassesTestBase {
 
+  @Test
   public void testRemoveDeclarations1() {
     testTreeConstruction(linesToString(
         "@def COLOR /* @default */ #fff;",
@@ -36,6 +41,7 @@ public class RemoveDefaultDeclarationsFunctionalTest extends PassesTestBase {
         "[[.CSS_RULE]{[padding:[[1px]];]}]");
   }
 
+  @Test
   public void testRemoveDeclarations2() {
     testTreeConstruction(linesToString(
         "@def COLOR /* @default */ #fff;",
@@ -53,6 +59,7 @@ public class RemoveDefaultDeclarationsFunctionalTest extends PassesTestBase {
         "[.CSS_RULE_2]{[color:[[red]];border:[[2px]];]}]");
   }
 
+  @Test
   public void testRemoveDeclarations3() {
     testTreeConstruction(linesToString(
         "@def COLOR /* @default */ #fff;",
@@ -69,7 +76,8 @@ public class RemoveDefaultDeclarationsFunctionalTest extends PassesTestBase {
         "[.CSS_RULE_2]{[border:[[2px]];]}]");
   }
 
-public void testRemoveDeclarations4() {
+  @Test
+  public void testRemoveDeclarations4() {
     testTreeConstruction(linesToString(
         "@def COLOR /* @default */ #fff;",
         ".CSS_RULE_1 {",
@@ -88,7 +96,8 @@ public void testRemoveDeclarations4() {
         "[.CSS_RULE_3]{[border-color:[[#000][#fff][#000][#fff]];]}]");
   }
 
-public void testRemoveDeclarations5() {
+  @Test
+  public void testRemoveDeclarations5() {
     testTreeConstruction(linesToString(
         "@def WIDTH /* @default */ thin;",
         ".CSS_RULE_1 {",
@@ -107,7 +116,8 @@ public void testRemoveDeclarations5() {
         "[.CSS_RULE_3]{[border-width:[[normal][thin][thick][thin]];]}]");
   }
 
-public void testRemoveDeclarations6() {
+  @Test
+  public void testRemoveDeclarations6() {
     testTreeConstruction(linesToString(
         "@def STYLE /* @default */ solid;",
         ".CSS_RULE_1 {",
@@ -126,7 +136,8 @@ public void testRemoveDeclarations6() {
         "[.CSS_RULE_3]{[border-style:[[solid][dotted]];]}]");
   }
 
-public void testRemoveDeclarations7() {
+  @Test
+  public void testRemoveDeclarations7() {
     testTreeConstruction(linesToString(
         "@def MARGIN /* @default */ 4px;",
         ".CSS_RULE_1 {",
@@ -145,7 +156,8 @@ public void testRemoveDeclarations7() {
         "[.CSS_RULE_3]{[margin:[[4px][0][4px][1px]];]}]");
   }
 
-public void testRemoveDeclarations8() {
+  @Test
+  public void testRemoveDeclarations8() {
     testTreeConstruction(linesToString(
         "@def PADDING /* @default */ 4px;",
         ".CSS_RULE_1 {",
@@ -164,7 +176,8 @@ public void testRemoveDeclarations8() {
         "[.CSS_RULE_3]{[padding:[[4px][4px][4px][0]];]}]");
   }
 
-public void testRemoveDeclarations9() {
+  @Test
+  public void testRemoveDeclarations9() {
     testTreeConstruction(linesToString(
         "@def WIDTH /* @default */ thin;",
         "@def STYLE /* @default */ solid;",
@@ -184,7 +197,8 @@ public void testRemoveDeclarations9() {
         "[.CSS_RULE_3]{[border:[[normal]];]}]");
   }
 
-public void testRemoveDeclarations10() {
+  @Test
+  public void testRemoveDeclarations10() {
   testTreeConstruction(linesToString(
       "@def WIDTH /* @default */ thin;",
       "@def STYLE /* @default */ solid;",
@@ -201,7 +215,8 @@ public void testRemoveDeclarations10() {
       "[.CSS_RULE_3]{[border:[[normal][solid][!important]];]}]");
 }
 
-public void testRemoveDeclarations11() {
+  @Test
+  public void testRemoveDeclarations11() {
   testTreeConstruction(linesToString(
       "@def WIDTH /* @default */ thin;",
       "@def COLOR /* @default */ #fff;",
@@ -218,7 +233,8 @@ public void testRemoveDeclarations11() {
       "[.CSS_RULE_2]{[]}]");
 }
 
-public void testRemoveDeclarations12() {
+  @Test
+  public void testRemoveDeclarations12() {
   testTreeConstruction(linesToString(
       "@def COLOR /* @default */ #fff;",
       "@def BGCOLOR COLOR;",

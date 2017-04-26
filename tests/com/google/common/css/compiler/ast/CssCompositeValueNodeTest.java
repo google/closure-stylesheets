@@ -20,13 +20,19 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for {@link CssCompositeValueNode}.
+ *
  * @author chrishenry@google.com (Chris Henry)
  */
+@RunWith(JUnit4.class)
 public class CssCompositeValueNodeTest extends TestCase {
 
+  @Test
   public void testDeepCopy() throws Exception {
     CssCompositeValueNode node = new CssCompositeValueNode(
         ImmutableList.<CssValueNode>of(

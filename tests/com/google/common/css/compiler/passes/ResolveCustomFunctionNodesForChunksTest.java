@@ -23,6 +23,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
+import org.junit.Test;
 
 /**
  * Unit tests for {@link ResolveCustomFunctionNodesForChunks}.
@@ -65,45 +66,53 @@ public class ResolveCustomFunctionNodesForChunksTest
     resolveForChunksPass.runPass();
   }
 
+  @Test
   public void testCreateDef1() {
     assertConstants(
         "@def A 1; .A { width: plus(A, 2, px);}",
         "plus(A,2,px)");
   }
 
+  @Test
   public void testCreateDef2() {
     assertConstants(
         "@def A 1; .A { width: plus(A, 1, px); height: plus(A, 2, px);}",
         "plus(A,1,px)", "plus(A,2,px)");
   }
 
+  @Test
   public void testFunctionWithNoDefInFunction() {
     assertConstants(
         "@def A 1px; .A { width: plus(A, plus(0, 2px));}",
         "plus(A,2px)");
   }
 
+  @Test
   public void testFunctionWithDefInFunction() {
     assertConstants(
         "@def A 1; .A { width: plus(A, plus(A, 2, \"\"), px);}",
         "plus(A,2,\"\")", "plus(A,__F0,px)");
   }
 
+  @Test
   public void testAlreadyDef1() {
     assertConstants("@def A 1; @def B plus(A,2,px);",
         "plus(A,2,px)");
   }
 
+  @Test
   public void testAlreadyDef2() {
     assertConstants("@def A 1; @def B plus(A, plus(A, 2, \"\"),px);",
         "plus(A,2,\"\")", "plus(A,__F0,px)");
   }
 
+  @Test
   public void testAlreadyDef3() {
     assertConstants("@def A 1; @def B plus(A,2,px) plus(A, 1, px);",
         "plus(A,2,px)", "plus(A,1,px)");
   }
 
+  @Test
   public void testNoFunctions() {
     assertConstants("@def A 1; .A { width: A }");
   }

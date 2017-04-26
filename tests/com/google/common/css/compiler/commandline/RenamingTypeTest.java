@@ -28,15 +28,19 @@ import com.google.common.css.SubstitutionMap;
 import com.google.common.css.SubstitutionMapProvider;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * {@link RenamingTypeTest} is a unit test for {@link RenamingType}.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public class RenamingTypeTest extends TestCase {
+@RunWith(JUnit4.class)
+public class RenamingTypeTest {
 
+  @Test
   public void testNone() {
     SubstitutionMapProvider provider = RenamingType.NONE
         .getCssSubstitutionMapProvider();
@@ -48,6 +52,7 @@ public class RenamingTypeTest extends TestCase {
     assertThat(map).isInstanceOf(IdentitySubstitutionMap.class);
   }
 
+  @Test
   public void testDebug() {
     SubstitutionMapProvider provider = RenamingType.DEBUG
         .getCssSubstitutionMapProvider();
@@ -64,6 +69,7 @@ public class RenamingTypeTest extends TestCase {
   }
 
 
+  @Test
   public void testClosure() {
     SubstitutionMapProvider provider = RenamingType.CLOSURE
         .getCssSubstitutionMapProvider();
@@ -83,6 +89,7 @@ public class RenamingTypeTest extends TestCase {
     testRenamingTypeThatWrapsASplittingSubstitutionMap(RenamingType.CLOSURE);
   }
 
+  @Test
   public void testClosureWithInputRenamingMap() {
     SubstitutionMapProvider provider = RenamingType.CLOSURE.getCssSubstitutionMapProvider();
     RecordingSubstitutionMap map =

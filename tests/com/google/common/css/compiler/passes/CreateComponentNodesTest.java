@@ -22,11 +22,15 @@ import com.google.common.css.compiler.ast.CssComponentNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CreateComponentNodes}.
  *
  */
+@RunWith(JUnit4.class)
 public class CreateComponentNodesTest extends NewFunctionalTestBase {
 
   @Override
@@ -34,6 +38,7 @@ public class CreateComponentNodesTest extends NewFunctionalTestBase {
     new CreateComponentNodes(tree.getMutatingVisitController(), errorManager).runPass();
   }
 
+  @Test
   public void testCreateComponentNode1() throws Exception {
     parseAndRun("@component CSS_X { @def X Y; }");
     assertThat(getFirstActualNode()).isInstanceOf(CssComponentNode.class);
@@ -44,6 +49,7 @@ public class CreateComponentNodesTest extends NewFunctionalTestBase {
     assertThat(comp.getBlock().toString()).isEqualTo("[@def[X, Y]]");
   }
 
+  @Test
   public void testCreateComponentNode2() throws Exception {
     parseAndRun("@abstract_component CSS_X { @def X Y; }");
     assertThat(getFirstActualNode()).isInstanceOf(CssComponentNode.class);
@@ -54,6 +60,7 @@ public class CreateComponentNodesTest extends NewFunctionalTestBase {
     assertThat(comp.getBlock().toString()).isEqualTo("[@def[X, Y]]");
   }
 
+  @Test
   public void testCreateComponentNode3() throws Exception {
     parseAndRun("@abstract_component CSS_X { @def X Y; }\n" +
         "@component CSS_Y extends CSS_X { @def X Y; }");
@@ -69,6 +76,7 @@ public class CreateComponentNodesTest extends NewFunctionalTestBase {
     assertThat(comp.getBlock().toString()).isEqualTo("[@def[X, Y]]");
   }
 
+  @Test
   public void testImplicitlyNamedComponent() throws Exception {
     parseAndRun("@component { @def X Y; }");
     assertThat(getFirstActualNode()).isInstanceOf(CssComponentNode.class);
@@ -79,39 +87,46 @@ public class CreateComponentNodesTest extends NewFunctionalTestBase {
     assertThat(comp.getBlock().toString()).isEqualTo("[@def[X, Y]]");
   }
 
+  @Test
   public void testBlockError() throws Exception {
     parseAndRun("@component CSS_X;", "@component without block");
     assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testNameError() throws Exception {
     parseAndRun("@component 1px {}", "@component without a valid literal as name");
     assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testExtendsError1() throws Exception {
     parseAndRun("@component CSS_X 1px CSS_Y {}",
         "@component with invalid second parameter (expects 'extends')");
     assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testExtendsError2() throws Exception {
     parseAndRun("@component CSS_X foo CSS_Y {}",
         "@component with invalid second parameter (expects 'extends')");
     assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testParentNameError() throws Exception {
     parseAndRun("@component CSS_X extends 1px {}",
         "@component with invalid literal as parent name");
     assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testInvalidParamNumError1() throws Exception {
     parseAndRun("@component CSS_X extends {}", "@component with invalid number of parameters");
     assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testInvalidParamNumError2() throws Exception {
     parseAndRun("@component CSS_X extends CSS_Y CSS_Z {}",
         "@component with invalid number of parameters");

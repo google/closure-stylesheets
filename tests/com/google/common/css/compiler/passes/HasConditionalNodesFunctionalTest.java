@@ -19,15 +19,20 @@ package com.google.common.css.compiler.passes;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.compiler.ast.FunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Functional tests for {@link HasConditionalNodes}.
  *
  */
+@RunWith(JUnit4.class)
 public class HasConditionalNodesFunctionalTest extends FunctionalTestBase {
 
   private boolean passResult;
 
+  @Test
   public void testSimpleTrue() {
     parseAndBuildTree(linesToString(
         "@if COND {",
@@ -39,6 +44,7 @@ public class HasConditionalNodesFunctionalTest extends FunctionalTestBase {
     assertThat(passResult).isTrue();
   }
 
+  @Test
   public void testComplexTrue() {
     parseAndBuildTree(linesToString(
         "@media print {",
@@ -59,6 +65,7 @@ public class HasConditionalNodesFunctionalTest extends FunctionalTestBase {
     assertThat(passResult).isTrue();
   }
 
+  @Test
   public void testSimpleFalse() {
     parseAndBuildTree(linesToString(
         "@media print /* @noflip */{",

@@ -17,44 +17,53 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.FunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Functional tests for {@link AbbreviatePositionalValues}.
  *
  */
-public class AbbreviatePositionalValuesFunctionalTest
-    extends FunctionalTestBase {
+@RunWith(JUnit4.class)
+public class AbbreviatePositionalValuesFunctionalTest extends FunctionalTestBase {
 
+  @Test
   public void test1() {
     testTreeConstruction(
         "foo { margin: -2px -2px; }",
         "[[foo]{[margin:[-2px]]}]");
   }
 
+  @Test
   public void test2() {
     testTreeConstruction(
         "foo { padding: 1px 2px 1px 2px; }",
         "[[foo]{[padding:[1px, 2px]]}]");
   }
 
+  @Test
   public void test3() {
     testTreeConstruction(
         "foo { padding: 1px auto 3px auto; }",
         "[[foo]{[padding:[1px, auto, 3px]]}]");
   }
 
+  @Test
   public void test4() {
     testTreeConstruction(
         "foo { padding: 1px 2px 1px 3px; }",
         "[[foo]{[padding:[1px, 2px, 1px, 3px]]}]");
   }
 
+  @Test
   public void test5() {
     testTreeConstruction(
         "foo { padding: 4px 4px 4px 4px; }",
         "[[foo]{[padding:[4px]]}]");
   }
 
+  @Test
   public void test6() {
     testTreeConstruction(
         "foo { border-color: red #fff red #fff}",

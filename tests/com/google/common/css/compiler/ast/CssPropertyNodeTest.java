@@ -18,18 +18,22 @@ package com.google.common.css.compiler.ast;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssPropertyNode}.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
+@RunWith(JUnit4.class)
 public class CssPropertyNodeTest extends TestCase {
 
+  @Test
   public void testPropertyNodeCreation1() {
     CssPropertyNode property = new CssPropertyNode("color", null);
 
@@ -39,6 +43,7 @@ public class CssPropertyNodeTest extends TestCase {
     assertThat(property.getProperty().hasPositionalParameters()).isFalse();
   }
 
+  @Test
   public void testPropertyNodeCreation2() {
     CssPropertyNode property = new CssPropertyNode("cOloR", null);
 
@@ -48,6 +53,7 @@ public class CssPropertyNodeTest extends TestCase {
     assertThat(property.getProperty().hasPositionalParameters()).isFalse();
  }
 
+  @Test
   public void testPropertyNodeCreation3() {
     SourceCodeLocation codeLoc = new SourceCodeLocation(
         new SourceCode("file.css", null), 1, 1, 1, 1, 1, 1);
@@ -59,6 +65,7 @@ public class CssPropertyNodeTest extends TestCase {
     assertThat(property.getProperty().hasPositionalParameters()).isFalse();
   }
 
+  @Test
   public void testPropertyNodePositionDependentValues() {
     CssPropertyNode borderColor = new CssPropertyNode("border-color", null);
     CssPropertyNode borderStyle = new CssPropertyNode("border-style", null);
@@ -82,6 +89,7 @@ public class CssPropertyNodeTest extends TestCase {
     assertThat(padding.getProperty().hasPositionalParameters()).isTrue();
   }
 
+  @Test
   public void testPropertyNodeShorthands() {
     assertThat(new CssPropertyNode("foo").getProperty().getShorthands()).isEmpty();
 
@@ -105,6 +113,7 @@ public class CssPropertyNodeTest extends TestCase {
         .inOrder();
   }
 
+  @Test
   public void testPropertyNodePartition() {
     assertThat(new CssPropertyNode("foo").getPartition()).isEqualTo("foo");
 
@@ -123,6 +132,7 @@ public class CssPropertyNodeTest extends TestCase {
     assertThat(new CssPropertyNode("border-left-style").getPartition()).isEqualTo("border");
   }
 
+  @Test
   public void testPropertyNodeCopy() {
     CssPropertyNode property = new CssPropertyNode("color", null);
     CssPropertyNode propertyCopy = new CssPropertyNode(property);

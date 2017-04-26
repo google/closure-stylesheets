@@ -34,20 +34,25 @@ import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.testing.UtilityTestCase;
 import java.util.Map;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test for RecordingSubstitutionMap.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
+@RunWith(JUnit4.class)
 public class RecordingSubstitutionMapTest extends UtilityTestCase {
 
   private String styleSheet;
   private Predicate<String> predicate;
   private Map<String,String> mappings;
 
-  @Override
-  protected void setUp() {
+  @Before
+  public void setUp() {
     styleSheet = linesToString(
         ".CSS_SPRITE { background-image: url(\"foo.png\"); }",
         ".sprite { background-image: url(\"bar.png\"); }"
@@ -75,6 +80,7 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
     passRunner.runPasses(cssTree);
   }
 
+  @Test
   public void testGet() {
     SubstitutionMap substitutionMap = new SubstitutionMap() {
       @Override
@@ -107,6 +113,7 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
     assertThat(mappings).containsExactlyEntriesIn(expectedMap).inOrder();
   }
 
+  @Test
   public void testOrderIsPreserved() {
     styleSheet = linesToString(
         ".zero { color: red; }",
@@ -150,6 +157,7 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
     return map;
   }
 
+  @Test
   public void testMapWithTypeIdentity() {
     RecordingSubstitutionMap map =
         new RecordingSubstitutionMap.Builder()
@@ -160,6 +168,7 @@ public class RecordingSubstitutionMapTest extends UtilityTestCase {
     assertThat(mappings).containsExactly("CSS_SPRITE", "CSS_SPRITE_");
   }
 
+  @Test
   public void testMapWithTypeMinimal() {
     RecordingSubstitutionMap map =
         new RecordingSubstitutionMap.Builder()

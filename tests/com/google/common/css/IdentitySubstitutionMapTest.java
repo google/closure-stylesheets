@@ -18,26 +18,31 @@ package com.google.common.css;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * {@link IdentitySubstitutionMapTest} is a unit test for
- * {@link IdentitySubstitutionMap}.
+ * {@link IdentitySubstitutionMapTest} is a unit test for {@link IdentitySubstitutionMap}.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public class IdentitySubstitutionMapTest extends TestCase {
+@RunWith(JUnit4.class)
+public class IdentitySubstitutionMapTest {
 
+  @Test
   public void testNull() {
     IdentitySubstitutionMap map = new IdentitySubstitutionMap();
     try {
       map.get(null);
-      fail();
+      Assert.fail();
     } catch (NullPointerException e) {
       // OK.
     }
   }
 
+  @Test
   public void testGet() {
     IdentitySubstitutionMap map = new IdentitySubstitutionMap();
     assertThat(map.get("")).isEmpty();

@@ -22,12 +22,17 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.base.Functions;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@code CssStringNode}
  *
  */
+@RunWith(JUnit4.class)
 public class CssStringNodeTest extends TestCase {
+  @Test
   public void testCssValueNodeRoundtrip() throws Exception {
     String v = "ordinary";
     for (CssStringNode.Type t : CssStringNode.Type.values()) {
@@ -37,6 +42,7 @@ public class CssStringNodeTest extends TestCase {
     }
   }
 
+  @Test
   public void testCssValueNodeFixedPoint() throws Exception {
     // This test doesn't care if setValue/getValue work in terms of
     // CSS or abstract values, but we just want to make sure that
@@ -52,6 +58,7 @@ public class CssStringNodeTest extends TestCase {
     assertThat(n.getValue()).isEqualTo(v2);
   }
 
+  @Test
   public void testConcreteRoundtrip() throws Exception {
     // This value is safe for verbatim inclusion in either kind of
     // string literal, and for each kind it includes:
@@ -79,6 +86,7 @@ public class CssStringNodeTest extends TestCase {
     }
   }
 
+  @Test
   public void testShortEscaper() throws Exception {
     for (String[] io : new String[][] {
         {"", ""},
@@ -107,6 +115,7 @@ public class CssStringNodeTest extends TestCase {
         .isEqualTo("\\100000a");
   }
 
+  @Test
   public void testInsertsIgnoredWhitespaceAfterEscape() throws Exception {
     // When parsing, we always discard zero or one whitespace after an
     // escape sequence.
@@ -143,6 +152,7 @@ public class CssStringNodeTest extends TestCase {
     }
   }
 
+  @Test
   public void testHtmlEscaper() throws Exception {
     for (String[] io : new String[][] {
         {"", ""},
@@ -166,6 +176,7 @@ public class CssStringNodeTest extends TestCase {
     assertThat(CssStringNode.HTML_ESCAPER.apply("'")).isEqualTo("\\000027");
   }
 
+  @Test
   public void testEscape() throws Exception {
     for (String[] io : new String[][] {
         {"", ""},
@@ -187,6 +198,7 @@ public class CssStringNodeTest extends TestCase {
         .isEqualTo("say \\'goodbye\\'");
   }
 
+  @Test
   public void testUnescape() throws Exception {
     for (String[] io : new String[][] {
         {"", ""},
@@ -234,6 +246,7 @@ public class CssStringNodeTest extends TestCase {
             String.format("\\%x", bigCodePoint)));
   }
 
+  @Test
   public void testCopyCtor() {
     CssStringNode a = new CssStringNode(
         CssStringNode.Type.DOUBLE_QUOTED_STRING, "foo");
@@ -244,6 +257,7 @@ public class CssStringNodeTest extends TestCase {
     assertThat(b.getValue()).isEqualTo(a.getValue());
   }
 
+  @Test
   public void testStringCannotDirectlyContainNewline() {
     // See http://www.w3.org/TR/CSS2/syndata.html#strings
     CssStringNode a = new CssStringNode(

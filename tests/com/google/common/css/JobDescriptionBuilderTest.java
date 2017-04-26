@@ -22,33 +22,40 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link JobDescriptionBuilder}.
  *
  */
-public class JobDescriptionBuilderTest extends TestCase {
+@RunWith(JUnit4.class)
+public class JobDescriptionBuilderTest {
   private JobDescriptionBuilder builder;
   private JobDescription job;
 
-  @Override
-  protected void setUp() {
+  @Before
+  public void setUp() {
     builder = new JobDescriptionBuilder();
   }
 
-  @Override
-  protected void tearDown() {
+  @After
+  public void tearDown() {
     builder = null;
     job = null;
   }
 
+  @Test
   public void testSimpleCreation() {
     job = builder.getJobDescription();
     assertThat(job).isNotNull();
     assertThat(builder.getJobDescription()).isSameAs(job);
   }
 
+  @Test
   public void testSettingInputs1() {
     SourceCode sourceCode = new SourceCode("tempfile", "filecontents");
     builder.addInput(sourceCode);
@@ -57,6 +64,7 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.inputs.get(0)).isSameAs(sourceCode);
   }
 
+  @Test
   public void testSettingInputs2() {
     builder.addInput(new SourceCode("bla", "bla")).clearInputs();
     SourceCode sourceCode = new SourceCode("tempfile", "filecontents");
@@ -66,6 +74,7 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.inputs.get(0)).isSameAs(sourceCode);
   }
 
+  @Test
   public void testSettingInputs3() {
     SourceCode sourceCode = new SourceCode("tempfile", "filecontents");
     builder.setInputs(ImmutableList.of(sourceCode));
@@ -74,6 +83,7 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.inputs.get(0)).isSameAs(sourceCode);
   }
 
+  @Test
   public void testSettingConditions1() {
     String conditionName = "cond";
     builder.addTrueConditionName(conditionName);
@@ -82,6 +92,7 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.trueConditionNames.get(0)).isSameAs(conditionName);
   }
 
+  @Test
   public void testSettingConditions2() {
     builder.addTrueConditionName("bla").clearTrueConditionNames();
     String conditionName = "cond";
@@ -91,6 +102,7 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.trueConditionNames.get(0)).isSameAs(conditionName);
   }
 
+  @Test
   public void testSettingConditions3() {
     String conditionName = "cond";
     builder.setTrueConditionNames(ImmutableList.of(conditionName));
@@ -99,24 +111,28 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.trueConditionNames.get(0)).isSameAs(conditionName);
   }
 
+  @Test
   public void testSetCheckUnrecognizedProperties1() {
     builder.setAllowUnrecognizedProperties(false);
     job = builder.getJobDescription();
     assertThat(job.allowUnrecognizedProperties).isFalse();
   }
 
+  @Test
   public void testSetCheckUnrecognizedProperties2() {
     builder.setAllowUnrecognizedProperties(true);
     job = builder.getJobDescription();
     assertThat(job.allowUnrecognizedProperties).isTrue();
   }
 
+  @Test
   public void testSetCheckUnrecognizedProperties3() {
     builder.allowUnrecognizedProperties();
     job = builder.getJobDescription();
     assertThat(job.allowUnrecognizedProperties).isTrue();
   }
 
+  @Test
   public void testSetAllowUnrecognizedProperties() {
     List<String> properties = Lists.newArrayList("a", "b");
     builder.setAllowedUnrecognizedProperties(properties);
@@ -124,12 +140,14 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.allowedUnrecognizedProperties).isEqualTo(Sets.newHashSet(properties));
   }
 
+  @Test
   public void testSetCopyrightNotice1() {
     builder.setCopyrightNotice(null);
     job = builder.getJobDescription();
     assertThat(job.copyrightNotice).isNull();
   }
 
+  @Test
   public void testSetCopyrightNotice2() {
     String copyrightNotice = "/* Copyright Google Inc. */";
     builder.setCopyrightNotice(copyrightNotice);
@@ -137,6 +155,7 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.copyrightNotice).isEqualTo(copyrightNotice);
   }
 
+  @Test
   public void testCopyJobDescription() {
     JobDescription otherJob = new JobDescriptionBuilder().
         addInput(new SourceCode("tempFile", "contents")).
@@ -156,6 +175,7 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.trueConditionNames).isEqualTo(otherJob.trueConditionNames);
   }
 
+  @Test
   public void testCssRenamingPrefix() {
     String prefix = "PREFIX_";
     builder.setCssRenamingPrefix(prefix);
@@ -163,6 +183,7 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.cssRenamingPrefix).isEqualTo(prefix);
   }
 
+  @Test
   public void testExcludedClasses() {
     List<String> exclude = Lists.newArrayList("foo", "bar");
     builder.setExcludedClassesFromRenaming(exclude);
@@ -170,6 +191,7 @@ public class JobDescriptionBuilderTest extends TestCase {
     assertThat(job.excludedClassesFromRenaming).isEqualTo(exclude);
   }
 
+  @Test
   public void testAllowUndefinedConstants() {
     builder.setAllowUndefinedConstants(true);
     job = builder.getJobDescription();

@@ -29,6 +29,7 @@ import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 
 /**
  * Unit tests for {@link ResolveCustomFunctionNodes}.
@@ -72,6 +73,7 @@ public class ResolveCustomFunctionNodesWithDefsTest
         .runPass();
   }
 
+  @Test
   public void testMultipleArgs() throws Exception {
     parseAndRun("@def BAR 3px left top;" +
         "A { foo: testMultipleArg(first, 30px, BAR) }");

@@ -20,14 +20,19 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.Lists;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssDefinitionNode}.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
+@RunWith(JUnit4.class)
 public class CssDefinitionNodeTest extends TestCase {
 
+  @Test
   public void testDefinitionNodeCreation() {
     CssDefinitionNode definition = new CssDefinitionNode(
         new CssLiteralNode("COLOR"));
@@ -38,6 +43,7 @@ public class CssDefinitionNodeTest extends TestCase {
     assertThat(definition.toString()).isEqualTo("@def COLOR []");
   }
 
+  @Test
   public void testDefinitionNodeCopy() {
     CssDefinitionNode definition1 = new CssDefinitionNode(
         new CssLiteralNode("COLOR"), 

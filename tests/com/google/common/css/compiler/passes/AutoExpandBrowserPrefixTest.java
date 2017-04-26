@@ -17,12 +17,15 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for the {@link AutoExpandBrowserPrefix} compiler pass.
- */
+/** Unit tests for the {@link AutoExpandBrowserPrefix} compiler pass. */
+@RunWith(JUnit4.class)
 public class AutoExpandBrowserPrefixTest extends PassesTestBase {
 
+  @Test
   public void testMatchOnPropertyNameAndValue() {
     testTreeConstruction(linesToString(
         "p {",
@@ -33,6 +36,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
         + "[/* @alternate */]display:[[flex]];]}]");
   }
 
+  @Test
   public void testMatchOnPropertyName() {
     testTreeConstruction(linesToString(
         "p {",
@@ -43,6 +47,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
         + "[/* @alternate */]flex-grow:[[1]];]}]");
   }
 
+  @Test
   public void testMatchFunction() {
     testTreeConstruction(linesToString(
         "@def GRADIENT top, #f8f8f8, #f1f1f1;",
@@ -57,6 +62,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
         + "[/* @alternate */]background-image:[linear-gradient([[top],[#f8f8f8],[#f1f1f1]])];]}]");
   }
 
+  @Test
   public void testMatchValueOnlyFunction() {
     testTreeConstruction(
         "p { margin: calc(100% - 24px) auto; }",
@@ -66,6 +72,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
             + "[/* @alternate */]margin:[calc([[100%] - [24px]]) [auto]];]}]");
   }
 
+  @Test
   public void testMatchValueOnlyFunctionLast() {
     testTreeConstruction(
         "p { margin: 10px calc(100% - 24px); }",
@@ -75,6 +82,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
             + "[/* @alternate */]margin:[[10px]calc([[100%] - [24px]])];]}]");
   }
 
+  @Test
   public void testMatchValueOnlyMultipleFunctions() {
     testTreeConstruction(
         "p { margin: calc(100% - 24px) calc(50% + 16px); }",
@@ -85,6 +93,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
             + "[/* @alternate */]margin:[calc([[100%] - [24px]]) calc([[50%] + [16px]])];]}]");
   }
 
+  @Test
   public void testDefMixinUnaffected() {
     testTreeConstruction(linesToString(
         "@defmixin display_flex() {",

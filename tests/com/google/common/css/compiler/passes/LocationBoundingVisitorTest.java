@@ -27,10 +27,12 @@ import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTreeVisitor;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@link LocationBoundingVisitor}.
- */
+/** Unit tests for {@link LocationBoundingVisitor}. */
+@RunWith(JUnit4.class)
 public class LocationBoundingVisitorTest extends NewFunctionalTestBase {
   private LocationBoundingVisitor locationBoundingVisitor;
 
@@ -41,6 +43,7 @@ public class LocationBoundingVisitorTest extends NewFunctionalTestBase {
         .startVisit(UniformVisitor.Adapters.asVisitor(locationBoundingVisitor));
   }
 
+  @Test
   public void testTrivialBound() throws Exception {
     CssLiteralNode red = new CssLiteralNode("red");
     SourceCodeLocation expected =
@@ -56,6 +59,7 @@ public class LocationBoundingVisitorTest extends NewFunctionalTestBase {
     assertThat(LocationBoundingVisitor.bound(red)).isEqualTo(expected);
   }
 
+  @Test
   public void testUnknown() throws Exception {
     parseAndRun("div { color: red; }");
     CssTreeVisitor eraseLocations =
@@ -76,6 +80,7 @@ public class LocationBoundingVisitorTest extends NewFunctionalTestBase {
         .isEqualTo(SourceCodeLocation.getUnknownLocation());
   }
 
+  @Test
   public void testMixedSubtree() throws Exception {
     // Let's examine a non-trivial tree
     parseAndRun("div { color: red; }");

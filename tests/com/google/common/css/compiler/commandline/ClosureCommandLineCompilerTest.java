@@ -16,6 +16,7 @@
 package com.google.common.css.compiler.commandline;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
 
 import com.google.common.css.ExitCodeHandler;
 import com.google.common.css.JobDescription;
@@ -25,8 +26,12 @@ import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.io.Files;
 import java.io.File;
-import junit.framework.TestCase;
-public class ClosureCommandLineCompilerTest extends TestCase {
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+@RunWith(JUnit4.class)
+public class ClosureCommandLineCompilerTest {
 
   static final ExitCodeHandler EXIT_CODE_HANDLER =
       new ExitCodeHandler() {
@@ -36,6 +41,7 @@ public class ClosureCommandLineCompilerTest extends TestCase {
         }
       };
 
+  @Test
   public void testMixinPropagation() throws Exception {
     ErrorManager errorManager = new NewFunctionalTestBase.TestErrorManager(new String[0]);
 
@@ -59,6 +65,7 @@ public class ClosureCommandLineCompilerTest extends TestCase {
     assertThat(output).isEqualTo(".example{background:url('sprite.png') no-repeat}");
   }
 
+  @Test
 
   public void testAllowDefPropagationDefaultsToTrue() throws Exception {
     ClosureCommandLineCompiler.Flags flags =
@@ -67,6 +74,7 @@ public class ClosureCommandLineCompilerTest extends TestCase {
     assertThat(jobDescription.allowDefPropagation).isTrue();
   }
 
+  @Test
 
   public void testEmptyImportBlocks() throws Exception {
     // See b/29995881

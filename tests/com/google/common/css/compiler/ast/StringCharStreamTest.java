@@ -20,16 +20,21 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import java.io.IOException;
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * Tests for a more efficient implementation of the CharStream which only
- * expects to operate on {@code String} object.
+ * Tests for a more efficient implementation of the CharStream which only expects to operate on
+ * {@code String} object.
  *
  * @author dgajda@google.com (Damian Gajda)
  */
-public class StringCharStreamTest extends TestCase {
+@RunWith(JUnit4.class)
+public class StringCharStreamTest {
 
+  @Test
   public void testLocation() throws Exception {
     StringCharStream s = new StringCharStream(
         "01234\n" +
@@ -56,6 +61,7 @@ public class StringCharStreamTest extends TestCase {
     readCharCheckLocation(s, 'd',  3, 3, 13);
   }
 
+  @Test
   public void testBackup() throws Exception {
     StringCharStream s = new StringCharStream(
         "01234\n" +
@@ -103,6 +109,7 @@ public class StringCharStreamTest extends TestCase {
     readCharCheckLocation(s, 'd',  3, 3, 13);
   }
 
+  @Test
   public void testConvertCharacterIndex() throws Exception {
     StringCharStream s = new StringCharStream(
         "01234\n" +
@@ -124,6 +131,7 @@ public class StringCharStreamTest extends TestCase {
     checkCharacterIndex(s, 3, 3, 13);
   }
 
+  @Test
   public void testGetImageAndGetSuffix() throws Exception {
     StringCharStream s = new StringCharStream(
         "01234\n" +
@@ -168,7 +176,7 @@ public class StringCharStreamTest extends TestCase {
 
     try {
       s.readChar();
-      fail();
+      Assert.fail();
     } catch (IOException e) {
       // Should thrown an exception, when reaching behind the end of the string.
     }

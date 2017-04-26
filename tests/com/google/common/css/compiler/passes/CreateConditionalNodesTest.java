@@ -24,11 +24,15 @@ import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CreateConditionalNodes}.
  *
  */
+@RunWith(JUnit4.class)
 public class CreateConditionalNodesTest extends NewFunctionalTestBase {
 
   @Override
@@ -38,6 +42,7 @@ public class CreateConditionalNodesTest extends NewFunctionalTestBase {
     pass.runPass();
   }
 
+  @Test
   public void testCreateSimpleConditionalBlockNode() throws Exception {
     parseAndRun("@if (!X){ a {b: c} } @else { d {e: f} }");
     assertThat(getFirstActualNode()).isInstanceOf(CssConditionalBlockNode.class);
@@ -53,6 +58,7 @@ public class CreateConditionalNodesTest extends NewFunctionalTestBase {
     assertThat(condRuleElse.getBlock().toString()).isEqualTo("[[d]{[e:[f]]}]");
   }
 
+  @Test
   public void testCreateNestedConditionalBlockNode() throws Exception {
     parseAndRun("@if X {a {b: c} } @else { @if (Y) {d {e: f} } }");
     assertThat(getFirstActualNode()).isInstanceOf(CssConditionalBlockNode.class);
@@ -76,6 +82,7 @@ public class CreateConditionalNodesTest extends NewFunctionalTestBase {
     assertThat(elseCondRuleIf.getBlock().toString()).isEqualTo("[[d]{[e:[f]]}]");
   }
 
+  @Test
   public void testCreateConditionalBlockNodeInRuleset() throws Exception {
     parseAndRun("a {@if X {b: c} @else {d: e} }");
     assertThat(getFirstActualNode()).isInstanceOf(CssRulesetNode.class);
@@ -96,36 +103,44 @@ public class CreateConditionalNodesTest extends NewFunctionalTestBase {
     assertThat(condRuleElse.getBlock().toString()).isEqualTo("[d:[e]]");
   }
 
+  @Test
   public void testIfWithoutBlockError() throws Exception {
     parseAndRun("@if (X) ;", "@if without block");
   }
 
+  @Test
   public void testIfWithoutConditionError() throws Exception {
     parseAndRun("@if {a {b: c} }", "@if without condition");
   }
 
+  @Test
   public void testIfWithTooManyParametersError() throws Exception {
     parseAndRun("@if X Y {a {b: c}}", "@if with too many parameters");
   }
 
+  @Test
   public void testElseTooManyParametersError() throws Exception {
     parseAndRun("@if (X) {a {b: c}} @else (Y) {a {b: c}}", "@else with too many parameters");
   }
 
+  @Test
   public void testElseWithoutIfError() throws Exception {
     parseAndRun("@else {a {b: c}}", "@else without previous @if");
   }
 
+  @Test
   public void testElseIfAfterElseError() throws Exception {
     parseAndRun("@if (X) {a {b: c}} @else {a {b: c}} @elseif (Y) {a {b: c}}",
                 "@elseif without previous @if");
   }
 
+  @Test
   public void testElseAfterRuleError() throws Exception {
     parseAndRun("@if (X && Y) {a {b: c}} a {b: c} @else {a {b: c}}",
                 "@else without previous @if");
   }
 
+  @Test
   public void testNestedElseWithoutIfError() throws Exception {
     parseAndRun("@if X { @else {a {b: c}} }",
                 "@else without previous @if");

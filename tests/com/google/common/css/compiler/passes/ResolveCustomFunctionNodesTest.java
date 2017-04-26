@@ -24,6 +24,7 @@ import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.css.compiler.gssfunctions.GssFunctions;
 import java.util.Map;
+import org.junit.Test;
 
 /**
  * Unit tests for {@link ResolveCustomFunctionNodes}.
@@ -52,50 +53,60 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
         ImmutableSet.<String>of() /* allowedNonStandardFunctions */).runPass();
   }
 
+  @Test
   public void testAcceptBuiltInFunction() throws Exception {
     parseAndRun("A { color: rgb(0,0,0) }");
   }
 
+  @Test
   public void testUnknownFunctionError() throws Exception {
     parseAndRun("A { width: -example(a,b) }", "Unknown function \"-example\"");
   }
 
+  @Test
   public void testUnknownFunctionAllowed() throws Exception {
     allowUnknownFunctions = true;
     parseAndRun("A { width: f(a,b) }");
     assertThat(getFirstPropertyValue().toString()).isEqualTo("[f(a,b)]");
   }
 
+  @Test
   public void testWrongNumberOfArgsError() throws Exception {
     parseAndRun("A { width: plus(2px); }",
         "Not enough arguments");
   }
 
+  @Test
   public void testWrongArgumentError1() throws Exception {
     parseAndRun("A { width: max(2,bar,foo) }",
         "Size must be a CssNumericNode with a unit or 0; was: bar");
   }
 
+  @Test
   public void testPlus() throws Exception {
     parseAndRun("A { width: plus(2px, 3px) }");
     assertThat(getFirstPropertyValue().toString()).isEqualTo("[5px]");
   }
 
+  @Test
   public void testMinus() throws Exception {
     parseAndRun("A { width: minus(2em, 5.5em) }");
     assertThat(getFirstPropertyValue().toString()).isEqualTo("[-3.5em]");
   }
 
+  @Test
   public void testMax() throws Exception {
     parseAndRun("A { width: max(-2%, -5%) }");
     assertThat(getFirstPropertyValue().toString()).isEqualTo("[-2%]");
   }
 
+  @Test
   public void testMultiply() throws Exception {
     parseAndRun("A { width: mult(-2, -5) }");
     assertThat(getFirstPropertyValue().toString()).isEqualTo("[10]");
   }
 
+  @Test
   public void testFunctionWithinFunction() throws Exception {
     parseAndRun("A { width: max(10px, max(2px, 30px)) }");
     assertThat(getFirstPropertyValue().toString()).isEqualTo("[30px]");

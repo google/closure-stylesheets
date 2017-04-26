@@ -20,14 +20,18 @@ import static com.google.common.css.compiler.ast.testing.SourceCodeLocationSubje
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * Unit tests for {@link SourceCodeLocation} and
- * {@link SourceCodeLocation.SourceCodePoint}.
+ * Unit tests for {@link SourceCodeLocation} and {@link SourceCodeLocation.SourceCodePoint}.
  *
  */
-public class SourceCodeLocationTest extends TestCase {
+@RunWith(JUnit4.class)
+public class SourceCodeLocationTest {
+  @Test
   public void testCreation() {
     String testSource = "abc\ndefg";
     SourceCodeLocation l = new SourceCodeLocation(
@@ -47,11 +51,12 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat("defg".charAt(l.getEndIndexInLine() - 1)).isEqualTo('g');
   }
 
+  @Test
   public void testBadCreation1() {
     SourceCode sourceCode = new SourceCode("testfile", "abc\ndefg");
     try {
       new SourceCodeLocation(sourceCode, 7, 2, 4, 2, 1, 3);
-      fail();
+      Assert.fail();
     } catch (IllegalArgumentException expected) {
       assertThat(expected)
           .hasMessageThat()
@@ -59,6 +64,7 @@ public class SourceCodeLocationTest extends TestCase {
     }
   }
 
+  @Test
   public void testComparisonOfEqualLocations1() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 =
@@ -76,6 +82,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc2.hashCode()).isEqualTo(loc1.hashCode());
   }
 
+  @Test
   public void testComparisonOfEqualLocations2() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 =
@@ -93,6 +100,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc2.hashCode()).isEqualTo(loc1.hashCode());
   }
 
+  @Test
   public void testComparisonOfEqualLocations3() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 =
@@ -105,6 +113,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc2.compareTo(loc1)).isEqualTo(1);
   }
 
+  @Test
   public void testComparisonOfEqualLocations4() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 =
@@ -117,6 +126,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc2.compareTo(loc1)).isEqualTo(1);
   }
 
+  @Test
   public void testComparisonOfEqualLocations5() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 =
@@ -129,6 +139,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc2.compareTo(loc1)).isEqualTo(1);
   }
 
+  @Test
   public void testComparisonOfEqualLocations6() {
     SourceCode sourceCode1 = new SourceCode("testfile1", "abcdef");
     SourceCodeLocation loc1 =
@@ -140,6 +151,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc2.equals(loc1)).isFalse();
   }
 
+  @Test
   public void testMergeTwo_sameFileInOrder() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
@@ -150,6 +162,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc3).matches("ab");
   }
 
+  @Test
   public void testMergeTwo_sameFileInWrongOrder() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
@@ -157,10 +170,11 @@ public class SourceCodeLocationTest extends TestCase {
 
     try {
       SourceCodeLocation loc3 = SourceCodeLocation.merge(loc2, loc1);
-      fail("merge should have thrown an exception for out of order locations");
+      Assert.fail("merge should have thrown an exception for out of order locations");
     } catch (Exception expected) {}
   }
 
+  @Test
   public void testMergeTwo_differentFiles() {
     SourceCode sourceCode1 = new SourceCode("testfile1", "abcdef");
     SourceCode sourceCode2 = new SourceCode("testfile2", "abcdef");
@@ -169,10 +183,11 @@ public class SourceCodeLocationTest extends TestCase {
 
     try {
       SourceCodeLocation loc3 = SourceCodeLocation.merge(loc1, loc2);
-      fail("merge should have thrown an exception for locations in different files");
+      Assert.fail("merge should have thrown an exception for locations in different files");
     } catch (Exception expected) {}
   }
 
+  @Test
   public void testMergeIterable_sameFileInOrderTwo() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
@@ -183,6 +198,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc3).matches("ab");
   }
 
+  @Test
   public void testMergeIterable_sameFileInOrderThree() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
@@ -197,6 +213,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc4).matches("abcde");
   }
 
+  @Test
   public void testMergeIterable_sameFileOutOfOrderThree() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);
@@ -211,6 +228,7 @@ public class SourceCodeLocationTest extends TestCase {
     assertThat(loc4).matches("abcde");
   }
 
+  @Test
   public void testMergeIterable_sameFileReverseOrderThree() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 = new SourceCodeLocation(sourceCode, 0, 1, 1, 2, 1, 3);

@@ -24,11 +24,15 @@ import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for {@link CheckMissingRequire}.
  *
  */
+@RunWith(JUnit4.class)
 public class CheckMissingRequireTest extends NewFunctionalTestBase {
 
   protected void runPasses(TestErrorManager errorMgr) {
@@ -54,6 +58,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         collectProvides.getDefmixinProvideMap()).runPass();
   }
 
+  @Test
   public void testBaseCase1() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -87,6 +92,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
   public void testBaseCase2() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -104,6 +110,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
   public void testMissingRequire() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -127,6 +134,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
   public void testMissingRequireFromComponent() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -153,6 +161,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
   public void testMissingRequireOfComponent() throws GssParserException {
     String basecomponent =  ""
         + "@provide 'foo.basecomponent';"
@@ -178,6 +187,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
   public void testMissingRequireInDef() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -200,6 +210,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
   public void testMissingRequireDefMixin() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -229,6 +240,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
   public void testMissingOverrideSelectorNamespace() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -253,6 +265,7 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
   public void testMissingOverrideDefNamespace() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"

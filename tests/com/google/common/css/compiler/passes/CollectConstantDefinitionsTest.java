@@ -24,25 +24,19 @@ import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests the collect constant definitions compiler pass.
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class CollectConstantDefinitionsTest extends TestCase {
+@RunWith(JUnit4.class)
+public class CollectConstantDefinitionsTest {
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-  }
-
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
-
+  @Test
   public void testCollect1() {
     final ConstantDefinitions definitions =
         collectConstantDefinitions(
@@ -67,6 +61,7 @@ public class CollectConstantDefinitionsTest extends TestCase {
     assertThat(border.getParameters().get(0).toString()).isEqualTo("border(COLOR,3px)");
   }
 
+  @Test
   public void testCollect2() {
     final ConstantDefinitions definitions =
         collectConstantDefinitions(

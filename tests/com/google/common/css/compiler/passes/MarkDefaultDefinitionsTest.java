@@ -21,14 +21,19 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.FunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link MarkDefaultDefinitions}.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
+@RunWith(JUnit4.class)
 public class MarkDefaultDefinitionsTest extends FunctionalTestBase {
 
+  @Test
   public void testMarkDefaultDefinitions1() {
     parseAndBuildTree(
         "/* @default */ @def COLOR red;");
@@ -43,6 +48,7 @@ public class MarkDefaultDefinitionsTest extends FunctionalTestBase {
     }
   }
   
+  @Test
   public void testMarkDefaultDefinitions2() {
     parseAndBuildTree(
         "/* @default */ @def PADDING 2px 3px 5px 1px;");
@@ -57,6 +63,7 @@ public class MarkDefaultDefinitionsTest extends FunctionalTestBase {
     }
   }
   
+  @Test
   public void testMarkDefaultDefinition3() {
     parseAndBuildTree(
         "@def PADDING /* @default */ 2px 3px 5px 1px;");
@@ -71,6 +78,7 @@ public class MarkDefaultDefinitionsTest extends FunctionalTestBase {
     }
   }
 
+  @Test
   public void testMarkDefaultDefinitions4() {
     parseAndBuildTree(
         "@def PADDING 2px 3px 5px 1px;");

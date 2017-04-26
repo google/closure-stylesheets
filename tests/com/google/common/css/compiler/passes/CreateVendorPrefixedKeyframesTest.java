@@ -19,10 +19,12 @@ package com.google.common.css.compiler.passes;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@link CreateVendorPrefixedKeyframes}.
- */
+/** Unit tests for {@link CreateVendorPrefixedKeyframes}. */
+@RunWith(JUnit4.class)
 public class CreateVendorPrefixedKeyframesTest extends NewFunctionalTestBase {
   private String compactPrintedResult;
 
@@ -36,6 +38,7 @@ public class CreateVendorPrefixedKeyframesTest extends NewFunctionalTestBase {
     compactPrintedResult = compactPrinterPass.getCompactPrintedString();
   }
 
+  @Test
   public void testCreateWebkitKeyframes() throws Exception {
     parseAndRun(
         "/* @gen-webkit-keyframes */"
@@ -55,6 +58,7 @@ public class CreateVendorPrefixedKeyframesTest extends NewFunctionalTestBase {
                 + "}");
   }
 
+  @Test
   public void testWithoutComment() throws Exception {
     parseAndRun(
         "@keyframes A{"

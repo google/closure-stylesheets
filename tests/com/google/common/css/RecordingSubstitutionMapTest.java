@@ -23,9 +23,12 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-public final class RecordingSubstitutionMapTest extends TestCase {
+@RunWith(JUnit4.class)
+public final class RecordingSubstitutionMapTest {
 
   private static final ImmutableSet<String> OUTPUT_BLACKLIST = ImmutableSet.of("c", "e", "i");
 
@@ -37,6 +40,7 @@ public final class RecordingSubstitutionMapTest extends TestCase {
     return m;
   }
 
+  @Test
   public final void testReadAndWrite() throws IOException {
     for (OutputRenamingMapFormat format : OutputRenamingMapFormat.values()) {
       RecordingSubstitutionMap recording =

@@ -20,17 +20,22 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.compiler.ast.CssFunctionNode.Function;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssFunctionNode}.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
+@RunWith(JUnit4.class)
 public class CssFunctionNodeTest extends TestCase {
 
   private static final CssFunctionNode.Function RGB =
       CssFunctionNode.Function.byName("rgb");
 
+  @Test
   public void testConstructor() {
     CssFunctionNode function = new CssFunctionNode((Function) null, null);
     assertThat(function.getFunction()).isNull();
@@ -39,6 +44,7 @@ public class CssFunctionNodeTest extends TestCase {
     assertThat(function.getArguments().getChildren()).isEmpty();
   }
   
+  @Test
   public void testFunctionName() {
     CssFunctionNode function = new CssFunctionNode(RGB, null);
     assertThat(function.getFunction()).isNotNull();
@@ -49,6 +55,7 @@ public class CssFunctionNodeTest extends TestCase {
     assertThat(function.getArguments().getChildren()).isEmpty();
   }
   
+  @Test
   public void testFunctionArguments() {
     CssFunctionNode function = new CssFunctionNode(RGB, null);
     CssFunctionArgumentsNode args = new CssFunctionArgumentsNode();

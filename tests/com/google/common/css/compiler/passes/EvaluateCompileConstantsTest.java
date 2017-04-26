@@ -22,11 +22,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssForLoopRuleNode;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-
-/**
- * Unit tests for {@link EvaluateCompileConstants}.
- */
+/** Unit tests for {@link EvaluateCompileConstants}. */
+@RunWith(JUnit4.class)
 public class EvaluateCompileConstantsTest extends PassesTestBase {
 
   private static final ImmutableMap<String, Integer> CONSTANTS =
@@ -40,6 +41,7 @@ public class EvaluateCompileConstantsTest extends PassesTestBase {
     new EvaluateCompileConstants(tree.getMutatingVisitController(), CONSTANTS).runPass();
   }
 
+  @Test
   public void testLoopParametersReplacement() throws Exception {
     parseAndRun("@for $i from FOO to BAR step BAZ {}");
     assertThat(getFirstActualNode()).isInstanceOf(CssForLoopRuleNode.class);
@@ -49,6 +51,7 @@ public class EvaluateCompileConstantsTest extends PassesTestBase {
     assertThat(loop.getStep().toString()).isEqualTo("3");
   }
 
+  @Test
   public void testValueInDefinitionReplacement() throws Exception {
     parseAndRun("@def X FOO;");
     assertThat(getFirstActualNode()).isInstanceOf(CssDefinitionNode.class);
@@ -57,6 +60,7 @@ public class EvaluateCompileConstantsTest extends PassesTestBase {
     assertThat(definition.getChildAt(0).toString()).isEqualTo("2");
   }
 
+  @Test
   public void testValueInArgumentReplacement() throws Exception {
     parseAndRun("@def X f(BAR);");
     assertThat(getFirstActualNode()).isInstanceOf(CssDefinitionNode.class);

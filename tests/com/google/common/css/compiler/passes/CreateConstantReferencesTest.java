@@ -23,13 +23,18 @@ import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests for {@link CreateConstantReferences}.
  *
  */
+@RunWith(JUnit4.class)
 public class CreateConstantReferencesTest extends NewFunctionalTestBase {
 
+  @Test
   public void testCreateSimpleRef() throws Exception {
     parseAndRun(".X { color: SOME_COLOR }");
 
@@ -38,6 +43,7 @@ public class CreateConstantReferencesTest extends NewFunctionalTestBase {
     assertThat(colorValue.getValue()).isEqualTo("SOME_COLOR");
   }
 
+  @Test
   public void testCreateFunRef() throws Exception {
     parseAndRun(".X { background-url:  image(X0,Y0) }");
 

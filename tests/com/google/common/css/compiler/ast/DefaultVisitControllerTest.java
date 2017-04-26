@@ -38,7 +38,10 @@ import com.google.common.css.compiler.ast.DefaultVisitController.VisitImportBloc
 import com.google.common.css.compiler.ast.DefaultVisitController.VisitImportRuleState;
 import com.google.common.css.compiler.ast.DefaultVisitController.VisitReplaceChildrenState;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.mockito.InOrder;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -46,16 +49,17 @@ import org.mockito.Mockito;
 /**
  * Unit tests for {@link DefaultVisitController}.
  *
- * TODO(oana): Add more unit tests.
+ * <p>TODO(oana): Add more unit tests.
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class DefaultVisitControllerTest extends TestCase {
+@RunWith(JUnit4.class)
+public class DefaultVisitControllerTest {
 
   DefaultTreeVisitor testVisitor = mock(DefaultTreeVisitor.class);
 
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     when(testVisitor.enterTree(Matchers.<CssRootNode>any())).thenReturn(true);
     when(testVisitor.enterImportBlock(Matchers.<CssImportBlockNode>any())).thenReturn(true);
     when(testVisitor.enterBlock(Matchers.<CssBlockNode>any())).thenReturn(true);
@@ -82,6 +86,7 @@ public class DefaultVisitControllerTest extends TestCase {
     when(testVisitor.enterComponent(Matchers.<CssComponentNode>any())).thenReturn(true);
   }
 
+  @Test
   public void testConstructor() {
     DefaultVisitController visitController = new DefaultVisitController(
         new CssTree((SourceCode) null), false);
@@ -89,6 +94,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(visitController.getStateStack().isEmpty()).isTrue();
   }
 
+  @Test
   public void testVisitBlock() {
     CssLiteralNode literal = new CssLiteralNode("");
     CssDefinitionNode def = new CssDefinitionNode(literal);
@@ -112,6 +118,7 @@ public class DefaultVisitControllerTest extends TestCase {
     inOrder.verify(testVisitor).enterDefinition(def);
   }
 
+  @Test
   public void testVisitProperties() {
 
     CssValueNode first = new CssLiteralNode("one", null);
@@ -177,6 +184,7 @@ public class DefaultVisitControllerTest extends TestCase {
     inOrder.verify(testVisitor).enterValueNode(third);
   }
 
+  @Test
   public void testStateStack() {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
@@ -192,6 +200,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(visitController.getStateStack().isEmpty()).isTrue();
   }
 
+  @Test
   public void testRootVisitBeforeChildrenState() {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
@@ -207,6 +216,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(visitController.getStateStack().getTop()).isInstanceOf(RootVisitCharsetState.class);
   }
 
+  @Test
   public void testRootVisitCharsetState() {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
@@ -226,6 +236,7 @@ public class DefaultVisitControllerTest extends TestCase {
         .isInstanceOf(RootVisitImportBlockState.class);
   }
 
+  @Test
   public void testRootVisitImportBlockState() {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
@@ -247,6 +258,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(visitController.getStateStack().getTop()).isInstanceOf(RootVisitBodyState.class);
   }
 
+  @Test
   public void testVisitImportBlockChildrenState() {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
@@ -273,6 +285,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(visitController.getStateStack().isEmpty()).isTrue();
   }
 
+  @Test
   public void testVisitImportRuleState() {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
@@ -288,6 +301,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(visitController.getStateStack().isEmpty()).isTrue();
   }
 
+  @Test
   public void testRootVisitBodyState() {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
@@ -314,6 +328,7 @@ public class DefaultVisitControllerTest extends TestCase {
         .isInstanceOf(RootVisitAfterChildrenState.class);
   }
 
+  @Test
   public void testVisitBlockChildrenState1() {
     CssDefinitionNode def = new CssDefinitionNode(new CssLiteralNode(""));
     CssBlockNode block = new CssBlockNode(false);
@@ -345,6 +360,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(visitController.getStateStack().isEmpty()).isTrue();
   }
 
+  @Test
   public void testVisitBlockChildrenState2() {
     CssDefinitionNode def = new CssDefinitionNode(new CssLiteralNode(""));
     CssBlockNode block = new CssBlockNode(false);
@@ -385,6 +401,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(state.currentIndex).isEqualTo(0);
   }
 
+  @Test
   public void testVisitBlockChildrenState3() {
     CssDefinitionNode def = new CssDefinitionNode(new CssLiteralNode(""));
     CssBlockNode block = new CssBlockNode(false);
@@ -423,6 +440,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(visitController.getStateStack().size()).isEqualTo(3);
   }
 
+  @Test
   public void testVisitSimpleUnknownAtRule() {
     CssLiteralNode defLit = new CssLiteralNode("def");
     CssUnknownAtRuleNode atDef = new CssUnknownAtRuleNode(defLit, false);
@@ -458,6 +476,7 @@ public class DefaultVisitControllerTest extends TestCase {
     // We've got no block associated with this at rule.
   }
 
+  @Test
   public void testVisitComplexUnknownAtRule() {
     CssLiteralNode defLit = new CssLiteralNode("def");
     CssUnknownAtRuleNode atDef = new CssUnknownAtRuleNode(defLit, false);
@@ -518,6 +537,7 @@ public class DefaultVisitControllerTest extends TestCase {
     }
   }
 
+  @Test
   public void testVisitComponent() {
     CssLiteralNode x = new CssLiteralNode("FOO");
     CssDefinitionNode def = new CssDefinitionNode(x);
@@ -550,6 +570,7 @@ public class DefaultVisitControllerTest extends TestCase {
     inOrder.verify(testVisitor).enterDefinition(def);
   }
 
+  @Test
   public void testVisitValueNodes() {
     List<CssValueNode> simpleValues = Lists.newLinkedList();
     for (String v : new String[] {"a", "b", "c"}) {
@@ -600,6 +621,7 @@ public class DefaultVisitControllerTest extends TestCase {
     assertThat(cNodes).contains(parent);
   }
 
+  @Test
   public void testVisitCompositeValueNodeWithFunction() {
     List<CssValueNode> simpleValues = Lists.newLinkedList();
     simpleValues.add(
@@ -691,21 +713,25 @@ public class DefaultVisitControllerTest extends TestCase {
     }
   }
 
+  @Test
   public void testRemoveCompositePropertyValueElement() {
     verifyRemoveablePropertyValueElement(
         "url(http://www.google.com/logo), red fixed");
   }
 
+  @Test
   public void testRemoveCompositePropertyValueElementMiddle() {
     verifyRemoveablePropertyValueElement(
         "red, url(http://www.google.com/logo), fixed");
   }
 
+  @Test
   public void testRemoveCompositePropertyValueElementEnd() {
     verifyRemoveablePropertyValueElement(
         "red fixed, url(http://www.google.com/logo)");
   }
 
+  @Test
   public void testVisitForLoop() {
     CssLiteralNode x = new CssLiteralNode("FOO");
     CssDefinitionNode def = new CssDefinitionNode(x);
@@ -743,6 +769,7 @@ public class DefaultVisitControllerTest extends TestCase {
     inOrder.verify(testVisitor).enterDefinition(def);
   }
 
+  @Test
   public void testCssCompositeValueNodeBecomesParentForNewChildren() {
     CssLiteralNode foo = new CssLiteralNode("foo");
     CssLiteralNode bar = new CssLiteralNode("bar");

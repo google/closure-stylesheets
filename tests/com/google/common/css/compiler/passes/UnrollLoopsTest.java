@@ -17,10 +17,12 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@link UnrollLoops}.
- */
+/** Unit tests for {@link UnrollLoops}. */
+@RunWith(JUnit4.class)
 public class UnrollLoopsTest extends PassesTestBase {
 
   @Override
@@ -31,6 +33,7 @@ public class UnrollLoopsTest extends PassesTestBase {
     new UnrollLoops(tree.getMutatingVisitController(), errorManager).runPass();
   }
 
+  @Test
   public void testSimpleLoopUnroll() throws Exception {
     testTreeConstruction(linesToString(
         "@for $i from 1 to 3 {",
@@ -39,6 +42,7 @@ public class UnrollLoopsTest extends PassesTestBase {
         "[[.foo-1]{[]}[.foo-2]{[]}[.foo-3]{[]}]");
   }
 
+  @Test
   public void testNestedLoopUnroll() throws Exception {
     testTreeConstruction(linesToString(
         "@for $i from 1 to 3 {",
@@ -49,6 +53,7 @@ public class UnrollLoopsTest extends PassesTestBase {
         "[[.foo-1-1]{[]}[.foo-2-1]{[]}[.foo-2-2]{[]}[.foo-3-1]{[]}[.foo-3-2]{[]}[.foo-3-3]{[]}]");
   }
 
+  @Test
   public void testDefinitionRenaming() throws Exception {
     testTreeConstruction(linesToString(
         "@for $i from 1 to 2 {",
@@ -61,12 +66,14 @@ public class UnrollLoopsTest extends PassesTestBase {
         + "@def FOO__LOOP0__2 [[2]];[.foo]{[top:[[FOO__LOOP0__2]];]}]");
   }
 
+  @Test
   public void testUnevalutedConstants() throws Exception {
     parseAndRun("@for $i from CONST to 2 {}", UnrollLoops.UNKNOWN_CONSTANT);
     parseAndRun("@for $i from 1 to CONST {}", UnrollLoops.UNKNOWN_CONSTANT);
     parseAndRun("@for $i from 1 to 2 step CONST {}", UnrollLoops.UNKNOWN_CONSTANT);
   }
 
+  @Test
   public void testUnevalutedVariable() throws Exception {
     parseAndRun("@for $i from $j to 2 {}", UnrollLoops.UNKNOWN_VARIABLE);
     parseAndRun("@for $i from 1 to $j {}", UnrollLoops.UNKNOWN_VARIABLE);

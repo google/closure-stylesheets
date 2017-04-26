@@ -26,6 +26,9 @@ import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link MarkNonFlippableNodes}.
@@ -33,8 +36,10 @@ import com.google.common.css.compiler.passes.testing.PassesTestBase;
  * @author oana@google.com (Oana Florescu)
  * @author fbenz@google.com (Florian Benz)
  */
+@RunWith(JUnit4.class)
 public class MarkNonFlippableNodesTest extends PassesTestBase {
 
+  @Test
   public void testMisplacedAnnotation() throws GssParserException {
     parseAndRun(linesToString(
         ".CLASSX,",
@@ -44,6 +49,7 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
         MarkNonFlippableNodes.INVALID_NOFLIP_ERROR_MESSAGE);
   }
 
+  @Test
   public void testMarkNonFlippableSingelDeclaration() {
     parseAndBuildTree(linesToString(
         ".CLASSX {",
@@ -65,6 +71,7 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
     assertThat(block.getChildren().get(1).getShouldBeFlipped()).isTrue();
   }
 
+  @Test
   public void testMarkNonFlippableRuleset() {
     parseAndBuildTree(linesToString(
         "/* @noflip */ .CLASSX {",
@@ -85,6 +92,7 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
     assertThat(block.getChildren().get(1).getShouldBeFlipped()).isFalse();
   }
 
+  @Test
   public void testMarkNonFlippableConditional() {
     parseAndBuildTree(linesToString(
         "/* @noflip */ @if COND {",
@@ -117,6 +125,7 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
     }
   }
 
+  @Test
   public void testMarkNonFlippableInConditional() {
     parseAndBuildTree(linesToString(
         "@if COND {",
@@ -176,6 +185,7 @@ public class MarkNonFlippableNodesTest extends PassesTestBase {
     }
   }
 
+  @Test
   public void testMarkNonFlippableMedia() {
     parseAndBuildTree(linesToString(
         "@media print /* @noflip */{",

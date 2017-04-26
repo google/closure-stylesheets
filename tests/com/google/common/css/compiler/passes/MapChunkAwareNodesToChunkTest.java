@@ -31,18 +31,22 @@ import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link MapChunkAwareNodesToChunk}.
  *
- * <p>This test case can be extended, so that the tests are
- * reused. The check* methods need to be overridden if the subclass
- * expects a different result.
+ * <p>This test case can be extended, so that the tests are reused. The check* methods need to be
+ * overridden if the subclass expects a different result.
  *
  * @author dgajda@google.com (Damian Gajda)
  */
-public class MapChunkAwareNodesToChunkTest extends TestCase {
+@RunWith(JUnit4.class)
+public class MapChunkAwareNodesToChunkTest {
 
   protected static final String F2 = "b";
   protected static final String F1 = "a";
@@ -83,9 +87,8 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
 
   protected CssKeyframesNode keyframes3b;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     pass = getPass(FILE_TO_CHUNK);
 
     List<CssValueNode> parameters = ImmutableList.of();
@@ -143,6 +146,7 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
     sel5a = new CssSelectorNode("a", location5a);
   }
 
+  @Test
   public void testMapToChunk() {
     setupEnterSelector();
     setupEnterDefinition();
@@ -160,6 +164,7 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
     assertThat(keyframes3b.getChunk()).isEqualTo(CB);
   }
 
+  @Test
   public void testMissingFileToChunkMapping() {
     Map<String, String> badFileToChunk =
       ImmutableMap.<String ,String>builder()
@@ -171,7 +176,7 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
     pass = getPass(badFileToChunk);
     try {
       pass.enterSelector(sel2a);
-      fail("Node 2a does not have a file to chunk mapping");
+      Assert.fail("Node 2a does not have a file to chunk mapping");
     } catch (NullPointerException expected) {
       // OK
     }
