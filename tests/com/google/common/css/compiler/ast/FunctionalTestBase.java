@@ -19,6 +19,9 @@ package com.google.common.css.compiler.ast;
 
 import com.google.common.css.compiler.ast.testing.FunctionalTestCommonBase;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import com.google.common.css.compiler.passes.CreateComponentNodes;
+import com.google.common.css.compiler.passes.CreateConditionalNodes;
+import com.google.common.css.compiler.passes.CreateDefinitionNodes;
 import com.google.common.css.compiler.passes.CreateForLoopNodes;
 import com.google.common.css.compiler.passes.CreateStandardAtRuleNodes;
 import com.google.common.css.compiler.passes.PrettyPrinter;

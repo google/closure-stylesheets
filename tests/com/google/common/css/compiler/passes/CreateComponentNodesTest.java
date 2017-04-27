@@ -16,16 +16,21 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssComponentNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
-
 import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CreateComponentNodes}.
  *
  */
+@RunWith(JUnit4.class)
 public class CreateComponentNodesTest extends NewFunctionalTestBase {
 
   @Override
@@ -33,87 +38,98 @@ public class CreateComponentNodesTest extends NewFunctionalTestBase {
     new CreateComponentNodes(tree.getMutatingVisitController(), errorManager).runPass();
   }
 
+  @Test
   public void testCreateComponentNode1() throws Exception {
     parseAndRun("@component CSS_X { @def X Y; }");
-    assertTrue(getFirstActualNode() instanceof CssComponentNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssComponentNode.class);
     CssComponentNode comp = (CssComponentNode) getFirstActualNode();
-    assertEquals("CSS_X", comp.getName().getValue());
-    assertNull(comp.getParentName());
-    assertFalse(comp.isAbstract());
-    assertEquals("[@def[X, Y]]", comp.getBlock().toString());
+    assertThat(comp.getName().getValue()).isEqualTo("CSS_X");
+    assertThat(comp.getParentName()).isNull();
+    assertThat(comp.isAbstract()).isFalse();
+    assertThat(comp.getBlock().toString()).isEqualTo("[@def[X, Y]]");
   }
 
+  @Test
   public void testCreateComponentNode2() throws Exception {
     parseAndRun("@abstract_component CSS_X { @def X Y; }");
-    assertTrue(getFirstActualNode() instanceof CssComponentNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssComponentNode.class);
     CssComponentNode comp = (CssComponentNode) getFirstActualNode();
-    assertEquals("CSS_X", comp.getName().getValue());
-    assertNull(comp.getParentName());
-    assertTrue(comp.isAbstract());
-    assertEquals("[@def[X, Y]]", comp.getBlock().toString());
+    assertThat(comp.getName().getValue()).isEqualTo("CSS_X");
+    assertThat(comp.getParentName()).isNull();
+    assertThat(comp.isAbstract()).isTrue();
+    assertThat(comp.getBlock().toString()).isEqualTo("[@def[X, Y]]");
   }
 
+  @Test
   public void testCreateComponentNode3() throws Exception {
     parseAndRun("@abstract_component CSS_X { @def X Y; }\n" +
         "@component CSS_Y extends CSS_X { @def X Y; }");
     List<CssNode> children = tree.getRoot().getBody().getChildren();
-    assertEquals(2, children.size());
-    assertTrue(children.get(0) instanceof CssComponentNode);
-    assertTrue(children.get(1) instanceof CssComponentNode);
+    assertThat(children).hasSize(2);
+    assertThat(children.get(0)).isInstanceOf(CssComponentNode.class);
+    assertThat(children.get(1)).isInstanceOf(CssComponentNode.class);
     CssComponentNode comp = (CssComponentNode) children.get(1);
-    assertEquals("CSS_Y", comp.getName().getValue());
-    assertNotNull(comp.getParentName());
-    assertEquals("CSS_X", comp.getParentName().getValue());
-    assertFalse(comp.isAbstract());
-    assertEquals("[@def[X, Y]]", comp.getBlock().toString());
+    assertThat(comp.getName().getValue()).isEqualTo("CSS_Y");
+    assertThat(comp.getParentName()).isNotNull();
+    assertThat(comp.getParentName().getValue()).isEqualTo("CSS_X");
+    assertThat(comp.isAbstract()).isFalse();
+    assertThat(comp.getBlock().toString()).isEqualTo("[@def[X, Y]]");
   }
 
+  @Test
   public void testImplicitlyNamedComponent() throws Exception {
     parseAndRun("@component { @def X Y; }");
-    assertTrue(getFirstActualNode() instanceof CssComponentNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssComponentNode.class);
     CssComponentNode comp = (CssComponentNode) getFirstActualNode();
-    assertSame(CssComponentNode.IMPLICIT_NODE_NAME, comp.getName().getValue());
-    assertNull(comp.getParentName());
-    assertFalse(comp.isAbstract());
-    assertEquals("[@def[X, Y]]", comp.getBlock().toString());
+    assertThat(comp.getName().getValue()).isSameAs(CssComponentNode.IMPLICIT_NODE_NAME);
+    assertThat(comp.getParentName()).isNull();
+    assertThat(comp.isAbstract()).isFalse();
+    assertThat(comp.getBlock().toString()).isEqualTo("[@def[X, Y]]");
   }
 
+  @Test
   public void testBlockError() throws Exception {
     parseAndRun("@component CSS_X;", "@component without block");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testNameError() throws Exception {
     parseAndRun("@component 1px {}", "@component without a valid literal as name");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testExtendsError1() throws Exception {
     parseAndRun("@component CSS_X 1px CSS_Y {}",
         "@component with invalid second parameter (expects 'extends')");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testExtendsError2() throws Exception {
     parseAndRun("@component CSS_X foo CSS_Y {}",
         "@component with invalid second parameter (expects 'extends')");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testParentNameError() throws Exception {
     parseAndRun("@component CSS_X extends 1px {}",
         "@component with invalid literal as parent name");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testInvalidParamNumError1() throws Exception {
     parseAndRun("@component CSS_X extends {}", "@component with invalid number of parameters");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testInvalidParamNumError2() throws Exception {
     parseAndRun("@component CSS_X extends CSS_Y CSS_Z {}",
         "@component with invalid number of parameters");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 }

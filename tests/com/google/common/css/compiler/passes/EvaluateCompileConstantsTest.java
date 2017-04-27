@@ -16,19 +16,21 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssForLoopRuleNode;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-import java.util.Map;
-
-/**
- * Unit tests for {@link EvaluateCompileConstants}.
- */
+/** Unit tests for {@link EvaluateCompileConstants}. */
+@RunWith(JUnit4.class)
 public class EvaluateCompileConstantsTest extends PassesTestBase {
 
-  private static final Map<String, Integer> CONSTANTS =
+  private static final ImmutableMap<String, Integer> CONSTANTS =
       ImmutableMap.of("FOO", 2, "BAR", 7, "BAZ", 3);
 
   @Override
@@ -39,28 +41,31 @@ public class EvaluateCompileConstantsTest extends PassesTestBase {
     new EvaluateCompileConstants(tree.getMutatingVisitController(), CONSTANTS).runPass();
   }
 
+  @Test
   public void testLoopParametersReplacement() throws Exception {
     parseAndRun("@for $i from FOO to BAR step BAZ {}");
-    assertTrue(getFirstActualNode() instanceof CssForLoopRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssForLoopRuleNode.class);
     CssForLoopRuleNode loop = (CssForLoopRuleNode) getFirstActualNode();
-    assertEquals("2", loop.getFrom().toString());
-    assertEquals("7", loop.getTo().toString());
-    assertEquals("3", loop.getStep().toString());
+    assertThat(loop.getFrom().toString()).isEqualTo("2");
+    assertThat(loop.getTo().toString()).isEqualTo("7");
+    assertThat(loop.getStep().toString()).isEqualTo("3");
   }
 
+  @Test
   public void testValueInDefinitionReplacement() throws Exception {
     parseAndRun("@def X FOO;");
-    assertTrue(getFirstActualNode() instanceof CssDefinitionNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssDefinitionNode.class);
     CssDefinitionNode definition = (CssDefinitionNode) getFirstActualNode();
-    assertEquals(1, definition.getChildren().size());
-    assertEquals("2", definition.getChildAt(0).toString());
+    assertThat(definition.getChildren()).hasSize(1);
+    assertThat(definition.getChildAt(0).toString()).isEqualTo("2");
   }
 
+  @Test
   public void testValueInArgumentReplacement() throws Exception {
     parseAndRun("@def X f(BAR);");
-    assertTrue(getFirstActualNode() instanceof CssDefinitionNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssDefinitionNode.class);
     CssDefinitionNode definition = (CssDefinitionNode) getFirstActualNode();
-    assertEquals(1, definition.getChildren().size());
-    assertEquals("f(7)", definition.getChildAt(0).toString());
+    assertThat(definition.getChildren()).hasSize(1);
+    assertThat(definition.getChildAt(0).toString()).isEqualTo("f(7)");
   }
 }

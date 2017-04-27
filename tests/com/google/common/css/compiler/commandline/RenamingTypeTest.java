@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.commandline;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
@@ -27,61 +28,68 @@ import com.google.common.css.SubstitutionMap;
 import com.google.common.css.SubstitutionMapProvider;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * {@link RenamingTypeTest} is a unit test for {@link RenamingType}.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public class RenamingTypeTest extends TestCase {
+@RunWith(JUnit4.class)
+public class RenamingTypeTest {
 
+  @Test
   public void testNone() {
     SubstitutionMapProvider provider = RenamingType.NONE
         .getCssSubstitutionMapProvider();
-    assertNotNull(provider);
+    assertThat(provider).isNotNull();
 
     SubstitutionMap map = provider.get();
-    assertNotNull(map);
+    assertThat(map).isNotNull();
     // This is sufficient to guarantee the contract of the renaming.
-    assertTrue(map instanceof IdentitySubstitutionMap);
+    assertThat(map).isInstanceOf(IdentitySubstitutionMap.class);
   }
 
+  @Test
   public void testDebug() {
     SubstitutionMapProvider provider = RenamingType.DEBUG
         .getCssSubstitutionMapProvider();
-    assertNotNull(provider);
+    assertThat(provider).isNotNull();
 
     SubstitutionMap map = provider.get();
-    assertNotNull(map);
+    assertThat(map).isNotNull();
 
-    assertEquals("dialog_", map.get("dialog"));
-    assertEquals("dialog_-button_", map.get("dialog-button"));
-    assertEquals("button__", map.get("button_"));
+    assertThat(map.get("dialog")).isEqualTo("dialog_");
+    assertThat(map.get("dialog-button")).isEqualTo("dialog_-button_");
+    assertThat(map.get("button_")).isEqualTo("button__");
 
     testRenamingTypeThatWrapsASplittingSubstitutionMap(RenamingType.DEBUG);
   }
 
 
+  @Test
   public void testClosure() {
     SubstitutionMapProvider provider = RenamingType.CLOSURE
         .getCssSubstitutionMapProvider();
-    assertNotNull(provider);
+    assertThat(provider).isNotNull();
 
     SubstitutionMap map = provider.get();
-    assertNotNull(map);
+    assertThat(map).isNotNull();
 
-    assertEquals("a", map.get("dialog"));
-    assertEquals("b", map.get("settings"));
-    assertEquals("a-c", map.get("dialog-button"));
-    assertEquals("c", map.get("button"));
-    assertEquals(
-        "A CSS class may include a part with the same name multiple times.",
-        "d-e-c-c-f", map.get("goog-imageless-button-button-pos"));
+    assertThat(map.get("dialog")).isEqualTo("a");
+    assertThat(map.get("settings")).isEqualTo("b");
+    assertThat(map.get("dialog-button")).isEqualTo("a-c");
+    assertThat(map.get("button")).isEqualTo("c");
+    assertWithMessage("A CSS class may include a part with the same name multiple times.")
+        .that(map.get("goog-imageless-button-button-pos"))
+        .isEqualTo("d-e-c-c-f");
 
     testRenamingTypeThatWrapsASplittingSubstitutionMap(RenamingType.CLOSURE);
   }
 
+  @Test
   public void testClosureWithInputRenamingMap() {
     SubstitutionMapProvider provider = RenamingType.CLOSURE.getCssSubstitutionMapProvider();
     RecordingSubstitutionMap map =
@@ -94,15 +102,14 @@ public class RenamingTypeTest extends TestCase {
         ImmutableMap.of("dialog", "e", "content", "b", "settings", "m", "unused", "T");
     map.initializeWithMappings(inputRenamingMap);
 
-    assertEquals("e", map.get("dialog"));
-    assertEquals("m", map.get("settings"));
-    assertEquals("e-a", map.get("dialog-button"));
-    assertEquals("a", map.get("button"));
-    assertEquals("c", map.get("title"));
-    assertEquals(
-        "Should accept same part multiple times even with a input renaming map.",
-        "d-f-a-a-g-e",
-        map.get("goog-imageless-button-button-pos-dialog"));
+    assertThat(map.get("dialog")).isEqualTo("e");
+    assertThat(map.get("settings")).isEqualTo("m");
+    assertThat(map.get("dialog-button")).isEqualTo("e-a");
+    assertThat(map.get("button")).isEqualTo("a");
+    assertThat(map.get("title")).isEqualTo("c");
+    assertWithMessage("Should accept same part multiple times even with a input renaming map.")
+        .that(map.get("goog-imageless-button-button-pos-dialog"))
+        .isEqualTo("d-f-a-a-g-e");
 
     Map<String, String> expectedMappings =
         ImmutableMap.<String, String>builder()
@@ -122,8 +129,8 @@ public class RenamingTypeTest extends TestCase {
       renamingType) {
     SubstitutionMapProvider provider = renamingType
         .getCssSubstitutionMapProvider();
-    RecordingSubstitutionMap map = new RecordingSubstitutionMap(provider.get(),
-        Predicates.alwaysTrue());
+    RecordingSubstitutionMap map =
+        new RecordingSubstitutionMap.Builder().withSubstitutionMap(provider.get()).build();
 
     map.get("dialog-content");
     map.get("dialog-title");
@@ -134,9 +141,11 @@ public class RenamingTypeTest extends TestCase {
         "title"
         );
     Set<String> observedMappings = map.getMappings().keySet();
-    assertEquals("There should be entries for both 'dialog' and 'content' in"
-        + "case someone does: "
-        + "goog.getCssName(goog.getCssName('dialog'), 'content')",
-        expectedMappings, observedMappings);
+    assertWithMessage(
+            "There should be entries for both 'dialog' and 'content' in"
+                + "case someone does: "
+                + "goog.getCssName(goog.getCssName('dialog'), 'content')")
+        .that(observedMappings)
+        .isEqualTo(expectedMappings);
   }
 }

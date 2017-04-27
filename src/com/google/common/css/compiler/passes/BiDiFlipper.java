@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssCompositeValueNode;
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
@@ -37,15 +36,11 @@ import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -60,12 +55,9 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
       new DecimalFormat("#.########", DecimalFormatSymbols.getInstance(Locale.US));
   private final MutatingVisitController visitController;
 
-  boolean shouldSwapLeftRightInUrl;
-  boolean shouldSwapLtrRtlInUrl;
-  boolean shouldFlipConstantReferences;
-
-  private static final Logger logger = Logger.getLogger(
-      BiDiFlipper.class.getName());
+  private final boolean shouldSwapLeftRightInUrl;
+  private final boolean shouldSwapLtrRtlInUrl;
+  private final boolean shouldFlipConstantReferences;
 
   public BiDiFlipper(MutatingVisitController visitController,
       boolean swapLtrRtlInUrl,
@@ -87,184 +79,145 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
   }
 
   /**
-   * Map with exact strings to match and their corresponding flipped value.
-   * For example, in "float: left" we need an exact match to flip "left" because
-   * we don't want to touch things like "background: left.png".
+   * Map with exact strings to match and their corresponding flipped value. For example, in "float:
+   * left" we need an exact match to flip "left" because we don't want to touch things like
+   * "background: left.png".
    */
-  private static final Map<String, String> EXACT_MATCHING_FOR_FLIPPING =
-    new ImmutableMap.Builder<String, String>()
-    .put("ltr", "rtl")
-    .put("rtl", "ltr")
-    .put("left", "right")
-    .put("right", "left")
-    .put("e-resize", "w-resize")
-    .put("w-resize", "e-resize")
-    .put("ne-resize", "nw-resize")
-    .put("nw-resize", "ne-resize")
-    .put("nesw-resize", "nwse-resize")
-    .put("nwse-resize", "nesw-resize")
-    .put("se-resize", "sw-resize")
-    .put("sw-resize", "se-resize")
-    .build();
+  private static final ImmutableMap<String, String> EXACT_MATCHING_FOR_FLIPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("ltr", "rtl")
+          .put("rtl", "ltr")
+          .put("left", "right")
+          .put("right", "left")
+          .put("e-resize", "w-resize")
+          .put("w-resize", "e-resize")
+          .put("ne-resize", "nw-resize")
+          .put("nw-resize", "ne-resize")
+          .put("nesw-resize", "nwse-resize")
+          .put("nwse-resize", "nesw-resize")
+          .put("se-resize", "sw-resize")
+          .put("sw-resize", "se-resize")
+          .build();
 
   /**
-   * Map with the "ends-with" substrings that can be flipped and their
-   * corresponding flipped value.
+   * Map with the "ends-with" substrings that can be flipped and their corresponding flipped value.
    * For example, for
-   * <p>
-   *   padding-right: 2px
-   * <p>
-   * we need to match that the property name ends with "-right".
+   *
+   * <p>padding-right: 2px
+   *
+   * <p>we need to match that the property name ends with "-right".
    */
-  private static final Map<String, String> ENDS_WITH_MATCHING_FOR_FLIPPING =
-    new ImmutableMap.Builder<String, String>()
-    .put("-left", "-right")
-    .put("-right", "-left")
-    .put("-bottomleft", "-bottomright")
-    .put("-topleft", "-topright")
-    .put("-bottomright", "-bottomleft")
-    .put("-topright", "-topleft")
-    .build();
+  private static final ImmutableMap<String, String> ENDS_WITH_MATCHING_FOR_FLIPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("-left", "-right")
+          .put("-right", "-left")
+          .put("-bottomleft", "-bottomright")
+          .put("-topleft", "-topright")
+          .put("-bottomright", "-bottomleft")
+          .put("-topright", "-topleft")
+          .build();
 
   /**
-   * Map with the "contains" substrings that can be flipped and their
-   * corresponding flipped value.
+   * Map with the "contains" substrings that can be flipped and their corresponding flipped value.
    * For example, for
-   * <p>
-   *   border-right-width: 2px
-   * <p>
-   * we need to match that the property name contains "-right-".
+   *
+   * <p>border-right-width: 2px
+   *
+   * <p>we need to match that the property name contains "-right-".
    */
-  private static final Map<String, String> CONTAINS_MATCHING_FOR_FLIPPING =
-    new ImmutableMap.Builder<String, String>()
-    .put("-left-", "-right-")
-    .put("-right-", "-left-")
-    .build();
+  private static final ImmutableMap<String, String> CONTAINS_MATCHING_FOR_FLIPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("-left-", "-right-")
+          .put("-right-", "-left-")
+          .build();
 
-  /**
-   * Set of properties that have flippable percentage values.
-   */
-  private static final Set<String> PROPERTIES_WITH_FLIPPABLE_PERCENTAGE =
-    ImmutableSet.of("background",
-                    "background-position",
-                    "background-position-x",
-                    "-ms-background-position-x");
+  /** Set of properties that have flippable percentage values. */
+  private static final ImmutableSet<String> PROPERTIES_WITH_FLIPPABLE_PERCENTAGE =
+      ImmutableSet.of(
+          "background",
+          "background-position",
+          "background-position-x",
+          "-ms-background-position-x");
 
   /*
    * Set of properties that are equivalent to border-radius.
    * TODO(roozbeh): Replace the explicit listing of prefixes with a general
    * pattern of "-[a-z]+-" to avoid maintaining a prefix list.
    */
-  private static final Set<String> BORDER_RADIUS_PROPERTIES =
-    ImmutableSet.of("border-radius",
-                    "-webkit-border-radius",
-                    "-moz-border-radius");
+  private static final ImmutableSet<String> BORDER_RADIUS_PROPERTIES =
+      ImmutableSet.of(
+          "border-radius",
+          "-webkit-border-radius",
+          "-moz-border-radius");
+
+  /** Set of properties whose property values may flip if they match the four-part pattern. */
+  private static final ImmutableSet<String> FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP =
+      ImmutableSet.of("border-color", "border-style", "border-width", "margin", "padding");
 
   /**
-   * Set of properties whose property values may flip if they match the
-   * four-part pattern.
+   * Map with the patterns to match URLs against if swap_ltr_rtl_in_url flag is true, and their
+   * replacement string. Only the first occurrence of the pattern is flipped. This would match "ltr"
+   * and "rtl" if they occur as a word inside the path specified by the url. For example, for
+   *
+   * <p>background: url(/foo/rtl/bkg.gif)
+   *
+   * <p>the flipped value would be
+   *
+   * <p>background: url(/foo/ltr/bkg.gif)
+   *
+   * <p>whereas for
+   *
+   * <p>background: url(/foo/bkg-ltr.gif)
+   *
+   * <p>the flipped value would be
+   *
+   * <p>background: url(/foo/bkg-rtl.gif)
+   *
+   * <p>
    */
-  private static final Set<String> FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP =
-    ImmutableSet.of("border-color",
-                    "border-style",
-                    "border-width",
-                    "margin",
-                    "padding");
+  private static final ImmutableMap<Pattern, String> URL_LTRTL_PATTERN_FOR_FLIPPING =
+      new ImmutableMap.Builder<Pattern, String>()
+          .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)ltr([-_\\./]+)"), "$1rtl$2")
+          .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)rtl([-_\\./]+)"), "$1ltr$2")
+          .build();
 
   /**
-   * Map with the patterns to match URLs against if swap_ltr_rtl_in_url flag is
-   * true, and their replacement string. Only the first occurrence of the
-   * pattern is flipped. This would match "ltr" and "rtl" if they occur as a
-   * word inside the path specified by the url.
-   * For example, for
-   * <p>
-   *   background: url(/foo/rtl/bkg.gif)
-   * <p>
-   * the flipped value would be
-   * <p>
-   *   background: url(/foo/ltr/bkg.gif)
-   * <p>
-   * whereas for
-   * <p>
-   *   background: url(/foo/bkg-ltr.gif)
-   * <p>
-   * the flipped value would be
-   * <p>
-   *   background: url(/foo/bkg-rtl.gif)
+   * Map with the patterns to match URLs against if swap_left_right_in_url flag is true, and their
+   * replacement string. Only the first occurrence of the pattern is flipped. This would match
+   * "left" and "right" if they occur as a word inside the path specified by the url. For example,
+   * for
+   *
+   * <p>background: url(/foo/right/bkg.gif)
+   *
+   * <p>the flipped value would be
+   *
+   * <p>background: url(/foo/left/bkg.gif)
+   *
+   * <p>whereas for
+   *
+   * <p>background: url(/foo/bkg-left.gif)
+   *
+   * <p>the flipped value would be
+   *
+   * <p>background: url(/foo/bkg-right.gif)
+   *
    * <p>
    */
-  private static final Map<Pattern, String> URL_LTRTL_PATTERN_FOR_FLIPPING =
-    new ImmutableMap.Builder<Pattern, String>()
-    .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)ltr([-_\\./]+)"),
-        "$1rtl$2")
-    .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)rtl([-_\\./]+)"),
-        "$1ltr$2")
-    .build();
+  private static final ImmutableMap<Pattern, String> URL_LEFTRIGHT_PATTERN_FOR_FLIPPING =
+      new ImmutableMap.Builder<Pattern, String>()
+          .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)left([-_\\./]+)"), "$1right$2")
+          .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)right([-_\\./]+)"), "$1left$2")
+          .build();
 
-  /**
-   * Map with the patterns to match URLs against if swap_left_right_in_url flag
-   * is true, and their replacement string. Only the first occurrence of the
-   * pattern is flipped. This would match "left" and "right" if they occur as a
-   * word inside the path specified by the url.
-   * For example, for
-   * <p>
-   *   background: url(/foo/right/bkg.gif)
-   * <p>
-   * the flipped value would be
-   * <p>
-   *   background: url(/foo/left/bkg.gif)
-   * <p>
-   * whereas for
-   * <p>
-   *   background: url(/foo/bkg-left.gif)
-   * <p>
-   * the flipped value would be
-   * <p>
-   *   background: url(/foo/bkg-right.gif)
-   * <p>
-   */
-  private static final Map<Pattern, String> URL_LEFTRIGHT_PATTERN_FOR_FLIPPING =
-    new ImmutableMap.Builder<Pattern, String>()
-    .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)left([-_\\./]+)"),
-        "$1right$2")
-    .put(Pattern.compile("(?<![a-zA-Z])([-_\\./]*)right([-_\\./]+)"),
-        "$1left$2")
-    .build();
-
-  /**
-   * Return if the string is "left" or "center" or "right".
-   */
-  private boolean isLeftOrCenterOrRight(String value) {
+  /** Return if the string is "left" or "center" or "right". */
+  private static boolean isLeftOrCenterOrRight(String value) {
     return "left".equals(value)
         || "center".equals(value)
         || "right".equals(value);
   }
 
-  /**
-   * Return if the node is CssHexColorNode.
-   */
-  private boolean isCssHexColorNode(CssValueNode valueNode) {
-    return (valueNode instanceof CssHexColorNode);
-  }
-
-  /**
-   * Return if the node is CssLiteralNode.
-   */
-  private boolean isCssLiteralNode(CssValueNode valueNode) {
-    return (valueNode instanceof CssLiteralNode);
-  }
-
-  /**
-   * Return if the node is CssNumericNode.
-   */
-  private boolean isNumericNode(CssValueNode valueNode) {
-    return (valueNode instanceof CssNumericNode);
-  }
-
-  /**
-   * Return if the node is a slash operator node.
-   */
-  private boolean isSlashNode(CssValueNode valueNode) {
+  /** Return if the node is a slash operator node. */
+  private static boolean isSlashNode(CssValueNode valueNode) {
     if (valueNode instanceof CssCompositeValueNode) {
       CssCompositeValueNode compositeNode = (CssCompositeValueNode) valueNode;
       return
@@ -292,11 +245,9 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
     return true;
   }
 
-  /**
-   * Return if the node is numeric and also has '%'.
-   */
-  private boolean isNumericAndHasPercentage(CssValueNode value) {
-    if (!isNumericNode(value)) {
+  /** Return if the node is numeric and also has '%'. */
+  private static boolean isNumericAndHasPercentage(CssValueNode value) {
+    if (!(value instanceof CssNumericNode)) {
       return false;
     }
     CssNumericNode numericNode = (CssNumericNode) value;
@@ -306,15 +257,13 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
   /**
    * Returns if the percentage value of this node is flippable.
    *
-   * Assumes simpler CSS 2.1 use of background and background-position
-   * (multi-layer is not supported yet, neither is the extended CSS 3 syntax
-   * for positioning, like "right 10% top 20%").
-   * TODO(roozbeh): add support CSS 3 multi-layer backgrounds.
-   * TODO(roozbeh): add support for extended CSS 3 syntax for positioning.
+   * <p>Assumes simpler CSS 2.1 use of background and background-position (multi-layer is not
+   * supported yet, neither is the extended CSS 3 syntax for positioning, like "right 10% top 20%").
+   * TODO(roozbeh): add support CSS 3 multi-layer backgrounds. TODO(roozbeh): add support for
+   * extended CSS 3 syntax for positioning.
    */
-  private boolean isValidForPercentageFlipping(
-      CssPropertyNode propertyNode, CssPropertyValueNode propertyValueNode,
-      int valueIndex) {
+  private static boolean isValidForPercentageFlipping(
+      CssPropertyNode propertyNode, CssPropertyValueNode propertyValueNode, int valueIndex) {
 
     String propertyName = propertyNode.getPropertyName();
     if (PROPERTIES_WITH_FLIPPABLE_PERCENTAGE.contains(propertyName)) {
@@ -326,7 +275,7 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
         // previous value is not numeric or "left", "center", or "right".
         CssValueNode previousValueNode =
             propertyValueNode.getChildAt(valueIndex - 1);
-        if (!isNumericNode(previousValueNode)
+        if (!(previousValueNode instanceof CssNumericNode)
             && !isLeftOrCenterOrRight(previousValueNode.getValue())) {
           return true;
         }
@@ -348,58 +297,64 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
     CssNumericNode numericNode = (CssNumericNode) valueNode;
     String oldPercentageValue = numericNode.getNumericPart();
     double newPercentValue = 100 - Double.parseDouble(oldPercentageValue);
-    CssValueNode newNumericNode = new CssNumericNode(
-        percentFormatter.format(newPercentValue), "%");
-
-    return newNumericNode;
+    return new CssNumericNode(percentFormatter.format(newPercentValue), "%");
   }
 
   /**
-   * Flips corners of a border-radius property. Corners are reordered in the
-   * following way:
+   * Flips corners of a border-radius property. Corners are reordered in the following way:
+   *
    * <ul>
    *   <li>0 1 is replaced with 1 0,
-   *   <li> 0 1 2 is replaced with 1 0 1 2, and
-   *   <li> 0 1 2 3 is replaced with 1 0 3 2.
+   *   <li>0 1 2 is replaced with 1 0 1 2, and
+   *   <li>0 1 2 3 is replaced with 1 0 3 2.
    * </ul>
    *
    * <p>Lists of other lengths are returned unchanged.
    *
-   * @param valueNodes the list of values representing the corners of a
-   * border-radius property.
+   * @param valueNodes the list of values representing the corners of a border-radius property.
    * @return a list of values with the corners flipped.
    */
-  private List<CssValueNode> flipCorners(List<CssValueNode> valueNodes) {
+  private static List<CssValueNode> flipCorners(List<CssValueNode> valueNodes) {
     switch (valueNodes.size()) {
       case 2:
-        return Lists.newArrayList(
-            valueNodes.get(1),
-            valueNodes.get(0));
+        {
+          List<CssValueNode> flipped = new ArrayList<>(2);
+          flipped.add(valueNodes.get(1));
+          flipped.add(valueNodes.get(0));
+          return flipped;
+        }
       case 3:
-        return Lists.newArrayList(
-            valueNodes.get(1),
-            valueNodes.get(0),
-            valueNodes.get(1).deepCopy(),
-            valueNodes.get(2));
+        {
+          List<CssValueNode> flipped = new ArrayList<>(4);
+          flipped.add(valueNodes.get(1));
+          flipped.add(valueNodes.get(0));
+          flipped.add(valueNodes.get(1).deepCopy());
+          flipped.add(valueNodes.get(2));
+          return flipped;
+        }
       case 4:
-        return Lists.newArrayList(
-            valueNodes.get(1),
-            valueNodes.get(0),
-            valueNodes.get(3),
-            valueNodes.get(2));
+        {
+          List<CssValueNode> flipped = new ArrayList<>(4);
+          flipped.add(valueNodes.get(1));
+          flipped.add(valueNodes.get(0));
+          flipped.add(valueNodes.get(3));
+          flipped.add(valueNodes.get(2));
+          return flipped;
+        }
       default:
         return valueNodes;
     }
   }
 
   /**
-   * Takes a list of property values that belong to a border-radius property
-   * and flips them. If there is a slash in the values, the data is divided
-   * around the slash. Then for each section, flipCorners is called.
+   * Takes a list of property values that belong to a border-radius property and flips them. If
+   * there is a slash in the values, the data is divided around the slash. Then for each section,
+   * flipCorners is called.
    */
-  private List<CssValueNode> flipBorderRadius(List<CssValueNode> valueNodes) {
+  private static List<CssValueNode> flipBorderRadius(List<CssValueNode> valueNodes) {
 
-    int count = 0, slashLocation = -1;
+    int count = 0;
+    int slashLocation = -1;
     CssCompositeValueNode slashNode = null;
     for (CssValueNode valueNode : valueNodes) {
       if (isSlashNode(valueNode)) {
@@ -425,20 +380,20 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
     List<CssValueNode> slashNodeValues = slashNode.getValues();
 
     // Create a list of horizontal values and flip them
-    List<CssValueNode> horizontalValues = Lists.newArrayList();
+    List<CssValueNode> horizontalValues = new ArrayList<>();
     horizontalValues.addAll(valueNodes.subList(0, slashLocation));
     horizontalValues.add(slashNodeValues.get(0));
     List<CssValueNode> newHorizontalValues = flipCorners(horizontalValues);
 
     // Do the same for vertical values
-    List<CssValueNode> verticalValues = Lists.newArrayList();
+    List<CssValueNode> verticalValues = new ArrayList<>();
     verticalValues.add(slashNodeValues.get(1));
     verticalValues.addAll(valueNodes.subList(slashLocation + 1,
         valueNodes.size()));
     List<CssValueNode> newVerticalValues = flipCorners(verticalValues);
 
     // Create a new slash node
-    List<CssValueNode> newSlashNodeValues = Lists.newArrayList();
+    List<CssValueNode> newSlashNodeValues = new ArrayList<>();
     newSlashNodeValues.add(newHorizontalValues.get(
         newHorizontalValues.size() - 1));
     newSlashNodeValues.add(newVerticalValues.get(0));
@@ -448,7 +403,7 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
       null
     );
 
-    List<CssValueNode> newValueList = Lists.newArrayList();
+    List<CssValueNode> newValueList = new ArrayList<>();
     newValueList.addAll(newHorizontalValues.subList(0,
         newHorizontalValues.size() - 1));
     newValueList.add(newSlashNode);
@@ -458,19 +413,15 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
   }
 
   /**
-   * Takes the list of property values, validate them, then swap the second
-   * and last values. So that 0 1 2 3 becomes 0 3 2 1.
+   * Takes the list of property values, validate them, then swap the second and last values. So that
+   * 0 1 2 3 becomes 0 3 2 1.
    *
-   * That is unless the length of the list is not four, it belongs to a property
-   * that shouldn't be flipped, or it's border-radius, where it will be
-   * specially handled.
+   * <p>That is unless the length of the list is not four, it belongs to a property that shouldn't
+   * be flipped, or it's border-radius, where it will be specially handled.
    *
-   * TODO(roozbeh): Add explicit flipping for 'border-image*' and '*-shadow'
-   * properties.
+   * <p>TODO(roozbeh): Add explicit flipping for 'border-image*' and '*-shadow' properties.
    */
-  private List<CssValueNode> flipNumericValues(
-      List<CssValueNode> valueNodes,
-      String propertyName) {
+  private List<CssValueNode> flipNumericValues(List<CssValueNode> valueNodes, String propertyName) {
 
     if (BORDER_RADIUS_PROPERTIES.contains(propertyName)) {
       return flipBorderRadius(valueNodes);
@@ -483,9 +434,9 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
     CssValueNode secondValueNode = null;
     CssValueNode fourthValueNode = null;
     for (CssValueNode valueNode : valueNodes) {
-      if (isNumericNode(valueNode)
-          || isCssLiteralNode(valueNode)
-          || isCssHexColorNode(valueNode)
+      if ((valueNode instanceof CssNumericNode)
+          || (valueNode instanceof CssLiteralNode)
+          || (valueNode instanceof CssHexColorNode)
           || shouldFlipConstantReference(valueNode)) {
         switch (count) {
           case 3:
@@ -502,7 +453,7 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
 
     // Swap second and last in the new list.
     count = 0;
-    List<CssValueNode> newValueList = Lists.newArrayList();
+    List<CssValueNode> newValueList = new ArrayList<>();
     for (CssValueNode valueNode : valueNodes) {
       if (1 == count) {
         newValueList.add(fourthValueNode);
@@ -516,15 +467,10 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
     return newValueList;
   }
 
-  /**
-   * Performs appropriate replacements needed for BiDi flipping.
-   */
-  private String flipValue(String value) {
-    for (String s : EXACT_MATCHING_FOR_FLIPPING.keySet()) {
-      if (value.equals(s)) {
-        value = EXACT_MATCHING_FOR_FLIPPING.get(s);
-        break;
-      }
+  /** Performs appropriate replacements needed for BiDi flipping. */
+  private static String flipValue(String value) {
+    if (EXACT_MATCHING_FOR_FLIPPING.containsKey(value)) {
+      value = EXACT_MATCHING_FOR_FLIPPING.get(value);
     }
     for (String s : ENDS_WITH_MATCHING_FOR_FLIPPING.keySet()) {
       if (value.endsWith(s)) {
@@ -533,7 +479,7 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
       }
     }
     for (String s : CONTAINS_MATCHING_FOR_FLIPPING.keySet()) {
-      if (value.indexOf(s) > 0) {
+      if (value.contains(s)) {
         value = value.replace(s, CONTAINS_MATCHING_FOR_FLIPPING.get(s));
         break;
       }
@@ -542,11 +488,11 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
   }
 
   /**
-   * Returns flipped node after making appropriate replacements needed for
-   * BiDi flipping, if the node is either a LiteralNode or PropertyNode.
-   * Eg: PropertyNode 'padding-right' would become 'padding-left'.
+   * Returns flipped node after making appropriate replacements needed for BiDi flipping, if the
+   * node is either a LiteralNode or PropertyNode. Eg: PropertyNode 'padding-right' would become
+   * 'padding-left'.
    */
-  private <T extends CssValueNode> T flipNode(T tNode) {
+  private static <T extends CssValueNode> T flipNode(T tNode) {
     if (tNode instanceof CssLiteralNode) {
       CssLiteralNode literalNode = (CssLiteralNode) tNode;
       String oldValue = literalNode.getValue();
@@ -661,7 +607,7 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
 
     // Update the property value.
     CssPropertyValueNode propertyValueNode = declarationNode.getPropertyValue();
-    List<CssValueNode> valueNodes = Lists.newArrayList();
+    List<CssValueNode> valueNodes = new ArrayList<>();
     int valueIndex = 0;
     for (CssValueNode valueNode : propertyValueNode.childIterable()) {
       // Flip URL argument, if it is a valid url function.
@@ -696,7 +642,7 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
       newDeclarationNode.setPropertyValue(propertyValueNode.deepCopy());
     }
 
-    List<CssNode> replacementList = Lists.newArrayList();
+    List<CssNode> replacementList = new ArrayList<>();
     replacementList.add(newDeclarationNode);
     visitController.replaceCurrentBlockChildWith(replacementList, false);
     return true;

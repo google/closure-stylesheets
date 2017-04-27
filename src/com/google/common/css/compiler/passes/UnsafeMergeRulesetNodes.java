@@ -27,7 +27,6 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeMultimap;
 import com.google.common.css.compiler.ast.*;
-
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -58,12 +57,8 @@ import java.util.Set;
  */
 public class UnsafeMergeRulesetNodes implements CssCompilerPass {
 
-  /**
-   * Partitions for which a fixed pre-determined ordering of
-   * properties won't do.
-   */
-  private static final Set<String> ORDER_DEPENDENT_PARTITIONS =
-      ImmutableSet.of("border");
+  /** Partitions for which a fixed pre-determined ordering of properties won't do. */
+  private static final ImmutableSet<String> ORDER_DEPENDENT_PARTITIONS = ImmutableSet.of("border");
 
   private final CssTree tree;
   private final boolean byPartition;

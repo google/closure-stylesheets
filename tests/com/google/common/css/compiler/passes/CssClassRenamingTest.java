@@ -16,6 +16,7 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -31,15 +32,19 @@ import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests the {@link CssClassRenaming} compiler pass.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
-public class CssClassRenamingTest extends TestCase {
+@RunWith(JUnit4.class)
+public class CssClassRenamingTest {
 
+  @Test
   public void testRunPass() {
     MutatingVisitController visitController = mock(MutatingVisitController.class);
 
@@ -48,12 +53,14 @@ public class CssClassRenamingTest extends TestCase {
     pass.runPass();
   }
 
+  @Test
   public void testNoSubstitutionWithNullMap() {
     CssClassSelectorNode node = new CssClassSelectorNode("FOO", null);
     CssClassRenaming pass = new CssClassRenaming(null, null, null);
     pass.enterClassSelector(node);
   }
 
+  @Test
   public void testNoClassSubstitutionWhenClassNotFoundInMap() {
     CssClassSelectorNode refinerNode = new CssClassSelectorNode("FOO", null);
     SubstitutionMap cssClassRenamingMap = mock(SubstitutionMap.class);
@@ -65,6 +72,7 @@ public class CssClassRenamingTest extends TestCase {
     verify(cssClassRenamingMap).get("FOO");
   }
 
+  @Test
   public void testNoIdSubstitutionWhenIdNotFoundInMap() {
     CssIdSelectorNode refinerNode = new CssIdSelectorNode("ID", null);
     SubstitutionMap idRenamingMap = mock(SubstitutionMap.class);
@@ -75,6 +83,7 @@ public class CssClassRenamingTest extends TestCase {
     verify(idRenamingMap).get("ID");
   }
   
+  @Test
   public void testEnterClassRefiner() {
     CssClassSelectorNode refinerNode = new CssClassSelectorNode("CSS_FOO",
         null);
@@ -102,9 +111,10 @@ public class CssClassRenamingTest extends TestCase {
     CssClassRenaming pass = new CssClassRenaming(
         tree.getMutatingVisitController(), classMap, null);
     pass.runPass();
-    assertEquals("[[.CSS_FOO_]{[]}]", AstPrinter.print(tree));
+    assertThat(AstPrinter.print(tree)).isEqualTo("[[.CSS_FOO_]{[]}]");
   }
 
+  @Test
   public void testEnterIdRefiner() {
     CssIdSelectorNode refinerNode = new CssIdSelectorNode("ID_FOO", null);
     CssRefinerListNode refiners = new CssRefinerListNode();
@@ -131,6 +141,6 @@ public class CssClassRenamingTest extends TestCase {
     CssClassRenaming pass
         = new CssClassRenaming(tree.getMutatingVisitController(), null, idMap);
     pass.runPass();
-    assertEquals("[[#ID_FOO_]{[]}]", AstPrinter.print(tree));
+    assertThat(AstPrinter.print(tree)).isEqualTo("[[#ID_FOO_]{[]}]");
   }
 }

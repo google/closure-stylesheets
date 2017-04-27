@@ -16,25 +16,31 @@
 
 package com.google.common.css;
 
-import junit.framework.TestCase;
+import static com.google.common.truth.Truth.assertThat;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * Test for the delegating CSS class substitution map which handles compound
- * class names.
+ * Test for the delegating CSS class substitution map which handles compound class names.
  *
  * @author dgajda@google.com (Damian Gajda)
  */
-public class SplittingSubstitutionMapTest extends TestCase {
+@RunWith(JUnit4.class)
+public class SplittingSubstitutionMapTest {
 
+  @Test
   public void testGet() throws Exception {
     SubstitutionMap map = new SplittingSubstitutionMap(
         new SimpleSubstitutionMap());
-    assertEquals("a_", map.get("a"));
-    assertEquals("a_-b_", map.get("a-b"));
-    assertEquals("a_-b_-c_", map.get("a-b-c"));
-    assertEquals("a_-b_-c_-d_", map.get("a-b-c-d"));
+    assertThat(map.get("a")).isEqualTo("a_");
+    assertThat(map.get("a-b")).isEqualTo("a_-b_");
+    assertThat(map.get("a-b-c")).isEqualTo("a_-b_-c_");
+    assertThat(map.get("a-b-c-d")).isEqualTo("a_-b_-c_-d_");
   }
 
+  @Test
   public void testSameObjectReturnedIfNoDash() {
     // Manually force a non-interned string so that we can prove we got back
     // the same one we meant. If we just used a String literal, it would be
@@ -42,7 +48,7 @@ public class SplittingSubstitutionMapTest extends TestCase {
     String input = new String("abc");
     SubstitutionMap map = new SplittingSubstitutionMap(
         new PassThroughSubstitutionMap());
-    assertSame(input, map.get(input));
+    assertThat(map.get(input)).isSameAs(input);
   }
 
   private static class PassThroughSubstitutionMap implements SubstitutionMap {

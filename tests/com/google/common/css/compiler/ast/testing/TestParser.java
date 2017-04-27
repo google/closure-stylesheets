@@ -108,11 +108,12 @@ public class TestParser {
     File sourcemapFile = new File(tmpDir, "sourcemap");
     File compiledFile = new File(tmpDir, "compiled.css");
 
-    Files.write(getSourceMapString(), sourcemapFile, StandardCharsets.UTF_8);
-    Files.write(getOutput(), compiledFile, StandardCharsets.UTF_8);
+    Files.asCharSink(sourcemapFile, StandardCharsets.UTF_8).write(getSourceMapString());
+    Files.asCharSink(compiledFile, StandardCharsets.UTF_8).write(getOutput());
     for (SourceCode source : sources) {
-      Files.write(
-          source.getFileContents(), new File(tmpDir, source.getFileName()), StandardCharsets.UTF_8);
+      Files
+          .asCharSink(new File(tmpDir, source.getFileName()), StandardCharsets.UTF_8)
+          .write(source.getFileContents());
     }
     Process process =
         new ProcessBuilder() /*

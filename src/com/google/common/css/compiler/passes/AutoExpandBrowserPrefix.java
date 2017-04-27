@@ -26,7 +26,6 @@ import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
-import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 
 import java.util.List;
@@ -34,7 +33,7 @@ import java.util.List;
 /**
  * A compiler pass that automatically detects certain properties that need additional
  * browser specific property declarations, and adds them.
- * The properties to be matched for expansion are provided by the BrowserPrefixGenerator.
+ * The properties to be matched for expansion are provided by the {@link BrowserPrefixGenerator}.
  *
  * <p>This mechanism is an alternative to using conventional mixins.
  * Problems with conventional mixins:
@@ -54,14 +53,11 @@ public final class AutoExpandBrowserPrefix extends DefaultTreeVisitor
     implements CssCompilerPass {
 
   private final MutatingVisitController visitController;
-  private final ErrorManager errorManager;
   private final ImmutableList<BrowserPrefixRule> expansionRules;
   private boolean inDefMixinBlock;
 
-  public AutoExpandBrowserPrefix(
-      MutatingVisitController visitController, ErrorManager errorManager) {
+  public AutoExpandBrowserPrefix(MutatingVisitController visitController) {
     this.visitController = visitController;
-    this.errorManager = errorManager;
     this.expansionRules = BrowserPrefixGenerator.getExpansionRules();
   }
 

@@ -18,6 +18,9 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssCompositeValueNode.Operator;
+import com.google.common.css.compiler.ast.CssMathNode;
+import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssNumericNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
@@ -55,45 +58,60 @@ public class EliminateUnitsFromZeroNumericValues extends DefaultTreeVisitor
 
   @Override
   public boolean enterValueNode(CssValueNode node) {
-    if (node instanceof CssNumericNode) {
-      CssNumericNode numericNode = (CssNumericNode) node;
-      String numericValue = numericNode.getNumericPart();
-      try {
-        float value = Float.parseFloat(numericValue);
-        if (value == 0.0) {
-          if (REMOVABLE_LENGTH_UNITS.contains(numericNode.getUnit())) {
-            numericNode.setUnit("");
-          }
-          numericNode.setNumericPart("0");
-        } else {
-          // Removes the 0s at the left of the dot.
-          int stripFront = 0;
-          while (numericValue.charAt(stripFront) == '0') {
-            stripFront++; 
-          }
-
-          int stripBack = numericValue.length() - 1;
-          if (numericValue.indexOf(".") >= 0) {
-            // Remove the 0s at the right of the dot.
-            while (numericValue.charAt(stripBack) == '0') {
-              stripBack--;
-            }
-            // Maybe remove the dot.
-            if (numericValue.charAt(stripBack) == '.') {
-              stripBack--;
-            }
-            numericValue = numericValue.substring(stripFront, stripBack + 1);
-          }
-          numericNode.setNumericPart(numericValue);
+    if (!(node instanceof CssNumericNode) // Don't process non-numeric nodes
+        // Don't strip units from operands of + and - inside calc() expressions; they are invalid.
+        // See https://www.w3.org/TR/css3-values/#calc-type-checking, and clarification by
+        // spec author: https://bugs.chromium.org/p/chromium/issues/detail?id=641556#c5.
+        || isPlusOrMinusOperand(node)) {
+      return true;
+    }
+    CssNumericNode numericNode = (CssNumericNode) node;
+    String numericValue = numericNode.getNumericPart();
+    try {
+      float value = Float.parseFloat(numericValue);
+      if (value == 0.0) {
+        if (REMOVABLE_LENGTH_UNITS.contains(numericNode.getUnit())) {
+          numericNode.setUnit("");
         }
-      } catch (NumberFormatException e) {
-        logger.warning("Numeric part of the numeric value node could not be "
-            + "parsed: " + node.toString()
-            + ((node.getSourceCodeLocation() != null) ?
-                "@" + node.getSourceCodeLocation().getLineNumber() : ""));
+        numericNode.setNumericPart("0");
+      } else {
+        // Removes the 0s at the left of the dot.
+        int stripFront = 0;
+        while (numericValue.charAt(stripFront) == '0') {
+          stripFront++;
+        }
+
+        int stripBack = numericValue.length() - 1;
+        if (numericValue.contains(".")) {
+          // Remove the 0s at the right of the dot.
+          while (numericValue.charAt(stripBack) == '0') {
+            stripBack--;
+          }
+          // Maybe remove the dot.
+          if (numericValue.charAt(stripBack) == '.') {
+            stripBack--;
+          }
+          numericValue = numericValue.substring(stripFront, stripBack + 1);
+        }
+        numericNode.setNumericPart(numericValue);
       }
+    } catch (NumberFormatException e) {
+      logger.warning(
+          "Numeric part of the numeric value node could not be "
+              + "parsed: "
+              + node.toString()
+              + ((node.getSourceCodeLocation() != null)
+                  ? "@" + node.getSourceCodeLocation().getLineNumber()
+                  : ""));
     }
     return true;
+  }
+
+  private static boolean isPlusOrMinusOperand(CssValueNode node) {
+    CssNode parent = node.getParent();
+    return parent instanceof CssMathNode
+        && (((CssMathNode) parent).getOperator() == Operator.ADD
+            || ((CssMathNode) parent).getOperator() == Operator.SUB);
   }
 
   @Override

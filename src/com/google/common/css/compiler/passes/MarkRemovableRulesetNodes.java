@@ -37,7 +37,6 @@ import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.SkippingTreeVisitor;
 import com.google.common.css.compiler.ast.VisitController;
-
 import java.util.Set;
 
 /**
@@ -61,11 +60,8 @@ public class MarkRemovableRulesetNodes extends SkippingTreeVisitor
   private final CssTree tree;
   private final VisitController visitController;
 
-  /**
-   * Property names not be to checked while traversing the tree to find
-   * overridden declarations.
-   */
-  static final Set<String> PROPERTIES_NOT_TO_BE_CHECKED =
+  /** Property names not be to checked while traversing the tree to find overridden declarations. */
+  static final ImmutableSet<String> PROPERTIES_NOT_TO_BE_CHECKED =
       ImmutableSet.of("display", "cursor");
 
   /** The set of rules known to be referenced. */

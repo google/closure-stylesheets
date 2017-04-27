@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssFontFaceNode;
@@ -24,14 +26,17 @@ import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
-
 import java.util.Map;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link ChunkCompactPrinter}.
  *
  * @author dgajda@google.com (Damian Gajda)
  */
+@RunWith(JUnit4.class)
 public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
 
   protected void setupTestTree() {
@@ -51,6 +56,7 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
     parseStyleSheet(sourceCode);
   }
 
+  @Test
   public void testChunkOutput() {
     setupTestTree();
     assertChunkOutput("foo", "foo{}a{}a#a{}a#a b{}b+i{}@media print{foo{}}"
@@ -63,7 +69,7 @@ public class ChunkCompactPrinterTest extends AbstractCompactPrinterTest {
   private void assertChunkOutput(String chunk, String expected, CssTree tree) {
     ChunkCompactPrinter<String> printer = new ChunkCompactPrinter<String>(tree, chunk);
     printer.runPass();
-    assertEquals(expected, printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString()).isEqualTo(expected);
   }
 
   @Override

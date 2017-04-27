@@ -16,13 +16,19 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CreateDefinitionNodes}.
  *
  */
+@RunWith(JUnit4.class)
 public class CreateDefinitionNodesTest extends NewFunctionalTestBase {
 
   @Override
@@ -32,30 +38,35 @@ public class CreateDefinitionNodesTest extends NewFunctionalTestBase {
     pass.runPass();
   }
 
+  @Test
   public void testCreateDefNode1() throws Exception {
     parseAndRun("@def X Y;");
-    assertTrue(getFirstActualNode() instanceof CssDefinitionNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssDefinitionNode.class);
     CssDefinitionNode def = (CssDefinitionNode) getFirstActualNode();
-    assertEquals("X", def.getName().getValue());
-    assertEquals(1, def.getParametersCount());
+    assertThat(def.getName().getValue()).isEqualTo("X");
+    assertThat(def.getParametersCount()).isEqualTo(1);
   }
 
+  @Test
   public void testBlockError() throws Exception {
     parseAndRun("@def X { a {b: c} }", "@def with block");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testNoNameError() throws Exception {
     parseAndRun("@def;", "@def without name");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testNameError() throws Exception {
     parseAndRun("@def 1px 2px 3px;",
         "@def without a valid literal as name");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testNameSyntacticallyInvalid() throws Exception {
     parseAndRun("@def FOO-BAR 1;",
         "WARNING for invalid @def name FOO-BAR. We will ignore this.");

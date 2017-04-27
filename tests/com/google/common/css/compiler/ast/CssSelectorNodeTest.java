@@ -16,18 +16,24 @@
 
 package com.google.common.css.compiler.ast;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssSelectorNode}.
  *
  * @author dgajda@google.com (Damian Gajda)
- *
  */
+@RunWith(JUnit4.class)
 public class CssSelectorNodeTest extends NewFunctionalTestBase {
 
+  @Test
   public void testDeepCopy() {
     SourceCode sourceCode = new SourceCode("foo", null);
     SourceCodeLocation location =
@@ -39,67 +45,81 @@ public class CssSelectorNodeTest extends NewFunctionalTestBase {
     refiner.appendComment(new CssCommentNode("/* @noflip */", null));
 
     CssSelectorNode copy = node.deepCopy();
-    assertEquals(node.getChunk(), copy.getChunk());
-    assertEquals(node.getSelectorName(), copy.getSelectorName());
-    assertEquals(node.getSourceCodeLocation(), copy.getSourceCodeLocation());
-    assertEquals(node.getRefiners().getChildAt(0).getComments(),
-        copy.getRefiners().getChildAt(0).getComments());
+    assertThat(copy.getChunk()).isEqualTo(node.getChunk());
+    assertThat(copy.getSelectorName()).isEqualTo(node.getSelectorName());
+    assertThat(copy.getSourceCodeLocation()).isEqualTo(node.getSourceCodeLocation());
+    assertThat(copy.getRefiners().getChildAt(0).getComments())
+        .isEqualTo(node.getRefiners().getChildAt(0).getComments());
   }
 
   // Examples from http://www.w3.org/TR/CSS2/cascade.html#specificity
 
+  @Test
   public void testSpecificity1() {
     testSpecificity("*", "0,0,0,0");
   }
 
+  @Test
   public void testSpecificity2() {
     testSpecificity("li", "0,0,0,1");
   }
 
+  @Test
   public void testSpecificity3() {
     testSpecificity("li:first-line", "0,0,0,2");
   }
 
+  @Test
   public void testSpecificity4() {
     testSpecificity("ul li", "0,0,0,2");
   }
 
+  @Test
   public void testSpecificity5() {
     testSpecificity("ul ol+li", "0,0,0,3");
   }
 
+  @Test
   public void testSpecificity6() {
     testSpecificity("h1 + *[rel=up]", "0,0,1,1");
   }
 
+  @Test
   public void testSpecificity7() {
     testSpecificity("ul ol li.red", "0,0,1,3");
   }
 
+  @Test
   public void testSpecificity8() {
     testSpecificity("li.red.level", "0,0,2,1");
   }
 
+  @Test
   public void testSpecificity9() {
     testSpecificity("#x34y", "0,1,0,0");
   }
 
+  @Test
   public void testSpecificity10() {
     testSpecificity("#s12:not(FOO)", "0,1,0,1");
   }
 
+  @Test
   public void testSpecificity11() {
     testSpecificity("*:not(li.red.level)", "0,0,2,1");
   }
 
+  @Test
   public void testSpecificity12() {
     testSpecificity("#s12:not(#s45)", "0,2,0,0");
   }
 
+  @Test
   public void testSpecificity13() {
     testSpecificity("#s12:not(#s45)", "0,2,0,0");
   }
 
+  @Test
   public void testSpecificity14() {
     testSpecificity("#s12::after", "0,1,0,1");
   }
@@ -111,9 +131,9 @@ public class CssSelectorNodeTest extends NewFunctionalTestBase {
       fail(e.getMessage());
     }
     CssNode node = tree.getRoot().getBody().getChildAt(0);
-    assertTrue(node instanceof CssRulesetNode);
+    assertThat(node).isInstanceOf(CssRulesetNode.class);
     CssRulesetNode rulesetNode = (CssRulesetNode) node;
     CssSelectorNode selectorNode = rulesetNode.getSelectors().getChildAt(0);
-    assertEquals(expected, selectorNode.getSpecificity().toString());
+    assertThat(selectorNode.getSpecificity().toString()).isEqualTo(expected);
   }
 }

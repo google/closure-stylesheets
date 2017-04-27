@@ -16,11 +16,15 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import static com.google.common.truth.Truth.assertThat;
 
-/**
- * Unit tests for {@link CreateVendorPrefixedKeyframes}.
- */
+import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+/** Unit tests for {@link CreateVendorPrefixedKeyframes}. */
+@RunWith(JUnit4.class)
 public class CreateVendorPrefixedKeyframesTest extends NewFunctionalTestBase {
   private String compactPrintedResult;
 
@@ -34,6 +38,7 @@ public class CreateVendorPrefixedKeyframesTest extends NewFunctionalTestBase {
     compactPrintedResult = compactPrinterPass.getCompactPrintedString();
   }
 
+  @Test
   public void testCreateWebkitKeyframes() throws Exception {
     parseAndRun(
         "/* @gen-webkit-keyframes */"
@@ -41,29 +46,26 @@ public class CreateVendorPrefixedKeyframesTest extends NewFunctionalTestBase {
         + "0%{top:0}"
         + "100%{top:1%}"
         + "}");
-    assertEquals(
-        "@keyframes A{"
-        + "0%{top:0}"
-        + "100%{top:1%}"
-        + "}"
-        + "@-webkit-keyframes A{"
-        + "0%{top:0}"
-        + "100%{top:1%}"
-        + "}",
-        compactPrintedResult);
+    assertThat(compactPrintedResult)
+        .isEqualTo(
+            "@keyframes A{"
+                + "0%{top:0}"
+                + "100%{top:1%}"
+                + "}"
+                + "@-webkit-keyframes A{"
+                + "0%{top:0}"
+                + "100%{top:1%}"
+                + "}");
   }
 
+  @Test
   public void testWithoutComment() throws Exception {
     parseAndRun(
         "@keyframes A{"
         + "0%{top:0}"
         + "100%{top:1%}"
         + "}");
-    assertEquals(
-        "@keyframes A{"
-        + "0%{top:0}"
-        + "100%{top:1%}"
-        + "}",
-        compactPrintedResult);
+    assertThat(compactPrintedResult)
+        .isEqualTo("@keyframes A{" + "0%{top:0}" + "100%{top:1%}" + "}");
   }
 }

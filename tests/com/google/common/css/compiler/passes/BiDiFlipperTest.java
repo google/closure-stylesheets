@@ -16,7 +16,7 @@
 
 package com.google.common.css.compiler.passes;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.css.compiler.ast.BackDoorNodeMutation;
@@ -175,19 +175,20 @@ public class BiDiFlipperTest {
     BiDiFlipper pass = new BiDiFlipper(tree.getMutatingVisitController(),
                                        true, true);
     pass.runPass();
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[[foo]{["
-        + "padding:[5px, 3px, 2px, 1px], "
-        + "font:[90%], "
-        + "background-position-x:[20%], "
-        + "background:[url(/foo/ltr/background.png)], "
-        + "margin-right:[5px], "
-        + "float:[right], "
-        + "right:[5px], "
-        + "cursor:[w-resize], "
-        + "border-top-right-radius:[3px], "
-        + "-moz-border-radius-topright:[3px]"
-        + "]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo(
+            "[[foo]{["
+                + "padding:[5px, 3px, 2px, 1px], "
+                + "font:[90%], "
+                + "background-position-x:[20%], "
+                + "background:[url(/foo/ltr/background.png)], "
+                + "margin-right:[5px], "
+                + "float:[right], "
+                + "right:[5px], "
+                + "cursor:[w-resize], "
+                + "border-top-right-radius:[3px], "
+                + "-moz-border-radius-topright:[3px]"
+                + "]}]");
   }
 
   @Test
@@ -222,11 +223,12 @@ public class BiDiFlipperTest {
     BiDiFlipper pass = new BiDiFlipper(tree.getMutatingVisitController(),
                                        true, true);
     pass.runPass();
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[[foo]{["
-        + "background-position-x:[98.87654322%], "
-        + "-ms-background-position-x:[97.5%]"
-        + "]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo(
+            "[[foo]{["
+                + "background-position-x:[98.87654322%], "
+                + "-ms-background-position-x:[97.5%]"
+                + "]}]");
   }
 
   @Test
@@ -278,11 +280,12 @@ public class BiDiFlipperTest {
     BiDiFlipper pass = new BiDiFlipper(tree.getMutatingVisitController(),
                                        true, true);
     pass.runPass();
-    assertEquals(
-        "[[foo]{["
-        + "margin:[1px, 4px, 3px, 2px, !important], "
-        + "border-radius:[2px, 1px, !important], "
-        + "padding-left:[1px, !important]"
-        + "]}]", tree.getRoot().getBody().toString());
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo(
+            "[[foo]{["
+                + "margin:[1px, 4px, 3px, 2px, !important], "
+                + "border-radius:[2px, 1px, !important], "
+                + "padding-left:[1px, !important]"
+                + "]}]");
   }
 }

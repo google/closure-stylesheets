@@ -16,57 +16,66 @@
 
 package com.google.common.css.compiler.ast;
 
-import com.google.common.css.compiler.ast.CssPseudoClassNode.FunctionType;
+import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.css.compiler.ast.CssPseudoClassNode.FunctionType;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssPseudoClassNode}
  *
  * @author fbenz@google.com (Florian Benz)
  */
+@RunWith(JUnit4.class)
 public class CssPseudoClassNodeTest extends TestCase {
 
+  @Test
   public void testNonFunction() {
     String name = "foo";
     CssPseudoClassNode node = new CssPseudoClassNode(name, null);
-    assertEquals(FunctionType.NONE, node.getFunctionType());
-    assertEquals(node.getPrefix(), ":");
-    assertEquals(node.getSuffix(), "");
-    assertEquals(name, node.getRefinerName());
-    assertNull(node.getArgument());
-    assertNull(node.getNotSelector());
+    assertThat(node.getFunctionType()).isEqualTo(FunctionType.NONE);
+    assertThat(node.getPrefix()).isEqualTo(":");
+    assertThat(node.getSuffix()).isEmpty();
+    assertThat(node.getRefinerName()).isEqualTo(name);
+    assertThat(node.getArgument()).isNull();
+    assertThat(node.getNotSelector()).isNull();
   }
 
+  @Test
   public void testLangFunction() {
     String name = "foo";
     String arg = "en";
     CssPseudoClassNode node = new CssPseudoClassNode(FunctionType.LANG, name,
         arg, null);
-    assertEquals(FunctionType.LANG, node.getFunctionType());
-    assertEquals(name, node.getRefinerName());
-    assertEquals(arg, node.getArgument());
-    assertNull(node.getNotSelector());
+    assertThat(node.getFunctionType()).isEqualTo(FunctionType.LANG);
+    assertThat(node.getRefinerName()).isEqualTo(name);
+    assertThat(node.getArgument()).isEqualTo(arg);
+    assertThat(node.getNotSelector()).isNull();
   }
 
+  @Test
   public void testNthFunction() {
     String name = "foo";
     String arg = "2n+1";
     CssPseudoClassNode node = new CssPseudoClassNode(FunctionType.NTH, name,
         arg, null);
-    assertEquals(FunctionType.NTH, node.getFunctionType());
-    assertEquals(name, node.getRefinerName());
-    assertEquals(arg, node.getArgument());
-    assertNull(node.getNotSelector());
+    assertThat(node.getFunctionType()).isEqualTo(FunctionType.NTH);
+    assertThat(node.getRefinerName()).isEqualTo(name);
+    assertThat(node.getArgument()).isEqualTo(arg);
+    assertThat(node.getNotSelector()).isNull();
   }
 
+  @Test
   public void testNotFunction() {
     String name = "not";
     CssSelectorNode selector = new CssSelectorNode("foo");
     CssPseudoClassNode node = new CssPseudoClassNode(name, selector, null);
-    assertEquals(FunctionType.NOT, node.getFunctionType());
-    assertEquals(name, node.getRefinerName());
-    assertEquals(selector, node.getNotSelector());
-    assertNull(node.getArgument());
+    assertThat(node.getFunctionType()).isEqualTo(FunctionType.NOT);
+    assertThat(node.getRefinerName()).isEqualTo(name);
+    assertThat(node.getNotSelector()).isEqualTo(selector);
+    assertThat(node.getArgument()).isNull();
   }
 }

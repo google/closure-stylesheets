@@ -16,40 +16,46 @@
 
 package com.google.common.css.compiler.ast;
 
-import com.google.common.css.SourceCode;
+import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.css.SourceCode;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssTree}
  *
- *
  */
+@RunWith(JUnit4.class)
 public class CssTreeTest extends TestCase {
 
+  @Test
   public void testSimple() {
     CssTree tree = new CssTree(new SourceCode("testfile", ""));
     CssRootNode root = tree.getRoot();
-    assertNotNull(root);
-    assertNull(root.getParent());
-    assertEquals(root, root.getBody().getParent());
-    assertTrue(tree.getRoot().getBody().isEmpty());
-    assertNull(root.getCharsetRule());
-    assertTrue(root.getImportRules().isEmpty());
-    assertNotNull(root.getBody());
+    assertThat(root).isNotNull();
+    assertThat(root.getParent()).isNull();
+    assertThat(root.getBody().getParent()).isEqualTo(root);
+    assertThat(tree.getRoot().getBody().isEmpty()).isTrue();
+    assertThat(root.getCharsetRule()).isNull();
+    assertThat(root.getImportRules().isEmpty()).isTrue();
+    assertThat(root.getBody()).isNotNull();
   }
 
+  @Test
   public void testCopyConstructor() {
     CssTree tree1 = new CssTree(new SourceCode("testfile", ""));
     CssTree tree2 = new CssTree(tree1);
 
-    assertNotSame(tree1.getRoot(), tree2.getRoot());
-    assertNotSame(tree1.getRoot().getBody(), tree2.getRoot().getBody());
-    assertTrue(tree1.getRoot().getBody().isEmpty());
-    assertTrue(tree2.getRoot().getBody().isEmpty());
-    assertEquals(tree1.getSourceCode(), tree2.getSourceCode());
+    assertThat(tree2.getRoot()).isNotSameAs(tree1.getRoot());
+    assertThat(tree2.getRoot().getBody()).isNotSameAs(tree1.getRoot().getBody());
+    assertThat(tree1.getRoot().getBody().isEmpty()).isTrue();
+    assertThat(tree2.getRoot().getBody().isEmpty()).isTrue();
+    assertThat(tree2.getSourceCode()).isEqualTo(tree1.getSourceCode());
 
     tree1.getRulesetNodesToRemove().addRulesetNode(new CssRulesetNode());
-    assertTrue(tree2.getRulesetNodesToRemove().getRulesetNodes().isEmpty());
+    assertThat(tree2.getRulesetNodesToRemove().getRulesetNodes()).isEmpty();
   }
 }

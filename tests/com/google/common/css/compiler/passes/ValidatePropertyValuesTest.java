@@ -17,10 +17,14 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link ValidatePropertyValues}.
  */
+@RunWith(JUnit4.class)
 public class ValidatePropertyValuesTest extends NewFunctionalTestBase {
 
   @Override
@@ -30,6 +34,7 @@ public class ValidatePropertyValuesTest extends NewFunctionalTestBase {
     pass.runPass();
   }
 
+  @Test
   public void testUnicodeRangeLegalPatterns() throws Exception {
     parseAndRun("@font-face { unicode-range: U+010a;}");
     parseAndRun("@font-face { unicode-range: U+010a-0230;}");
@@ -37,6 +42,7 @@ public class ValidatePropertyValuesTest extends NewFunctionalTestBase {
     parseAndRun("@font-face { unicode-range: U+23??, U+010a;}");
   }
 
+  @Test
   public void testUnicodeRangeOutOfRangePatterns() throws Exception {
     parseAndRun("@font-face { unicode-range: U+110000;}",
         ValidatePropertyValues.UNICODE_ILLEGAL_CODEPOINT_ERROR);

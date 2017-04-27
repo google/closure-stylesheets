@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.passes;
 
 import static com.google.common.css.compiler.passes.ResolveCustomFunctionNodesForChunks.DEF_PREFIX;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -32,14 +33,17 @@ import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
-
 import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link ProcessComponents}.
  *
  * @author dgajda@google.com (Damian Gajda)
  */
+@RunWith(JUnit4.class)
 public class ProcessComponentsTest extends PassesTestBase {
 
   private static final String FILE1 = "file1";
@@ -339,6 +343,7 @@ public class ProcessComponentsTest extends PassesTestBase {
     checkTreeDebugString(expectedOutput);
   }
 
+  @Test
   public void testTopComponent() throws Exception {
     testTreeConstruction(topComponentInput, "[" + topComponentOutput + "]");
     testTreeConstructionWithResolve(
@@ -348,6 +353,7 @@ public class ProcessComponentsTest extends PassesTestBase {
         "[" + topComponentOutputResolved + "]");
   }
 
+  @Test
   public void testChildComponent() throws Exception {
     testTreeConstruction(
         topComponentInput + "\n" + childComponentInput,
@@ -362,6 +368,7 @@ public class ProcessComponentsTest extends PassesTestBase {
             replaceFunction(childComponentOutputTemplate, "[" + DEF_PREFIX + "2]") + "]");
   }
 
+  @Test
   public void testChildComponentWithReferenceWorkaround() throws Exception {
     String topComponentWithWorkaroundInput = joinNl(Iterables.concat(
         topComponentPrefixInput,
@@ -382,6 +389,7 @@ public class ProcessComponentsTest extends PassesTestBase {
             replaceFunction(childComponentOutputTemplate, "[" + DEF_PREFIX + "2]") + "]");
   }
 
+  @Test
   public void testChildComponentWithAbstractParent() throws Exception {
     testTreeConstruction(
         abstractTopComponentInput + "\n" + childComponentInput,
@@ -396,6 +404,7 @@ public class ProcessComponentsTest extends PassesTestBase {
             replaceFunction(childComponentOutputTemplate, "[" + DEF_PREFIX + "1]") + "]");
   }
 
+  @Test
   public void testGrandChildComponent() throws Exception {
     testTreeConstruction(
         topComponentInput + "\n" + childComponentInput + "\n" +
@@ -416,49 +425,58 @@ public class ProcessComponentsTest extends PassesTestBase {
                 "3]") + "]");
   }
 
+  @Test
   public void testIfComponent() throws Exception {
     testTreeConstruction(ifComponentInput, "[" + ifComponentOutput + "]");
   }
 
+  @Test
   public void testUndefinedParentComponentError() throws Exception {
     parseAndRun("@component CSS_X extends CSS_Y { }",
         "parent component is undefined in chunk " + TEST_CHUNK);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testRedefinedComponentError() throws Exception {
     parseAndRun(ImmutableMap.of(
             FILE1, "@component CSS_X { }",
             FILE2, "@component CSS_X { }"),
         "cannot redefine component in chunk " + CHUNK2);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testNestedComponentsError1() throws Exception {
     parseAndRun("@component CSS_X { @component CSS_Y {} }", "nested components are not allowed");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testNestedComponentsError2() throws Exception {
     parseAndRun("@component CSS_X { @component CSS_Y {} }\n@component CSS_Z extends CSS_X {}",
         "nested components are not allowed");
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testImplicitlyNamed() throws Exception {
     testTreeConstruction(namelessComponentInput, "[" + camelCasedComponentOutput + "]");
   }
 
+  @Test
   public void testStringNamed() throws Exception {
     testTreeConstruction(stringNamedComponentInput, "[" + camelCasedComponentOutput + "]");
   }
 
+  @Test
   public void testImplicitlyNamedNoPackageError() throws Exception {
     parseAndRun("@component { }",
         "implicitly-named @components require a prior @provide declaration " + TEST_CHUNK);
-    assertTrue(isEmptyBody());
+    assertThat(isEmptyBody()).isTrue();
   }
 
+  @Test
   public void testImplicitlyNamedMultiplePackage() throws Exception {
     // Construct gss consisting of three @provides and one implicit @component sandwiched
     // in-between. Verify that the produced css uses the name of the @provide immediately preceeding
@@ -470,6 +488,7 @@ public class ProcessComponentsTest extends PassesTestBase {
         "[" + camelCasedComponentOutput + "]");
   }
 
+  @Test
   public void testImplicitlyNamedMultipleComponents() throws Exception {
     parseAndRun(ImmutableMap.<String, String>of(
         "file1",
@@ -480,6 +499,7 @@ public class ProcessComponentsTest extends PassesTestBase {
         "@component { }"));
   }
 
+  @Test
   public void testImplicitlyNamedMultipleComponentsPackageError() throws Exception {
     parseAndRun(ImmutableMap.<String, String>of(
         "file1",
@@ -491,6 +511,7 @@ public class ProcessComponentsTest extends PassesTestBase {
         "cannot redefine component in chunk chunk2");
   }
 
+  @Test
   public void testMultiplePackageWithNoComponentError() throws Exception {
     testTreeConstruction(
         "@provide \"some.example.package\";\n" +
@@ -498,10 +519,12 @@ public class ProcessComponentsTest extends PassesTestBase {
         "[]");
   }
 
+  @Test
   public void testPrefixingRules() throws Exception {
     testTreeConstruction(prefixingTestComponentInput, "[" + prefixingTestComponentOutput + "]");
   }
 
+  @Test
   public void testComponentDefsSourceCodeLocation() throws Exception {
     CssTree tree = parseAndRun(ImmutableMap.of(
         FILE1,
@@ -534,7 +557,7 @@ public class ProcessComponentsTest extends PassesTestBase {
         "CHILD__BASE_COLOR", FILE2,
         "CHILD__SPECIFIC_COLOR", FILE2,
         "CHILD__DERIVED_COLOR", FILE2);
-    assertEquals(expectedDefs, foundDefs.build());
+    assertThat(foundDefs.build()).containsExactlyEntriesIn(expectedDefs).inOrder();
   }
 
   private String joinNl(Iterable<String> lines) {
@@ -556,7 +579,7 @@ public class ProcessComponentsTest extends PassesTestBase {
     private int count = 0;
     @Override
     public String apply(String chunk) {
-      assertNotNull(chunk);
+      assertThat(chunk).isNotNull();
       return String.valueOf(count++);
     }
   }

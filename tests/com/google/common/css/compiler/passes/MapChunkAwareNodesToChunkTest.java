@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.SourceCode;
@@ -27,22 +29,24 @@ import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssValueNode;
-
-import junit.framework.TestCase;
-
 import java.util.List;
 import java.util.Map;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link MapChunkAwareNodesToChunk}.
  *
- * <p>This test case can be extended, so that the tests are
- * reused. The check* methods need to be overridden if the subclass
- * expects a different result.
+ * <p>This test case can be extended, so that the tests are reused. The check* methods need to be
+ * overridden if the subclass expects a different result.
  *
  * @author dgajda@google.com (Damian Gajda)
  */
-public class MapChunkAwareNodesToChunkTest extends TestCase {
+@RunWith(JUnit4.class)
+public class MapChunkAwareNodesToChunkTest {
 
   protected static final String F2 = "b";
   protected static final String F1 = "a";
@@ -55,8 +59,8 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
   protected static final String CB = "B";
   protected static final String CC = "C";
 
-  protected static final Map<String, String> FILE_TO_CHUNK =
-      ImmutableMap.<String ,String>builder()
+  protected static final ImmutableMap<String, String> FILE_TO_CHUNK =
+      ImmutableMap.<String, String>builder()
           .put(F1, CA)
           .put(F2, CA)
           .put(F3, CB)
@@ -83,9 +87,8 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
 
   protected CssKeyframesNode keyframes3b;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     pass = getPass(FILE_TO_CHUNK);
 
     List<CssValueNode> parameters = ImmutableList.of();
@@ -143,6 +146,7 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
     sel5a = new CssSelectorNode("a", location5a);
   }
 
+  @Test
   public void testMapToChunk() {
     setupEnterSelector();
     setupEnterDefinition();
@@ -155,11 +159,12 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
 
     // Only one assert per node type, so these aren't put into their own
     // functions.
-    assertEquals(CA, fun1b.getChunk());
-    assertEquals(CB, media3a.getChunk());
-    assertEquals(CB, keyframes3b.getChunk());
+    assertThat(fun1b.getChunk()).isEqualTo(CA);
+    assertThat(media3a.getChunk()).isEqualTo(CB);
+    assertThat(keyframes3b.getChunk()).isEqualTo(CB);
   }
 
+  @Test
   public void testMissingFileToChunkMapping() {
     Map<String, String> badFileToChunk =
       ImmutableMap.<String ,String>builder()
@@ -171,7 +176,7 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
     pass = getPass(badFileToChunk);
     try {
       pass.enterSelector(sel2a);
-      fail("Node 2a does not have a file to chunk mapping");
+      Assert.fail("Node 2a does not have a file to chunk mapping");
     } catch (NullPointerException expected) {
       // OK
     }
@@ -182,30 +187,30 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
   }
 
   protected void checkEnterSelector() {
-    assertEquals(CA, sel1a.getChunk());
-    assertEquals(CA, sel1b.getChunk());
-    assertEquals(CA, sel2a.getChunk());
-    assertEquals(CB, sel3a.getChunk());
-    assertEquals(CB, sel3b.getChunk());
-    assertEquals(CB, sel3c.getChunk());
-    assertEquals(CC, sel4c.getChunk());
-    assertEquals(CS, sel5a.getChunk());
+    assertThat(sel1a.getChunk()).isEqualTo(CA);
+    assertThat(sel1b.getChunk()).isEqualTo(CA);
+    assertThat(sel2a.getChunk()).isEqualTo(CA);
+    assertThat(sel3a.getChunk()).isEqualTo(CB);
+    assertThat(sel3b.getChunk()).isEqualTo(CB);
+    assertThat(sel3c.getChunk()).isEqualTo(CB);
+    assertThat(sel4c.getChunk()).isEqualTo(CC);
+    assertThat(sel5a.getChunk()).isEqualTo(CS);
   }
 
   protected void checkEnterDefinition() {
-    assertEquals(CA, def1a.getChunk());
-    assertEquals(CA, def2a.getChunk());
+    assertThat(def1a.getChunk()).isEqualTo(CA);
+    assertThat(def2a.getChunk()).isEqualTo(CA);
   }
 
   private void setupEnterSelector() {
-    assertNull(sel1a.getChunk());
-    assertNull(sel1b.getChunk());
-    assertNull(sel2a.getChunk());
-    assertNull(sel3a.getChunk());
-    assertNull(sel3b.getChunk());
-    assertNull(sel3c.getChunk());
-    assertNull(sel4c.getChunk());
-    assertNull(sel5a.getChunk());
+    assertThat(sel1a.getChunk()).isNull();
+    assertThat(sel1b.getChunk()).isNull();
+    assertThat(sel2a.getChunk()).isNull();
+    assertThat(sel3a.getChunk()).isNull();
+    assertThat(sel3b.getChunk()).isNull();
+    assertThat(sel3c.getChunk()).isNull();
+    assertThat(sel4c.getChunk()).isNull();
+    assertThat(sel5a.getChunk()).isNull();
 
     pass.enterSelector(sel1a);
     pass.enterSelector(sel1b);
@@ -218,25 +223,25 @@ public class MapChunkAwareNodesToChunkTest extends TestCase {
   }
 
   private void setupEnterDefinition() {
-    assertNull(def1a.getChunk());
-    assertNull(def2a.getChunk());
+    assertThat(def1a.getChunk()).isNull();
+    assertThat(def2a.getChunk()).isNull();
 
     pass.enterDefinition(def1a);
     pass.enterDefinition(def2a);
   }
 
   private void setupEnterFunctionNode() {
-    assertNull(fun1b.getChunk());
+    assertThat(fun1b.getChunk()).isNull();
     pass.enterFunctionNode(fun1b);
   }
 
   private void setupEnterMediaRule() {
-    assertNull(media3a.getChunk());
+    assertThat(media3a.getChunk()).isNull();
     pass.enterMediaRule(media3a);
   }
 
   private void setupEnterKeyframesRule() {
-    assertNull(keyframes3b.getChunk());
+    assertThat(keyframes3b.getChunk()).isNull();
     pass.enterKeyframesRule(keyframes3b);
   }
 }

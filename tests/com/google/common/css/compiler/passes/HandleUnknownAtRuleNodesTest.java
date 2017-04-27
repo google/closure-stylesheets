@@ -16,13 +16,19 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.Sets;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link HandleUnknownAtRuleNodes}.
  *
  */
+@RunWith(JUnit4.class)
 public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
 
   private final String errorMessage = HandleUnknownAtRuleNodes.unknownAtRuleErrorMessage;
@@ -59,67 +65,66 @@ public class HandleUnknownAtRuleNodesTest extends NewFunctionalTestBase {
     compactPrintedResult = compactPrinterPass.getCompactPrintedString();
   }
 
+  @Test
   public void testReportRemove() throws Exception {
     report = true;
     remove = true;
     parseAndRun(testCode, errorMessage);
-    assertEquals("", prettyPrintedResult);
-    assertEquals("", compactPrintedResult);
+    assertThat(prettyPrintedResult).isEmpty();
+    assertThat(compactPrintedResult).isEmpty();
   }
 
+  @Test
   public void testReportDoNotRemove() throws Exception {
     report = true;
     remove = false;
     parseAndRun(testCode, errorMessage, errorMessage, errorMessage);
-    assertEquals(testCodePrettyPrintedResult, prettyPrintedResult);
-    assertEquals(testCodeCompactPrintedResult, compactPrintedResult);
+    assertThat(prettyPrintedResult).isEqualTo(testCodePrettyPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo(testCodeCompactPrintedResult);
   }
 
+  @Test
   public void testDoNotReportRemove() throws Exception {
     report = false;
     remove = true;
     parseAndRun(testCode);
-    assertEquals("", prettyPrintedResult);
-    assertEquals("", compactPrintedResult);
+    assertThat(prettyPrintedResult).isEmpty();
+    assertThat(compactPrintedResult).isEmpty();
   }
 
+  @Test
   public void testDoNotReportDoNotRemove() throws Exception {
     report = false;
     remove = false;
     parseAndRun(testCode);
-    assertEquals(testCodePrettyPrintedResult, prettyPrintedResult);
-    assertEquals(testCodeCompactPrintedResult, compactPrintedResult);
+    assertThat(prettyPrintedResult).isEqualTo(testCodePrettyPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo(testCodeCompactPrintedResult);
   }
 
+  @Test
   public void testDoNotReportDoNotRemoveMedia() throws Exception {
     report = true;
     remove = true;
     parseAndRun("@media print { .A { margin: 0; } }");
-    assertEquals(linesToString(
-        "@media print {",
-        "  .A {",
-        "    margin: 0;",
-        "  }",
-        "}",
-        ""), prettyPrintedResult);
-    assertEquals("@media print{.A{margin:0}}", compactPrintedResult);
+    assertThat(prettyPrintedResult)
+        .isEqualTo(linesToString("@media print {", "  .A {", "    margin: 0;", "  }", "}", ""));
+    assertThat(compactPrintedResult).isEqualTo("@media print{.A{margin:0}}");
   }
 
+  @Test
   public void testDoNotReportDoNotRemoveMediaWithUnknown() throws Exception {
     report = true;
     remove = true;
     parseAndRun("@media print { @foo { .A { margin: 0; } } }", errorMessage);
-    assertEquals(linesToString(
-        "@media print {",
-        "}",
-        ""), prettyPrintedResult);
-    assertEquals("@media print{}", compactPrintedResult);
+    assertThat(prettyPrintedResult).isEqualTo(linesToString("@media print {", "}", ""));
+    assertThat(compactPrintedResult).isEqualTo("@media print{}");
   }
 
+  @Test
   public void testDoNotReportDoNotRemoveCustomAtRule() throws Exception {
     report = true;
     remove = true;
     parseAndRun("@-custom-at-rule print { }");
-    assertEquals("@-custom-at-rule print{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("@-custom-at-rule print{}");
   }
 }

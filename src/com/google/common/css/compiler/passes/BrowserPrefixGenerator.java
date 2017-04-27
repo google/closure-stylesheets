@@ -168,6 +168,15 @@ final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("text-size-adjust")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-text-size-adjust")
+        .addExpandPropertyName("-moz-text-size-adjust")
+        .addExpandPropertyName("-ms-text-size-adjust")
+        .addExpandPropertyName("text-size-adjust")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("animation")
         .isFunction(false)
         .addExpandPropertyName("-webkit-animation")
@@ -295,6 +304,16 @@ final class BrowserPrefixGenerator {
         .isFunction(false)
         .addExpandPropertyValue("-moz-grab")
         .addExpandPropertyValue("-webkit-grab")
+        .addExpandPropertyValue("grab")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("cursor")
+        .matchPropertyValue("grabbing")
+        .isFunction(false)
+        .addExpandPropertyValue("-moz-grabbing")
+        .addExpandPropertyValue("-webkit-grabbing")
+        .addExpandPropertyValue("grabbing")
         .build());
 
     // Needed for Firefox 15, Chrome 25, Safari 6, iOS Safari 6.1 or less

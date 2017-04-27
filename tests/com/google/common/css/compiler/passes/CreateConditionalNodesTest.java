@@ -16,17 +16,23 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssConditionalBlockNode;
 import com.google.common.css.compiler.ast.CssConditionalRuleNode;
 import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CreateConditionalNodes}.
  *
  */
+@RunWith(JUnit4.class)
 public class CreateConditionalNodesTest extends NewFunctionalTestBase {
 
   @Override
@@ -36,94 +42,105 @@ public class CreateConditionalNodesTest extends NewFunctionalTestBase {
     pass.runPass();
   }
 
+  @Test
   public void testCreateSimpleConditionalBlockNode() throws Exception {
     parseAndRun("@if (!X){ a {b: c} } @else { d {e: f} }");
-    assertTrue(getFirstActualNode() instanceof CssConditionalBlockNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssConditionalBlockNode.class);
     CssConditionalBlockNode condBlock =
         (CssConditionalBlockNode) getFirstActualNode();
     CssConditionalRuleNode condRuleIf = condBlock.getChildren().get(0);
     CssConditionalRuleNode condRuleElse = condBlock.getChildren().get(1);
-    assertEquals("if", condRuleIf.getName().getValue());
-    assertEquals(1, condRuleIf.getParametersCount());
-    assertEquals("[[a]{[b:[c]]}]", condRuleIf.getBlock().toString());
-    assertEquals("else", condRuleElse.getName().getValue());
-    assertEquals(0, condRuleElse.getParametersCount());
-    assertEquals("[[d]{[e:[f]]}]", condRuleElse.getBlock().toString());
+    assertThat(condRuleIf.getName().getValue()).isEqualTo("if");
+    assertThat(condRuleIf.getParametersCount()).isEqualTo(1);
+    assertThat(condRuleIf.getBlock().toString()).isEqualTo("[[a]{[b:[c]]}]");
+    assertThat(condRuleElse.getName().getValue()).isEqualTo("else");
+    assertThat(condRuleElse.getParametersCount()).isEqualTo(0);
+    assertThat(condRuleElse.getBlock().toString()).isEqualTo("[[d]{[e:[f]]}]");
   }
 
+  @Test
   public void testCreateNestedConditionalBlockNode() throws Exception {
     parseAndRun("@if X {a {b: c} } @else { @if (Y) {d {e: f} } }");
-    assertTrue(getFirstActualNode() instanceof CssConditionalBlockNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssConditionalBlockNode.class);
     CssConditionalBlockNode condBlock = (CssConditionalBlockNode) getFirstActualNode();
-    assertEquals(2, condBlock.getChildren().size());
+    assertThat(condBlock.getChildren()).hasSize(2);
     CssConditionalRuleNode condRuleIf = condBlock.getChildren().get(0);
     CssConditionalRuleNode condRuleElse = condBlock.getChildren().get(1);
-    assertEquals("if", condRuleIf.getName().getValue());
-    assertEquals(1, condRuleIf.getParametersCount());
-    assertEquals("[[a]{[b:[c]]}]", condRuleIf.getBlock().toString());
-    assertEquals("else", condRuleElse.getName().getValue());
-    assertEquals(0, condRuleElse.getParametersCount());
-    assertEquals(1, condRuleElse.getBlock().getChildren().size());
+    assertThat(condRuleIf.getName().getValue()).isEqualTo("if");
+    assertThat(condRuleIf.getParametersCount()).isEqualTo(1);
+    assertThat(condRuleIf.getBlock().toString()).isEqualTo("[[a]{[b:[c]]}]");
+    assertThat(condRuleElse.getName().getValue()).isEqualTo("else");
+    assertThat(condRuleElse.getParametersCount()).isEqualTo(0);
+    assertThat(condRuleElse.getBlock().getChildren()).hasSize(1);
     CssNode child = condRuleElse.getBlock().getChildren().get(0);
-    assertTrue(child instanceof CssConditionalBlockNode);
+    assertThat(child).isInstanceOf(CssConditionalBlockNode.class);
     CssConditionalBlockNode elseCondBlock = (CssConditionalBlockNode) child;
-    assertEquals(1, elseCondBlock.getChildren().size());
+    assertThat(elseCondBlock.getChildren()).hasSize(1);
     CssConditionalRuleNode elseCondRuleIf = elseCondBlock.getChildren().get(0);
-    assertEquals("if", elseCondRuleIf.getName().getValue());
-    assertEquals(1, elseCondRuleIf.getParametersCount());
-    assertEquals("[[d]{[e:[f]]}]", elseCondRuleIf.getBlock().toString());
+    assertThat(elseCondRuleIf.getName().getValue()).isEqualTo("if");
+    assertThat(elseCondRuleIf.getParametersCount()).isEqualTo(1);
+    assertThat(elseCondRuleIf.getBlock().toString()).isEqualTo("[[d]{[e:[f]]}]");
   }
 
+  @Test
   public void testCreateConditionalBlockNodeInRuleset() throws Exception {
     parseAndRun("a {@if X {b: c} @else {d: e} }");
-    assertTrue(getFirstActualNode() instanceof CssRulesetNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssRulesetNode.class);
     CssRulesetNode ruleset = (CssRulesetNode) getFirstActualNode();
-    assertEquals("[a]{[[@if[X]{[b:[c]]}, @else[]{[d:[e]]}]]}", ruleset.toString());
+    assertThat(ruleset.toString()).isEqualTo("[a]{[[@if[X]{[b:[c]]}, @else[]{[d:[e]]}]]}");
     CssDeclarationBlockNode declarationBlock = ruleset.getDeclarations();
-    assertEquals(1, declarationBlock.getChildren().size());
-    assertTrue(declarationBlock.getChildAt(0) instanceof CssConditionalBlockNode);
+    assertThat(declarationBlock.getChildren()).hasSize(1);
+    assertThat(declarationBlock.getChildAt(0)).isInstanceOf(CssConditionalBlockNode.class);
     CssConditionalBlockNode condBlock = (CssConditionalBlockNode) declarationBlock.getChildAt(0);
-    assertEquals(2, condBlock.getChildren().size());
+    assertThat(condBlock.getChildren()).hasSize(2);
     CssConditionalRuleNode condRuleIf = condBlock.getChildren().get(0);
     CssConditionalRuleNode condRuleElse = condBlock.getChildren().get(1);
-    assertEquals("if", condRuleIf.getName().getValue());
-    assertEquals(1, condRuleIf.getParametersCount());
-    assertEquals("[b:[c]]", condRuleIf.getBlock().toString());
-    assertEquals("else", condRuleElse.getName().getValue());
-    assertEquals(0, condRuleElse.getParametersCount());
-    assertEquals("[d:[e]]", condRuleElse.getBlock().toString());
+    assertThat(condRuleIf.getName().getValue()).isEqualTo("if");
+    assertThat(condRuleIf.getParametersCount()).isEqualTo(1);
+    assertThat(condRuleIf.getBlock().toString()).isEqualTo("[b:[c]]");
+    assertThat(condRuleElse.getName().getValue()).isEqualTo("else");
+    assertThat(condRuleElse.getParametersCount()).isEqualTo(0);
+    assertThat(condRuleElse.getBlock().toString()).isEqualTo("[d:[e]]");
   }
 
+  @Test
   public void testIfWithoutBlockError() throws Exception {
     parseAndRun("@if (X) ;", "@if without block");
   }
 
+  @Test
   public void testIfWithoutConditionError() throws Exception {
     parseAndRun("@if {a {b: c} }", "@if without condition");
   }
 
+  @Test
   public void testIfWithTooManyParametersError() throws Exception {
     parseAndRun("@if X Y {a {b: c}}", "@if with too many parameters");
   }
 
+  @Test
   public void testElseTooManyParametersError() throws Exception {
     parseAndRun("@if (X) {a {b: c}} @else (Y) {a {b: c}}", "@else with too many parameters");
   }
 
+  @Test
   public void testElseWithoutIfError() throws Exception {
     parseAndRun("@else {a {b: c}}", "@else without previous @if");
   }
 
+  @Test
   public void testElseIfAfterElseError() throws Exception {
     parseAndRun("@if (X) {a {b: c}} @else {a {b: c}} @elseif (Y) {a {b: c}}",
                 "@elseif without previous @if");
   }
 
+  @Test
   public void testElseAfterRuleError() throws Exception {
     parseAndRun("@if (X && Y) {a {b: c}} a {b: c} @else {a {b: c}}",
                 "@else without previous @if");
   }
 
+  @Test
   public void testNestedElseWithoutIfError() throws Exception {
     parseAndRun("@if X { @else {a {b: c}} }",
                 "@else without previous @if");

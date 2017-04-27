@@ -67,7 +67,7 @@ public class AbbreviatePositionalValuesTest {
     verify(mockVisitController)
         .replaceCurrentBlockChildWith(cssNodesCaptor.capture(), Matchers.anyBoolean());
     CssNode cssNode = Iterables.getOnlyElement(cssNodesCaptor.getValue());
-    assertThat(cssNode instanceof CssDeclarationNode).isTrue();
+    assertThat(cssNode).isInstanceOf(CssDeclarationNode.class);
     CssDeclarationNode replacement = (CssDeclarationNode) cssNode;
     assertThat(replacement.getPropertyValue().numChildren()).isEqualTo(1);
     assertThat(replacement.getPropertyValue().getChildAt(0).getValue()).isEqualTo("A");

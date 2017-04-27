@@ -16,24 +16,31 @@
 
 package com.google.common.css;
 
-import junit.framework.TestCase;
+import static com.google.common.truth.Truth.assertThat;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit test for {@link PrefixingSubstitutionMap}.
  *
  */
-public class PrefixingSubstitutionMapTest extends TestCase {
+@RunWith(JUnit4.class)
+public class PrefixingSubstitutionMapTest {
+  @Test
   public void testNoPrefix() throws Exception {
     SubstitutionMap map = new PrefixingSubstitutionMap(
         new SimpleSubstitutionMap(), "");
-    assertEquals("foo_", map.get("foo"));
-    assertEquals("foo-bar_", map.get("foo-bar"));
+    assertThat(map.get("foo")).isEqualTo("foo_");
+    assertThat(map.get("foo-bar")).isEqualTo("foo-bar_");
   }
 
+  @Test
   public void testPrefix() throws Exception {
     SubstitutionMap map = new PrefixingSubstitutionMap(
         new SimpleSubstitutionMap(), "PREFIX_");
-    assertEquals("PREFIX_foo_", map.get("foo"));
-    assertEquals("PREFIX_foo-bar_", map.get("foo-bar"));
+    assertThat(map.get("foo")).isEqualTo("PREFIX_foo_");
+    assertThat(map.get("foo-bar")).isEqualTo("PREFIX_foo-bar_");
   }
 }

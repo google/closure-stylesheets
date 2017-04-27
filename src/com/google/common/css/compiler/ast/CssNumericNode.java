@@ -100,7 +100,12 @@ public class CssNumericNode extends CssValueNode {
   }
 
   @Override
-  public String toString() {
+  public String getValue() {
     return getNumericPart() + getUnit();
+  }
+
+  @Override
+  public String toString() {
+    return getValue();
   }
 }

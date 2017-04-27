@@ -18,10 +18,10 @@ package com.google.common.css.compiler.gssfunctions;
 
 import static com.google.common.css.compiler.gssfunctions.ColorUtil.formatColor;
 import static com.google.common.css.compiler.gssfunctions.ColorUtil.hsbToColor;
+import static com.google.common.css.compiler.gssfunctions.ColorUtil.hslToColor;
 import static com.google.common.css.compiler.gssfunctions.ColorUtil.testContrast;
 import static com.google.common.css.compiler.gssfunctions.ColorUtil.toHsb;
 import static com.google.common.css.compiler.gssfunctions.ColorUtil.toHsl;
-import static com.google.common.css.compiler.gssfunctions.ColorUtil.hslToColor;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableList;
@@ -40,7 +40,6 @@ import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.ast.GssFunctionException;
-
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -48,7 +47,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.annotation.Nullable;
 
 /**
@@ -332,14 +330,7 @@ public class GssFunctions {
       CssValueNode arg3 = args.get(2);
       CssValueNode arg4 = args.get(3);
 
-      if (!(arg1 instanceof CssHexColorNode
-          || arg1 instanceof CssLiteralNode)) {
-        String message =
-            "The first argument must be a CssHexColorNode or a CssLiteralNode.";
-        errorManager.report(
-            new GssError(message, arg1.getSourceCodeLocation()));
-        throw new GssFunctionException(message);
-      }
+      assertArgumentLooksLikeAColor(1, arg1, errorManager);
       CssNumericNode numeric2, numeric3, numeric4;
       if (arg2 instanceof CssNumericNode && arg3 instanceof CssNumericNode
           && arg4 instanceof CssNumericNode) {
@@ -461,6 +452,36 @@ public class GssFunctions {
     }
   }
 
+  /** Verify a function argument looks like a color node. */
+  public static void assertArgumentLooksLikeAColor(
+      int argOrdinal, CssValueNode argValue, ErrorManager errorManager)
+      throws GssFunctionException {
+    if (!(argValue instanceof CssHexColorNode
+        || argValue instanceof CssLiteralNode
+        || argValue instanceof CssFunctionNode)) {
+      String message =
+          String.format(
+              "Argument %d must be a CssHexColorNode. a CssLiteralNode, or a "
+                  + "CssFunctionNode, was %s",
+              argOrdinal, argValue.getClass().getSimpleName());
+      errorManager.report(new GssError(message, argValue.getSourceCodeLocation()));
+      throw new GssFunctionException(message);
+    }
+    if (argValue instanceof CssFunctionNode) {
+      CssFunctionNode functionNode = (CssFunctionNode) argValue;
+      if (!functionNode.getFunctionName().equals("rgb")
+          && !functionNode.getFunctionName().equals("rgba")) {
+        String message =
+            String.format(
+                "Could not interpret argument %d as a color. Function must be 'rgb' or"
+                    + " 'rgba', was %s",
+                argOrdinal, functionNode.getFunctionName());
+        errorManager.report(new GssError(message, argValue.getSourceCodeLocation()));
+        throw new GssFunctionException(message);
+      }
+    }
+  }
+
   /**
    * Abstract base class providing HSL color space manipulation functions.
    */
@@ -566,14 +587,7 @@ public class GssFunctions {
       CssValueNode arg1 = args.get(0);
       CssValueNode arg2 = args.get(1);
 
-      if (!(arg1 instanceof CssHexColorNode
-          || arg1 instanceof CssLiteralNode)) {
-        String message =
-          "The first argument must be a CssHexColorNode or a CssLiteralNode.";
-        errorManager.report(
-          new GssError(message, arg1.getSourceCodeLocation()));
-        throw new GssFunctionException(message);
-      }
+      assertArgumentLooksLikeAColor(1, arg1, errorManager);
       CssNumericNode numeric2;
       if (arg2 instanceof CssNumericNode) {
         numeric2 = (CssNumericNode) arg2;
@@ -628,12 +642,7 @@ public class GssFunctions {
       CssValueNode arg1 = args.get(0);
       CssValueNode arg2 = args.get(1);
 
-      if (!(arg1 instanceof CssHexColorNode || arg1 instanceof CssLiteralNode)) {
-        String message = "The first argument must be a CssHexColorNode or a CssLiteralNode.";
-        errorManager.report(new GssError(message, arg1
-          .getSourceCodeLocation()));
-        throw new GssFunctionException(message);
-      }
+      assertArgumentLooksLikeAColor(1, arg1, errorManager);
       CssNumericNode numeric2;
       if (arg2 instanceof CssNumericNode) {
         numeric2 = (CssNumericNode) arg2;
@@ -733,14 +742,7 @@ public class GssFunctions {
       CssValueNode arg1 = args.get(0);
       CssValueNode arg2 = args.get(1);
 
-      if (!(arg1 instanceof CssHexColorNode
-          || arg1 instanceof CssLiteralNode)) {
-        String message =
-          "The first argument must be a CssHexColorNode or a CssLiteralNode.";
-        errorManager.report(
-          new GssError(message, arg1.getSourceCodeLocation()));
-        throw new GssFunctionException(message);
-      }
+      assertArgumentLooksLikeAColor(1, arg1, errorManager);
       CssNumericNode numeric2;
       if (arg2 instanceof CssNumericNode) {
         numeric2 = (CssNumericNode) arg2;
@@ -793,14 +795,7 @@ public class GssFunctions {
       CssValueNode arg1 = args.get(0);
       CssValueNode arg2 = args.get(1);
 
-      if (!(arg1 instanceof CssHexColorNode
-          || arg1 instanceof CssLiteralNode)) {
-        String message =
-          "The first argument must be a CssHexColorNode or a CssLiteralNode.";
-        errorManager.report(
-          new GssError(message, arg1.getSourceCodeLocation()));
-        throw new GssFunctionException(message);
-      }
+      assertArgumentLooksLikeAColor(1, arg1, errorManager);
       CssNumericNode numeric2;
       if (arg2 instanceof CssNumericNode) {
         numeric2 = (CssNumericNode) arg2;
@@ -854,14 +849,7 @@ public class GssFunctions {
       CssValueNode arg1 = args.get(0);
       CssValueNode arg2 = args.get(1);
 
-      if (!(arg1 instanceof CssHexColorNode
-          || arg1 instanceof CssLiteralNode)) {
-        String message =
-          "The first argument must be a CssHexColorNode or a CssLiteralNode.";
-        errorManager.report(
-          new GssError(message, arg1.getSourceCodeLocation()));
-        throw new GssFunctionException(message);
-      }
+      assertArgumentLooksLikeAColor(1, arg1, errorManager);
       CssNumericNode numeric2;
       if (arg2 instanceof CssNumericNode) {
         numeric2 = (CssNumericNode) arg2;

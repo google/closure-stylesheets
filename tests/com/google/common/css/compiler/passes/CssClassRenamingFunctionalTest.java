@@ -18,14 +18,19 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.css.SubstitutionMap;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- *  Functional tests the {@link CssClassRenaming} compiler pass.
- *  
+ * Functional tests the {@link CssClassRenaming} compiler pass.
+ *
  * @author oana@google.com (Oana Florescu)
  */
+@RunWith(JUnit4.class)
 public class CssClassRenamingFunctionalTest extends PassesTestBase {
 
+  @Test
   public void testCssClassRenaming1() {
     testTreeConstruction(linesToString(
         ".CSS_RULE_1 {",
@@ -38,6 +43,7 @@ public class CssClassRenamingFunctionalTest extends PassesTestBase {
         "[.CSS_RULE_2_]{[border:[[2px]];]}]");
   }
 
+  @Test
   public void testCssClassRenaming2() {
     testTreeConstruction(linesToString(
         ".CSS_RULE_1 .CSS_RULE_2 {",
@@ -50,6 +56,7 @@ public class CssClassRenamingFunctionalTest extends PassesTestBase {
         "[.CSS_RULE_2_]{[border:[[2px]];]}]");
   }
 
+  @Test
   public void testCssClassRenaming3() {
     testTreeConstruction(linesToString(
         "div.CSS_RULE_1 {",
@@ -58,6 +65,7 @@ public class CssClassRenamingFunctionalTest extends PassesTestBase {
         "[[div.CSS_RULE_1_]{[padding:[[1px]];]}]");
   }
 
+  @Test
   public void testCssClassRenaming4() {
     testTreeConstruction(linesToString(
         ".CSS_RULE_1#ID_ID {",

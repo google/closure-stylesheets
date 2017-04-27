@@ -17,6 +17,7 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
 
 /**
  * Unit tests for {@link HandleMissingConstantDefinitions}.
@@ -34,10 +35,12 @@ public class HandleMissingConstantDefinitionsTest
       "  color: MISSING_TEXT_COLOR",
       "}");
 
+  @Test
   public void testGoodCodeNoErrors() throws Exception {
     parseAndRun(TEST_GOOD_CODE);
   }
 
+  @Test
   public void testBadCodeThrowsErrors() throws Exception {
     parseAndRun(TEST_BAD_CODE, HandleMissingConstantDefinitions.ERROR_MESSAGE);
   }

@@ -19,44 +19,48 @@ package com.google.common.css.compiler.passes;
 import static com.google.common.css.compiler.passes.UnsafeMergeRulesetNodes.DECLARATION_COMPARATOR;
 import static com.google.common.css.compiler.passes.UnsafeMergeRulesetNodes.TO_STRING_COMPARATOR;
 import static com.google.common.css.compiler.passes.UnsafeMergeRulesetNodes.TO_STRING_ITERABLE_COMPARATOR;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.css.compiler.ast.*;
-
-import junit.framework.TestCase;
+import com.google.common.css.compiler.ast.CssDeclarationNode;
+import com.google.common.css.compiler.ast.CssNumericNode;
+import com.google.common.css.compiler.ast.CssPropertyNode;
+import com.google.common.css.compiler.ast.CssPropertyValueNode;
+import com.google.common.css.compiler.ast.CssSelectorNode;
+import com.google.common.css.compiler.ast.CssValueNode;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link UnsafeMergeRulesetNodes}.
  *
  */
-public class UnsafeMergeRulesetNodesTest extends TestCase {
+@RunWith(JUnit4.class)
+public class UnsafeMergeRulesetNodesTest {
 
-  /**
-   * Tests for {@link UnsafeMergeRulesetNodes#TO_STRING_COMPARATOR}.
-   */
+  /** Tests for {@link UnsafeMergeRulesetNodes#TO_STRING_COMPARATOR}. */
+  @Test
   public void testToStringComparator() {
-    testEquals(TO_STRING_COMPARATOR.compare(
-        new CssSelectorNode("a"), new CssSelectorNode("a")));
-    testSmaller(TO_STRING_COMPARATOR.compare(
-        new CssSelectorNode("a"), new CssSelectorNode("b")));
-    CssSelectorNode n = new CssSelectorNode("a");
+    assertThat(TO_STRING_COMPARATOR.compare(
+        new CssSelectorNode("a"), new CssSelectorNode("a"))).isEqualTo(0);
+    assertThat(TO_STRING_COMPARATOR.compare(
+        new CssSelectorNode("a"), new CssSelectorNode("b"))).isLessThan(0);
   }
 
-  /**
-   * Tests for {@link UnsafeMergeRulesetNodes#TO_STRING_ITERABLE_COMPARATOR}.
-   */
+  /** Tests for {@link UnsafeMergeRulesetNodes#TO_STRING_ITERABLE_COMPARATOR}. */
+  @Test
   public void testToStringIterableComparator() {
-    testEquals(TO_STRING_ITERABLE_COMPARATOR.compare(
-        ImmutableList.of("a", "b"), ImmutableList.of("a", "b")));
-    testGreater(TO_STRING_ITERABLE_COMPARATOR.compare(
-        ImmutableList.of("b", "a"), ImmutableList.of("a", "b")));
-    testSmaller(TO_STRING_ITERABLE_COMPARATOR.compare(
-            ImmutableList.of("a"), ImmutableList.of("a", "b")));
+    assertThat(TO_STRING_ITERABLE_COMPARATOR.compare(
+        ImmutableList.of("a", "b"), ImmutableList.of("a", "b"))).isEqualTo(0);
+    assertThat(TO_STRING_ITERABLE_COMPARATOR.compare(
+        ImmutableList.of("b", "a"), ImmutableList.of("a", "b"))).isGreaterThan(0);
+    assertThat(TO_STRING_ITERABLE_COMPARATOR.compare(
+            ImmutableList.of("a"), ImmutableList.of("a", "b"))).isLessThan(0);
   }
 
-  /**
-   * Tests for {@link UnsafeMergeRulesetNodes#DECLARATION_COMPARATOR}.
-   */
+  /** Tests for {@link UnsafeMergeRulesetNodes#DECLARATION_COMPARATOR}. */
+  @Test
   public void testDeclarationComparator() {
     CssPropertyNode padding = new CssPropertyNode("padding");
     CssPropertyNode paddingLeft = new CssPropertyNode("padding-left");
@@ -67,7 +71,6 @@ public class UnsafeMergeRulesetNodesTest extends TestCase {
     CssValueNode px2 = new CssNumericNode("2", "px");
 
     CssPropertyValueNode v1 = new CssPropertyValueNode(ImmutableList.of(px1));
-    CssPropertyValueNode v2 = new CssPropertyValueNode(ImmutableList.of(px2));
     CssPropertyValueNode v1s =
         new CssPropertyValueNode(ImmutableList.of(px1, px1, px1, px1));
     CssPropertyValueNode v2s =
@@ -85,30 +88,11 @@ public class UnsafeMergeRulesetNodesTest extends TestCase {
     CssDeclarationNode marginLeft1 =
         new CssDeclarationNode(marginLeft.deepCopy(), v1.deepCopy());
 
-    testEquals(DECLARATION_COMPARATOR.compare(
-        margin1, margin1.deepCopy()));
-    testSmaller(DECLARATION_COMPARATOR.compare(
-        margin1, marginLeft1));
-    testSmaller(DECLARATION_COMPARATOR.compare(
-        margin1, paddingLeft1));
-    testSmaller(DECLARATION_COMPARATOR.compare(
-        padding1, padding2));
-    testSmaller(DECLARATION_COMPARATOR.compare(
-        marginLeft1, padding2));
-    testGreater(DECLARATION_COMPARATOR.compare(
-        paddingLeft1, padding2));
-
-  }
-
-  private void testEquals(int i) {
-    assertEquals(0, i);
-  }
-
-  private void testSmaller(int i) {
-    assertTrue(i < 0);
-  }
-
-  private void testGreater(int i) {
-    assertTrue(i > 0);
+    assertThat(DECLARATION_COMPARATOR.compare(margin1, margin1.deepCopy())).isEqualTo(0);
+    assertThat(DECLARATION_COMPARATOR.compare(margin1, marginLeft1)).isLessThan(0);
+    assertThat(DECLARATION_COMPARATOR.compare(margin1, paddingLeft1)).isLessThan(0);
+    assertThat(DECLARATION_COMPARATOR.compare(padding1, padding2)).isLessThan(0);
+    assertThat(DECLARATION_COMPARATOR.compare(marginLeft1, padding2)).isLessThan(0);
+    assertThat(DECLARATION_COMPARATOR.compare(paddingLeft1, padding2)).isGreaterThan(0);
   }
 }
