@@ -491,8 +491,10 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
    * Returns flipped node after making appropriate replacements needed for BiDi flipping, if the
    * node is either a LiteralNode or PropertyNode. Eg: PropertyNode 'padding-right' would become
    * 'padding-left'.
+   *
+   * <p>Subclasses can override to provide custom flipping behavior.
    */
-  private static <T extends CssValueNode> T flipNode(T tNode) {
+  protected <T extends CssValueNode> T flipNode(T tNode) {
     if (tNode instanceof CssLiteralNode) {
       CssLiteralNode literalNode = (CssLiteralNode) tNode;
       String oldValue = literalNode.getValue();
