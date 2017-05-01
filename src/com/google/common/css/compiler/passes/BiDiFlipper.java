@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
  */
 public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
 
-  private final DecimalFormat percentFormatter =
+  private static final DecimalFormat PERCENT_FORMATTER =
       new DecimalFormat("#.########", DecimalFormatSymbols.getInstance(Locale.US));
   private final MutatingVisitController visitController;
 
@@ -296,8 +296,16 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
 
     CssNumericNode numericNode = (CssNumericNode) valueNode;
     String oldPercentageValue = numericNode.getNumericPart();
-    double newPercentValue = 100 - Double.parseDouble(oldPercentageValue);
-    return new CssNumericNode(percentFormatter.format(newPercentValue), "%");
+    return new CssNumericNode(flipPercentageValue(oldPercentageValue), "%");
+  }
+
+  /**
+   * Returns a formatted string representing 100% - value. Neither the input nor the output contains
+   * a {@code %}.
+   */
+  public static String flipPercentageValue(String value) {
+    double newValue = 100 - Double.parseDouble(value);
+    return PERCENT_FORMATTER.format(newValue);
   }
 
   /**
@@ -469,8 +477,8 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
     return newValueList;
   }
 
-  /** Performs appropriate replacements needed for BiDi flipping. */
-  private static String flipValue(String value) {
+  /** Performs appropriate replacements needed for BiDi flipping a literal value. */
+  public static String flipLiteralValue(String value) {
     if (EXACT_MATCHING_FOR_FLIPPING.containsKey(value)) {
       value = EXACT_MATCHING_FOR_FLIPPING.get(value);
     }
@@ -503,7 +511,7 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
       if (null == oldValue) {
         return tNode;
       }
-      String flippedValue = flipValue(oldValue);
+      String flippedValue = flipLiteralValue(oldValue);
       if (flippedValue.equals(oldValue)) {
         return tNode;
       }
@@ -519,7 +527,7 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
       if (null == oldValue) {
         return tNode;
       }
-      String flippedValue = flipValue(oldValue);
+      String flippedValue = flipLiteralValue(oldValue);
       if (flippedValue.equals(oldValue)) {
         return tNode;
       }
