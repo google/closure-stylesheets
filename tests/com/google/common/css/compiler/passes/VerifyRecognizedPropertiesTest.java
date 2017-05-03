@@ -35,6 +35,7 @@ public class VerifyRecognizedPropertiesTest extends NewFunctionalTestBase {
 
   private Set<String> allowedUnrecognizedProperties;
 
+  @Override
   @Before
   public void setUp() {
     allowedUnrecognizedProperties = ImmutableSet.of();

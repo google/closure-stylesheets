@@ -24,15 +24,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link ResolveCustomFunctionNodesForChunks}.
  *
  */
-@RunWith(JUnit4.class)
-public class ResolveCustomFunctionNodesForChunksTest extends ResolveCustomFunctionNodesTest {
+public class ResolveCustomFunctionNodesForChunksTest
+      extends ResolveCustomFunctionNodesTest {
 
   private static final String TEST_CHUNK = "testChunk";
 
@@ -45,7 +43,7 @@ public class ResolveCustomFunctionNodesForChunksTest extends ResolveCustomFuncti
 
     new CreateConstantReferences(tree.getMutatingVisitController()).runPass();
 
-    new MapChunkAwareNodesToChunk<>(
+    new MapChunkAwareNodesToChunk<String>(
         tree, ImmutableMap.of(TEST_FILENAME, TEST_CHUNK)).runPass();
 
     resolveForChunksPass =

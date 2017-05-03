@@ -19,6 +19,7 @@ package com.google.common.css.compiler.ast;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.SourceCode;
+import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -28,7 +29,7 @@ import org.junit.runners.JUnit4;
  *
  */
 @RunWith(JUnit4.class)
-public class CssTreeTest {
+public class CssTreeTest extends TestCase {
 
   @Test
   public void testSimple() {

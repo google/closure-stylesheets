@@ -30,15 +30,13 @@ import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link ResolveCustomFunctionNodes}.
  *
  */
-@RunWith(JUnit4.class)
-public class ResolveCustomFunctionNodesWithDefsTest extends NewFunctionalTestBase {
+public class ResolveCustomFunctionNodesWithDefsTest
+    extends NewFunctionalTestBase {
 
   protected boolean allowUnknownFunctions = false;
 

@@ -20,7 +20,7 @@ import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.CssCombinatorNode.Combinator;
 import com.google.common.css.compiler.ast.testing.AstUtilityTestCase;
-import org.junit.Assert;
+import junit.framework.AssertionFailedError;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -56,8 +56,8 @@ public class AstUtilityTestCaseTest extends AstUtilityTestCase {
     
     try {
       deepEquals(node1, node2);
-      Assert.fail("FAIL: Node1 and Node2 should not be equal.");
-    } catch (AssertionError e) {
+      fail("FAIL: Node1 and Node2 should not be equal.");
+    } catch (AssertionFailedError e) {
       if (e.getMessage().startsWith("FAIL")) {
         throw e;
       }
@@ -81,8 +81,8 @@ public class AstUtilityTestCaseTest extends AstUtilityTestCase {
     
     try {
       deepEquals(parent1, parent2);
-      Assert.fail("FAIL: Parent1 and Parent2 should not be equal.");
-    } catch (AssertionError e) {
+      fail("FAIL: Parent1 and Parent2 should not be equal.");
+    } catch (AssertionFailedError e) {
       if (e.getMessage().startsWith("FAIL")) {
         throw e;
       }

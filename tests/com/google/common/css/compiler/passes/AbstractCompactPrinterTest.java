@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.base.Joiner;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.FunctionalTestBase;
-import org.junit.Before;
 
 /**
  * Base class for compact printer tests.
@@ -32,9 +31,10 @@ public abstract class AbstractCompactPrinterTest extends FunctionalTestBase {
   
   protected boolean preserveMarkedComments; 
   
-  @Before
-  public void setUp() {
+  @Override
+  protected void setUp() throws Exception {
     preserveMarkedComments = false;
+    super.setUp();
   }
 
   protected void assertCompactPrintedResult(String expected, String source) {

@@ -19,7 +19,7 @@ package com.google.common.css.compiler.ast;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.List;
-import org.junit.Assert;
+import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -30,7 +30,7 @@ import org.junit.runners.JUnit4;
  * @author fbenz@google.com (Florian Benz)
  */
 @RunWith(JUnit4.class)
-public class CssAbstractBlockNodeTest {
+public class CssAbstractBlockNodeTest extends TestCase {
   private ImmutableList<Class<? extends CssNode>> validSuperclasses =
       ImmutableList.<Class<? extends CssNode>>of(CssValueNode.class);
 
@@ -42,7 +42,7 @@ public class CssAbstractBlockNodeTest {
     try {
       new TestBlock(children, validSuperclasses);
     } catch (IllegalStateException e) {
-      Assert.fail(e.getMessage());
+      fail(e.getMessage());
     }
   }
 
@@ -55,7 +55,7 @@ public class CssAbstractBlockNodeTest {
       TestBlock testBlock = new TestBlock(children, validSuperclasses);
       testBlock.deepCopy();
     } catch (IllegalStateException e) {
-      Assert.fail(e.getMessage());
+      fail(e.getMessage());
     }
   }
 
@@ -65,7 +65,7 @@ public class CssAbstractBlockNodeTest {
     try {
       testBlock.addChildToBack(new CssLiteralNode("a"));
     } catch (IllegalStateException e) {
-      Assert.fail(e.getMessage());
+      fail(e.getMessage());
     }
   }
 
@@ -78,7 +78,7 @@ public class CssAbstractBlockNodeTest {
     try {
       testBlock.setChildren(children);
     } catch (IllegalStateException e) {
-      Assert.fail(e.getMessage());
+      fail(e.getMessage());
     }
   }
 
@@ -87,7 +87,7 @@ public class CssAbstractBlockNodeTest {
     TestBlock testBlock = new TestBlock(validSuperclasses);
     try {
       testBlock.addChildToBack(new CssBlockNode());
-      Assert.fail("An IllegalStateException should have been thrown.");
+      fail("An IllegalStateException should have been thrown.");
     } catch (IllegalStateException e) {
       // expected exception
     }
@@ -102,7 +102,7 @@ public class CssAbstractBlockNodeTest {
     children.add(new CssBlockNode());
     try {
       testBlock.setChildren(children);
-      Assert.fail("An IllegalStateException should have been thrown.");
+      fail("An IllegalStateException should have been thrown.");
     } catch (IllegalStateException e) {
       // expected exception
     }

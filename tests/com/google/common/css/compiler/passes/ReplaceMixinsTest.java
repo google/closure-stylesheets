@@ -19,15 +19,12 @@ package com.google.common.css.compiler.passes;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for the {@link ReplaceMixins} compiler pass.
  *
  * @author fbenz@google.com (Florian Benz)
  */
-@RunWith(JUnit4.class)
 public class ReplaceMixinsTest extends PassesTestBase {
 
   @Test

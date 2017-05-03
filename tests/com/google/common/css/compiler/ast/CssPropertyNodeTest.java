@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
+import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -30,7 +31,7 @@ import org.junit.runners.JUnit4;
  * @author oana@google.com (Oana Florescu)
  */
 @RunWith(JUnit4.class)
-public class CssPropertyNodeTest {
+public class CssPropertyNodeTest extends TestCase {
 
   @Test
   public void testPropertyNodeCreation1() {
