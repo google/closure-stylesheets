@@ -16,6 +16,9 @@
 
 package com.google.common.css.compiler.ast.testing;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.SourceCode;
@@ -26,9 +29,10 @@ import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.PrettyPrinter;
-
 import java.util.List;
 import java.util.Map;
+import org.junit.Assert;
+
 
 /**
  * Base class for testing the passes which use an {@link ErrorManager}.
@@ -54,7 +58,7 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
     try {
       parseAndRun(fileNameToGss);
     } catch (GssParserException e) {
-      fail(e.getMessage());
+      Assert.fail(e.getMessage());
     }
   }
 
@@ -128,8 +132,9 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
     errorManager = new TestErrorManager(exactMatch, expectedMessages);
     runPass();
     errorManager.generateReport();
-    assertTrue("Encountered all errors.",
-               ((TestErrorManager)errorManager).hasEncounteredAllErrors());
+    assertWithMessage("Encountered all errors.")
+        .that(((TestErrorManager) errorManager).hasEncounteredAllErrors())
+        .isTrue();
     return tree;
   }
 
@@ -192,7 +197,7 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
   protected void test(String inputGss, String expectedCss)
       throws GssParserException {
     parseAndRun(inputGss);
-    assertEquals(normalizeExpectedCss(expectedCss), getCompiledCss());
+    assertThat(getCompiledCss()).isEqualTo(normalizeExpectedCss(expectedCss));
   }
 
   /**
@@ -231,21 +236,28 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
     }
 
     public void print(GssError error) {
-      assertTrue("Unexpected extra error: " + error.format(),
-          currentIndex < expectedMessages.length);
+      assertWithMessage("Unexpected extra error: " + error.format())
+          .that(currentIndex)
+          .isLessThan(expectedMessages.length);
       print(error.getMessage());
     }
 
     @Override
     public void print(String message) {
-      assertTrue("Unexpected extra error: " + message,
-          currentIndex < expectedMessages.length);
+      assertWithMessage("Unexpected extra error: " + message)
+          .that(currentIndex)
+          .isLessThan(expectedMessages.length);
       if (exactMatch) {
-        assertEquals(expectedMessages[currentIndex], message);
+        assertThat(message).isEqualTo(expectedMessages[currentIndex]);
       } else {
-        assertTrue("Expected error '" + message + "' to contain '"
-            + expectedMessages[currentIndex] + "'.",
-            message.contains(expectedMessages[currentIndex]));
+        assertWithMessage(
+                "Expected error '"
+                    + message
+                    + "' to contain '"
+                    + expectedMessages[currentIndex]
+                    + "'.")
+            .that(message)
+            .contains(expectedMessages[currentIndex]);
       }
       currentIndex++;
     }

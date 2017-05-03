@@ -18,7 +18,7 @@ package com.google.common.css.compiler.ast.testing;
 
 import com.google.common.css.compiler.ast.CssNode;
 import com.google.common.css.testing.UtilityTestCase;
-
+import com.google.common.truth.Truth;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -42,7 +42,7 @@ public abstract class AstUtilityTestCase extends UtilityTestCase {
     Class<? extends CssNode> class1 = node1.getClass();
     Class<? extends CssNode> class2 = node2.getClass();
 
-    assertEquals(class1, class2);
+    Truth.assertThat(class1).isEqualTo(class2);
 
     Class<?> currentClass = class1;
     assertFieldsEqual(node1, node2, currentClass);
@@ -91,7 +91,7 @@ public abstract class AstUtilityTestCase extends UtilityTestCase {
           continue;
         }
 
-        assertEquals("Field " + field, value1, value2);
+        Truth.assertWithMessage("Field " + field).that(value1).isEqualTo(value2);
       }
     }
   }

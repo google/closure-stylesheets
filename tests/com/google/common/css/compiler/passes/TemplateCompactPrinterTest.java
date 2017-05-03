@@ -213,33 +213,33 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
     printer.runPass();
 
-    assertEquals(
-        R_S
-            + "\n/* Header comment\n * @license MIT */\n"
-            + "foo{}"
-            + rE
-            + R_S
-            + "\n/* @preserve Preserved comment 1 */\n"
-            + "a{}"
-            + rE
-            + R_S
-            + "@media print{"
-            + R_S
-            // TODO(flan): The declaration start should be *before* the comment, not after.
-            // The problem is that the preserved comment printing visitor visits before the
-            // TemplateCompactPrinter.
-            + "foo{\n/* @preserve Preserved comment 2 */\n"
-            + dS
-            + "color:red"
-            + dE
-            + "}"
-            + rE
-            + "}"
-            + rE
-            + R_S
-            + "\n/*! this is important */\nfoo{}"
-            + rE,
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(
+            R_S
+                + "\n/* Header comment\n * @license MIT */\n"
+                + "foo{}"
+                + rE
+                + R_S
+                + "\n/* @preserve Preserved comment 1 */\n"
+                + "a{}"
+                + rE
+                + R_S
+                + "@media print{"
+                + R_S
+                // TODO(flan): The declaration start should be *before* the comment, not after.
+                // The problem is that the preserved comment printing visitor visits before the
+                // TemplateCompactPrinter.
+                + "foo{\n/* @preserve Preserved comment 2 */\n"
+                + dS
+                + "color:red"
+                + dE
+                + "}"
+                + rE
+                + "}"
+                + rE
+                + R_S
+                + "\n/*! this is important */\nfoo{}"
+                + rE);
   }
 
   @Test
@@ -342,9 +342,8 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = createCommentPreservingPrinter("foo");
     printer.runPass();
 
-    assertEquals(
-        R_S + "foo{" + dS + "width:calc((100% - 24px)*0.375)" + dE + "}" + rE,
-        printer.getCompactPrintedString());
+    assertThat(printer.getCompactPrintedString())
+        .isEqualTo(R_S + "foo{" + dS + "width:calc((100% - 24px)*0.375)" + dE + "}" + rE);
   }
 
   @Test
@@ -361,18 +360,18 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
   }
 
   private TemplateCompactPrinter<String> createPrinter(String chunkId) {
-    return new TemplateCompactPrinter<String>(newTree, chunkId);
+    return new TemplateCompactPrinter<>(newTree, chunkId);
   }
 
 
   private TemplateCompactPrinter<String> createCommentPreservingPrinter(String chunkId) {
-    TemplateCompactPrinter<String> printer = new TemplateCompactPrinter<String>(newTree, chunkId);
+    TemplateCompactPrinter<String> printer = new TemplateCompactPrinter<>(newTree, chunkId);
     printer.setPreserveMarkedComments(true);
     return printer;
   }
 
   private TemplateCompactPrinter<String> createNonCommentPreservingPrinter(String chunkId) {
-    TemplateCompactPrinter<String> printer = new TemplateCompactPrinter<String>(newTree, chunkId);
+    TemplateCompactPrinter<String> printer = new TemplateCompactPrinter<>(newTree, chunkId);
     printer.setPreserveMarkedComments(false);
     return printer;
   }

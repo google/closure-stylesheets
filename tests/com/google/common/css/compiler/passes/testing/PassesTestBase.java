@@ -23,7 +23,7 @@ import com.google.common.css.compiler.ast.CssRootNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
-
+import com.google.common.truth.Truth;
 import java.util.List;
 
 /**
@@ -49,7 +49,7 @@ public class PassesTestBase extends NewFunctionalTestBase {
    */
   @Override
   protected void checkTreeDebugString(String expected) {
-    assertEquals(expected, AstPrinter.print(tree));
+    Truth.assertThat(AstPrinter.print(tree)).isEqualTo(expected);
   }
 
   protected void checkRuleset(String expected, CssRulesetNode rule) {
@@ -57,6 +57,6 @@ public class PassesTestBase extends NewFunctionalTestBase {
     CssBlockNode block = new CssBlockNode(false, blockChildren);
     CssRootNode root = new CssRootNode(block);
     CssTree t = new CssTree(null, root);
-    assertEquals(expected, AstPrinter.print(t));
+    Truth.assertThat(AstPrinter.print(t)).isEqualTo(expected);
   }
 }

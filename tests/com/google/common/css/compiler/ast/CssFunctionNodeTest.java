@@ -19,7 +19,6 @@ package com.google.common.css.compiler.ast;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.compiler.ast.CssFunctionNode.Function;
-import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -30,7 +29,7 @@ import org.junit.runners.JUnit4;
  * @author oana@google.com (Oana Florescu)
  */
 @RunWith(JUnit4.class)
-public class CssFunctionNodeTest extends TestCase {
+public class CssFunctionNodeTest {
 
   private static final CssFunctionNode.Function RGB =
       CssFunctionNode.Function.byName("rgb");

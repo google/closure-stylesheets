@@ -21,17 +21,19 @@ import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit test for {@link RemoveVendorSpecificProperties}.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
+@RunWith(JUnit4.class)
 public class RemoveVendorSpecificPropertiesTest extends NewFunctionalTestBase {
 
   private Vendor vendor;
 
-  @Override
   @Before
   public void setUp() {
     vendor = null;

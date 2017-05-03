@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.base.Functions;
-import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -31,7 +30,7 @@ import org.junit.runners.JUnit4;
  *
  */
 @RunWith(JUnit4.class)
-public class CssStringNodeTest extends TestCase {
+public class CssStringNodeTest {
   @Test
   public void testCssValueNodeRoundtrip() throws Exception {
     String v = "ordinary";
@@ -239,11 +238,10 @@ public class CssStringNodeTest extends TestCase {
     // char/String repertoire. According to CSS 2.1, we can replace the
     // escape.
     int bigCodePoint = Character.MAX_CODE_POINT + 1;
-    assertEquals(
-        // replacement character
-        "\ufffd",
-        CssStringNode.unescape(
-            String.format("\\%x", bigCodePoint)));
+    assertThat(CssStringNode.unescape(String.format("\\%x", bigCodePoint)))
+        .isEqualTo(
+            // replacement character
+            "\ufffd");
   }
 
   @Test

@@ -20,12 +20,15 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link StrictCss2}.
  *
  * @author fbenz@google.com (Florian Benz)
  */
+@RunWith(JUnit4.class)
 public class StrictCss2Test extends NewFunctionalTestBase {
   private String compactPrintedResult;
 

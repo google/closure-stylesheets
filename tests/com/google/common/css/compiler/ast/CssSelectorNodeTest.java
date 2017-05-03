@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -128,7 +129,7 @@ public class CssSelectorNodeTest extends NewFunctionalTestBase {
     try {
       parseAndRun(selector + " {}");
     } catch (GssParserException e) {
-      fail(e.getMessage());
+      Assert.fail(e.getMessage());
     }
     CssNode node = tree.getRoot().getBody().getChildAt(0);
     assertThat(node).isInstanceOf(CssRulesetNode.class);
