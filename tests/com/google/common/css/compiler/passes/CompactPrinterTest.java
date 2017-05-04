@@ -103,7 +103,8 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
               "}"));
   }
 
-  public  void testRuleset6() {
+  @Test
+  public void testRuleset6() {
     assertCompactPrintedResult(
         ".CSS_RULE{background:generate(COLOR,2px);border:BORDER}",
         lines("@def COLOR red;",

@@ -23,6 +23,7 @@ import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.VisitController;
 import com.google.common.css.compiler.passes.UniformVisitor;
+import com.google.common.truth.Truth;
 
 /**
  * Utility methods for all the functional tests.
@@ -62,7 +63,7 @@ public abstract class FunctionalTestCommonBase extends AstUtilityTestCase {
    * @param expected
    */
   protected void checkTreeDebugString(String expected) {
-    assertEquals(expected, tree.getRoot().toString());
+    Truth.assertThat(tree.getRoot().toString()).isEqualTo(expected);
   }
 
   protected boolean isEmptyBody() {

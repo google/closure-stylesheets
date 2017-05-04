@@ -106,20 +106,21 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
     CssTree t = parseAndRun("div { font-family: sans } @import 'a';",
         CreateStandardAtRuleNodes.IGNORE_IMPORT_WARNING_MESSAGE,
         CreateStandardAtRuleNodes.IGNORED_IMPORT_WARNING_MESSAGE);
-    assertEquals(
-        "This pass should not reorder misplaced nodes.",
-        "(com.google.common.css.compiler.ast.CssRootNode "
-        + "(com.google.common.css.compiler.ast.CssImportBlockNode)"
-        + "(com.google.common.css.compiler.ast.CssBlockNode "
-        + "(com.google.common.css.compiler.ast.CssRulesetNode "
-        + "(com.google.common.css.compiler.ast.CssSelectorListNode "
-        + "(com.google.common.css.compiler.ast.CssSelectorNode))"
-        + "(com.google.common.css.compiler.ast.CssDeclarationBlockNode "
-        + "(com.google.common.css.compiler.ast.CssDeclarationNode "
-        + "(com.google.common.css.compiler.ast.CssPropertyValueNode "
-        + "(com.google.common.css.compiler.ast.CssLiteralNode sans)))))"
-        + "(com.google.common.css.compiler.ast.CssImportRuleNode)))",
-        SExprPrinter.print(false /* includeHashCodes */, false /* withLocationAnnotation */, t));
+    assertWithMessage("This pass should not reorder misplaced nodes.")
+        .that(
+            SExprPrinter.print(false /* includeHashCodes */, false /* withLocationAnnotation */, t))
+        .isEqualTo(
+            "(com.google.common.css.compiler.ast.CssRootNode "
+                + "(com.google.common.css.compiler.ast.CssImportBlockNode)"
+                + "(com.google.common.css.compiler.ast.CssBlockNode "
+                + "(com.google.common.css.compiler.ast.CssRulesetNode "
+                + "(com.google.common.css.compiler.ast.CssSelectorListNode "
+                + "(com.google.common.css.compiler.ast.CssSelectorNode))"
+                + "(com.google.common.css.compiler.ast.CssDeclarationBlockNode "
+                + "(com.google.common.css.compiler.ast.CssDeclarationNode "
+                + "(com.google.common.css.compiler.ast.CssPropertyValueNode "
+                + "(com.google.common.css.compiler.ast.CssLiteralNode sans)))))"
+                + "(com.google.common.css.compiler.ast.CssImportRuleNode)))");
   }
 
   @Test

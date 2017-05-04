@@ -18,20 +18,18 @@ package com.google.common.css.testing;
 
 import com.google.common.base.Joiner;
 
-import junit.framework.TestCase;
-
 /**
- * A base class for test cases that provides utility methods commonly used in
- * {@code CssParser}'s tests.
+ * A base class for test cases that provides utility methods commonly used in {@code CssParser}'s
+ * tests.
  *
  */
-public abstract class UtilityTestCase extends TestCase {
+public abstract class UtilityTestCase {
 
   public UtilityTestCase() {
   }
 
   public UtilityTestCase(String name) {
-    super(name);
+    // TODO(user): delete after migrating callers
   }
 
   private static String joinWithNewLines(String ... lines) {
