@@ -65,6 +65,8 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "hsl",
           "hsla",
           "local", // used with @font-face
+          "matrix",
+          "matrix3d",
           "perspective",
           "rgba",
           "rotate",
@@ -77,6 +79,9 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "scaleY",
           "scaleZ",
           "scale3d",
+          "skew",
+          "skewX",
+          "skewY",
           "steps",
           "to",
           "translate",
