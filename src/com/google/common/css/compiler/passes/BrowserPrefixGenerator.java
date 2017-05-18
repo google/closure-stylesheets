@@ -31,16 +31,11 @@ import com.google.common.collect.ImmutableList;
  */
 final class BrowserPrefixGenerator {
 
-  private static ImmutableList<BrowserPrefixRule> expansionRules = null;
+  private static final ImmutableList<BrowserPrefixRule> EXPANSION_RULES = buildExpansionRules();
 
-  /**
-   * Builds and returns the rules for automatic expansion of mixins.
-   */
+  /** Returns the rules for automatic expansion of mixins. */
   static ImmutableList<BrowserPrefixRule> getExpansionRules() {
-    if (expansionRules == null) {
-      expansionRules = buildExpansionRules();
-    }
-    return expansionRules;
+    return EXPANSION_RULES;
   }
 
   private static ImmutableList<BrowserPrefixRule> buildExpansionRules() {
