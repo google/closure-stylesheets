@@ -16,14 +16,22 @@
 
 package com.google.common.css.compiler.passes;
 
+import com.google.common.css.compiler.ast.CssAttributeSelectorNode;
+import com.google.common.css.compiler.ast.CssClassSelectorNode;
+import com.google.common.css.compiler.ast.CssCombinatorNode;
 import com.google.common.css.compiler.ast.CssConstantReferenceNode;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssFontFaceNode;
+import com.google.common.css.compiler.ast.CssIdSelectorNode;
 import com.google.common.css.compiler.ast.CssImportRuleNode;
 import com.google.common.css.compiler.ast.CssKeyframeRulesetNode;
+import com.google.common.css.compiler.ast.CssKeyframesNode;
 import com.google.common.css.compiler.ast.CssMediaRuleNode;
 import com.google.common.css.compiler.ast.CssPageRuleNode;
+import com.google.common.css.compiler.ast.CssPseudoClassNode;
+import com.google.common.css.compiler.ast.CssPseudoElementNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
+import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssUnknownAtRuleNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.VisitController;
@@ -34,16 +42,29 @@ import javax.annotation.Nullable;
  * declaration boundaries are explicitly noted, so that a declaration can be removed if it ends up
  * empty.
  *
+ * <p>This pass can only be used if {@link MapChunkAwareNodesToChunk} pass has been run before.
+ * Otherwise this pass won't work.
+ *
  * @param <T> type of chunk id objects
  * @author dgajda@google.com (Damian Gajda)
  */
-public class TemplateCompactPrintingVisitor<T> extends ChunkCompactPrintingVisitor<T> {
+public class TemplateCompactPrintingVisitor<T> extends CompactPrintingVisitor {
+
+  /** Chunk to be printed by this printer. */
+  private final T chunk;
+
+  /**
+   * Whether currently visited selector (including its children) belongs to printed chunk and
+   * should be printed.
+   */
+  private boolean printSelector;
 
   public TemplateCompactPrintingVisitor(
       VisitController visitController,
       T chunk,
       @Nullable CodeBuffer buffer) {
-    super(visitController, chunk, buffer);
+    super(visitController, buffer);
+    this.chunk = chunk;
   }
 
   @Override
@@ -71,7 +92,13 @@ public class TemplateCompactPrintingVisitor<T> extends ChunkCompactPrintingVisit
 
   @Override
   public boolean enterRuleset(CssRulesetNode ruleset) {
-    boolean printRuleset = super.enterRuleset(ruleset);
+    boolean printRuleset = false;
+    for (CssSelectorNode selector : ruleset.getSelectors().childIterable()) {
+      if (chunk.equals(selector.getChunk())) {
+        printRuleset = true;
+        break;
+      }
+    }
     if (printRuleset) {
       buffer.append(TemplateCompactPrinter.RULE_START);
     }
@@ -88,7 +115,8 @@ public class TemplateCompactPrintingVisitor<T> extends ChunkCompactPrintingVisit
   @Override
   public boolean enterMediaRule(CssMediaRuleNode media) {
     buffer.append(TemplateCompactPrinter.RULE_START);
-    boolean printMediaRule = super.enterMediaRule(media);
+    printSelector = chunk.equals(media.getChunk());
+    boolean printMediaRule = printSelector && super.enterMediaRule(media);
     if (!printMediaRule) {
       buffer.deleteLastCharIfCharIs(TemplateCompactPrinter.RULE_START);
     }
@@ -98,14 +126,33 @@ public class TemplateCompactPrintingVisitor<T> extends ChunkCompactPrintingVisit
   @Override
   public void leaveMediaRule(CssMediaRuleNode media) {
     // only called if enterMediaRule returns true
-    super.leaveMediaRule(media);
+    if (printSelector) {
+      super.leaveMediaRule(media);
+    }
     buffer.append(TemplateCompactPrinter.RULE_END);
+  }
+
+  @Override
+  public boolean enterSelector(CssSelectorNode selector) {
+    printSelector = chunk.equals(selector.getChunk());
+    if (printSelector) {
+      return super.enterSelector(selector);
+    }
+    return true;
+  }
+
+  @Override
+  public void leaveSelector(CssSelectorNode selector) {
+    if (printSelector) {
+      super.leaveSelector(selector);
+    }
   }
 
   @Override
   public boolean enterFontFace(CssFontFaceNode cssFontFaceNode) {
     buffer.append(TemplateCompactPrinter.RULE_START);
-    boolean printFontFace = super.enterFontFace(cssFontFaceNode);
+    printSelector = chunk.equals(cssFontFaceNode.getChunk());
+    boolean printFontFace = printSelector && super.enterFontFace(cssFontFaceNode);
     if (!printFontFace) {
       buffer.deleteLastCharIfCharIs(TemplateCompactPrinter.RULE_START);
     }
@@ -115,7 +162,9 @@ public class TemplateCompactPrintingVisitor<T> extends ChunkCompactPrintingVisit
   @Override
   public void leaveFontFace(CssFontFaceNode cssFontFaceNode) {
     // only called if enterFontFace returns true
-    super.leaveFontFace(cssFontFaceNode);
+    if (printSelector) {
+      super.leaveFontFace(cssFontFaceNode);
+    }
     buffer.append(TemplateCompactPrinter.RULE_END);
   }
 
@@ -137,6 +186,22 @@ public class TemplateCompactPrintingVisitor<T> extends ChunkCompactPrintingVisit
   }
 
   @Override
+  public boolean enterKeyframesRule(CssKeyframesNode keyframes) {
+    printSelector = chunk.equals(keyframes.getChunk());
+    if (!printSelector) {
+      return false;
+    }
+    return super.enterKeyframesRule(keyframes);
+  }
+
+  @Override
+  public void leaveKeyframesRule(CssKeyframesNode keyframes) {
+    if (printSelector) {
+      super.leaveKeyframesRule(keyframes);
+    }
+  }
+
+  @Override
   public boolean enterPageRule(CssPageRuleNode node) {
     buffer.append(TemplateCompactPrinter.RULE_START);
     boolean printPageRule = super.enterPageRule(node);
@@ -151,6 +216,21 @@ public class TemplateCompactPrintingVisitor<T> extends ChunkCompactPrintingVisit
     // only called if enterPageRule returns true
     super.leavePageRule(node);
     buffer.append(TemplateCompactPrinter.RULE_END);
+  }
+
+  @Override
+  public boolean enterClassSelector(CssClassSelectorNode node) {
+    if (printSelector) {
+      return super.enterClassSelector(node);
+    }
+    return true;
+  }
+
+  @Override
+  public void leaveClassSelector(CssClassSelectorNode node) {
+    if (printSelector) {
+      super.leaveClassSelector(node);
+    }
   }
 
   @Override
@@ -184,5 +264,80 @@ public class TemplateCompactPrintingVisitor<T> extends ChunkCompactPrintingVisit
   public void leaveImportRule(CssImportRuleNode node) {
     super.leaveImportRule(node);
     buffer.append(TemplateCompactPrinter.RULE_END);
+  }
+
+  @Override
+  public boolean enterIdSelector(CssIdSelectorNode node) {
+    if (printSelector) {
+      return super.enterIdSelector(node);
+    }
+    return true;
+  }
+
+  @Override
+  public void leaveIdSelector(CssIdSelectorNode node) {
+    if (printSelector) {
+      super.leaveIdSelector(node);
+    }
+  }
+
+  @Override
+  public boolean enterPseudoClass(CssPseudoClassNode node) {
+    if (printSelector) {
+      return super.enterPseudoClass(node);
+    }
+    return true;
+  }
+
+  @Override
+  public void leavePseudoClass(CssPseudoClassNode node) {
+    if (printSelector) {
+      super.leavePseudoClass(node);
+    }
+  }
+
+  @Override
+  public boolean enterPseudoElement(CssPseudoElementNode node) {
+    if (printSelector) {
+      return super.enterPseudoElement(node);
+    }
+    return true;
+  }
+
+  @Override
+  public void leavePseudoElement(CssPseudoElementNode node) {
+    if (printSelector) {
+      super.leavePseudoElement(node);
+    }
+  }
+
+  @Override
+  public boolean enterAttributeSelector(CssAttributeSelectorNode node) {
+    if (printSelector) {
+      return super.enterAttributeSelector(node);
+    }
+    return true;
+  }
+
+  @Override
+  public void leaveAttributeSelector(CssAttributeSelectorNode node) {
+    if (printSelector) {
+      super.leaveAttributeSelector(node);
+    }
+  }
+
+  @Override
+  public boolean enterCombinator(CssCombinatorNode combinator) {
+    if (printSelector) {
+      return super.enterCombinator(combinator);
+    }
+    return true;
+  }
+
+  @Override
+  public void leaveCombinator(CssCombinatorNode combinator) {
+    if (printSelector) {
+      super.leaveCombinator(combinator);
+    }
   }
 }

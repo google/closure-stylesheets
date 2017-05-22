@@ -19,21 +19,73 @@ package com.google.common.css.compiler.passes;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssFontFaceNode;
+import com.google.common.css.compiler.ast.CssKeyframesNode;
+import com.google.common.css.compiler.ast.CssMediaRuleNode;
+import com.google.common.css.compiler.ast.CssSelectorNode;
+import com.google.common.css.compiler.ast.CssTree;
+import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import java.util.Map;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link TemplateCompactPrinter}.
  *
  * @author dgajda@google.com (Damian Gajda)
  */
-public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
+@RunWith(JUnit4.class)
+public class TemplateCompactPrinterTest extends AbstractCompactPrinterTest {
 
   private static final char R_S = TemplateCompactPrinter.RULE_START;
   private static final char rE = TemplateCompactPrinter.RULE_END;
   private static final char dS = TemplateCompactPrinter.DECLARATION_START;
   private static final char dE = TemplateCompactPrinter.DECLARATION_END;
+
+  protected void setupTestTree() {
+    String sourceCode =
+        "foo,hr,.bar,i{} "
+            + "a,i{} "
+            + "b,hr{} "
+            + "a#a{} "
+            + "b#b{} "
+            + "i,hr{}"
+            + "a i{}"
+            + "b > i + em, a#a b {}"
+            + "b + i, a+i {}"
+            + "@media print { foo {} }"
+            + "@keyframes my-animation { 0% {} }"
+            + "@font-face { font-family:'Roboto'; }";
+    parseStyleSheet(sourceCode);
+  }
+
+  @Override
+  protected CssTree parseStyleSheet(String sourceCode) {
+    CssTree newTree = super.parseStyleSheet(sourceCode);
+    Map<String, String> selectorToChunk =
+        new ImmutableMap.Builder<String, String>()
+            .put("foo", "foo")
+            .put("a", "foo")
+            .put("a#a", "foo")
+            .put("a#a b", "foo")
+            .put("b+i", "foo")
+            .put(".bar", "bar")
+            .put("b", "bar")
+            .put("b#b", "bar")
+            .put("b>i+em", "bar")
+            .put("hr", "baz")
+            .put("i", "baz")
+            .put("a i", "baz")
+            .put("a+i", "baz")
+            .put("my-animation", "bar")
+            .put("print", "foo")
+            .build();
+    new SetSelectorChunk(newTree, selectorToChunk).runPass();
+    return newTree;
+  }
 
   @Test
   public void testChunkOutput_initialChunk() {
@@ -374,5 +426,77 @@ public class TemplateCompactPrinterTest extends ChunkCompactPrinterTest {
     TemplateCompactPrinter<String> printer = new TemplateCompactPrinter<>(newTree, chunkId);
     printer.setPreserveMarkedComments(false);
     return printer;
+  }
+
+  /**
+   * Helper pass to mark selectors with a chunk, uses a map from string representation of a selector
+   * to a chunk, given selector belongs to.
+   */
+  protected static class SetSelectorChunk extends DefaultTreeVisitor implements CssCompilerPass {
+    private CssTree tree;
+    private Map<String, String> selectorToChunkMap;
+
+    /**
+     * The current "top" selector - one which is first in a list of selectors divided by
+     * combinators. It is used to correctly set the chunk of combined selectors.
+     */
+    private CssSelectorNode currentTopSelector;
+
+    /** The chunk of current "top" selector. */
+    private String topSelectorChunk;
+
+    /**
+     * Creates the helper pass for a given CSS AST and selector to chunk mapping.
+     *
+     * @param tree the CSS AST tree to be mapped
+     * @param selectorToChunk a map from string representation of a selector to a chunk this
+     *     selector belongs to
+     */
+    public SetSelectorChunk(CssTree tree, Map<String, String> selectorToChunk) {
+      this.tree = tree;
+      this.selectorToChunkMap = selectorToChunk;
+    }
+
+    @Override
+    public boolean enterSelector(CssSelectorNode selector) {
+      if (currentTopSelector == null) {
+        currentTopSelector = selector;
+        topSelectorChunk = selectorToChunkMap.get(PassUtil.printSelector(selector));
+      }
+      selector.setChunk(topSelectorChunk);
+      return true;
+    }
+
+    @Override
+    @SuppressWarnings("ReferenceEquality")
+    public void leaveSelector(CssSelectorNode selector) {
+      if (currentTopSelector == selector) {
+        currentTopSelector = null;
+        topSelectorChunk = null;
+      }
+    }
+
+    @Override
+    public boolean enterMediaRule(CssMediaRuleNode media) {
+      media.setChunk(selectorToChunkMap.get(media.getParameters().get(0).getValue()));
+      return true;
+    }
+
+    @Override
+    public boolean enterKeyframesRule(CssKeyframesNode keyframes) {
+      keyframes.setChunk(selectorToChunkMap.get(keyframes.getParameters().get(0).getValue()));
+      return true;
+    }
+
+    @Override
+    public boolean enterFontFace(CssFontFaceNode cssFontFaceNode) {
+      cssFontFaceNode.setChunk("foo");
+      return true;
+    }
+
+    @Override
+    public void runPass() {
+      tree.getVisitController().startVisit(this);
+    }
   }
 }
