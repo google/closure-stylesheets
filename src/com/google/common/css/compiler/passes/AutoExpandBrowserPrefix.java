@@ -17,7 +17,6 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssCommentNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
 import com.google.common.css.compiler.ast.CssDeclarationNode;
@@ -27,7 +26,7 @@ import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,8 +48,7 @@ import java.util.List;
  *    Eg. background-image: linear-gradient(ARGS);
  *
  */
-public final class AutoExpandBrowserPrefix extends DefaultTreeVisitor
-    implements CssCompilerPass {
+public class AutoExpandBrowserPrefix extends DefaultTreeVisitor implements CssCompilerPass {
 
   private final MutatingVisitController visitController;
   private final ImmutableList<BrowserPrefixRule> expansionRules;
@@ -80,7 +78,7 @@ public final class AutoExpandBrowserPrefix extends DefaultTreeVisitor
     if (inDefMixinBlock) {
       return true;
     }
-    List<CssDeclarationNode> expansionNodes = Lists.newArrayList();
+    ImmutableList.Builder<CssDeclarationNode> expansionNodes = ImmutableList.builder();
     for (BrowserPrefixRule rule : expansionRules) {
       // If the name is present in the rule then it must match the declaration.
       if (rule.getMatchPropertyName() != null
@@ -95,62 +93,77 @@ public final class AutoExpandBrowserPrefix extends DefaultTreeVisitor
           expansionNode.setSourceCodeLocation(declaration.getSourceCodeLocation());
           expansionNodes.add(expansionNode);
         }
+      } else if (!rule.isFunction()) {
+        // Handle case #2 where the property value is not a function.
+        expansionNodes.addAll(getNonFunctionValueMatches(rule, declaration));
+      } else if (hasMatchingValueOnlyFunction(declaration, rule)) {
+        // Handle case #3 where the property value is a function. Eg. linear-gradient().
+        // The rule is value-only and one of the declaration values matches.
+        expansionNodes.addAll(expandMatchingValueOnlyFunctions(declaration, rule));
       } else {
-        if (!rule.isFunction()) {
-          // Handle case #2 where the property value is not a function.
-          // Ensure that the property value matches exactly.
-          if (!(declaration.getPropertyValue().getChildren().size() == 1
-              && rule.getMatchPropertyValue().equals(
-                  declaration.getPropertyValue().getChildAt(0).getValue()))) {
-            continue;
-          }
-          // TODO(user): Maybe support multiple values for non-function value-only expansions.
-          for (CssPropertyValueNode ruleValueNode : rule.getValueOnlyExpansionNodes()) {
-            // For valueOnlyExpansionNodes the property name comes from the declaration.
-            CssDeclarationNode expansionNode =
-                new CssDeclarationNode(
-                    declaration.getPropertyName(),
-                    ruleValueNode.deepCopy(),
-                    declaration.getSourceCodeLocation());
-            expansionNode.appendComment(new CssCommentNode("/* @alternate */", null));
-            expansionNodes.add(expansionNode);
-          }
-          for (CssDeclarationNode ruleExpansionNode : rule.getExpansionNodes()) {
-            CssDeclarationNode expansionNode = ruleExpansionNode.deepCopy();
-            expansionNode.setSourceCodeLocation(declaration.getSourceCodeLocation());
-            expansionNodes.add(expansionNode);
-          }
-        } else {
-          // Handle case #3 where the property value is a function. Eg. linear-gradient().
-          if (hasMatchingValueOnlyFunction(declaration, rule)) {
-            // The rule is value-only and one of the declaration values matches.
-            expansionNodes.addAll(expandMatchingValueOnlyFunctions(declaration, rule));
-          } else {
-            // The rule is not value-only or did not match, check other rules.
-            CssValueNode matchValueNode = declaration.getPropertyValue().getChildAt(0);
-            if (matchValueNode instanceof CssFunctionNode) {
-              CssFunctionNode matchFunctionNode = (CssFunctionNode) matchValueNode;
-              if (matchFunctionNode.getFunctionName().equals(rule.getMatchPropertyValue())) {
-                for (CssDeclarationNode ruleExpansionNode : rule.getExpansionNodes()) {
-                  CssDeclarationNode expansionNode = ruleExpansionNode.deepCopy();
-                  CssValueNode expandValueNode = expansionNode.getPropertyValue().getChildAt(0);
-                  CssFunctionNode expandFunctionNode = (CssFunctionNode) expandValueNode;
-                  expandFunctionNode.setArguments(matchFunctionNode.getArguments().deepCopy());
-                  expansionNode.setSourceCodeLocation(declaration.getSourceCodeLocation());
-                  expansionNodes.add(expansionNode);
-                }
-              }
-            }
-          }
-        }
+        // The rule is not value-only or did not match, check other rules.
+        expansionNodes.addAll(getOtherMatches(declaration, rule));
       }
 
-      if (!expansionNodes.isEmpty()) {
-        visitController.replaceCurrentBlockChildWith(expansionNodes, false);
-        return true;
+      ImmutableList<CssDeclarationNode> replacements = expansionNodes.build();
+
+      if (!replacements.isEmpty()) {
+        visitController.replaceCurrentBlockChildWith(
+            replacements, false /* visitTheReplacementNodes */);
+        break; // found a match, don't need to look for more
       }
     }
     return true;
+  }
+
+  protected ImmutableList<CssDeclarationNode> getNonFunctionValueMatches(
+      BrowserPrefixRule rule, CssDeclarationNode declaration) {
+    // Ensure that the property value matches exactly.
+    if (!(declaration.getPropertyValue().getChildren().size() == 1
+        && rule.getMatchPropertyValue()
+            .equals(declaration.getPropertyValue().getChildAt(0).getValue()))) {
+      return ImmutableList.of();
+    }
+    ImmutableList.Builder<CssDeclarationNode> replacements = ImmutableList.builder();
+    // TODO(user): Maybe support multiple values for non-function value-only expansions.
+    for (CssPropertyValueNode ruleValueNode : rule.getValueOnlyExpansionNodes()) {
+      // For valueOnlyExpansionNodes the property name comes from the declaration.
+      CssDeclarationNode expansionNode =
+          new CssDeclarationNode(
+              declaration.getPropertyName(),
+              ruleValueNode.deepCopy(),
+              declaration.getSourceCodeLocation());
+      expansionNode.appendComment(new CssCommentNode("/* @alternate */", null));
+      replacements.add(expansionNode);
+    }
+    for (CssDeclarationNode ruleExpansionNode : rule.getExpansionNodes()) {
+      CssDeclarationNode expansionNode = ruleExpansionNode.deepCopy();
+      expansionNode.setSourceCodeLocation(declaration.getSourceCodeLocation());
+      replacements.add(expansionNode);
+    }
+    return replacements.build();
+  }
+
+  private ImmutableList<CssDeclarationNode> getOtherMatches(
+      CssDeclarationNode declaration, BrowserPrefixRule rule) {
+    CssValueNode matchValueNode = declaration.getPropertyValue().getChildAt(0);
+    if (!(matchValueNode instanceof CssFunctionNode)) {
+      return ImmutableList.of();
+    }
+    CssFunctionNode matchFunctionNode = (CssFunctionNode) matchValueNode;
+    if (!matchFunctionNode.getFunctionName().equals(rule.getMatchPropertyValue())) {
+      return ImmutableList.of();
+    }
+    ImmutableList.Builder<CssDeclarationNode> replacements = ImmutableList.builder();
+    for (CssDeclarationNode ruleExpansionNode : rule.getExpansionNodes()) {
+      CssDeclarationNode expansionNode = ruleExpansionNode.deepCopy();
+      CssValueNode expandValueNode = expansionNode.getPropertyValue().getChildAt(0);
+      CssFunctionNode expandFunctionNode = (CssFunctionNode) expandValueNode;
+      expandFunctionNode.setArguments(matchFunctionNode.getArguments().deepCopy());
+      expansionNode.setSourceCodeLocation(declaration.getSourceCodeLocation());
+      replacements.add(expansionNode);
+    }
+    return replacements.build();
   }
 
   /**
@@ -185,12 +198,12 @@ public final class AutoExpandBrowserPrefix extends DefaultTreeVisitor
    * expansion rule we can match 0 or more values.
    * For example: margin: calc(X) calc(Y); -> margin: -webkit-calc(X) -webkit-calc(Y);
    */
-  private static List<CssDeclarationNode> expandMatchingValueOnlyFunctions(
+  private static ImmutableList<CssDeclarationNode> expandMatchingValueOnlyFunctions(
       CssDeclarationNode declaration, BrowserPrefixRule rule) {
-    List<CssDeclarationNode> expansionNodes = Lists.newArrayList();
+    ImmutableList.Builder<CssDeclarationNode> expansionNodes = ImmutableList.builder();
     for (CssPropertyValueNode ruleValueNode : rule.getValueOnlyExpansionNodes()) {
       List<CssValueNode> expansionNodeValues =
-          Lists.newArrayListWithCapacity(declaration.getPropertyValue().numChildren());
+          new ArrayList<>(declaration.getPropertyValue().numChildren());
       for (CssValueNode declarationValueNode : declaration.getPropertyValue().getChildren()) {
         if (matchesValueOnlyFunction(declarationValueNode, rule)) {
           CssFunctionNode declarationFunctionNode = (CssFunctionNode) declarationValueNode;
@@ -210,7 +223,7 @@ public final class AutoExpandBrowserPrefix extends DefaultTreeVisitor
       expansionNode.appendComment(new CssCommentNode("/* @alternate */", null));
       expansionNodes.add(expansionNode);
     }
-    return expansionNodes;
+    return expansionNodes.build();
   }
 
   @Override

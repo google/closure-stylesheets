@@ -42,7 +42,7 @@ public class TemplateCompactPrinter<T> extends CompactPrinter {
   public static final char RULE_END = '\u0119';
 
   /** Chunk to be printed by this printer. */
-  private final T chunk;
+  final T chunk;
 
   // CodeBuffer with specific behavior for the printer
   private static final class CodeBufferForTemplate extends CodeBuffer {

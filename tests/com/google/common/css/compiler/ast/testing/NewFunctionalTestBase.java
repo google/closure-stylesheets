@@ -23,16 +23,22 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.BasicErrorManager;
+import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssFontFaceNode;
+import com.google.common.css.compiler.ast.CssKeyframesNode;
+import com.google.common.css.compiler.ast.CssMediaRuleNode;
+import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
+import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.PrettyPrinter;
+import com.google.common.css.compiler.passes.TemplateCompactPrinter;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
-
 
 /**
  * Base class for testing the passes which use an {@link ErrorManager}.
@@ -173,6 +179,7 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
     return prettyPrinterPass.getPrettyPrintedString();
   }
 
+
   /**
    * Normalizes the expected CSS to a pretty-printed form that can be compared
    * with the result of {@link #getCompiledCss()}.
@@ -264,6 +271,46 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
 
     public boolean hasEncounteredAllErrors() {
       return currentIndex == expectedMessages.length;
+    }
+  }
+
+  /**
+   * Helper pass to mark all selectors as belonging to a single chunk.
+   * (The official printer for compiled CSS, {@link TemplateCompactPrinter}, requires
+   * at least one chunk, so this is useful for tests that want to assert against the official
+   * compiled output but don't care directly about chunking.)
+   */
+  private final class AllSelectorsInOneChunk extends DefaultTreeVisitor implements CssCompilerPass {
+
+    static final String THE_CHUNK = "THE_CHUNK";
+
+    @Override
+    public boolean enterSelector(CssSelectorNode selector) {
+      selector.setChunk(THE_CHUNK);
+      return true;
+    }
+
+    @Override
+    public boolean enterMediaRule(CssMediaRuleNode media) {
+      media.setChunk(THE_CHUNK);
+      return true;
+    }
+
+    @Override
+    public boolean enterKeyframesRule(CssKeyframesNode keyframes) {
+      keyframes.setChunk(THE_CHUNK);
+      return true;
+    }
+
+    @Override
+    public boolean enterFontFace(CssFontFaceNode cssFontFaceNode) {
+      cssFontFaceNode.setChunk(THE_CHUNK);
+      return true;
+    }
+
+    @Override
+    public void runPass() {
+      tree.getVisitController().startVisit(this);
     }
   }
 }
