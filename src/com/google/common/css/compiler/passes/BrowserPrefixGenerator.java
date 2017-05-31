@@ -29,12 +29,12 @@ import com.google.common.collect.ImmutableList;
  *    Eg. background-image: linear-gradient(ARGS);
  *
  */
-final class BrowserPrefixGenerator {
+public final class BrowserPrefixGenerator {
 
   private static final ImmutableList<BrowserPrefixRule> EXPANSION_RULES = buildExpansionRules();
 
   /** Returns the rules for automatic expansion of mixins. */
-  static ImmutableList<BrowserPrefixRule> getExpansionRules() {
+  public static ImmutableList<BrowserPrefixRule> getExpansionRules() {
     return EXPANSION_RULES;
   }
 

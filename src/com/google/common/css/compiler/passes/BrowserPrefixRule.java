@@ -98,15 +98,17 @@ public final class BrowserPrefixRule {
     }
   }
 
-  @Nullable String getMatchPropertyName() {
+  @Nullable
+  public String getMatchPropertyName() {
     return matchPropertyName.orNull();
   }
 
-  @Nullable String getMatchPropertyValue() {
+  @Nullable
+  public String getMatchPropertyValue() {
     return matchPropertyValue.orNull();
   }
 
-  boolean isFunction() {
+  public boolean isFunction() {
     return isFunction;
   }
 
