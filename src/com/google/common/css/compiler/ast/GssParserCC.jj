@@ -702,7 +702,7 @@ PARSER_END(GssParserCC)
 
   // ident        -?{nmstart}{nmchar}*
   // {ident}         {return IDENT;}
-  | < IDENTIFIER: (<MINUS>)? <NAMESTART> (<NAMECHAR> | <MINUS> <FOR_VARIABLE> )* >
+  | < IDENTIFIER: (<MINUS>(<MINUS>)?)? <NAMESTART> (<NAMECHAR> | <MINUS> <FOR_VARIABLE> )* >
 
   // "not("
   // Special handling needed because ':not' takes simple selectors as

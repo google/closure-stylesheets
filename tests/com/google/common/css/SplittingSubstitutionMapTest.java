@@ -38,6 +38,10 @@ public class SplittingSubstitutionMapTest {
     assertThat(map.get("a-b")).isEqualTo("a_-b_");
     assertThat(map.get("a-b-c")).isEqualTo("a_-b_-c_");
     assertThat(map.get("a-b-c-d")).isEqualTo("a_-b_-c_-d_");
+    assertThat(map.get("--a")).isEqualTo("--a_");
+    assertThat(map.get("--a-b")).isEqualTo("--a_-b_");
+    assertThat(map.get("--a-b-c")).isEqualTo("--a_-b_-c_");
+    assertThat(map.get("--a-b-c-d")).isEqualTo("--a_-b_-c_-d_");
   }
 
   @Test

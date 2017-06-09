@@ -44,12 +44,20 @@ public class PrefixingSubstitutionMap
 
   @Override
   public String get(String key) {
+    if (key.startsWith("--")){
+      return "--" + prefix + delegate.get(key.substring(2));
+    }
     return prefix + delegate.get(key);
   }
 
   @Override
   public ValueWithMappings getValueWithMappings(String key) {
     if (delegate instanceof MultipleMappingSubstitutionMap) {
+      String prefix = this.prefix;
+      if (key.startsWith("--")) {
+        key = key.substring(2);
+        prefix = "--"+this.prefix;
+      }
       ValueWithMappings withoutPrefix =
           ((MultipleMappingSubstitutionMap) delegate).getValueWithMappings(key);
       return ValueWithMappings.createWithValueAndMappings(

@@ -30,17 +30,23 @@ import org.junit.runners.JUnit4;
 public class PrefixingSubstitutionMapTest {
   @Test
   public void testNoPrefix() throws Exception {
-    SubstitutionMap map = new PrefixingSubstitutionMap(
+    MultipleMappingSubstitutionMap map = new PrefixingSubstitutionMap(
         new SimpleSubstitutionMap(), "");
     assertThat(map.get("foo")).isEqualTo("foo_");
     assertThat(map.get("foo-bar")).isEqualTo("foo-bar_");
+    assertThat(map.get("--foo")).isEqualTo("--foo_");
+    assertThat(map.get("--foo-bar")).isEqualTo("--foo-bar_");
+    assertThat(map.getValueWithMappings("--foo").value).isEqualTo("--foo_");
   }
 
   @Test
   public void testPrefix() throws Exception {
-    SubstitutionMap map = new PrefixingSubstitutionMap(
+    MultipleMappingSubstitutionMap map = new PrefixingSubstitutionMap(
         new SimpleSubstitutionMap(), "PREFIX_");
     assertThat(map.get("foo")).isEqualTo("PREFIX_foo_");
     assertThat(map.get("foo-bar")).isEqualTo("PREFIX_foo-bar_");
+    assertThat(map.get("--foo")).isEqualTo("--PREFIX_foo_");
+    assertThat(map.get("--foo-bar")).isEqualTo("--PREFIX_foo-bar_");
+    assertThat(map.getValueWithMappings("--foo").value).isEqualTo("--PREFIX_foo_");
   }
 }
