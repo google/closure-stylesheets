@@ -54,9 +54,6 @@ public class SplittingSubstitutionMap implements
     Preconditions.checkNotNull(key, "CSS key cannot be null");
     Preconditions.checkArgument(!key.isEmpty(), "CSS key cannot be empty");
 
-    String prefix = "";
-    
-    
     // Efficiently handle the common case with no dashes.
     if (key.indexOf('-') == -1) {
       String value = delegate.get(key);
