@@ -80,11 +80,6 @@ public class CssClassRenaming extends DefaultTreeVisitor
         ImmutableList.of(idSelector), false /* visitTheReplacementNodes */);
     return true;
   }
-  
-  @Override
-  public boolean enterDeclaration(CssDeclarationNode declaration) {
-    return true;
-  }
 
   @Override
   public void leaveDeclaration(CssDeclarationNode node) {
