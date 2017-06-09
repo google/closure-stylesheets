@@ -54,6 +54,9 @@ public class SplittingSubstitutionMap implements
     Preconditions.checkNotNull(key, "CSS key cannot be null");
     Preconditions.checkArgument(!key.isEmpty(), "CSS key cannot be empty");
 
+    String prefix = "";
+    
+    
     // Efficiently handle the common case with no dashes.
     if (key.indexOf('-') == -1) {
       String value = delegate.get(key);
@@ -61,11 +64,17 @@ public class SplittingSubstitutionMap implements
     }
 
     StringBuilder buffer = new StringBuilder();
+    int prefixSize = 0;
+    if (key.startsWith("--")) {
+      key = key.substring(2);
+      buffer.append("--");
+      prefixSize = 2;
+    }
     // Cannot use an ImmutableMap.Builder because the same key/value pair may be
     // inserted more than once in this loop.
     Map<String, String> mappings = Maps.newLinkedHashMap();
     for (String part : DASH.split(key)) {
-      if (buffer.length() != 0) {
+      if (buffer.length() != prefixSize) {
         buffer.append('-');
       }
 

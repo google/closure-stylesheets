@@ -20,7 +20,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.css.SubstitutionMap;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
 import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssDeclarationNode;
 import com.google.common.css.compiler.ast.CssIdSelectorNode;
+import com.google.common.css.compiler.ast.CssLiteralNode;
+import com.google.common.css.compiler.ast.CssPropertyNode;
+import com.google.common.css.compiler.ast.CssPropertyValueNode;
+import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 
@@ -73,6 +78,51 @@ public class CssClassRenaming extends DefaultTreeVisitor
         new CssIdSelectorNode(substitution, node.getSourceCodeLocation());
     visitController.replaceCurrentBlockChildWith(
         ImmutableList.of(idSelector), false /* visitTheReplacementNodes */);
+    return true;
+  }
+  
+  @Override
+  public boolean enterDeclaration(CssDeclarationNode declaration) {
+    return true;
+  }
+
+  @Override
+  public void leaveDeclaration(CssDeclarationNode node) {
+    if (cssClassRenamingMap == null) {
+      return;
+    }
+    String name = node.getPropertyName().getPropertyName();
+    if (!name.startsWith("--")) {
+      return;
+    }
+    String substitution = cssClassRenamingMap.get(name);
+    if (substitution == null) {
+      return;
+    }
+    CssPropertyValueNode value = node.getPropertyValue();
+    if (value != null) {
+      value = new CssPropertyValueNode(value);
+    }
+    CssDeclarationNode declaration = new CssDeclarationNode(
+        new CssPropertyNode(substitution, node.getPropertyName().getSourceCodeLocation()), value);
+    visitController.replaceCurrentBlockChildWith(ImmutableList.of(declaration), false);
+    return;
+  }
+
+  @Override
+  public boolean enterArgumentNode(CssValueNode value) {
+    if (!(value instanceof CssLiteralNode && value.getValue().startsWith("--"))) {
+      return true;
+    }
+    if (cssClassRenamingMap == null) {
+      return true;
+    }
+    String substitution = cssClassRenamingMap.get(value.getValue());
+    if (substitution == null) {
+      return true;
+    }
+    CssLiteralNode literal = new CssLiteralNode(substitution, value.getSourceCodeLocation());
+    visitController.replaceCurrentBlockChildWith(ImmutableList.of(literal), false);
     return true;
   }
 

@@ -20,16 +20,25 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.css.SubstitutionMap;
 import com.google.common.css.compiler.ast.BackDoorNodeMutation;
 import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
+import com.google.common.css.compiler.ast.CssDeclarationBlockNode;
+import com.google.common.css.compiler.ast.CssDeclarationNode;
+import com.google.common.css.compiler.ast.CssFunctionArgumentsNode;
+import com.google.common.css.compiler.ast.CssFunctionNode;
 import com.google.common.css.compiler.ast.CssIdSelectorNode;
+import com.google.common.css.compiler.ast.CssLiteralNode;
+import com.google.common.css.compiler.ast.CssPropertyNode;
+import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssRefinerListNode;
 import com.google.common.css.compiler.ast.CssRootNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
+import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
 import org.junit.Test;
@@ -114,6 +123,44 @@ public class CssClassRenamingTest {
     assertThat(AstPrinter.print(tree)).isEqualTo("[[.CSS_FOO_]{[]}]");
   }
 
+  @Test
+  public void testCustomPropertyRenaming() {
+    CssFunctionNode value = new CssFunctionNode(CssFunctionNode.Function.byName("var"), null);
+    value.setArguments(new CssFunctionArgumentsNode(ImmutableList.of((CssValueNode) new CssLiteralNode("--myvar-b"))));
+    CssDeclarationNode declarationNode = new CssDeclarationNode(new CssPropertyNode("--myvar-a"),
+        new CssPropertyValueNode(ImmutableList.of((CssValueNode)value)));
+    CssClassSelectorNode refinerNode = new CssClassSelectorNode("CSS_FOO",
+        null);
+    CssRefinerListNode refiners = new CssRefinerListNode();
+    BackDoorNodeMutation.addChildToBack(refiners, refinerNode);
+
+    CssDeclarationBlockNode ruleBody = new CssDeclarationBlockNode();
+    ruleBody.addChildToBack(declarationNode);
+    CssRulesetNode ruleset = new CssRulesetNode(ruleBody);
+    CssSelectorNode sel = new CssSelectorNode("FOO");
+    ruleset.addSelector(sel);
+
+    CssBlockNode body = new CssBlockNode(false);
+    BackDoorNodeMutation.addChildToBack(body, ruleset);
+
+    CssRootNode root = new CssRootNode(body);
+    CssTree tree = new CssTree(null, root);
+    
+    SubstitutionMap classMap = new SubstitutionMap() {
+        /** {@inheritDoc} */
+        @Override
+        public String get(String key) {
+          return key.startsWith("--") ? key + '_' : key;
+        }
+    };
+    CssClassRenaming pass = new CssClassRenaming(
+        tree.getMutatingVisitController(), classMap, null);
+    pass.runPass();
+    assertThat(AstPrinter.print(tree)).isEqualTo("[[FOO]{[--myvar-a_:[var(--myvar-b_)];]}]");
+  }
+
+
+  
   @Test
   public void testEnterIdRefiner() {
     CssIdSelectorNode refinerNode = new CssIdSelectorNode("ID_FOO", null);

@@ -143,7 +143,10 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "inset",
           "circle",
           "ellipse",
-          "polygon"
+          "polygon",
+          
+          // CSS Variables
+          "var"
       );
       ImmutableMap.Builder<String, Function> builder = ImmutableMap.builder();
       for (String functionName : recognizedCssFunctions) {

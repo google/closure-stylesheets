@@ -54,6 +54,11 @@ public class VerifyRecognizedPropertiesTest extends NewFunctionalTestBase {
   }
 
   @Test
+  public void testCustomProperties() throws GssParserException {
+    parseAndRun("div {--my-color: blue; }");
+  }
+  
+  @Test
   public void testUnrecognizedProperties() throws GssParserException {
     parseAndRun("div {colour: blue; background-colour: green; }",
         "colour is an unrecognized property",
