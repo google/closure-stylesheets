@@ -1113,6 +1113,31 @@ public class GssParserTest {
         .isEqualTo("99px".length());
   }
 
+  @Test
+  public void testCustomDeclaration() throws GssParserException {
+    testTree(":root { --test: 10px; }", "[[:root]{[--test:[[10px]];]}]");
+  }
+
+  @Test(expected=GssParserException.class)
+  public void testNoValueShouldFailCustomDeclaration() throws GssParserException {
+    testValid(":root { --var:; }"); // We expect this to throw
+  }
+
+  @Test
+  public void testCustomPropertyReferenceInCalc() throws GssParserException {
+    testValid("div { width: calc(10px * var(--test)); }");
+  }
+
+  @Test
+  public void testDefaultValue() throws GssParserException {
+    testValid(".class { width: var(--test, 20px); }");
+  }
+
+  @Test
+  public void testCalcInVarDefaultValue() throws GssParserException {
+    testValid(".class { width: var(--test, calc(100% - 20px)); }");
+  }
+
   private CssTree parse(List<SourceCode> sources) throws GssParserException {
     GssParser parser = new GssParser(sources);
     return parser.parse();

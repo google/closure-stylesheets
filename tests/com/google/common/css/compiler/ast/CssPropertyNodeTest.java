@@ -38,6 +38,7 @@ public class CssPropertyNodeTest {
 
     assertThat(property.getParent()).isNull();
     assertThat(property.getSourceCodeLocation()).isNull();
+    assertThat(property.isCustom()).isFalse();
     assertThat(property.toString()).isEqualTo("color");
     assertThat(property.getProperty().hasPositionalParameters()).isFalse();
   }
@@ -48,6 +49,7 @@ public class CssPropertyNodeTest {
 
     assertThat(property.getParent()).isNull();
     assertThat(property.getSourceCodeLocation()).isNull();
+    assertThat(property.isCustom()).isFalse();
     assertThat(property.toString()).isEqualTo("color");
     assertThat(property.getProperty().hasPositionalParameters()).isFalse();
  }
@@ -60,7 +62,18 @@ public class CssPropertyNodeTest {
 
     assertThat(property.getParent()).isNull();
     assertThat(property.getSourceCodeLocation()).isEqualTo(codeLoc);
+    assertThat(property.isCustom()).isFalse();
     assertThat(property.toString()).isEqualTo("color");
+    assertThat(property.getProperty().hasPositionalParameters()).isFalse();
+  }
+
+  @Test
+  public void testCustomPropertyNodeCreation() {
+    CssPropertyNode property = new CssPropertyNode("--cOloR", null);
+    assertThat(property.getParent()).isNull();
+    assertThat(property.getSourceCodeLocation()).isNull();
+    assertThat(property.isCustom()).isTrue();
+    assertThat(property.toString()).isEqualTo("--cOloR");
     assertThat(property.getProperty().hasPositionalParameters()).isFalse();
   }
 
@@ -137,31 +150,50 @@ public class CssPropertyNodeTest {
     CssPropertyNode propertyCopy = new CssPropertyNode(property);
     CssPropertyNode property1 = new CssPropertyNode("border-color", null);
     CssPropertyNode property1Copy = new CssPropertyNode(property1);
+    CssPropertyNode property2 = new CssPropertyNode("--theme-color", null);
+    CssPropertyNode property2Copy = new CssPropertyNode(property2);
 
     assertThat(property.getParent()).isNull();
     assertThat(propertyCopy.getParent()).isNull();
     assertThat(property1.getParent()).isNull();
     assertThat(property1Copy.getParent()).isNull();
+    assertThat(property2.getParent()).isNull();
+    assertThat(property2Copy.getParent()).isNull();
 
     assertThat(property.getSourceCodeLocation()).isNull();
     assertThat(propertyCopy.getSourceCodeLocation()).isNull();
     assertThat(property1.getSourceCodeLocation()).isNull();
     assertThat(property1Copy.getSourceCodeLocation()).isNull();
+    assertThat(property2.getSourceCodeLocation()).isNull();
+    assertThat(property2Copy.getSourceCodeLocation()).isNull();
 
     assertThat(property.toString()).isEqualTo("color");
     assertThat(propertyCopy.toString()).isEqualTo("color");
     assertThat(property1.toString()).isEqualTo("border-color");
     assertThat(property1Copy.toString()).isEqualTo("border-color");
+    assertThat(property2.toString()).isEqualTo("--theme-color");
+    assertThat(property2Copy.toString()).isEqualTo("--theme-color");
 
     assertThat(property.getProperty().isRecognizedProperty()).isTrue();
     assertThat(propertyCopy.getProperty().isRecognizedProperty()).isTrue();
     assertThat(property1.getProperty().isRecognizedProperty()).isTrue();
     assertThat(property1Copy.getProperty().isRecognizedProperty()).isTrue();
+    assertThat(property2.getProperty().isRecognizedProperty()).isFalse();
+    assertThat(property2Copy.getProperty().isRecognizedProperty()).isFalse();
 
     assertThat(property.getProperty().hasPositionalParameters()).isFalse();
     assertThat(propertyCopy.getProperty().hasPositionalParameters()).isFalse();
     assertThat(property1.getProperty().hasPositionalParameters()).isTrue();
     assertThat(property1Copy.getProperty().hasPositionalParameters()).isTrue();
+    assertThat(property2.getProperty().hasPositionalParameters()).isFalse();
+    assertThat(property2Copy.getProperty().hasPositionalParameters()).isFalse();
+
+    assertThat(property.isCustom()).isFalse();
+    assertThat(propertyCopy.isCustom()).isFalse();
+    assertThat(property1.isCustom()).isFalse();
+    assertThat(property1Copy.isCustom()).isFalse();
+    assertThat(property2.isCustom()).isTrue();
+    assertThat(property2Copy.isCustom()).isTrue();
   }
 
 }

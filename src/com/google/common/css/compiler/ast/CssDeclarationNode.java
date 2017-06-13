@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 
 /**
  * A node representing a CSS declaration in the abstract syntax tree.
- * For example: <code>background: red</code>
+ * For example: <code>background: red</code> or <code>--card-padding: 24px</code>.
  *
  * @author oana@google.com (Oana Florescu)
  */
@@ -155,6 +155,11 @@ public class CssDeclarationNode extends CssNode {
   public boolean hasStarHack() {
     return hasStarHack;
   }
+
+  /**
+   * @return whether this node represents the declaration of a CSS custom property.
+   */
+  public boolean isCustomDeclaration() { return this.propertyName.isCustom(); }
 
   /**
    * For debugging only.

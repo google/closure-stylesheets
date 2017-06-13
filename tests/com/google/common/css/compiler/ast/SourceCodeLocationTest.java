@@ -139,6 +139,34 @@ public class SourceCodeLocationTest {
   }
 
   @Test
+  public void testRuleWithCustomDeclaration() throws Exception {
+    CssTree tree = parse(".foo {\n  --theme-color: BlanchedAlmond\n}");
+    List<CssNode> rules = tree.getRoot().getBody().getChildren();
+    CssRulesetNode rule = (CssRulesetNode) getOnlyElement(rules);
+    assertThat(rule.getSourceCodeLocation()).hasSpan(1, 1, 3, 2); // whole thing
+
+    CssSelectorListNode selectors = rule.getSelectors();
+    assertThat(selectors.getSourceCodeLocation()).hasSpan(1, 1, 1, 5);
+    assertThat(selectors.getSourceCodeLocation()).matches(".foo");
+
+    CssDeclarationBlockNode declarations = rule.getDeclarations();
+    assertThat(declarations.getSourceCodeLocation()).hasSpan(2, 3, 2, 32);
+    assertThat(declarations.getSourceCodeLocation()).matches("--theme-color: BlanchedAlmond");
+
+    CssDeclarationNode declaration =
+        (CssDeclarationNode) Iterables.getOnlyElement(declarations.getChildren());
+    assertThat(declaration.getSourceCodeLocation()).hasSpan(2, 3, 2, 32);
+
+    CssPropertyNode propertyName = declaration.getPropertyName();
+    assertThat(propertyName.getSourceCodeLocation()).hasSpan(2, 3, 2, 16);
+    assertThat(propertyName.getSourceCodeLocation()).matches("--theme-color");
+
+    CssPropertyValueNode propertyValueNode = declaration.getPropertyValue();
+    assertThat(propertyValueNode.getSourceCodeLocation()).hasSpan(2, 18, 2, 32);
+    assertThat(propertyValueNode.getSourceCodeLocation()).matches("BlanchedAlmond");
+  }
+
+  @Test
   public void testRuleWithTwoDeclarations() throws Exception {
     CssTree tree = parse(".foo {\n  background-color: blue;\n  text-color: red\n}");
     List<CssNode> rules = tree.getRoot().getBody().getChildren();

@@ -64,6 +64,11 @@ public class VerifyRecognizedProperties extends DefaultTreeVisitor
     Property property = propertyNode.getProperty();
     String propertyName = property.getName();
 
+    // CSS custom properties are always recognized.
+    if (property.isCustom()) {
+      return true;
+    }
+
     // TODO(bolinfest): Have separate options to specify whether the star hack
     // or underscore hack should be allowed. See:
     // http://en.wikipedia.org/wiki/CSS_filter#Star_hack

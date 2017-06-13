@@ -40,6 +40,7 @@ public class CssDeclarationNodeTest extends AstUtilityTestCase {
     assertThat(node.getSourceCodeLocation()).isNull();
     assertThat(node.getPropertyName().toString()).isEqualTo(propertyName.toString());
     assertThat(node.getPropertyValue().isEmpty()).isTrue();
+    assertThat(node.isCustomDeclaration()).isFalse();
   }
 
   @Test
@@ -55,7 +56,25 @@ public class CssDeclarationNodeTest extends AstUtilityTestCase {
     assertThat(node.getParent()).isNull();
     assertThat(node.getSourceCodeLocation()).isNull();
     assertThat(node.getPropertyValue()).isEqualTo(propertyValue);
+    assertThat(node.isCustomDeclaration()).isFalse();
     assertThat(node.toString()).isEqualTo("color:[red]");
+  }
+
+  @Test
+  public void testCompleteCustomDeclarationNodeCreation() {
+    CssPropertyNode propertyName = new CssPropertyNode("--theme-color", null);
+    CssLiteralNode colorValue = new CssLiteralNode("BurlyWood");
+    CssPropertyValueNode propertyValue = new CssPropertyValueNode();
+    propertyValue.addChildToBack(colorValue);
+
+    CssDeclarationNode node = new CssDeclarationNode(propertyName,
+        propertyValue);
+
+    assertThat(node.getParent()).isNull();
+    assertThat(node.getSourceCodeLocation()).isNull();
+    assertThat(node.getPropertyValue()).isEqualTo(propertyValue);
+    assertThat(node.isCustomDeclaration()).isTrue();
+    assertThat(node.toString()).isEqualTo("--theme-color:[BurlyWood]");
   }
   
   @Test
