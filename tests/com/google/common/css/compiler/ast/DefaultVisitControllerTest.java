@@ -18,6 +18,7 @@ package com.google.common.css.compiler.ast;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,8 @@ import com.google.common.collect.Lists;
 import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.CssAttributeSelectorNode.MatchType;
 import com.google.common.css.compiler.ast.CssCompositeValueNode.Operator;
+import com.google.common.css.compiler.ast.CssFunctionNode.Function;
+import com.google.common.css.compiler.ast.CssStringNode.Type;
 import com.google.common.css.compiler.ast.DefaultVisitController.RootVisitAfterChildrenState;
 import com.google.common.css.compiler.ast.DefaultVisitController.RootVisitBeforeChildrenState;
 import com.google.common.css.compiler.ast.DefaultVisitController.RootVisitBodyState;
@@ -42,6 +45,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -568,6 +572,55 @@ public class DefaultVisitControllerTest {
     inOrder.verify(testVisitor).enterComponent(comp);
     // Then we enter the definition within the component.
     inOrder.verify(testVisitor).enterDefinition(def);
+  }
+
+  @Test
+  public void testVisitFunctionNode() {
+    CssDefinitionNode def = new CssDefinitionNode(new CssLiteralNode("FOO"));
+    CssFunctionNode func = new CssFunctionNode(Function.byName("url"), null);
+    CssStringNode argument = new CssStringNode(Type.SINGLE_QUOTED_STRING, "some_url");
+    func.setArguments(new CssFunctionArgumentsNode(ImmutableList.<CssValueNode>of(argument)));
+    def.addChildToBack(func);
+
+    // Visit children
+    when(testVisitor.enterFunctionNode(any(CssFunctionNode.class))).thenReturn(true);
+
+    DefaultVisitController controller = new DefaultVisitController(def, true);
+    controller.startVisit(testVisitor);
+
+    ArgumentCaptor<CssValueNode> argCaptor = ArgumentCaptor.forClass(CssValueNode.class);
+    InOrder inOrder = Mockito.inOrder(testVisitor);
+    inOrder.verify(testVisitor).enterDefinition(def);
+    inOrder.verify(testVisitor).enterFunctionNode(func);
+    inOrder.verify(testVisitor).enterArgumentNode(argCaptor.capture());
+    inOrder.verify(testVisitor).leaveArgumentNode(argCaptor.capture());
+    inOrder.verify(testVisitor).leaveFunctionNode(func);
+    inOrder.verify(testVisitor).leaveDefinition(def);
+    inOrder.verifyNoMoreInteractions();
+
+    assertThat(argCaptor.getValue().toString()).isEqualTo(argument.toString());
+  }
+
+  @Test
+  public void testVisitFunctionNode_dontVisitChildren() {
+    CssDefinitionNode def = new CssDefinitionNode(new CssLiteralNode("FOO"));
+    CssFunctionNode func = new CssFunctionNode(Function.byName("url"), null);
+    CssStringNode argument = new CssStringNode(Type.SINGLE_QUOTED_STRING, "some_url");
+    func.setArguments(new CssFunctionArgumentsNode(ImmutableList.<CssValueNode>of(argument)));
+    def.addChildToBack(func);
+
+    // Prevent visiting children
+    when(testVisitor.enterFunctionNode(any(CssFunctionNode.class))).thenReturn(false);
+
+    DefaultVisitController controller = new DefaultVisitController(def, true);
+    controller.startVisit(testVisitor);
+
+    InOrder inOrder = Mockito.inOrder(testVisitor);
+    inOrder.verify(testVisitor).enterDefinition(def);
+    inOrder.verify(testVisitor).enterFunctionNode(func);
+    inOrder.verify(testVisitor).leaveFunctionNode(func);
+    inOrder.verify(testVisitor).leaveDefinition(def);
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test

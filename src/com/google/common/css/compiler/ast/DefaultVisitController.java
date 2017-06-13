@@ -1562,6 +1562,7 @@ class DefaultVisitController implements MutatingVisitController {
 
     private final CssFunctionNode node;
 
+    private boolean shouldVisitChildren = true;
     private boolean visitedChildren = false;
 
     VisitFunctionNodeState(CssFunctionNode node) {
@@ -1571,7 +1572,7 @@ class DefaultVisitController implements MutatingVisitController {
     @Override
     public void doVisit() {
       if (!visitedChildren) {
-        visitor.enterFunctionNode(node);
+        shouldVisitChildren = visitor.enterFunctionNode(node);
       } else {
         visitor.leaveFunctionNode(node);
       }
@@ -1580,8 +1581,9 @@ class DefaultVisitController implements MutatingVisitController {
     @Override
     public void transitionToNextState() {
       if (!visitedChildren) {
-        stateStack.push(
-            new VisitFunctionArgumentsNodeState(node.getArguments()));
+        if (shouldVisitChildren) {
+          stateStack.push(new VisitFunctionArgumentsNodeState(node.getArguments()));
+        }
         visitedChildren = true;
       } else {
         stateStack.pop();
