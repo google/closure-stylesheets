@@ -45,10 +45,6 @@ class DefaultVisitController implements MutatingVisitController {
   /** The stack of states for the controller. */
   private final StateStack stateStack = new StateStack();
 
-  /** Whether the visit was required to stop. */
-  @SuppressWarnings("unused")
-  private boolean stopVisitCalled = false;
-
   @SuppressWarnings("serial")
   private static class StopVisitRequestedException extends RuntimeException {}
 
@@ -2040,7 +2036,6 @@ class DefaultVisitController implements MutatingVisitController {
 
   @Override
   public void stopVisit() {
-    stopVisitCalled = true;
     stateStack.getTop().stopVisitCalled();
     throw new StopVisitRequestedException();
   }
