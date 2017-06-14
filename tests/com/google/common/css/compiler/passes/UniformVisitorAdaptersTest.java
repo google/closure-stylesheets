@@ -36,7 +36,7 @@ public class UniformVisitorAdaptersTest {
     UniformVisitor uniformVisitor = mock(UniformVisitor.class);
     CssTreeVisitor visitor = Adapters.asVisitor(uniformVisitor);
 
-    visitor.enterSelector(null /* selector */);
+    boolean unused = visitor.enterSelector(null /* selector */);
     visitor.leaveSelector(null /* selector */);
 
     InOrder verifier = inOrder(uniformVisitor);
@@ -50,7 +50,7 @@ public class UniformVisitorAdaptersTest {
     CombinedVisitor combinedVisitor = mock(CombinedVisitor.class);
     CssTreeVisitor visitor = Adapters.asCombinedVisitor(combinedVisitor);
 
-    visitor.enterSelector(null /* selector */);
+    boolean unused = visitor.enterSelector(null /* selector */);
     visitor.leaveSelector(null /* selector */);
 
     InOrder verifier = inOrder(combinedVisitor);

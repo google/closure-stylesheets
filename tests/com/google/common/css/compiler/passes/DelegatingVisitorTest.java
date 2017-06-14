@@ -39,7 +39,7 @@ public class DelegatingVisitorTest {
 
     CssTreeVisitor delegatingVisitor = DelegatingVisitor.from(visitor1, visitor2);
 
-    delegatingVisitor.enterSelector(null /* selector */);
+    boolean unused = delegatingVisitor.enterSelector(null /* selector */);
     delegatingVisitor.leaveSelector(null /* selector */);
 
     assertThat(orderRecord)

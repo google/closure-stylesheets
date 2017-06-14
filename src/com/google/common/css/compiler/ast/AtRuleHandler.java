@@ -16,108 +16,121 @@
 
 package com.google.common.css.compiler.ast;
 
+import javax.annotation.CheckReturnValue;
+
 /**
  * A handler for at rules.
  *
  */
 public interface AtRuleHandler {
   /**
-   * @return {@code true} if the contents of the rule should be visited,
-   *     false otherwise. {@link #leaveConditionalRule(CssConditionalRuleNode)}
-   *     will still be called.
+   * @return {@code true} if the contents of the rule should be visited, false otherwise. {@link
+   *     #leaveConditionalRule(CssConditionalRuleNode)} will still be called.
    */
+  @CheckReturnValue
   boolean enterConditionalRule(CssConditionalRuleNode node);
 
   /** Called after visiting a {@code CssConditionalRuleNode}'s sub trees */
   void leaveConditionalRule(CssConditionalRuleNode node);
 
   /** Called before visiting a {@code CssImportRuleNode}'s sub trees */
+  @CheckReturnValue
   boolean enterImportRule(CssImportRuleNode node);
 
   /** Called after visiting a {@code CssImportRuleNode}'s sub trees */
   void leaveImportRule(CssImportRuleNode node);
 
   /** Called before visiting a {@code CssMediaRuleNode}'s sub trees */
+  @CheckReturnValue
   boolean enterMediaRule(CssMediaRuleNode node);
 
   /** Called after visiting a {@code CssMediaRuleNode}'s sub trees */
   void leaveMediaRule(CssMediaRuleNode node);
 
   /** Called before visiting a {@code CssPageRuleNode}'s sub trees */
+  @CheckReturnValue
   boolean enterPageRule(CssPageRuleNode node);
 
   /** Called after visiting a {@code CssPageRuleNode}'s sub trees */
   void leavePageRule(CssPageRuleNode node);
 
   /** Called before visiting a {@code CssPageSelectorNode}'s sub trees */
+  @CheckReturnValue
   boolean enterPageSelector(CssPageSelectorNode node);
 
   /** Called after visiting a {@code CssPageSelectorNode}'s sub trees */
   void leavePageSelector(CssPageSelectorNode node);
 
   /** Called before visiting a {@code CssFontFaceNode}'s sub trees */
+  @CheckReturnValue
   boolean enterFontFace(CssFontFaceNode node);
 
   /** Called after visiting a {@code CssFontFaceNode}'s sub trees */
   void leaveFontFace(CssFontFaceNode node);
 
   /**
-   * @return {@code true} if the contents of the rule should be visited,
-   *     false otherwise. {@link #leaveDefinition(CssDefinitionNode)}
-   *     will still be called.
+   * @return {@code true} if the contents of the rule should be visited, false otherwise. {@link
+   *     #leaveDefinition(CssDefinitionNode)} will still be called.
    */
+  @CheckReturnValue
   boolean enterDefinition(CssDefinitionNode node);
 
   /** Called after visiting a {@code CssDefinitionNode}'s sub trees */
   void leaveDefinition(CssDefinitionNode node);
 
   /** Called before visiting a {@code CssUnknownAtRuleNode}'s sub trees */
+  @CheckReturnValue
   boolean enterUnknownAtRule(CssUnknownAtRuleNode node);
 
   /** Called after visiting a {@code CssUnknownAtRuleNode}'s sub trees */
   void leaveUnknownAtRule(CssUnknownAtRuleNode node);
 
   /** Called between adjacent nodes in a media type list */
+  @CheckReturnValue
   boolean enterMediaTypeListDelimiter(CssNodesListNode<? extends CssNode> node);
 
   /** Called between adjacent nodes in a media type list */
   void leaveMediaTypeListDelimiter(CssNodesListNode<? extends CssNode> node);
 
   /** Called before visiting a {@code CssComponentNode}'s sub trees */
+  @CheckReturnValue
   boolean enterComponent(CssComponentNode node);
 
   /** Called after visiting a {@code CssComponentNode}'s sub trees */
   void leaveComponent(CssComponentNode node);
 
   /** Called before visiting a {@code CssKeyframesNode}'s sub trees */
+  @CheckReturnValue
   boolean enterKeyframesRule(CssKeyframesNode node);
 
   /** Called after visiting a {@code CssKeyframesNode}'s sub trees */
   void leaveKeyframesRule(CssKeyframesNode node);
 
   /** Called before visiting a {@code CssMixinDefinitionNode}'s sub trees */
+  @CheckReturnValue
   boolean enterMixinDefinition(CssMixinDefinitionNode node);
 
   /** Called after visiting a {@code CssMixinDefinitionNode}'s sub trees */
   void leaveMixinDefinition(CssMixinDefinitionNode node);
 
   /** Called before visiting a {@code CssMixinNode}'s sub trees */
+  @CheckReturnValue
   boolean enterMixin(CssMixinNode node);
 
   /** Called after visiting a {@code CssMixinNode}'s sub trees */
   void leaveMixin(CssMixinNode node);
 
   /** Called before visiting a {@code CssProvideNode}'s sub trees */
+  @CheckReturnValue
   boolean enterProvideNode(CssProvideNode node);
 
   /** Called after visiting a {@code CssProvideNode}'s sub trees */
   void leaveProvideNode(CssProvideNode node);
 
   /** Called before visiting a {@code CssRequireNode}'s sub trees */
+  @CheckReturnValue
   boolean enterRequireNode(CssRequireNode node);
 
   /** Called after visiting a {@code CssRequireNode}'s sub trees */
   void leaveRequireNode(CssRequireNode node);
-
-
 }
