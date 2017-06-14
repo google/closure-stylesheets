@@ -16,14 +16,11 @@
 
 package com.google.common.css.compiler.ast;
 
-import static com.google.common.css.compiler.ast.DefaultVisitController.VisitState.Progress.BEFORE_CHILDREN;
-import static com.google.common.css.compiler.ast.DefaultVisitController.VisitState.Progress.BEFORE_ENTER;
-import static com.google.common.css.compiler.ast.DefaultVisitController.VisitState.Progress.LEAVING;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Queues;
 import com.google.common.css.compiler.ast.CssCompositeValueNode.Operator;
+
 import java.util.Deque;
 import java.util.List;
 
@@ -60,6 +57,7 @@ class DefaultVisitController implements MutatingVisitController {
    * @param <T> type of the children CSS nodes that can be used as a replacement
    *     for currently visited block node
    */
+  @VisibleForTesting
   interface VisitState<T extends CssNode> {
     /**
      * Performs the visit by calling appropriate methods of the visitor
@@ -114,39 +112,6 @@ class DefaultVisitController implements MutatingVisitController {
      */
     void replaceCurrentBlockChildWith(List<T> replacementNodes,
         boolean visitTheReplacementNodes);
-
-    /**
-     * Helper enum for implementations to communicate state between {@link #doVisit} and
-     * {@link #transitionToNextState}.
-     *
-     * <p>Typically, implementations of doVisit call an {@code enter} method, while
-     * implementations of transitionToNextState push a child state onto the stack as long as
-     * the {@code enter} method returned {@code true}. VisitState implementations can keep a
-     * Progress field and dispatch on it from both doVisit and transitionToNextState to make the
-     * communication of state clear. See {@link VisitDefinitionState} for a simple example.
-     */
-    enum Progress {
-      /**
-       * The VisitState has not called its node's {@code enter} method.
-       * Valid successor states are {@link #BEFORE_CHILDREN} and {@link #LEAVING}.
-       */
-      BEFORE_ENTER,
-      /**
-       * The VisitState has called its node's {@code enter} method, and it returned {@code true},
-       * indicating that the node's children should be visited.
-       * {@link #LEAVING} is the only valid successor state.
-       */
-      BEFORE_CHILDREN,
-      /**
-       * The VisitState has called its node's {@code enter} method. If it returned {@code true},
-       * the VisitState has pushed a child state onto the stack. The node's {@code leave} method
-       * may also have been called. There are no valid successor states.
-       *
-       * <p>TODO(brndn): consider splitting this into two states, BEFORE_LEAVE and AFTER_LEAVE,
-       * to prevent multiple calls to transitionToNextState.
-       */
-      LEAVING;
-    }
   }
 
   /**
@@ -328,11 +293,6 @@ class DefaultVisitController implements MutatingVisitController {
       this.root = root;
     }
 
-    /*
-     * TODO(user): complex flow of control with other root visitor classes. Ensure enterTree()
-     * return value is propagated correctly.
-     */
-    @SuppressWarnings("CheckReturnValue")
     @Override
     public void doVisit() {
       visitor.enterTree(root);
@@ -406,7 +366,9 @@ class DefaultVisitController implements MutatingVisitController {
 
     private final CssImportBlockNode block;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
 
     RootVisitImportBlockState(CssRootNode root, CssImportBlockNode block) {
       this.root = root;
@@ -415,30 +377,21 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterImportBlock(block) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveImportBlock(block);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterImportBlock(block);
+      } else {
+        visitor.leaveImportBlock(block);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitImportBlockChildrenState(block));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.transitionTo(new RootVisitBodyState(root, root.getBody()));
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitImportBlockChildrenState(block));
+        visitedChildren = true;
+      } else {
+        stateStack.transitionTo(
+            new RootVisitBodyState(root, root.getBody()));
       }
     }
   }
@@ -491,7 +444,6 @@ class DefaultVisitController implements MutatingVisitController {
     }
 
     @Override
-    @SuppressWarnings("CheckReturnValue") // CssProvideNodes have no children
     public void doVisit() {
       visitor.enterProvideNode(node);
       visitor.leaveProvideNode(node);
@@ -513,7 +465,6 @@ class DefaultVisitController implements MutatingVisitController {
     }
 
     @Override
-    @SuppressWarnings("CheckReturnValue") // CssRequireNodes have no children
     public void doVisit() {
       visitor.enterRequireNode(node);
       visitor.leaveRequireNode(node);
@@ -532,7 +483,9 @@ class DefaultVisitController implements MutatingVisitController {
 
     private final CssBlockNode body;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
 
     RootVisitBodyState(CssRootNode root, CssBlockNode body) {
       this.root = root;
@@ -541,30 +494,20 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterBlock(body) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveBlock(body);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterBlock(body);
+      } else {
+        visitor.leaveBlock(body);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitBlockChildrenState(body));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.transitionTo(new RootVisitAfterChildrenState(root));
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitBlockChildrenState(body));
+        visitedChildren = true;
+      } else {
+        stateStack.transitionTo(new RootVisitAfterChildrenState(root));
       }
     }
   }
@@ -582,7 +525,9 @@ class DefaultVisitController implements MutatingVisitController {
 
     private final CssDefinitionNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
 
     VisitDefinitionState(CssDefinitionNode node) {
       this.node = node;
@@ -590,30 +535,20 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterDefinition(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveDefinition(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterDefinition(node);
+      } else {
+        visitor.leaveDefinition(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitDefinitionParametersState(node));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitDefinitionParametersState(node));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
@@ -711,33 +646,33 @@ class DefaultVisitController implements MutatingVisitController {
     }
   }
 
-  private final class VisitMediaTypeListDelimiterState extends BaseVisitState<CssNode> {
+  private class VisitMediaTypeListDelimiterState
+      extends BaseVisitState<CssNode> {
 
-    final CssNodesListNode<? extends CssNode> node;
+    private final CssNodesListNode<? extends CssNode> node;
 
-    VisitMediaTypeListDelimiterState(CssNodesListNode<? extends CssNode> node) {
+    public VisitMediaTypeListDelimiterState(
+        CssNodesListNode<? extends CssNode> node) {
       this.node = node;
     }
 
-    @SuppressWarnings("CheckReturnValue") // delimiters have no children
-    @Override
-    public void doVisit() {
+    @Override public void doVisit() {
       visitor.enterMediaTypeListDelimiter(node);
       visitor.leaveMediaTypeListDelimiter(node);
     }
-
-    @Override
-    public void transitionToNextState() {
+    @Override public void transitionToNextState() {
       stateStack.pop();
     }
   }
 
   @VisibleForTesting
-  final class VisitPageRuleState extends VisitChildrenOptionalState<CssNode> {
+  class VisitPageRuleState extends VisitChildrenOptionalState<CssNode> {
 
     private final CssPageRuleNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
 
     VisitPageRuleState(CssPageRuleNode node) {
       this.node = node;
@@ -745,40 +680,32 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterPageRule(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leavePageRule(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterPageRule(node);
+      } else {
+        visitor.leavePageRule(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
 
   @VisibleForTesting
-  final class VisitPageSelectorState extends VisitChildrenOptionalState<CssNode> {
+  class VisitPageSelectorState extends VisitChildrenOptionalState<CssNode> {
 
     private final CssPageSelectorNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
 
     VisitPageSelectorState(CssPageSelectorNode node) {
       this.node = node;
@@ -786,40 +713,32 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterPageSelector(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leavePageSelector(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterPageSelector(node);
+      } else {
+        visitor.leavePageSelector(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
 
   @VisibleForTesting
-  final class VisitFontFaceState extends VisitChildrenOptionalState<CssNode> {
+  class VisitFontFaceState extends VisitChildrenOptionalState<CssNode> {
 
     private final CssFontFaceNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
 
     VisitFontFaceState(CssFontFaceNode node) {
       this.node = node;
@@ -827,40 +746,30 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterFontFace(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveFontFace(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterFontFace(node);
+      } else {
+        visitor.leaveFontFace(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          break;
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitUnknownAtRuleBlockState(node.getBlock()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
 
   @VisibleForTesting
-  final class VisitConditionalBlockState extends BaseVisitState<CssNode> {
+  class VisitConditionalBlockState extends BaseVisitState<CssNode> {
 
     private final CssConditionalBlockNode block;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
     VisitConditionalBlockState(CssConditionalBlockNode block) {
       this.block = block;
@@ -868,30 +777,21 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterConditionalBlock(block) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveConditionalBlock(block);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitor.enterConditionalBlock(block);
+      } else {
+        visitor.leaveConditionalBlock(block);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitConditionalBlockChildrenState(block));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        stateStack.push(
+            new VisitConditionalBlockChildrenState(block));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
@@ -911,11 +811,13 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   @VisibleForTesting
-  final class VisitConditionalRuleState extends VisitChildrenOptionalState<CssNode> {
+  class VisitConditionalRuleState extends VisitChildrenOptionalState<CssNode> {
 
     private final CssConditionalRuleNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
 
     VisitConditionalRuleState(CssConditionalRuleNode node) {
       this.node = node;
@@ -923,30 +825,21 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterConditionalRule(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveConditionalRule(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterConditionalRule(node);
+      } else {
+        visitor.leaveConditionalRule(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitConditionalRuleChildrenState(node.getBlock()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(
+            new VisitConditionalRuleChildrenState(node.getBlock()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
@@ -960,11 +853,13 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   @VisibleForTesting
-  final class VisitRulesetState extends VisitChildrenOptionalState<CssNode> {
+  class VisitRulesetState extends VisitChildrenOptionalState<CssNode> {
 
     private final CssRulesetNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
 
     VisitRulesetState(CssRulesetNode node) {
       this.node = node;
@@ -972,40 +867,32 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterRuleset(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveRuleset(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterRuleset(node);
+      } else {
+        visitor.leaveRuleset(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitSelectorBlockState(node, node.getSelectors()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitSelectorBlockState(node, node.getSelectors()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
 
   @VisibleForTesting
-  final class VisitKeyframeRulesetState extends VisitChildrenOptionalState<CssNode> {
+  class VisitKeyframeRulesetState extends VisitChildrenOptionalState<CssNode> {
 
     private final CssKeyframeRulesetNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
+
+    private boolean shouldVisitChildren = true;
 
     VisitKeyframeRulesetState(CssKeyframeRulesetNode node) {
       this.node = node;
@@ -1013,42 +900,32 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterKeyframeRuleset(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveKeyframeRuleset(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        shouldVisitChildren = visitor.enterKeyframeRuleset(node);
+      } else {
+        visitor.leaveKeyframeRuleset(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitKeyBlockState(node, node.getKeys()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren && shouldVisitChildren) {
+        stateStack.push(new VisitKeyBlockState(node, node.getKeys()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
 
   @VisibleForTesting
-  final class VisitSelectorBlockState extends BaseVisitState<CssNode> {
+  class VisitSelectorBlockState extends BaseVisitState<CssNode> {
 
     private final CssSelectorListNode block;
 
     private final CssRulesetNode ruleset;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
     VisitSelectorBlockState(CssRulesetNode ruleset,
                             CssSelectorListNode block) {
@@ -1058,30 +935,22 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterSelectorBlock(block) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveSelectorBlock(block);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitor.enterSelectorBlock(block);
+      } else {
+        visitor.leaveSelectorBlock(block);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitSelectorBlockChildrenState(block));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.transitionTo(new VisitDeclarationBlockState(ruleset.getDeclarations()));
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        stateStack.push(
+            new VisitSelectorBlockChildrenState(block));
+        visitedChildren = true;
+      } else {
+        stateStack.transitionTo(
+            new VisitDeclarationBlockState(ruleset.getDeclarations()));
       }
     }
   }
@@ -1101,45 +970,38 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   @VisibleForTesting
-  final class VisitKeyBlockState extends BaseVisitState<CssNode> {
+  class VisitKeyBlockState extends BaseVisitState<CssNode> {
 
     private final CssKeyListNode block;
 
     private final CssKeyframeRulesetNode ruleset;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
-    VisitKeyBlockState(CssKeyframeRulesetNode ruleset, CssKeyListNode block) {
+    VisitKeyBlockState(CssKeyframeRulesetNode ruleset,
+                            CssKeyListNode block) {
       this.ruleset = ruleset;
       this.block = block;
     }
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterKeyBlock(block) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveKeyBlock(block);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitor.enterKeyBlock(block);
+      } else {
+        visitor.leaveKeyBlock(block);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitKeyBlockChildrenState(block));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.transitionTo(new VisitDeclarationBlockState(ruleset.getDeclarations()));
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        stateStack.push(
+            new VisitKeyBlockChildrenState(block));
+        visitedChildren = true;
+      } else {
+        stateStack.transitionTo(
+            new VisitDeclarationBlockState(ruleset.getDeclarations()));
       }
     }
   }
@@ -1159,11 +1021,11 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   @VisibleForTesting
-  final class VisitSelectorState extends BaseVisitState<CssNode> {
+  class VisitSelectorState extends BaseVisitState<CssNode> {
 
     private final CssSelectorNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
     VisitSelectorState(CssSelectorNode node) {
       this.node = node;
@@ -1171,74 +1033,55 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterSelector(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveSelector(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitor.enterSelector(node);
+      } else {
+        visitor.leaveSelector(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          // We need to prepare the stack such that the refiners are visited first
-          // and then the combinator if there is one.
-          if (node.getCombinator() != null) {
-            stateStack.push(new VisitCombinatorState(node.getCombinator()));
-          }
-          stateStack.push(new VisitRefinerListState(node.getRefiners()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        // We need to prepare the stack such that the refiners are visited first
+        // and then the combinator if there is one.
+        if (node.getCombinator() != null) {
+          stateStack.push(new VisitCombinatorState(node.getCombinator()));
+        }
+        stateStack.push(new VisitRefinerListState(node.getRefiners()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
 
   @VisibleForTesting
-  final class VisitKeyState extends BaseVisitState<CssNode> {
+  class VisitKeyState extends BaseVisitState<CssNode> {
 
     private final CssKeyNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
     VisitKeyState(CssKeyNode node) {
       this.node = node;
     }
 
-    @SuppressWarnings("CheckReturnValue") // CssKeyNodes have no children
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          visitor.enterKey(node);
-          state = LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveKey(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitor.enterKey(node);
+      } else {
+        visitor.leaveKey(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
@@ -1252,11 +1095,11 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   @VisibleForTesting
-  final class VisitRefinerNodeState extends BaseVisitState<CssNode> {
+  class VisitRefinerNodeState extends BaseVisitState<CssNode> {
 
     private final CssRefinerNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
     VisitRefinerNodeState(CssRefinerNode node) {
       this.node = node;
@@ -1264,72 +1107,61 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          boolean shouldVisitChildren = true;
-          // TODO(fbenz): Actually each of these nodes should have its own state
-          // here but this adds a bunch of similar code that is not really
-          // necessary. The problem is the design of the visit controller. I'm
-          // going to refactor it so that it doesn't make sense to add all the
-          // states.
-          if (node instanceof CssClassSelectorNode) {
-            shouldVisitChildren = visitor.enterClassSelector((CssClassSelectorNode) node);
-          } else if (node instanceof CssIdSelectorNode) {
-            shouldVisitChildren = visitor.enterIdSelector((CssIdSelectorNode) node);
-          } else if (node instanceof CssPseudoClassNode) {
-            shouldVisitChildren = visitor.enterPseudoClass((CssPseudoClassNode) node);
-          } else if (node instanceof CssPseudoElementNode) {
-            shouldVisitChildren = visitor.enterPseudoElement((CssPseudoElementNode) node);
-          } else if (node instanceof CssAttributeSelectorNode) {
-            shouldVisitChildren = visitor.enterAttributeSelector((CssAttributeSelectorNode) node);
-          }
-          state = shouldVisitChildren ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          if (node instanceof CssClassSelectorNode) {
-            visitor.leaveClassSelector((CssClassSelectorNode) node);
-          } else if (node instanceof CssIdSelectorNode) {
-            visitor.leaveIdSelector((CssIdSelectorNode) node);
-          } else if (node instanceof CssPseudoClassNode) {
-            visitor.leavePseudoClass((CssPseudoClassNode) node);
-          } else if (node instanceof CssPseudoElementNode) {
-            visitor.leavePseudoElement((CssPseudoElementNode) node);
-          } else if (node instanceof CssAttributeSelectorNode) {
-            visitor.leaveAttributeSelector((CssAttributeSelectorNode) node);
-          }
-          break;
-        default:
-          throw new AssertionError();
+      // TODO(fbenz): Actually each of these nodes should have its own state
+      // here but this adds a bunch of similar code that is not really
+      // necessary. The problem is the design of the visit controller. I'm
+      // going to refactor it so that it doesn't make sense to add all the
+      // states.
+      if (!visitedChildren) {
+        if (node instanceof CssClassSelectorNode) {
+          visitor.enterClassSelector((CssClassSelectorNode) node);
+        } else if (node instanceof CssIdSelectorNode) {
+          visitor.enterIdSelector((CssIdSelectorNode) node);
+        } else if (node instanceof CssPseudoClassNode) {
+          visitor.enterPseudoClass((CssPseudoClassNode) node);
+        } else if (node instanceof CssPseudoElementNode) {
+          visitor.enterPseudoElement((CssPseudoElementNode) node);
+        } else if (node instanceof CssAttributeSelectorNode) {
+          visitor.enterAttributeSelector((CssAttributeSelectorNode) node);
+        }
+      } else {
+        if (node instanceof CssClassSelectorNode) {
+          visitor.leaveClassSelector((CssClassSelectorNode) node);
+        } else if (node instanceof CssIdSelectorNode) {
+          visitor.leaveIdSelector((CssIdSelectorNode) node);
+        } else if (node instanceof CssPseudoClassNode) {
+          visitor.leavePseudoClass((CssPseudoClassNode) node);
+        } else if (node instanceof CssPseudoElementNode) {
+          visitor.leavePseudoElement((CssPseudoElementNode) node);
+        } else if (node instanceof CssAttributeSelectorNode) {
+          visitor.leaveAttributeSelector((CssAttributeSelectorNode) node);
+        }
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          if (node instanceof CssPseudoClassNode) {
-            CssPseudoClassNode pseudoClass = (CssPseudoClassNode) node;
-            if (pseudoClass.getNotSelector() != null) {
-              stateStack.push(new VisitSelectorState(pseudoClass.getNotSelector()));
-            }
+      if (!visitedChildren) {
+        if (node instanceof CssPseudoClassNode) {
+          CssPseudoClassNode pseudoClass = (CssPseudoClassNode) node;
+          if (pseudoClass.getNotSelector() != null) {
+            stateStack.push(new VisitSelectorState(
+                pseudoClass.getNotSelector()));
           }
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+        }
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
 
   @VisibleForTesting
-  final class VisitCombinatorState extends BaseVisitState<CssNode> {
+  class VisitCombinatorState extends BaseVisitState<CssNode> {
 
     private final CssCombinatorNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
     VisitCombinatorState(CssCombinatorNode node) {
       this.node = node;
@@ -1337,30 +1169,20 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterCombinator(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveCombinator(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitor.enterCombinator(node);
+      } else {
+        visitor.leaveCombinator(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitSelectorState(node.getSelector()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        stateStack.push(new VisitSelectorState(node.getSelector()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
@@ -1381,11 +1203,6 @@ class DefaultVisitController implements MutatingVisitController {
       this.node = block;
     }
 
-    /*
-     * TODO(user): complex flow of control. Ensure enterDeclarationBlock() return value is
-     * propagated correctly.
-     */
-    @SuppressWarnings("CheckReturnValue")
     @Override
     public void doVisit() {
       if (!startedVisitingChildren) {
@@ -1443,11 +1260,11 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   @VisibleForTesting
-  final class VisitDeclarationState extends BaseVisitState<CssNode> {
+  class VisitDeclarationState extends BaseVisitState<CssNode> {
 
     private final CssDeclarationNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
     VisitDeclarationState(CssDeclarationNode node) {
       this.node = node;
@@ -1455,30 +1272,20 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterDeclaration(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveDeclaration(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitor.enterDeclaration(node);
+      } else {
+        visitor.leaveDeclaration(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitPropertyValueState(node.getPropertyValue()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        stateStack.push(new VisitPropertyValueState(node.getPropertyValue()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
 
@@ -1490,11 +1297,11 @@ class DefaultVisitController implements MutatingVisitController {
   }
 
   @VisibleForTesting
-  final class VisitMixinState extends BaseVisitState<CssNode> {
+  class VisitMixinState extends BaseVisitState<CssNode> {
 
     private final CssMixinNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
     VisitMixinState(CssMixinNode node) {
       this.node = node;
@@ -1502,30 +1309,21 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterMixin(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveMixin(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitor.enterMixin(node);
+      } else {
+        visitor.leaveMixin(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitFunctionArgumentsNodeState(node.getArguments()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        stateStack.push(
+            new VisitFunctionArgumentsNodeState(node.getArguments()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }
@@ -1545,11 +1343,6 @@ class DefaultVisitController implements MutatingVisitController {
       this.node = node;
     }
 
-    /*
-     * TODO(user): complex flow of control. Ensure enterPropertyValue() return value is
-     * propagated correctly.
-     */
-    @SuppressWarnings("CheckReturnValue")
     @Override
     public void doVisit() {
       if (!visitingChildren) {
@@ -1633,7 +1426,6 @@ class DefaultVisitController implements MutatingVisitController {
       this.node = node;
     }
 
-    @SuppressWarnings("CheckReturnValue") // non-composite CssValueNodes have no children.
     @Override
     public void doVisit() {
       visitor.enterValueNode(node);
@@ -1749,11 +1541,6 @@ class DefaultVisitController implements MutatingVisitController {
       this.parent = parent;
     }
 
-    /*
-     * TODO(user): complex flow of control with VisitCompositeValueState. Ensure
-     * enterCompositeValueNodeOperator() return value is propagated correctly.
-     */
-    @SuppressWarnings("CheckReturnValue")
     @Override
     public void doVisit() {
       visitor.enterCompositeValueNodeOperator(parent);
@@ -1913,7 +1700,6 @@ class DefaultVisitController implements MutatingVisitController {
       this.node = node;
     }
 
-    @SuppressWarnings("CheckReturnValue") // non-composite CssValueNodes have no children
     @Override
     public void doVisit() {
       visitor.enterArgumentNode(node);
@@ -2139,7 +1925,7 @@ class DefaultVisitController implements MutatingVisitController {
 
     private final CssMixinDefinitionNode node;
 
-    private Progress state = BEFORE_ENTER;
+    private boolean visitedChildren = false;
 
     VisitMixinDefinitionState(CssMixinDefinitionNode node) {
       this.node = node;
@@ -2147,30 +1933,20 @@ class DefaultVisitController implements MutatingVisitController {
 
     @Override
     public void doVisit() {
-      switch (state) {
-        case BEFORE_ENTER:
-          state = visitor.enterMixinDefinition(node) ? BEFORE_CHILDREN : LEAVING;
-          break;
-        case LEAVING:
-          visitor.leaveMixinDefinition(node);
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        visitor.enterMixinDefinition(node);
+      } else {
+        visitor.leaveMixinDefinition(node);
       }
     }
 
     @Override
     public void transitionToNextState() {
-      switch (state) {
-        case BEFORE_CHILDREN:
-          stateStack.push(new VisitDeclarationBlockState(node.getBlock()));
-          state = LEAVING;
-          break;
-        case LEAVING:
-          stateStack.pop();
-          break;
-        default:
-          throw new AssertionError();
+      if (!visitedChildren) {
+        stateStack.push(new VisitDeclarationBlockState(node.getBlock()));
+        visitedChildren = true;
+      } else {
+        stateStack.pop();
       }
     }
   }

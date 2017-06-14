@@ -245,7 +245,6 @@ public class DefaultVisitControllerTest {
     CssTree tree = new CssTree((SourceCode) null);
     DefaultVisitController visitController = new DefaultVisitController(
         tree, true);
-    visitController.visitor = new DefaultTreeVisitor();
     RootVisitImportBlockState state =
         visitController
         .new RootVisitImportBlockState(tree.getRoot(), tree.getRoot().getImportRules());
@@ -253,7 +252,6 @@ public class DefaultVisitControllerTest {
     visitController.getStateStack().push(state);
     assertThat(visitController.getStateStack().getTop()).isEqualTo(state);
 
-    state.doVisit();
     state.transitionToNextState();
     assertThat(visitController.getStateStack().size()).isEqualTo(2);
     assertThat(visitController.getStateStack().getTop())
@@ -319,7 +317,6 @@ public class DefaultVisitControllerTest {
     visitController.getStateStack().push(state);
     assertThat(visitController.getStateStack().getTop()).isEqualTo(state);
 
-    state.doVisit();
     state.transitionToNextState();
     assertThat(visitController.getStateStack().size()).isEqualTo(2);
     assertThat(visitController.getStateStack().getTop())
@@ -358,7 +355,6 @@ public class DefaultVisitControllerTest {
     assertThat(visitController.getStateStack().getTop()).isInstanceOf(VisitDefinitionState.class);
     assertThat(state.currentIndex).isEqualTo(0);
 
-    visitController.getStateStack().getTop().doVisit();
     visitController.getStateStack().getTop().transitionToNextState();
     assertThat(visitController.getStateStack().size()).isEqualTo(3);
 
@@ -399,7 +395,6 @@ public class DefaultVisitControllerTest {
     state.removeCurrentChild();
     assertThat(state.currentIndex).isEqualTo(0);
 
-    visitController.getStateStack().getTop().doVisit();
     visitController.getStateStack().getTop().transitionToNextState();
     assertThat(visitController.getStateStack().size()).isEqualTo(3);
 
@@ -445,7 +440,6 @@ public class DefaultVisitControllerTest {
     state.removeCurrentChild();
     assertThat(state.currentIndex).isEqualTo(0);
 
-    visitController.getStateStack().getTop().doVisit();
     visitController.getStateStack().getTop().transitionToNextState();
     assertThat(visitController.getStateStack().size()).isEqualTo(3);
   }
