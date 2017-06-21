@@ -110,12 +110,13 @@ public class CreateStandardAtRuleNodes implements UniformVisitor, CssCompilerPas
           Type.BOTTOM_RIGHT_CORNER);
   private static final ImmutableSet<String> PSEUDO_PAGES =
       ImmutableSet.of(":left", ":right", ":first");
-  // The @-rules are restricted because it only makes sense for them to be used
-  // inside an @media block. Especially @def should never be allowed because it
-  // can be misleading; @def rules are processed by the compiler but @media
-  // rules are handled by the browser.
-  private static final ImmutableSet<String> ALLOWED_AT_RULES_IN_MEDIA =
-      ImmutableSet.of("page", "if", "elseif", "else", "for");
+  // Not all @-rules make sense inside an @media block. For
+  // example: @charset, @import, @namespace are only permitted at the
+  // beginning of a stylesheet. Also, @def should never be allowed
+  // because it can be misleading; @def rules are processed by the
+  // compiler but @media rules are handled by the browser.
+  private static final ImmutableSet<String> ALLOWED_AT_RULES_IN_MEDIA = ImmutableSet.of(
+      "page", "if", "elseif", "else", "for", "media", "keyframes", "supports", "font-face");
 
   private final MutatingVisitController visitController;
   private final ErrorManager errorManager;

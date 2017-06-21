@@ -422,4 +422,20 @@ public class CreateStandardAtRuleNodesTest extends PassesTestBase {
         + "  .test { font-color: red; }\n"
         + "}");
   }
+
+  @Test
+  public void testMediaKeyframes() throws Exception {
+    parseAndRun(
+        ""
+        + "@media (min-width: 500px) {\n"
+        + "  @keyframes frame {\n"
+        + "    from {\n"
+        + "      height: 0px;\n"
+        + "    }\n"
+        + "    to {\n"
+        + "      height: 100px;\n"
+        + "    }\n"
+        + "  }\n"
+        + "}\n");
+  }
 }
