@@ -34,7 +34,7 @@ public enum Vendor {
 
   private final String prefix;
 
-  private Vendor(String prefix) {
+  Vendor(String prefix) {
     this.prefix = prefix;
   }
 
@@ -45,5 +45,9 @@ public enum Vendor {
       }
     }
     return null;
+  }
+
+  public String getPrefix() {
+    return prefix;
   }
 }
