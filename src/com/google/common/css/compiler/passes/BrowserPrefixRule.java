@@ -27,9 +27,7 @@ import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssPropertyNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssValueNode;
-
 import java.util.List;
-
 import javax.annotation.Nullable;
 
 /**
@@ -42,7 +40,7 @@ import javax.annotation.Nullable;
  * <p>Each rule, if matched, provides a set of placeholder expansion nodes - which will
  * be cloned and swapped into the tree, as part of AutoExpandBrowserPrefix pass.
  */
-class BrowserPrefixRule {
+public final class BrowserPrefixRule {
   private final Optional<String> matchPropertyName;
   private final Optional<String> matchPropertyValue;
   private final boolean isFunction;
@@ -113,10 +111,10 @@ class BrowserPrefixRule {
   }
 
   /**
-   * @return A list of expansion nodes that contain a property names, and may contain a value.
-   * These nodes should be used when replacing declarations by matching property name.
+   * @return A list of expansion nodes that contain a property names, and may contain a value. These
+   *     nodes should be used when replacing declarations by matching property name.
    */
-  List<CssDeclarationNode> getExpansionNodes() {
+  public List<CssDeclarationNode> getExpansionNodes() {
     return expansionNodes;
   }
 

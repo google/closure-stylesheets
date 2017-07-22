@@ -144,14 +144,14 @@ public class BiDiFlipper extends DefaultTreeVisitor implements CssCompilerPass {
    * TODO(roozbeh): Replace the explicit listing of prefixes with a general
    * pattern of "-[a-z]+-" to avoid maintaining a prefix list.
    */
-  static final ImmutableSet<String> BORDER_RADIUS_PROPERTIES =
+  public static final ImmutableSet<String> BORDER_RADIUS_PROPERTIES =
       ImmutableSet.of(
           "border-radius",
           "-webkit-border-radius",
           "-moz-border-radius");
 
   /** Set of properties whose property values may flip if they match the four-part pattern. */
-  static final ImmutableSet<String> FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP =
+  public static final ImmutableSet<String> FOUR_PART_PROPERTIES_THAT_SHOULD_FLIP =
       ImmutableSet.of("border-color", "border-style", "border-width", "margin", "padding");
 
   /**
