@@ -544,8 +544,8 @@ the
  * @param title
  */
 {template .dialog}
-<div class=\"{css dialog-content}\">
-  <div class=\"{css dialog-title}\">{$title}</title>
+<div class=\"{css('dialog-content')}\">
+  <div class=\"{css('dialog-title')}\">{$title}</title>
   {call .content data=\"all\" /}
 </div>
 {/template}
