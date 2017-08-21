@@ -266,6 +266,34 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
   }
 
   @Test
+  public void testMissingOverrideSelectorNamespace_multilineComment() throws GssParserException {
+    String base =  ""
+        + "@provide 'foo.base';\n"
+        + "@def FOO_BASE_COLOR     #fff;\n";
+    String streamitem =  ""
+        + "@provide 'foo.streamitem';\n"
+        + "@require 'foo.base';\n"
+        + "/**\n"
+        + " * @overrideSelector {foo.foo}\n"
+        + " */\n"
+        + ".nav {\n"
+        + "  color: FOO_BASE_COLOR;\n"
+        + "}\n";
+
+    ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
+        "base.gss", base,
+        "streamitem.gss", streamitem);
+    parseAndBuildTree(fileNameToGss);
+    String[] expectedMessages = {"Missing @require for @overrideSelector"};
+    TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
+    runPasses(errorManager);
+    errorManager.generateReport();
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
+  }
+
+  @Test
   public void testMissingOverrideDefNamespace() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -288,4 +316,29 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
+  public void testMissingOverrideDefNamespace_multilineComment() throws GssParserException {
+    String base =  ""
+        + "@provide 'foo.base';\n"
+        + "@def FOO_BASE_COLOR     #fff;\n";
+    String streamitem =  ""
+        + "@provide 'foo.streamitem';\n"
+        + "@require 'foo.bar';\n"
+        + "/**\n"
+        + " * @overrideDef {foo.base}\n"
+        + " */\n"
+        + "@def FOO_BASE_COLOR  #ffe;\n";
+
+    ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
+        "base.gss", base,
+        "streamitem.gss", streamitem);
+    parseAndBuildTree(fileNameToGss);
+    String[] expectedMessages = {"Missing @require for @overrideDef"};
+    TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
+    runPasses(errorManager);
+    errorManager.generateReport();
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
+  }
 }

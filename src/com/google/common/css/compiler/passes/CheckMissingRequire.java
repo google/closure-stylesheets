@@ -16,6 +16,8 @@
 
 package com.google.common.css.compiler.passes;
 
+import static java.util.regex.Pattern.MULTILINE;
+
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Sets;
 import com.google.common.css.compiler.ast.CssCommentNode;
@@ -54,10 +56,10 @@ public final class CheckMissingRequire extends DefaultTreeVisitor implements Css
   private static final Logger logger = Logger.getLogger(CheckMissingRequire.class.getName());
 
   private static final Pattern OVERRIDE_SELECTOR_REGEX = Pattern.compile(
-      "/\\*\\*?\\s+@overrideSelector\\s+\\{(.*)\\}\\s+\\*/");
+      "^\\s*(?:/\\*?)?\\*\\s+@overrideSelector\\s+\\{(.*)\\}\\s*(?:\\*/)?$", MULTILINE);
 
   private static final Pattern OVERRIDE_DEF_REGEX = Pattern.compile(
-      "/\\*\\*?\\s+@overrideDef\\s+\\{(.*)\\}\\s+\\*/");
+      "^\\s*(?:/\\*?)?\\*\\s+@overrideDef\\s+\\{(.*)\\}\\s*(?:\\*/)?$", MULTILINE);
 
   private final VisitController visitController;
   private final ErrorManager errorManager;
