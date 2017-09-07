@@ -379,6 +379,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
         CssClassSelectorNode newNode = new CssClassSelectorNode(
             classPrefix + node.getRefinerName(),
             inAncestorBlock ? sourceCodeLocation : node.getSourceCodeLocation());
+        newNode.setComments(node.getComments());
         visitController.replaceCurrentBlockChildWith(ImmutableList.of(newNode), false);
       }
       firstClassSelector = false;

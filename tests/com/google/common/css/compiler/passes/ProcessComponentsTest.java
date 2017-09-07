@@ -25,14 +25,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.css.compiler.ast.CssCommentNode;
 import com.google.common.css.compiler.ast.CssDefinitionNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
+import com.google.common.css.compiler.ast.CssRefinerNode;
+import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.DefaultTreeVisitor;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -558,6 +562,51 @@ public class ProcessComponentsTest extends PassesTestBase {
         "CHILD__SPECIFIC_COLOR", FILE2,
         "CHILD__DERIVED_COLOR", FILE2);
     assertThat(foundDefs.build()).containsExactlyEntriesIn(expectedDefs).inOrder();
+  }
+
+  @Test
+  public void testComponentCommentsAreRetained() throws Exception {
+    CssTree tree =
+        parseAndRun(
+            ImmutableMap.of(
+                FILE1,
+                joinNl(
+                    ImmutableList.of(
+                        "@provide \"some.example.package\";",
+                        "@component PARENT {",
+                        "  /** Some comment. */",
+                        "  .Foo {",
+                        "    margin-left: 10px;",
+                        "  }",
+                        "}")),
+                FILE2,
+                joinNl(
+                    ImmutableList.of(
+                        "@provide \"another.example.package\";",
+                        "@require \"some.example.package\";",
+                        "@component CHILD extends PARENT {",
+                        "  /**",
+                        "   * Multiline comment.",
+                        "   */",
+                        "  .Foo { background-color: DERIVED_COLOR; color: SPECIFIC_COLOR; }",
+                        "}"))));
+    final List<String> foundComments = new ArrayList<>();
+    tree.getVisitController()
+        .startVisit(
+            new DefaultTreeVisitor() {
+              @Override
+              public boolean enterSelector(CssSelectorNode node) {
+                for (CssRefinerNode refiner : node.getRefiners().getChildren()) {
+                  for (CssCommentNode comment : refiner.getComments()) {
+                    foundComments.add(comment.getValue());
+                  }
+                }
+                return true;
+              }
+            });
+    String someComment = "/** Some comment. */";
+    String multilineComment = "/**\n" + "   * Multiline comment.\n" + "   */";
+    assertThat(foundComments).containsExactly(someComment, someComment, multilineComment).inOrder();
   }
 
   private String joinNl(Iterable<String> lines) {
