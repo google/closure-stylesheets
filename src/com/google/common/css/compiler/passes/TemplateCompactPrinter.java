@@ -30,7 +30,7 @@ import com.google.common.css.compiler.ast.VisitController;
  *
  * @author dgajda@google.com (Damian Gajda)
  */
-public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
+public class TemplateCompactPrinter<T> extends CompactPrinter {
 
   public static final char REFERENCE_START = '\u0123';
   public static final char REFERENCE_END = '\u0122';
@@ -40,6 +40,9 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
   public static final char DECLARATION_END = '\u0104';
   public static final char RULE_START = '\u0118';
   public static final char RULE_END = '\u0119';
+
+  /** Chunk to be printed by this printer. */
+  protected final T chunk;
 
   // CodeBuffer with specific behavior for the printer
   private static final class CodeBufferForTemplate extends CodeBuffer {
@@ -61,7 +64,8 @@ public class TemplateCompactPrinter<T> extends ChunkCompactPrinter<T> {
    * @param chunk the chunk selected for printing
    */
   public TemplateCompactPrinter(CssTree tree, T chunk) {
-    super(tree, chunk, new CodeBufferForTemplate());
+    super(tree, new CodeBufferForTemplate(), null /* generator */);
+    this.chunk = chunk;
   }
 
   @Override

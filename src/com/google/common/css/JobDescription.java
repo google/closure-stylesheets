@@ -64,6 +64,7 @@ public class JobDescription {
   public final GssFunctionMapProvider gssFunctionMapProvider;
   public final SubstitutionMapProvider cssSubstitutionMapProvider;
   public final OutputRenamingMapFormat outputRenamingMapFormat;
+  public final Map<String, String> inputRenamingMap;
   public final boolean preserveComments;
   public final boolean suppressDependencyCheck;
   public final Map<String, Integer> compileConstants;
@@ -138,6 +139,7 @@ public class JobDescription {
       GssFunctionMapProvider gssFunctionMapProvider,
       SubstitutionMapProvider cssSubstitutionMapProvider,
       OutputRenamingMapFormat outputRenamingMapFormat,
+      Map<String, String> inputRenamingMap,
       boolean preserveComments,
       boolean suppressDependencyCheck, Map<String, Integer> compileConstants,
       boolean createSourceMap,
@@ -185,6 +187,7 @@ public class JobDescription {
     this.gssFunctionMapProvider = gssFunctionMapProvider;
     this.cssSubstitutionMapProvider = cssSubstitutionMapProvider;
     this.outputRenamingMapFormat = outputRenamingMapFormat;
+    this.inputRenamingMap = inputRenamingMap;
     this.preserveComments = preserveComments;
     this.suppressDependencyCheck = suppressDependencyCheck;
     this.compileConstants = ImmutableMap.copyOf(compileConstants);

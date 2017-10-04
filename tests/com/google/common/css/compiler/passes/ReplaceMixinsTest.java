@@ -18,14 +18,19 @@ package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for the {@link ReplaceMixins} compiler pass.
  *
  * @author fbenz@google.com (Florian Benz)
  */
+@RunWith(JUnit4.class)
 public class ReplaceMixinsTest extends PassesTestBase {
 
+  @Test
   public void testMixinReplacement1() {
     testTreeConstruction(linesToString(
         "@defmixin test(COLOR) {",
@@ -38,6 +43,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[color:[[#fff]];]}]");
   }
 
+  @Test
   public void testMixinReplacement2() {
     testTreeConstruction(linesToString(
         "@defmixin color(COLOR) {",
@@ -56,6 +62,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[width:[[60%]];height:[[50%]];position:[[absolute]];color:[[red]];]}]");
   }
 
+  @Test
   public void testMixinReplacement3() {
     testTreeConstruction(linesToString(
         "@defmixin size(H, W) {",
@@ -74,6 +81,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         + "[div]{[width:[[200px]];height:[[100px]];]}]");
   }
 
+  @Test
   public void testMixinReplacement4() {
     testTreeConstruction(linesToString(
         "@defmixin size(W, H) {",
@@ -95,6 +103,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[color:[[#fff]];width:[[50%]];height:[[60%]];position:[[absolute]];]}]");
   }
 
+  @Test
   public void testMixinReplacement5() {
     testTreeConstruction(linesToString(
         "@defmixin empty(X, Y) {",
@@ -106,6 +115,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[]}]");
   }
 
+  @Test
   public void testMixinReplacementTwice() {
     testTreeConstruction(linesToString(
         "@defmixin test(COLOR) {",
@@ -119,6 +129,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[color:[[#fff]];color:[[#fff]];]}]");
   }
 
+  @Test
   public void testMixinReplacementNested1() {
     testTreeConstruction(linesToString(
         "@defmixin width(W) {",
@@ -136,6 +147,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[width:[[50%]];height:[[60%]];position:[[absolute]];]}]");
   }
 
+  @Test
   public void testMixinReplacementNested2() {
     testTreeConstruction(linesToString(
         "@defmixin width(W2) {",
@@ -154,6 +166,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[width:[[50%]];height:[[60%]];width:[[10px]];position:[[absolute]];]}]");
   }
 
+  @Test
   public void testMixinReplacementNested3() {
     testTreeConstruction(linesToString(
         "@defmixin width(W2) {",
@@ -174,6 +187,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         + "position:[[absolute]];]}]");
   }
 
+  @Test
   public void testMixinReplacementNested4() {
     testTreeConstruction(linesToString(
         "@defmixin empty() {",
@@ -191,6 +205,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[]}]");
   }
 
+  @Test
   public void testMixinReplacementNested5() {
     testTreeConstruction(linesToString(
         "@defmixin empty() {",
@@ -213,6 +228,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[]}]");
   }
 
+  @Test
   public void testCompositeValues1() {
     testTreeConstruction(linesToString(
         "@defmixin font(RATIO) {",
@@ -231,6 +247,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[font:[[[1em]/[1.3em]][Arial]];]}]");
   }
 
+  @Test
   public void testCompositeValues2() {
     testTreeConstruction(linesToString(
         "@defmixin margin(MARGIN) {",
@@ -243,6 +260,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "[[p]{[margin:[[1px][2px][3px][4px]];]}]");
   }
 
+  @Test
   public void testMixinReplacementComponents() {
     testTreeConstruction(linesToString(
         "@defmixin col(PAR) {",
@@ -269,6 +287,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         + "[.YELLOW_ABY-INCOMP]{[color:[[green]];background-color:[[yellow]];]}]");
   }
 
+  @Test
   public void testMixinReplacementGradient1() {
     testTreeConstruction(linesToString(
         "@def GRADIENT_POS top;",
@@ -291,6 +310,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         + "font-size:[[80%]];]}]");
   }
 
+  @Test
   public void testMixinReplacementGradient2() {
     testTreeConstruction(linesToString(
         "@defmixin grad(A, B, C, D, E) {",
@@ -305,6 +325,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         + "bottom left,red 20px,yellow,green,blue 90%)];]}]");
   }
 
+  @Test
   public void testMixinReplacementGradient3() {
     testTreeConstruction(linesToString(
         "@defmixin grad(A, B, C, D, E) {",
@@ -319,6 +340,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         + "bottom left,red 20px,yellow,green,blue 90%)];]}]");
   }
 
+  @Test
   public void testMixinReplacementOnCompositeValueNodeWithNestedValues() {
     testTreeConstruction(linesToString(
         "@defmixin foo(A, B, C) {",
@@ -330,6 +352,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         + "[.b]{[background:[[rgba(0,0,0,.2),rgba(0,0,0,.2)]];]}]");
   }
 
+  @Test
   public void testMixinReplacementGradientYouTube() {
     testTreeConstruction(linesToString(
         "@def _VR_MAIN rgba(0, 0, 0, .12), rgba(0, 0, 0, .08) 1px,"
@@ -348,31 +371,37 @@ public class ReplaceMixinsTest extends PassesTestBase {
         + " [[1px],rgba(0,0,0,0)] [[30px],[transparent]] 100%)];]}]");
   }
 
+  @Test
   public void testNoMatchingMixinDefinition() throws GssParserException {
     parseAndRun("@defmixin test() {} h1 { @mixin unkown(); }",
         ReplaceMixins.NO_MATCHING_MIXIN_DEFINITION_ERROR_MESSAGE);
   }
 
+  @Test
   public void testDifferentArgumentCount1() throws GssParserException {
     parseAndRun("@defmixin test(PAR1) {} h1 { @mixin test(10px, 20px); }",
         ReplaceMixins.ARGUMENT_MISMATCH_ERROR_MESSAGE);
   }
 
+  @Test
   public void testDifferentArgumentCount2() throws GssParserException {
     parseAndRun("@defmixin test(PAR1, PAR2) {} h1 { @mixin test(10px); }",
         ReplaceMixins.ARGUMENT_MISMATCH_ERROR_MESSAGE);
   }
 
+  @Test
   public void testDifferentArgumentCount3() throws GssParserException {
     parseAndRun("@defmixin test() {} h1 { @mixin test(10px, 20px); }",
         ReplaceMixins.ARGUMENT_MISMATCH_ERROR_MESSAGE);
   }
 
+  @Test
   public void testDifferentArgumentCount4() throws GssParserException {
     parseAndRun("@defmixin test(PAR1) {} h1 { @mixin test(); }",
         ReplaceMixins.ARGUMENT_MISMATCH_ERROR_MESSAGE);
   }
 
+  @Test
   public void testDifferentArgumentCount5() throws GssParserException {
     parseAndRun(linesToString(
         "@defmixin someMixin(A, C, D, E) {",
@@ -388,6 +417,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         ReplaceMixins.ARGUMENT_MISMATCH_ERROR_MESSAGE);
   }
 
+  @Test
   public void testNestedBad() throws GssParserException {
     parseAndRun(linesToString(
         "@defmixin color(COL) {",
@@ -405,6 +435,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         "GSS constant not defined: COLOR");
   }
 
+  @Test
   public void testCycle() throws GssParserException {
     parseAndRun(linesToString(
         "@defmixin a(A) {",
@@ -425,6 +456,7 @@ public class ReplaceMixinsTest extends PassesTestBase {
         ReplaceMixins.CYCLE_ERROR_MESSAGE);
   }
 
+  @Test
   public void testIdSeqInFontShorthandUsingDefMixin() throws Exception {
     testTreeConstruction(linesToString(
         "@defmixin myfont(FONTSTYLE, FONTFACEA, FONTFACEB) {",

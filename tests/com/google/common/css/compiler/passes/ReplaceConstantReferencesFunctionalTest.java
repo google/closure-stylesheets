@@ -17,14 +17,19 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Functional tests for {@link ReplaceConstantReferences}.
  *
  * @author oana@google.com (Oana Florescu)
  */
+@RunWith(JUnit4.class)
 public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
 
+  @Test
   public void testReplaceConstants1() {
     testTreeConstruction(linesToString(
         "@def A red;",
@@ -37,6 +42,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         "[[.CSS_RULE]{[background:[gssFunction(red,3px,1)];]}]");
   }
 
+  @Test
   public void testReplaceConstants2() {
     testTreeConstruction(linesToString(
         "@def A red;",
@@ -50,6 +56,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         "[[.CSS_RULE]{[border-color:[[red][green][blue]];]}]");
   }
 
+  @Test
   public void testReplaceConstants3() {
     testTreeConstruction(linesToString(
         "@def COLOR #ccc;",
@@ -65,6 +72,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         + "[blendColors(#ccc,#000) [#ccc][#ccc][#ccc]];]}]");
   }
 
+  @Test
   public void testReplaceConstants4() {
     testTreeConstruction(linesToString(
         "@def IE6 0;",
@@ -81,6 +89,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         + "[function(blendColors(red,0,-8,-8),1px,tr,0)];]}]");
   }
 
+  @Test
   public void testReplaceConstants5() {
     testTreeConstruction(linesToString(
         "@def EXT_COLOR red;",
@@ -94,6 +103,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         + "[function(blendColors(red))];]}]");
   }
 
+  @Test
   public void testWebkitGradient() {
     testTreeConstruction(linesToString(
         "@def A #fff;",
@@ -107,6 +117,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         + "[-webkit-gradient(linear,0 0,0 100%,from(#fff),to(#ddd))];]}]");
   }
 
+  @Test
   public void testCompositeValueNodeReplacement() {
     testTreeConstruction(linesToString(
       "@def DARK_DIVIDER_LEFT -1px 0 1px rgba(5,4,4,.3);",
@@ -120,6 +131,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
       + "];]}]");
   }
 
+  @Test
   public void testVariableInFunctionInComposite() throws Exception {
     testTreeConstruction(linesToString(
         "@def BG_COLOR beige;",
@@ -135,6 +147,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         + "rgba(255,255,255,0),beige 70%)]];]}]");
   }
 
+  @Test
   public void testCompositeValueNodeWithFunctions() {
     testTreeConstruction(linesToString(
         "@def DEF_A top, red 30%, rgba(0, 0, 0, 0);",
@@ -147,6 +160,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
         + "linear-gradient([[top],rgba(0,0,0,0),[red]] 30%)]];]}]");
   }
 
+  @Test
   public void testFontReplacement() throws Exception {
     testTreeConstruction(linesToString(
       "@def BASE_TINY_FONT_FACE verdana, arial, \"Courrier New\", sans-serif;",
@@ -158,6 +172,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
       "[[.A]{[font:[[19px][[verdana],[arial],[\"Courrier New\"],[sans-serif]]];]}]");
   }
 
+  @Test
   public void testMediaQueryReplacement1() throws Exception {
     testTreeConstruction(linesToString(
       "@def QUERY screen and (min-resolution:96dpi);",
@@ -169,6 +184,7 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
       "[@media [screen] [and] [(min-resolution:96dpi)]{[.A]{[color:[[red]];]}}]");
   }
 
+  @Test
   public void testMediaQueryReplacement2() throws Exception {
     testTreeConstruction(linesToString(
       "@def QUERY (min-resolution:96dpi);",
@@ -178,6 +194,30 @@ public class ReplaceConstantReferencesFunctionalTest extends PassesTestBase {
       "  }",
       "}"),
       "[@media [screen] [and] [(min-resolution:96dpi)]{[.A]{[color:[[red]];]}}]");
+  }
+
+  @Test
+  public void testCalcReplacement() {
+    testTreeConstruction(
+        "@def A 5px; .elem { width: calc(A * 2) }", "[[.elem]{[width:[calc([[[5px]]*[2]])];]}]");
+  }
+
+  @Test
+  public void testCalcReplacement_Complex1() {
+    testTreeConstruction(
+        "@def A 5px; .elem { width: calc((A * (A + 5) - A) / 2) }",
+        "[[.elem]{[width:[calc([[([([[5px]]*[([[5px]] + [5])])] - [[5px]])]/[2]])];]}]");
+  }
+
+  @Test
+  public void testCalcReplacement_Complex2() {
+    testTreeConstruction(
+        "@def A 5px;"
+            + "@def C calc(2 + A + 10px);"
+            + ".foo {"
+            + "width: C;"
+            + "}",
+        "[[.foo]{[width:[calc([[2] + [[[5px]] + [10px]]])];]}]");
   }
 
   @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Google Inc.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.common.css.compiler.ast;
+package com.google.common.css;
 
 /**
- * Shim class for the class moved to the passes package.
- *
- * @author fbenz@google.com (Florian Benz)
+ * Gives access to a node's location in the original source code.
  */
-public class CreateConstantReferences extends
-    com.google.common.css.compiler.passes.CreateConstantReferences {
-
-  /**
-   * @deprecated Use
-   *     {@link com.google.common.css.compiler.passes.CreateConstantReferences}
-   *     instead.
-   */
-  @Deprecated
-  public CreateConstantReferences(MutatingVisitController visitController) {
-    super(visitController);
-  }
+public interface Locatable {
+  SourceCodeLocation getSourceCodeLocation();
 }

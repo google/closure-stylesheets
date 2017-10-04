@@ -25,11 +25,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.css.Vendor;
-
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
 import javax.annotation.Nullable;
 
 /**
@@ -44,9 +41,15 @@ import javax.annotation.Nullable;
 public final class Property {
 
   /**
-   * The CSS properties recognized by default by the CSS Compiler, indexed by
-   * name. Note that this includes non-standard properties, such as
-   * "-webkit-border-radius".
+   * The string that prefixes all custom property names.
+   *
+   * @see <a href="https://www.w3.org/TR/css-variables/">Specification</a>
+   */
+  private static final java.lang.String CUSTOM_PROPERTY_PREFIX = "--";
+
+  /**
+   * The CSS properties recognized by default by the CSS Compiler, indexed by name. Note that this
+   * includes non-standard properties, such as "-webkit-border-radius".
    */
   private static final BiMap<String, Property> NAME_TO_PROPERTY_MAP;
 
@@ -213,9 +216,29 @@ public final class Property {
         builder("font-weight"),
         builder("glyph-orientation-horizontal").isSvgOnly(),
         builder("glyph-orientation-vertical").isSvgOnly(),
+        builder("grid"),
+        builder("grid-area"),
+        builder("grid-auto-columns"),
+        builder("grid-auto-flow"),
+        builder("grid-auto-rows"),
+        builder("grid-column"),
+        builder("grid-column-end"),
+        builder("grid-column-gap"),
+        builder("grid-column-start"),
+        builder("grid-gap"),
+        builder("grid-row"),
+        builder("grid-row-end"),
+        builder("grid-row-gap"),
+        builder("grid-row-start"),
+        builder("grid-template"),
+        builder("grid-template-areas"),
+        builder("grid-template-columns"),
+        builder("grid-template-rows"),
         builder("height"),
         builder("image-rendering").isSvgOnly(),
         builder("justify-content"),
+        builder("justify-items"),
+        builder("justify-self"),
         builder("kerning").isSvgOnly(),
         builder("-khtml-user-select"),
         builder("left"),
@@ -751,6 +774,7 @@ public final class Property {
         builder("-webkit-wrap-shape-inside"),
         builder("-webkit-wrap-shape-outside"),
         builder("-webkit-wrap-through"),
+        builder("-webkit-writing-mode"),
         builder("white-space"),
         builder("windows"),
         builder("will-change"),
@@ -758,7 +782,7 @@ public final class Property {
         builder("word-break"),
         builder("word-spacing"),
         builder("word-wrap"),
-        builder("writing-mode").isSvgOnly(),
+        builder("writing-mode"),
         builder("z-index"),
         builder("zoom").setVendor(Vendor.MICROSOFT)
     );
@@ -782,24 +806,31 @@ public final class Property {
 
   private final boolean hasPositionalParameters;
 
+  private final boolean isCustom;
+
   private final boolean isSvgOnly;
 
   private final String warning;
 
-  private Property(String name,
+  private Property(
+      String name,
       Set<String> shorthands,
       String partition,
       @Nullable Vendor vendor,
       boolean hasPositionDependentValues,
+      boolean isCustom,
       boolean isSvgOnly,
       @Nullable String warning) {
-    Preconditions.checkArgument(name.equals(name.toLowerCase()),
-        "property name should be all lowercase: %s", name);
+    if (!isCustom) {
+      Preconditions.checkArgument(name.equals(name.toLowerCase()),
+          "property name should be all lowercase: %s", name);
+    }
     this.name = name;
     this.shorthands = shorthands;
     this.partition = partition;
     this.vendor = vendor;
     this.hasPositionalParameters = hasPositionDependentValues;
+    this.isCustom = isCustom;
     this.isSvgOnly = isSvgOnly;
     this.warning = warning;
   }
@@ -808,6 +839,9 @@ public final class Property {
     Preconditions.checkArgument(!NAME_TO_PROPERTY_MAP.containsKey(name));
     Builder builder = builder(name)
         .setShorthands(ImmutableSet.<String>of());
+    if (name.startsWith(CUSTOM_PROPERTY_PREFIX)) {
+      builder.isCustom();
+    }
     return builder.build();
   }
 
@@ -818,6 +852,11 @@ public final class Property {
    *     with the specified {@code name} will be created.
    */
   public static Property byName(String name) {
+    // All CSS property names are case-insensitive, except for custom properties.
+    if (!name.startsWith(CUSTOM_PROPERTY_PREFIX)) {
+      name = name.toLowerCase();
+    }
+
     Property property = NAME_TO_PROPERTY_MAP.get(name);
     if (property != null) {
       return property;
@@ -879,19 +918,24 @@ public final class Property {
   }
 
   /**
-   * @return the corresponding {@link Vendor} if {@link #isVendorSpecific()}
-   *     returns {@code true}; otherwise, returns {@code null}
+   * @return the corresponding {@link Vendor} if {@link #isVendorSpecific()} returns {@code true};
+   *     otherwise, returns {@code null}
    */
   public @Nullable Vendor getVendor() {
     return vendor;
   }
 
   /**
-   * @return whether this property can take positional parameters, such as
-   *     "margin", where the parameters "1px 2px 3px" imply "1px 2px 3px 2px"
+   * @return whether this property can take positional parameters, such as "margin", where the
+   *     parameters "1px 2px 3px" imply "1px 2px 3px 2px"
    */
   public boolean hasPositionalParameters() {
     return hasPositionalParameters;
+  }
+
+  /** @return whether this is a CSS custom property */
+  public boolean isCustom() {
+    return isCustom;
   }
 
   public boolean isSvgOnly() {
@@ -938,6 +982,7 @@ public final class Property {
     private Set<String> shorthands;
     private Vendor vendor;
     private boolean hasPositionalParameters;
+    private boolean isCustom;
     private boolean isSvgOnly;
     private String warning;
 
@@ -947,6 +992,7 @@ public final class Property {
       this.shorthands = null;
       this.vendor = Vendor.parseProperty(name);
       this.hasPositionalParameters = false;
+      this.isCustom = false;
       this.isSvgOnly = false;
       this.warning = null;
     }
@@ -962,6 +1008,7 @@ public final class Property {
           partition,
           this.vendor,
           this.hasPositionalParameters,
+          this.isCustom,
           this.isSvgOnly,
           this.warning);
     }
@@ -976,10 +1023,13 @@ public final class Property {
       return this;
     }
 
-    /**
-     * Indicates that the property is relevant only when styling SVG, but not
-     * HTML.
-     */
+    /** Indicates that the property is a CSS custom property. */
+    public Builder isCustom() {
+      this.isCustom = true;
+      return this;
+    }
+
+    /** Indicates that the property is relevant only when styling SVG, but not HTML. */
     public Builder isSvgOnly() {
       this.isSvgOnly = true;
       return this;
@@ -998,52 +1048,50 @@ public final class Property {
       return this;
     }
 
-    /**
-     * The set of all standard shorthand properties.
-     */
-    private static final Set<String> SHORTHAND_PROPERTIES = ImmutableSet.of(
-        "background",
-        "border",
-        "border-bottom",
-        "border-color",
-        "border-left",
-        "border-right",
-        "border-style",
-        "border-top",
-        "border-width",
-        "font",
-        "list-style",
-        "margin",
-        "outline",
-        "padding",
-        "pause");
+    /** The set of all standard shorthand properties. */
+    private static final ImmutableSet<String> SHORTHAND_PROPERTIES =
+        ImmutableSet.of(
+            "background",
+            "border",
+            "border-bottom",
+            "border-color",
+            "border-left",
+            "border-right",
+            "border-style",
+            "border-top",
+            "border-width",
+            "font",
+            "list-style",
+            "margin",
+            "outline",
+            "padding",
+            "pause");
 
     /**
-     * The set of standard properties that seem to have shorthands as defined by
-     * {@link #computeShorthandPropertiesFor}, but don't.
+     * The set of standard properties that seem to have shorthands as defined by {@link
+     * #computeShorthandPropertiesFor}, but don't.
      */
-    private static final Set<String> NO_SHORTHAND = ImmutableSet.of(
-        "border-collapse",
-        "border-spacing");
+    private static final ImmutableSet<String> NO_SHORTHAND =
+        ImmutableSet.of("border-collapse", "border-spacing");
 
-    private static final Map<String, String> BORDER_RADIUS_PROPERTIES =
+    private static final ImmutableMap<String, String> BORDER_RADIUS_PROPERTIES =
         ImmutableMap.<String, String>builder()
-        .put("border-radius", "border-radius")
-        .put("border-top-left-radius", "border-radius")
-        .put("border-top-right-radius", "border-radius")
-        .put("border-bottom-right-radius", "border-radius")
-        .put("border-bottom-left-radius", "border-radius")
-        .put("-webkit-border-radius", "-webkit-border-radius")
-        .put("-webkit-border-top-left-radius", "-webkit-border-radius")
-        .put("-webkit-border-top-right-radius", "-webkit-border-radius")
-        .put("-webkit-border-bottom-right-radius", "-webkit-border-radius")
-        .put("-webkit-border-bottom-left-radius", "-webkit-border-radius")
-        .put("-moz-border-radius", "-moz-border-radius")
-        .put("-moz-border-radius-topleft", "-moz-border-radius")
-        .put("-moz-border-radius-topright", "-moz-border-radius")
-        .put("-moz-border-radius-bottomright", "-moz-border-radius")
-        .put("-moz-border-radius-bottomleft", "-moz-border-radius")
-        .build();
+            .put("border-radius", "border-radius")
+            .put("border-top-left-radius", "border-radius")
+            .put("border-top-right-radius", "border-radius")
+            .put("border-bottom-right-radius", "border-radius")
+            .put("border-bottom-left-radius", "border-radius")
+            .put("-webkit-border-radius", "-webkit-border-radius")
+            .put("-webkit-border-top-left-radius", "-webkit-border-radius")
+            .put("-webkit-border-top-right-radius", "-webkit-border-radius")
+            .put("-webkit-border-bottom-right-radius", "-webkit-border-radius")
+            .put("-webkit-border-bottom-left-radius", "-webkit-border-radius")
+            .put("-moz-border-radius", "-moz-border-radius")
+            .put("-moz-border-radius-topleft", "-moz-border-radius")
+            .put("-moz-border-radius-topright", "-moz-border-radius")
+            .put("-moz-border-radius-bottomright", "-moz-border-radius")
+            .put("-moz-border-radius-bottomleft", "-moz-border-radius")
+            .build();
 
     /**
      * Computes the set of shorthand properties for a given standard property.

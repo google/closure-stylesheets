@@ -16,46 +16,52 @@
 
 package com.google.common.css.compiler.ast;
 
-import com.google.common.collect.Lists;
+import static com.google.common.truth.Truth.assertThat;
 
-import junit.framework.TestCase;
+import com.google.common.collect.Lists;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssDefinitionNode}.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
-public class CssDefinitionNodeTest extends TestCase {
+@RunWith(JUnit4.class)
+public class CssDefinitionNodeTest {
 
+  @Test
   public void testDefinitionNodeCreation() {
     CssDefinitionNode definition = new CssDefinitionNode(
         new CssLiteralNode("COLOR"));
 
-    assertNull(definition.getParent());
-    assertNull(definition.getSourceCodeLocation());
-    assertEquals("@def", definition.getType().toString());
-    assertEquals("@def COLOR []", definition.toString());
+    assertThat(definition.getParent()).isNull();
+    assertThat(definition.getSourceCodeLocation()).isNull();
+    assertThat(definition.getType().toString()).isEqualTo("@def");
+    assertThat(definition.toString()).isEqualTo("@def COLOR []");
   }
 
+  @Test
   public void testDefinitionNodeCopy() {
     CssDefinitionNode definition1 = new CssDefinitionNode(
         new CssLiteralNode("COLOR"), 
         Lists.newArrayList(new CssCommentNode("/* foo */", null)));
     CssDefinitionNode definition2 = new CssDefinitionNode(definition1);
     
-    assertNull(definition1.getParent());
-    assertNull(definition2.getParent());
-    
-    assertNull(definition1.getSourceCodeLocation());
-    assertNull(definition2.getSourceCodeLocation());
-    
-    assertEquals("@def", definition1.getType().toString());
-    assertEquals("@def", definition2.getType().toString());
-    
-    assertEquals("@def COLOR []", definition1.toString());
-    assertEquals("@def COLOR []", definition2.toString());
-    
-    assertTrue(definition1.hasComment("/* foo */"));
-    assertTrue(definition2.hasComment("/* foo */"));
+    assertThat(definition1.getParent()).isNull();
+    assertThat(definition2.getParent()).isNull();
+
+    assertThat(definition1.getSourceCodeLocation()).isNull();
+    assertThat(definition2.getSourceCodeLocation()).isNull();
+
+    assertThat(definition1.getType().toString()).isEqualTo("@def");
+    assertThat(definition2.getType().toString()).isEqualTo("@def");
+
+    assertThat(definition1.toString()).isEqualTo("@def COLOR []");
+    assertThat(definition2.toString()).isEqualTo("@def COLOR []");
+
+    assertThat(definition1.hasComment("/* foo */")).isTrue();
+    assertThat(definition2.hasComment("/* foo */")).isTrue();
   }
 }

@@ -16,28 +16,32 @@
 
 package com.google.common.css;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-
-import junit.framework.TestCase;
-
 import java.math.BigInteger;
 import java.util.Set;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Test for MinimalSubstitutionMap.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
-public class MinimalSubstitutionMapTest extends TestCase {
+@RunWith(JUnit4.class)
+public class MinimalSubstitutionMapTest {
 
   private static final char[] START_CHARS = new char[] { 'a' };
-
+  
   private static final char[] CHARS = new char[] { '1', '2' };
-
+  
   private MinimalSubstitutionMap map;
 
-  /**
+  /** 
    * @return a MinimalSubstitutionMap that uses fewer characters for CSS class
    *     names
    */
@@ -49,32 +53,34 @@ public class MinimalSubstitutionMapTest extends TestCase {
    * Tests basic get() functionality, and that get() returns the same value when
    * applied to the same key.
    */
+  @Test
   public void testGet() {
     map = createTestMap();
-    assertEquals("a", map.get("foo"));
+    assertThat(map.get("foo")).isEqualTo("a");
 
     // Note that the order the secondary characters appear in the generated CSS
     // class names does not match the order they appear in the CHARS array. This
     // is acceptable; the only important thing is that the names are unique,
     // which is confirmed by test_toShortString().
-    assertEquals("a2", map.get("bar"));
-    assertEquals("a1", map.get("baz"));
+    assertThat(map.get("bar")).isEqualTo("a2");
+    assertThat(map.get("baz")).isEqualTo("a1");
 
-    assertEquals("a", map.get("foo"));
+    assertThat(map.get("foo")).isEqualTo("a");
   }
 
   /**
    * Tests that the get() function correctly omits values from the blacklist.
    */
+  @Test
   public void testGetWithBlacklist() {
     map = new MinimalSubstitutionMap(START_CHARS, CHARS, ImmutableSet.of("a"));
 
     // We skipped over "a".  See testGet().
-    assertEquals("a2", map.get("foo"));
+    assertThat(map.get("foo")).isEqualTo("a2");
 
     // Move on to a new value, and then go back to "foo" to prove repeatability
-    assertEquals("a1", map.get("bar"));
-    assertEquals("a2", map.get("foo"));
+    assertThat(map.get("bar")).isEqualTo("a1");
+    assertThat(map.get("foo")).isEqualTo("a2");
   }
 
   /**
@@ -83,6 +89,7 @@ public class MinimalSubstitutionMapTest extends TestCase {
    * that there are only 2 strings with 2 chars, 4 strings with 3 chars,
    * 8 strings with 4 chars, etc.
    */
+  @Test
   public void testToShortString() {
     map = createTestMap();
 
@@ -98,22 +105,25 @@ public class MinimalSubstitutionMapTest extends TestCase {
       for (int i = 0; i < numberOfStringsWithThisLength; ++i) {
         String renamedClass = map.toShortString(n);
 
+        // Use blaze test --test_output=all to see this
         System.out.println("RENAMED CLASS: " + renamedClass);
 
-        assertFalse("Already contains a class named: " + renamedClass,
-            classes.contains(renamedClass));
-        assertEquals("Class name did not match expected length", stringLength,
-            renamedClass.length());
+        assertWithMessage("Already contains a class named: " + renamedClass)
+            .that(classes)
+            .doesNotContain(renamedClass);
+        assertWithMessage("Class name did not match expected length")
+            .that(renamedClass)
+            .hasLength(stringLength);
         classes.add(renamedClass);
         ++n;
       }
-      assertEquals("Does not contain all possible CSS class names of length "
-          + stringLength, NUM_CHARS.pow(power + 1).intValue() - 1,
-          classes.size());
+      assertWithMessage("Does not contain all possible CSS class names of length " + stringLength)
+          .that(classes)
+          .hasSize(NUM_CHARS.pow(power + 1).intValue() - 1);
     }
 
-    assertEquals("Does not contain all possible CSS class names of length "
-        + (MAX_POWER + 1), NUM_CHARS.pow(MAX_POWER + 1).intValue() - 1,
-        classes.size());
+    assertWithMessage("Does not contain all possible CSS class names of length " + (MAX_POWER + 1))
+        .that(classes)
+        .hasSize(NUM_CHARS.pow(MAX_POWER + 1).intValue() - 1);
   }
 }

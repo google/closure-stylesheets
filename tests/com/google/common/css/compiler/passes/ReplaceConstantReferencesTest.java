@@ -16,12 +16,11 @@
 
 package com.google.common.css.compiler.passes;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.BackDoorNodeMutation;
@@ -42,65 +41,67 @@ import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.GssError;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import junit.framework.TestCase;
-
-import org.easymock.Capture;
-import org.easymock.EasyMock;
-
 import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Unit tests for {@link ReplaceConstantReferences}.
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class ReplaceConstantReferencesTest extends TestCase {
+@RunWith(MockitoJUnitRunner.class)
+public class ReplaceConstantReferencesTest {
 
+  @Mock MutatingVisitController mockVisitController;
+  @Mock CssTree mockTree;
+  @Mock ConstantDefinitions mockDefinitions;
+  @Mock SourceCodeLocation mockLoc;
+  @Mock CssConstantReferenceNode mockRefNode;
+  @Mock ErrorManager mockErrorManager;
+  @Captor ArgumentCaptor<List<CssNode>> cssNodesCaptor;
+
+  @Test
   public void testRunPass() {
-    MutatingVisitController visitController = createMock(
-        MutatingVisitController.class);
-    CssTree tree = createMock(CssTree.class);
-    expect(tree.getMutatingVisitController())
-        .andReturn(visitController).anyTimes();
-    // We need to have this replayed because in the constructor of
-    // ReplaceConstantReferences pass we need tree.getMutatingVisitController().
-    replay(tree);
+    when(mockTree.getMutatingVisitController()).thenReturn(mockVisitController);
 
     ReplaceConstantReferences pass =
-        new ReplaceConstantReferences(tree, new ConstantDefinitions(),
-            true /* removeDefs */, new DummyErrorManager(),
+        new ReplaceConstantReferences(
+            mockTree,
+            new ConstantDefinitions(),
+            true /* removeDefs */,
+            new DummyErrorManager(),
             true /* allowUndefinedConstants */);
-    visitController.startVisit(pass);
-    replay(visitController);
+    mockVisitController.startVisit(pass);
 
     pass.runPass();
-    verify(visitController);
   }
 
+  @Test
   public void testEnterDefinitionNode() {
-    MutatingVisitController visitController = createMock(
-        MutatingVisitController.class);
-    CssTree tree = createMock(CssTree.class);
-    expect(tree.getMutatingVisitController())
-        .andReturn(visitController).anyTimes();
-    // We need to have this replayed because in the constructor of
-    // ReplaceConstantReferences pass we need tree.getMutatingVisitController().
-    replay(tree);
+    when(mockTree.getMutatingVisitController()).thenReturn(mockVisitController);
 
     ReplaceConstantReferences pass =
-      new ReplaceConstantReferences(tree, new ConstantDefinitions(),
-          true /* removeDefs */, new DummyErrorManager(),
-          true /* allowUndefinedConstants */);
+        new ReplaceConstantReferences(
+            mockTree,
+            new ConstantDefinitions(),
+            true /* removeDefs */,
+            new DummyErrorManager(),
+            true /* allowUndefinedConstants */);
 
-    visitController.removeCurrentNode();
-    replay(visitController);
+    mockVisitController.removeCurrentNode();
 
     CssDefinitionNode node = new CssDefinitionNode(new CssLiteralNode("COLOR"));
     pass.enterDefinition(node);
-    verify(visitController);
   }
 
+  @Test
   public void testEnterValueNode() {
     CssDefinitionNode def = new CssDefinitionNode(new CssLiteralNode("COLOR"));
     def.getParameters().add(new CssLiteralNode("red"));
@@ -138,87 +139,69 @@ public class ReplaceConstantReferencesTest extends TestCase {
             true /* removeDefs */, new DummyErrorManager(),
             true /* allowUndefinedConstants */);
     pass.runPass();
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[[foo]{[padding:[5px], color:[red]]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo("[[foo]{[padding:[5px], color:[red]]}]");
   }
 
   // TODO(oana): Added a task in tracker for fixing these dependencies and
   // making the mocking of objects easier.
+  @Test
   public void testEnterArgumentNode() {
     CssDefinitionNode def = new CssDefinitionNode(new CssLiteralNode("COLOR"));
 
-    MutatingVisitController visitController = createMock(
-        MutatingVisitController.class);
-    CssTree tree = createMock(CssTree.class);
-    expect(tree.getMutatingVisitController())
-        .andReturn(visitController).anyTimes();
-    ConstantDefinitions definitions = EasyMock.createMock(
-        ConstantDefinitions.class);
-    expect(definitions.getConstantDefinition("COLOR"))
-        .andReturn(def).anyTimes();
-    replay(definitions);
-    replay(tree);
+    when(mockTree.getMutatingVisitController()).thenReturn(mockVisitController);
+    when(mockDefinitions.getConstantDefinition("COLOR")).thenReturn(def);
 
     ReplaceConstantReferences pass =
-        new ReplaceConstantReferences(tree, definitions, true /* removeDefs */,
-            new DummyErrorManager(), true /* allowUndefinedConstants */);
-
-    Capture<List<CssNode>> tempList = new Capture<List<CssNode>>();
-    visitController.replaceCurrentBlockChildWith(capture(tempList), eq(true));
-    replay(visitController);
+        new ReplaceConstantReferences(
+            mockTree,
+            mockDefinitions,
+            true /* removeDefs */,
+            new DummyErrorManager(),
+            true /* allowUndefinedConstants */);
 
     CssConstantReferenceNode node = new CssConstantReferenceNode("COLOR", null);
     pass.enterArgumentNode(node);
-    verify(visitController);
-    assertEquals(1, tempList.getValue().size());
-    assertEquals(
-        CssCompositeValueNode.class,
-        tempList.getValue().get(0).getClass());
+
+    Mockito.verify(mockVisitController)
+        .replaceCurrentBlockChildWith(cssNodesCaptor.capture(), eq(true));
+    assertThat(cssNodesCaptor.getValue()).hasSize(1);
+    assertThat(cssNodesCaptor.getValue().get(0).getClass()).isEqualTo(CssCompositeValueNode.class);
   }
 
+  @Test
   public void testAllowUndefinedConstants() {
-    ConstantDefinitions definitions = EasyMock.createMock(
-        ConstantDefinitions.class);
-    expect(definitions.getConstantDefinition("Foo")).andStubReturn(null);
+    when(mockRefNode.getValue()).thenReturn("Foo");
+    when(mockRefNode.getSourceCodeLocation()).thenReturn(mockLoc);
 
-    SourceCodeLocation loc = createMock(SourceCodeLocation.class);
-    CssConstantReferenceNode refNode = createMock(
-        CssConstantReferenceNode.class);
-    expect(refNode.getValue()).andStubReturn("Foo");
-    expect(refNode.getSourceCodeLocation()).andStubReturn(loc);
+    ReplaceConstantReferences allowingPass =
+        new ReplaceConstantReferences(
+            mockTree,
+            mockDefinitions,
+            true /* removeDefs */,
+            mockErrorManager,
+            true /* allowUndefinedConstants */);
+    allowingPass.replaceConstantReference(mockRefNode);
 
     // This should not cause an error to be reported.
-    ErrorManager errorManager = createMock(ErrorManager.class);
-    replay(definitions, refNode, errorManager);
-    ReplaceConstantReferences allowingPass =
-        new ReplaceConstantReferences(createMock(CssTree.class), definitions,
-            true /* removeDefs */, errorManager,
-            true /* allowUndefinedConstants */);
-    allowingPass.replaceConstantReference(refNode);
-    verify(definitions, refNode, errorManager);
+    verify(mockErrorManager, times(0)).report(Matchers.<GssError>any());
   }
 
+  @Test
   public void testAllowUndefinedConstantsError() {
-    ConstantDefinitions definitions = EasyMock.createMock(
-        ConstantDefinitions.class);
-    expect(definitions.getConstantDefinition("Foo")).andStubReturn(null);
-
-    SourceCodeLocation loc = createMock(SourceCodeLocation.class);
-    CssConstantReferenceNode refNode = createMock(
-        CssConstantReferenceNode.class);
-    expect(refNode.getValue()).andStubReturn("Foo");
-    expect(refNode.getSourceCodeLocation()).andStubReturn(loc);
-
-    // This should cause an error to be reported.
-    ErrorManager errorManager = createMock(ErrorManager.class);
-    errorManager.report(EasyMock.<GssError>anyObject());
-    replay(definitions, refNode, errorManager);
+    when(mockRefNode.getValue()).thenReturn("Foo");
+    when(mockRefNode.getSourceCodeLocation()).thenReturn(mockLoc);
 
     ReplaceConstantReferences nonAllowingPass =
-      new ReplaceConstantReferences(createMock(CssTree.class), definitions,
-          true /* removeDefs */, errorManager,
-          false /* allowUndefinedConstants */);
-    nonAllowingPass.replaceConstantReference(refNode);
-    verify(definitions, refNode, errorManager);
+        new ReplaceConstantReferences(
+            mockTree,
+            mockDefinitions,
+            true /* removeDefs */,
+            mockErrorManager,
+            false /* allowUndefinedConstants */);
+    nonAllowingPass.replaceConstantReference(mockRefNode);
+
+    // This should cause an error to be reported.
+    verify(mockErrorManager).report(Matchers.<GssError>any());
   }
 }

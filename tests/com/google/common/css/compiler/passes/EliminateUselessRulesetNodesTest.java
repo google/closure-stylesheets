@@ -16,71 +16,58 @@
 
 package com.google.common.css.compiler.passes;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import junit.framework.TestCase;
-
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Unit tests for {@link EliminateUselessRulesetNodes}.
  *
- * TODO(oana): Added a task in tracker for fixing the dependencies and
- * making the mocking of objects easier.
+ * <p>TODO(oana): Added a task in tracker for fixing the dependencies and making the mocking of
+ * objects easier.
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class EliminateUselessRulesetNodesTest extends TestCase {
+@RunWith(MockitoJUnitRunner.class)
+public class EliminateUselessRulesetNodesTest {
 
-  public void testRunPass() {
-    MutatingVisitController visitController = createMock(
-        MutatingVisitController.class);
-    CssTree tree = createMock(CssTree.class);
-    expect(tree.getMutatingVisitController())
-        .andReturn(visitController).anyTimes();
-    tree.resetRulesetNodesToRemove();
-    replay(tree);
+  @Mock MutatingVisitController mockVisitController;
+  @Mock CssTree mockTree;
 
-    EliminateUselessRulesetNodes pass = new EliminateUselessRulesetNodes(tree);
-    visitController.startVisit(pass);
-    replay(visitController);
-
-    pass.runPass();
-    verify(visitController);
+  @Before
+  public void setUp() {
+    when(mockTree.getMutatingVisitController()).thenReturn(mockVisitController);
   }
 
+  @Test
+  public void testRunPass() {
+    EliminateUselessRulesetNodes pass = new EliminateUselessRulesetNodes(mockTree);
+    mockVisitController.startVisit(pass);
+
+    pass.runPass();
+  }
+
+  @Test
   public void testEnterRulesetNode() {
     CssRulesetNode node = new CssRulesetNode();
     List<CssRulesetNode> rulesList = Lists.newArrayList(node);
 
-    MutatingVisitController visitController = createMock(
-        MutatingVisitController.class);
-    CssTree tree = createMock(CssTree.class);
-    expect(tree.getMutatingVisitController())
-        .andReturn(visitController).anyTimes();
-    CssTree.RulesetNodesToRemove nodesToRemove = createMock(
-        CssTree.RulesetNodesToRemove.class);
-    expect(tree.getRulesetNodesToRemove()).andReturn(nodesToRemove)
-        .anyTimes();
-    expect(nodesToRemove.getRulesetNodes())
-        .andReturn(rulesList).anyTimes();
-    replay(nodesToRemove);
-    replay(tree);
+    CssTree.RulesetNodesToRemove nodesToRemove = mock(CssTree.RulesetNodesToRemove.class);
+    when(nodesToRemove.getRulesetNodes()).thenReturn(rulesList);
+    when(mockTree.getRulesetNodesToRemove()).thenReturn(nodesToRemove);
 
-    EliminateUselessRulesetNodes pass = new EliminateUselessRulesetNodes(tree);
-
-    visitController.removeCurrentNode();
-    replay(visitController);
+    EliminateUselessRulesetNodes pass = new EliminateUselessRulesetNodes(mockTree);
 
     pass.enterRuleset(node);
-    verify(visitController);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,30 @@
 
 package com.google.common.css.compiler.passes;
 
-import com.google.common.css.compiler.ast.FunctionalTestBase;
+import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** @author oana@google.com (Oana Florescu) */
+/**
+ * Unit tests for {@link WarnOnCustomProperty}.
+ */
 @RunWith(JUnit4.class)
-public class EliminateUselessRulesetNodesFunctionalTest extends FunctionalTestBase {
-
-  @Test
-  public void test() {
-    testTreeConstruction(
-        linesToString(
-            "foo { background-color: blue;}",
-            "foo { border-left: 5px;}",
-            "foo { background-color: red;}"
-            ),
-        "[[foo]{[border-left:[5px]]}, "
-        + "[foo]{[background-color:[red]]}]");
-  }
+public class WarnOnCustomPropertyTest extends NewFunctionalTestBase {
 
   @Override
   protected void runPass() {
-    MarkRemovableRulesetNodes markPass = new MarkRemovableRulesetNodes(tree);
-    markPass.runPass();
-    EliminateUselessRulesetNodes pass
-        = new EliminateUselessRulesetNodes(tree);
+    WarnOnCustomProperty pass = new WarnOnCustomProperty(tree.getVisitController(), errorManager);
     pass.runPass();
+  }
+
+  @Test
+  public void testWarnsOnDeclaration() throws Exception {
+    parseAndRun(":root { --test: 123; }", WarnOnCustomProperty.DECLARATION_WARNING_MSG);
+  }
+
+  @Test
+  public void testWarnsOnReference() throws Exception {
+    parseAndRun(":root { background: var(--test); }", WarnOnCustomProperty.REFERENCE_WARNING_MSG);
   }
 }

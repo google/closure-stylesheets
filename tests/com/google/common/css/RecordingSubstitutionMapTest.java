@@ -16,14 +16,19 @@
 
 package com.google.common.css;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-public final class RecordingSubstitutionMapTest extends TestCase {
+@RunWith(JUnit4.class)
+public final class RecordingSubstitutionMapTest {
 
   private static final ImmutableSet<String> OUTPUT_BLACKLIST = ImmutableSet.of("c", "e", "i");
 
@@ -35,16 +40,17 @@ public final class RecordingSubstitutionMapTest extends TestCase {
     return m;
   }
 
+  @Test
   public final void testReadAndWrite() throws IOException {
     for (OutputRenamingMapFormat format : OutputRenamingMapFormat.values()) {
       RecordingSubstitutionMap recording =
           new RecordingSubstitutionMap.Builder().withSubstitutionMap(createDelegate()).build();
       // Put some stuff into the map.
       // TIL: there are a lot of websites on the A-Z of fruits & vegetables.
-      assertEquals("x-a", recording.get("apple"));
-      assertEquals("x-b", recording.get("banana"));
-      assertEquals("x-d", recording.get("durian"));
-      assertEquals("x-f-g", recording.get("figgy-goop"));
+      assertThat(recording.get("apple")).isEqualTo("x-a");
+      assertThat(recording.get("banana")).isEqualTo("x-b");
+      assertThat(recording.get("durian")).isEqualTo("x-d");
+      assertThat(recording.get("figgy-goop")).isEqualTo("x-f-g");
 
       // Write it out.
       StringWriter out = new StringWriter();
@@ -65,7 +71,7 @@ public final class RecordingSubstitutionMapTest extends TestCase {
                 .withSubstitutionMap(createDelegate())
                 .withMappings(format.readRenamingMap(in))
                 .build();
-        assertEquals(-1, in.read());
+        assertThat(in.read()).isEqualTo(-1);
       } catch (IOException | RuntimeException ex) {
         throw (AssertionFailedError)
             new AssertionFailedError(
@@ -81,12 +87,12 @@ public final class RecordingSubstitutionMapTest extends TestCase {
 
       // Vary the order to check that we get stable values from the
       // earlier uses, and unambiguous new values.
-      assertEquals("x-b", recordingFromString.get("banana"));
-      assertEquals("x-h", recordingFromString.get("honeydew"));
-      assertEquals("x-a", recordingFromString.get("apple"));
-      assertEquals("x-f-g", recordingFromString.get("figgy-goop"));
-      assertEquals("x-d", recordingFromString.get("durian"));
-      assertEquals("x-j", recordingFromString.get("jalapeno"));
+      assertThat(recordingFromString.get("banana")).isEqualTo("x-b");
+      assertThat(recordingFromString.get("honeydew")).isEqualTo("x-h");
+      assertThat(recordingFromString.get("apple")).isEqualTo("x-a");
+      assertThat(recordingFromString.get("figgy-goop")).isEqualTo("x-f-g");
+      assertThat(recordingFromString.get("durian")).isEqualTo("x-d");
+      assertThat(recordingFromString.get("jalapeno")).isEqualTo("x-j");
     }
   }
 }

@@ -16,9 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.Lists;
 import com.google.common.css.compiler.ast.BackDoorNodeMutation;
@@ -36,30 +36,29 @@ import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.CssValueNode;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import junit.framework.TestCase;
-
 import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link ColorValueOptimizer}.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
-public class ColorValueOptimizerTest extends TestCase {
-  
+@RunWith(JUnit4.class)
+public class ColorValueOptimizerTest {
+
+  @Test
   public void testRunPass() {
-    MutatingVisitController visitController = createMock(
-        MutatingVisitController.class);
-    
+    MutatingVisitController visitController = mock(MutatingVisitController.class);
     ColorValueOptimizer pass = new ColorValueOptimizer(visitController);
     visitController.startVisit(pass);
-    replay(visitController);
     
     pass.runPass();
-    verify(visitController);
   }
 
+  @Test
   public void testEnterValueNode1() {
     CssPropertyNode prop = new CssPropertyNode("color", null);
     CssPropertyValueNode value = new CssPropertyValueNode();
@@ -82,10 +81,10 @@ public class ColorValueOptimizerTest extends TestCase {
     ColorValueOptimizer pass = new ColorValueOptimizer(
         tree.getMutatingVisitController());
     pass.runPass();
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[[foo]{[color:[#123]]}]");
+    assertThat(tree.getRoot().getBody().toString()).isEqualTo("[[foo]{[color:[#123]]}]");
   }
 
+  @Test
   public void testEnterValueNode2() {
     CssPropertyNode prop = new CssPropertyNode("color", null);
     CssPropertyValueNode value = new CssPropertyValueNode();
@@ -108,8 +107,7 @@ public class ColorValueOptimizerTest extends TestCase {
     ColorValueOptimizer pass = new ColorValueOptimizer(
         tree.getMutatingVisitController());
     pass.runPass();
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[[foo]{[color:[#123344]]}]");
+    assertThat(tree.getRoot().getBody().toString()).isEqualTo("[[foo]{[color:[#123344]]}]");
   }
 
   private CssNumericNode createNumericNode(String value) {
@@ -131,6 +129,7 @@ public class ColorValueOptimizerTest extends TestCase {
     return function;
   }
 
+  @Test
   public void testEnterFunctionNode1() {
     CssPropertyNode prop = new CssPropertyNode("color", null);
     CssPropertyValueNode value = new CssPropertyValueNode();
@@ -154,38 +153,42 @@ public class ColorValueOptimizerTest extends TestCase {
     ColorValueOptimizer pass = new ColorValueOptimizer(
         tree.getMutatingVisitController());
     pass.runPass();
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[[foo]{[color:[#0f0]]}]");
+    assertThat(tree.getRoot().getBody().toString()).isEqualTo("[[foo]{[color:[#0f0]]}]");
   }
 
+  @Test
   public void testCanShortenHex() {
-    assertTrue(ColorValueOptimizer.canShortenHexString("#000000"));
-    assertTrue(ColorValueOptimizer.canShortenHexString("#00aa22"));
-    assertFalse(ColorValueOptimizer.canShortenHexString("#000001"));
-    assertFalse(ColorValueOptimizer.canShortenHexString("#000"));
+    assertThat(ColorValueOptimizer.canShortenHexString("#000000")).isTrue();
+    assertThat(ColorValueOptimizer.canShortenHexString("#00aa22")).isTrue();
+    assertThat(ColorValueOptimizer.canShortenHexString("#000001")).isFalse();
+    assertThat(ColorValueOptimizer.canShortenHexString("#000")).isFalse();
   }
 
+  @Test
   public void testShortenHex() {
-    assertEquals("#000", ColorValueOptimizer.shortenHexString("#000000"));
-    assertEquals("#0a2", ColorValueOptimizer.shortenHexString("#00aa22"));
+    assertThat(ColorValueOptimizer.shortenHexString("#000000")).isEqualTo("#000");
+    assertThat(ColorValueOptimizer.shortenHexString("#00aa22")).isEqualTo("#0a2");
   }
 
+  @Test
   public void testParseRgbArguments() {
     CssFunctionNode function = createRgbFunctionNode("0", "15", "255");
-    assertEquals("#000fff", ColorValueOptimizer.parseRgbArguments(function));
+    assertThat(ColorValueOptimizer.parseRgbArguments(function)).isEqualTo("#000fff");
     function = createRgbFunctionNode("0%", "50%", "100%");
-    assertEquals("#0080ff", ColorValueOptimizer.parseRgbArguments(function));
+    assertThat(ColorValueOptimizer.parseRgbArguments(function)).isEqualTo("#0080ff");
   }
 
+  @Test
   public void testParseRgbArgumentsOutOfRange() {
     // Surprisingly, these are valid according to W3C and should be clamped
     // to valid values.
     CssFunctionNode function = createRgbFunctionNode("1", "1", "300");
-    assertEquals("#0101ff", ColorValueOptimizer.parseRgbArguments(function));
+    assertThat(ColorValueOptimizer.parseRgbArguments(function)).isEqualTo("#0101ff");
     function = createRgbFunctionNode("-10", "1", "1");
-    assertEquals("#000101", ColorValueOptimizer.parseRgbArguments(function));
+    assertThat(ColorValueOptimizer.parseRgbArguments(function)).isEqualTo("#000101");
   }
 
+  @Test
   public void testParseRgbArgumentsBadArgs() {
     CssFunctionNode function = new CssFunctionNode(
         CssFunctionNode.Function.byName("rgb"), null /* sourceCodeLocation */);

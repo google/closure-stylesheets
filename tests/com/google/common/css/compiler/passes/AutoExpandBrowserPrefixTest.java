@@ -17,12 +17,15 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for the {@link AutoExpandBrowserPrefix} compiler pass.
- */
+/** Unit tests for the {@link AutoExpandBrowserPrefix} compiler pass. */
+@RunWith(JUnit4.class)
 public class AutoExpandBrowserPrefixTest extends PassesTestBase {
 
+  @Test
   public void testMatchOnPropertyNameAndValue() {
     testTreeConstruction(linesToString(
         "p {",
@@ -33,6 +36,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
         + "[/* @alternate */]display:[[flex]];]}]");
   }
 
+  @Test
   public void testMatchOnPropertyName() {
     testTreeConstruction(linesToString(
         "p {",
@@ -43,6 +47,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
         + "[/* @alternate */]flex-grow:[[1]];]}]");
   }
 
+  @Test
   public void testMatchFunction() {
     testTreeConstruction(linesToString(
         "@def GRADIENT top, #f8f8f8, #f1f1f1;",
@@ -57,36 +62,38 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
         + "[/* @alternate */]background-image:[linear-gradient([[top],[#f8f8f8],[#f1f1f1]])];]}]");
   }
 
+  @Test
   public void testMatchValueOnlyFunction() {
-    testTreeConstruction(linesToString(
-        "p {",
-        "  margin: calc(100% - 24px) auto;",
-        "}"),
-        "[[p]{[[/* @alternate */]margin:[-webkit-calc(100% - 24px) [auto]];"
-        + "[/* @alternate */]margin:[-moz-calc(100% - 24px) [auto]];"
-        + "[/* @alternate */]margin:[calc(100% - 24px) [auto]];]}]");
+    testTreeConstruction(
+        "p { margin: calc(100% - 24px) auto; }",
+        ""
+            + "[[p]{[[/* @alternate */]margin:[-webkit-calc([[100%] - [24px]]) [auto]];"
+            + "[/* @alternate */]margin:[-moz-calc([[100%] - [24px]]) [auto]];"
+            + "[/* @alternate */]margin:[calc([[100%] - [24px]]) [auto]];]}]");
   }
 
+  @Test
   public void testMatchValueOnlyFunctionLast() {
-    testTreeConstruction(linesToString(
-        "p {",
-        "  margin: 10px calc(100% - 24px);",
-        "}"),
-        "[[p]{[[/* @alternate */]margin:[[10px]-webkit-calc(100% - 24px)];"
-        + "[/* @alternate */]margin:[[10px]-moz-calc(100% - 24px)];"
-        + "[/* @alternate */]margin:[[10px]calc(100% - 24px)];]}]");
+    testTreeConstruction(
+        "p { margin: 10px calc(100% - 24px); }",
+        ""
+            + "[[p]{[[/* @alternate */]margin:[[10px]-webkit-calc([[100%] - [24px]])];"
+            + "[/* @alternate */]margin:[[10px]-moz-calc([[100%] - [24px]])];"
+            + "[/* @alternate */]margin:[[10px]calc([[100%] - [24px]])];]}]");
   }
 
+  @Test
   public void testMatchValueOnlyMultipleFunctions() {
-    testTreeConstruction(linesToString(
-        "p {",
-        "  margin: calc(100% - 24px) calc(50% + 16px);",
-        "}"),
-        "[[p]{[[/* @alternate */]margin:[-webkit-calc(100% - 24px) -webkit-calc(50% + 16px)];"
-        + "[/* @alternate */]margin:[-moz-calc(100% - 24px) -moz-calc(50% + 16px)];"
-        + "[/* @alternate */]margin:[calc(100% - 24px) calc(50% + 16px)];]}]");
+    testTreeConstruction(
+        "p { margin: calc(100% - 24px) calc(50% + 16px); }",
+        ""
+            + "[[p]{[[/* @alternate */]margin:[-webkit-calc([[100%] - [24px]]) "
+            + "-webkit-calc([[50%] + [16px]])];"
+            + "[/* @alternate */]margin:[-moz-calc([[100%] - [24px]]) -moz-calc([[50%] + [16px]])];"
+            + "[/* @alternate */]margin:[calc([[100%] - [24px]]) calc([[50%] + [16px]])];]}]");
   }
 
+  @Test
   public void testDefMixinUnaffected() {
     testTreeConstruction(linesToString(
         "@defmixin display_flex() {",
@@ -115,8 +122,7 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
         errorManager).runPass();
     new CreateComponentNodes(tree.getMutatingVisitController(),
         errorManager).runPass();
-    new AutoExpandBrowserPrefix(tree.getMutatingVisitController(),
-        errorManager).runPass();
+    new AutoExpandBrowserPrefix(tree.getMutatingVisitController()).runPass();
 
     // The passes tested here.
     CollectMixinDefinitions collectDefinitions = new CollectMixinDefinitions(

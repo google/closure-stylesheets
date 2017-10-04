@@ -28,14 +28,12 @@ import com.google.debugging.sourcemap.SourceMapFormat;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
 import com.google.debugging.sourcemap.SourceMapGeneratorV3;
-
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Class to collect and generate source map(v3) for Gss compiler. It is intended to be used by
@@ -68,18 +66,20 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
    * Map used internally to get {@code Predicate<CssNode>}s from {@code DetailLevel}.
    *
    * <ul>
-   * <li> {@code ALL} provides the most details by generating source map for
-   * every nodes containing source locations.
-   * <li> {@code DEFAULT} generates source map for selected nodes and results in
-   * a smaller output suitable to use in production.
+   *   <li>{@code ALL} provides the most details by generating source map for every nodes containing
+   *       source locations.
+   *   <li>{@code DEFAULT} generates source map for selected nodes and results in a smaller output
+   *       suitable to use in production.
    * </ul>
    */
-  private static final Map<SourceMapDetailLevel, Predicate<CssNode>> DETAIL_LEVEL_PREDICATES =
-      Maps.immutableEnumMap(ImmutableMap.of(
-          SourceMapDetailLevel.ALL,
-          Predicates.<CssNode>alwaysTrue(),
-          SourceMapDetailLevel.DEFAULT,
-          Predicates.<CssNode>alwaysTrue()));
+  private static final ImmutableMap<SourceMapDetailLevel, Predicate<CssNode>>
+      DETAIL_LEVEL_PREDICATES =
+          Maps.immutableEnumMap(
+              ImmutableMap.of(
+                  SourceMapDetailLevel.ALL,
+                  Predicates.<CssNode>alwaysTrue(),
+                  SourceMapDetailLevel.DEFAULT,
+                  Predicates.<CssNode>alwaysTrue()));
 
   /** Deque to hold current mappings on stack while visiting the subtree. **/
   private final Deque<Mapping> mappings;
@@ -159,6 +159,7 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
     // as when a CssImportBlockNode is encountered, and there is no
     // copyright comment.
     Preconditions.checkState(endCharIndex >= -1);
+    endCharIndex++; //
     if (!mappings.isEmpty() && mappings.peek().node == node) {
       Mapping mapping = mappings.pop();
       mapping.end = new FilePosition(endLine, endCharIndex);

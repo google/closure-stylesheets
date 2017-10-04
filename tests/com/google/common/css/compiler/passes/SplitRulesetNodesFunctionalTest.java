@@ -17,20 +17,26 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Functional tests for {@link SplitRulesetNodes}.
  * 
  * @author oana@google.com (Oana Florescu)
  */
+@RunWith(JUnit4.class)
 public class SplitRulesetNodesFunctionalTest extends PassesTestBase {
 
+  @Test
   public void test1() {
     testTreeConstruction(
         "foo { border: 0px; padding: 5px; }",
         "[[foo]{[border:[[0px]];]}[foo]{[padding:[[5px]];]}]");
   }
 
+  @Test
   public void test2() {
     testTreeConstruction(
         "foo {"
@@ -42,6 +48,7 @@ public class SplitRulesetNodesFunctionalTest extends PassesTestBase {
         + "[foo]{[background:[[red]];]}]");
   }
 
+  @Test
   public void test3() {
     testTreeConstruction(
         "foo, bar { border: 0px; padding: 5px }",
@@ -49,6 +56,7 @@ public class SplitRulesetNodesFunctionalTest extends PassesTestBase {
         + "[bar]{[border:[[0px]];]}[bar]{[padding:[[5px]];]}]");
   }
 
+  @Test
   public void test4() {
     testTreeConstruction(
         linesToString(
@@ -58,6 +66,7 @@ public class SplitRulesetNodesFunctionalTest extends PassesTestBase {
         + "[.foobar]{[border:[[0px]];]}[.foobar]{[padding:[[5px]];]}]");
   }
 
+  @Test
   public void test5() {
     testTreeConstruction(
         ".foo.bar, .foobar+a "
@@ -66,6 +75,7 @@ public class SplitRulesetNodesFunctionalTest extends PassesTestBase {
         + "[.foobar+a]{[border:[[0px]];]}[.foobar+a]{[padding:[[5px]];]}]");
   }
 
+  @Test
   public void test6() {
     testTreeConstruction(
         ".foo.bar "

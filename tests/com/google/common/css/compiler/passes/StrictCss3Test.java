@@ -16,13 +16,19 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link StrictCss3}.
  *
  * @author fbenz@google.com (Florian Benz)
  */
+@RunWith(JUnit4.class)
 public class StrictCss3Test extends NewFunctionalTestBase {
   private String compactPrintedResult;
 
@@ -34,101 +40,121 @@ public class StrictCss3Test extends NewFunctionalTestBase {
     compactPrintedResult = compactPrinterPass.getCompactPrintedString();
   }
 
+  @Test
   public void testPseudoClass1() throws Exception {
     parseAndRun("div :root {}");
-    assertEquals("div :root{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :root{}");
   }
 
+  @Test
   public void testPseudoClass2() throws Exception {
     parseAndRun("div :last-child {}");
-    assertEquals("div :last-child{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :last-child{}");
   }
 
+  @Test
   public void testPseudoClass3() throws Exception {
     parseAndRun("div :empty {}");
-    assertEquals("div :empty{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :empty{}");
   }
 
+  @Test
   public void testPseudoClass4() throws Exception {
     parseAndRun("div :checked {}");
-    assertEquals("div :checked{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :checked{}");
   }
 
+  @Test
   public void testPseudoElement1() throws Exception {
     parseAndRun("p ::first-line {}");
-    assertEquals("p ::first-line{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("p ::first-line{}");
   }
 
+  @Test
   public void testPseudoElement2() throws Exception {
     parseAndRun("h1 ::first-letter {}");
-    assertEquals("h1 ::first-letter{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("h1 ::first-letter{}");
   }
 
+  @Test
   public void testPseudoElement3() throws Exception {
     parseAndRun("div ::after {}");
-    assertEquals("div ::after{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div ::after{}");
   }
 
+  @Test
   public void testPseudoElement4() throws Exception {
     parseAndRun("div ::before {}");
-    assertEquals("div ::before{}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div ::before{}");
   }
 
+  @Test
   public void testPseudoClassNth1() throws Exception {
     parseAndRun("ul :nth-child(5n+3) {}");
-    assertEquals("ul :nth-child(5n+3){}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("ul :nth-child(5n+3){}");
   }
 
+  @Test
   public void testPseudoClassNth2() throws Exception {
     parseAndRun("ol :nth-last-child(5) {}");
-    assertEquals("ol :nth-last-child(5){}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("ol :nth-last-child(5){}");
   }
 
+  @Test
   public void testPseudoClassNth3() throws Exception {
     parseAndRun("p :nth-of-type(odd) {}");
-    assertEquals("p :nth-of-type(odd){}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("p :nth-of-type(odd){}");
   }
 
+  @Test
   public void testPseudoClassNth4() throws Exception {
     parseAndRun("div :nth-last-of-type(-2n-3) {}");
-    assertEquals("div :nth-last-of-type(-2n-3){}", compactPrintedResult);
+    assertThat(compactPrintedResult).isEqualTo("div :nth-last-of-type(-2n-3){}");
   }
 
+  @Test
   public void testPseudoClassBad1() throws Exception {
     parseAndRun("div :none {}", false,
         StrictCss3.UNSUPPORTED_PESUDO_CLASS_ERROR_MESSAGE);
   }
 
+  @Test
   public void testPseudoClassBad2() throws Exception {
     parseAndRun("div :first-line {}", false,
         StrictCss3.UNSUPPORTED_PESUDO_CLASS_ERROR_MESSAGE);
   }
 
+  @Test
   public void testPseudoClassBad3() throws Exception {
     parseAndRun("div :after {}", false,
         StrictCss3.UNSUPPORTED_PESUDO_CLASS_ERROR_MESSAGE);
   }
 
+  @Test
   public void testPseudoElementBad() throws Exception {
     parseAndRun("div ::none {}", false,
         StrictCss3.UNSUPPORTED_PESUDO_ELEMENT_ERROR_MESSAGE);
   }
 
+  @Test
   public void testPseudoClassNthBad1() throws Exception {
     parseAndRun("div :none(2n) {}", false,
         StrictCss3.UNSUPPORTED_PESUDO_CLASS_NTH_ERROR_MESSAGE);
   }
 
+  @Test
   public void testPseudoClassNthBad2() throws Exception {
     parseAndRun("div :bad(odd) {}", false,
         StrictCss3.UNSUPPORTED_PESUDO_CLASS_NTH_ERROR_MESSAGE);
   }
 
+  @Test
   public void testPseudoClassNthBad3() throws Exception {
     parseAndRun("div :nth-last-of-type {}", false,
         StrictCss3.MISSING_FUNCTION_PESUDO_CLASS_NTH_ERROR_MESSAGE);
   }
 
+  @Test
   public void testValidLengthUnits() throws Exception {
     parseAndRun(
         "a {" +
@@ -159,6 +185,7 @@ public class StrictCss3Test extends NewFunctionalTestBase {
         "}");
   }
 
+  @Test
   public void testInvalidLengthUnit() throws Exception {
     parseAndRun(
         "a {" +
@@ -168,6 +195,7 @@ public class StrictCss3Test extends NewFunctionalTestBase {
   }
 
 
+  @Test
   public void testBorderValidation() throws Exception {
     parseAndRun(
         "a {" +
@@ -175,6 +203,7 @@ public class StrictCss3Test extends NewFunctionalTestBase {
         "}");
   }
 
+  @Test
   public void testBorderValidation2() throws Exception {
     parseAndRun(
         "a {" +
@@ -183,6 +212,7 @@ public class StrictCss3Test extends NewFunctionalTestBase {
         StrictCss3.INVALID_UNIT_PREFIX + "xx");
   }
 
+  @Test
   public void testBorderValidation3() throws Exception {
     parseAndRun(
         "a {" +

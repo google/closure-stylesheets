@@ -16,10 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.common.base.Joiner;
 import com.google.common.css.SourceCode;
@@ -35,45 +34,44 @@ import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.GssParser;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- *  Unit tests for {@link MergeAdjacentRulesetNodesWithSameDeclarations}.
+ * Unit tests for {@link MergeAdjacentRulesetNodesWithSameDeclarations}.
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class MergeAdjacentRulesetNodesWithSameDeclarationsTest
-    extends TestCase {
+@RunWith(JUnit4.class)
+public class MergeAdjacentRulesetNodesWithSameDeclarationsTest {
 
+  @Test
   public void testRunPass() {
-    MutatingVisitController visitController = createMock(
-        MutatingVisitController.class);
-    CssTree tree = createMock(CssTree.class);
-    expect(tree.getMutatingVisitController()).andReturn(visitController)
-        .anyTimes();
-    replay(tree);
+    MutatingVisitController visitController = mock(MutatingVisitController.class);
+    CssTree tree = mock(CssTree.class);
+    when(tree.getMutatingVisitController()).thenReturn(visitController);
 
     MergeAdjacentRulesetNodesWithSameDeclarations pass =
         new MergeAdjacentRulesetNodesWithSameDeclarations(tree);
     visitController.startVisit(pass);
-    replay(visitController);
 
     pass.runPass();
-    verify(visitController);
   }
 
+  @Test
   public void testEnterTree() {
     CssTree tree = new CssTree((SourceCode) null);
     tree.getRulesetNodesToRemove().addRulesetNode(new CssRulesetNode());
-    assertFalse(tree.getRulesetNodesToRemove().getRulesetNodes().isEmpty());
+    assertThat(tree.getRulesetNodesToRemove().getRulesetNodes()).isNotEmpty();
 
     MergeAdjacentRulesetNodesWithSameDeclarations pass =
         new MergeAdjacentRulesetNodesWithSameDeclarations(tree);
     pass.enterTree(tree.getRoot());
-    assertTrue(tree.getRulesetNodesToRemove().getRulesetNodes().isEmpty());
+    assertThat(tree.getRulesetNodesToRemove().getRulesetNodes()).isEmpty();
   }
 
+  @Test
   public void testPassResult() throws Exception {
     CssTree tree = new GssParser(new SourceCode(null, lines(
       "@-moz-document url-prefix() {",
@@ -91,18 +89,21 @@ public class MergeAdjacentRulesetNodesWithSameDeclarationsTest
       "  padding: 5px;",
       "}"))).parse();
 
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[@-moz-document[url-prefix()]{[[foo]{[padding:[6px]]}, [bar]{[padding:[6px]]}]}, " +
-        "[foo]{[padding:[5px]]}, [bar]{[padding:[5px]]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo(
+            "[@-moz-document[url-prefix()]{[[foo]{[padding:[6px]]}, [bar]{[padding:[6px]]}]}, "
+                + "[foo]{[padding:[5px]]}, [bar]{[padding:[5px]]}]");
 
     MergeAdjacentRulesetNodesWithSameDeclarations pass =
         new MergeAdjacentRulesetNodesWithSameDeclarations(tree);
     pass.runPass();
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[@-moz-document[url-prefix()]{[[foo, bar]{[padding:[6px]]}, [bar]{[padding:[6px]]}]}, " +
-        "[foo, bar]{[padding:[5px]]}, [bar]{[padding:[5px]]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo(
+            "[@-moz-document[url-prefix()]{[[foo, bar]{[padding:[6px]]}, [bar]{[padding:[6px]]}]}, "
+                + "[foo, bar]{[padding:[5px]]}, [bar]{[padding:[5px]]}]");
   }
 
+  @Test
   public void testPassResult2() {
     CssPropertyNode prop1 = new CssPropertyNode("padding", null);
     CssPropertyValueNode value1 = new CssPropertyValueNode();
@@ -146,19 +147,20 @@ public class MergeAdjacentRulesetNodesWithSameDeclarationsTest
 
     CssRootNode root = new CssRootNode(body);
     CssTree tree = new CssTree(null, root);
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[[foo]{[padding:[5px], display:[5px]]}, "
-        + "[bar]{[padding:[5px], display:[5px]]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo(
+            "[[foo]{[padding:[5px], display:[5px]]}, " + "[bar]{[padding:[5px], display:[5px]]}]");
 
     MergeAdjacentRulesetNodesWithSameDeclarations pass =
         new MergeAdjacentRulesetNodesWithSameDeclarations(tree, true);
     pass.runPass();
     // skip merging rules with display -> we expect output == input
-    assertEquals(tree.getRoot().getBody().toString(),
-        "[[foo]{[padding:[5px], display:[5px]]}, "
-        + "[bar]{[padding:[5px], display:[5px]]}]");
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo(
+            "[[foo]{[padding:[5px], display:[5px]]}, " + "[bar]{[padding:[5px], display:[5px]]}]");
   }
 
+  @Test
   public void testDoNotMergePseudoElements() throws Exception {
     CssTree tree = new GssParser(new SourceCode(null, lines(
       "foo {",
@@ -180,11 +182,11 @@ public class MergeAdjacentRulesetNodesWithSameDeclarationsTest
     MergeAdjacentRulesetNodesWithSameDeclarations pass =
         new MergeAdjacentRulesetNodesWithSameDeclarations(tree);
     pass.runPass();
-    assertEquals(
-        "[[foo, .bar]{[padding:[5px]]}, [.bar]{[padding:[5px]]}, " +
-        "[baz::-ms-clear]{[padding:[5px]]}, " +
-        "[.bez, biz]{[padding:[5px]]}, [biz]{[padding:[5px]]}]",
-        tree.getRoot().getBody().toString());
+    assertThat(tree.getRoot().getBody().toString())
+        .isEqualTo(
+            "[[foo, .bar]{[padding:[5px]]}, [.bar]{[padding:[5px]]}, "
+                + "[baz::-ms-clear]{[padding:[5px]]}, "
+                + "[.bez, biz]{[padding:[5px]]}, [biz]{[padding:[5px]]}]");
   }
 
   private String lines(String... lines) {

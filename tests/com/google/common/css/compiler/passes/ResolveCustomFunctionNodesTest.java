@@ -16,18 +16,23 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.css.compiler.gssfunctions.GssFunctions;
-
 import java.util.Map;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link ResolveCustomFunctionNodes}.
  *
  */
+@RunWith(JUnit4.class)
 public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
 
   protected boolean allowUnknownFunctions = false;
@@ -51,52 +56,62 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
         ImmutableSet.<String>of() /* allowedNonStandardFunctions */).runPass();
   }
 
+  @Test
   public void testAcceptBuiltInFunction() throws Exception {
     parseAndRun("A { color: rgb(0,0,0) }");
   }
 
+  @Test
   public void testUnknownFunctionError() throws Exception {
     parseAndRun("A { width: -example(a,b) }", "Unknown function \"-example\"");
   }
 
+  @Test
   public void testUnknownFunctionAllowed() throws Exception {
     allowUnknownFunctions = true;
     parseAndRun("A { width: f(a,b) }");
-    assertEquals("[f(a,b)]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[f(a,b)]");
   }
 
+  @Test
   public void testWrongNumberOfArgsError() throws Exception {
     parseAndRun("A { width: plus(2px); }",
         "Not enough arguments");
   }
 
+  @Test
   public void testWrongArgumentError1() throws Exception {
     parseAndRun("A { width: max(2,bar,foo) }",
         "Size must be a CssNumericNode with a unit or 0; was: bar");
   }
 
+  @Test
   public void testPlus() throws Exception {
     parseAndRun("A { width: plus(2px, 3px) }");
-    assertEquals("[5px]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[5px]");
   }
 
+  @Test
   public void testMinus() throws Exception {
     parseAndRun("A { width: minus(2em, 5.5em) }");
-    assertEquals("[-3.5em]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[-3.5em]");
   }
 
+  @Test
   public void testMax() throws Exception {
     parseAndRun("A { width: max(-2%, -5%) }");
-    assertEquals("[-2%]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[-2%]");
   }
 
+  @Test
   public void testMultiply() throws Exception {
     parseAndRun("A { width: mult(-2, -5) }");
-    assertEquals("[10]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[10]");
   }
 
+  @Test
   public void testFunctionWithinFunction() throws Exception {
     parseAndRun("A { width: max(10px, max(2px, 30px)) }");
-    assertEquals("[30px]", getFirstPropertyValue().toString());
+    assertThat(getFirstPropertyValue().toString()).isEqualTo("[30px]");
   }
 }

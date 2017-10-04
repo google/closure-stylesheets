@@ -21,51 +21,61 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.css.compiler.ast.CssMixinDefinitionNode;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.testing.PassesTestBase;
-
 import java.util.Map;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for the {@link CollectMixinDefinitions} compiler pass.
  *
  * @author fbenz@google.com (Florian Benz)
  */
+@RunWith(JUnit4.class)
 public class CollectMixinDefinitionsTest extends PassesTestBase {
   private Map<String, CssMixinDefinitionNode> definitions;
 
+  @Test
   public void testSimpleMixinDefinition() {
     parseAndBuildTree(
         "@defmixin test(PAR1, PAR2) { width: PAR1; height: PAR2; }");
   }
 
+  @Test
   public void testCollectedMixinDefinitions() {
     parseAndBuildTree(linesToString(
         "@defmixin test1(PAR1, PAR2) { width: PAR1; height: PAR2; }",
         "@defmixin test2() {}",
         "@defmixin test3(PAR1) { color: PAR1; }"));
-    assertNotNull(definitions);
+    assertThat(definitions).isNotNull();
     assertThat(definitions.keySet()).containsExactly("test1", "test2", "test3");
   }
 
+  @Test
   public void testDupilicateMixinDefinitionNames() throws GssParserException {
     parseAndRun("@defmixin test() {} @defmixin test() {}",
         CollectMixinDefinitions.DUPLICATE_MIXIN_DEFINITION_NAME_ERROR_MESSAGE);
   }
 
+  @Test
   public void testDupilicateArgumentNames() throws GssParserException {
     parseAndRun("@defmixin test(PAR, PAR) {}",
         CollectMixinDefinitions.DUPLICATE_ARGUMENT_NAME_ERROR_MESSAGE);
   }
 
+  @Test
   public void testInvalidArgument() throws GssParserException {
     parseAndRun("@defmixin test(Par) {}",
         CollectMixinDefinitions.INVALID_ARGUMENT_ERROR_MESSAGE);
   }
 
+  @Test
   public void testInvalidBlock1() throws GssParserException {
     parseAndRun("@if (COND) { @defmixin test(PAR) {} }",
         CollectMixinDefinitions.INVALID_BLOCK_ERROR_MESSAGE);
   }
 
+  @Test
   public void testInvalidBlock2() throws GssParserException {
     parseAndRun("@component X { @defmixin test(PAR) {} }",
         CollectMixinDefinitions.INVALID_BLOCK_ERROR_MESSAGE);

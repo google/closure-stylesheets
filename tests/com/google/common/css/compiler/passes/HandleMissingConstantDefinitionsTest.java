@@ -17,12 +17,13 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@link HandleMissingConstantDefinitions}.
- */
-public class HandleMissingConstantDefinitionsTest
-    extends NewFunctionalTestBase {
+/** Unit tests for {@link HandleMissingConstantDefinitions}. */
+@RunWith(JUnit4.class)
+public class HandleMissingConstantDefinitionsTest extends NewFunctionalTestBase {
 
   private static final String TEST_GOOD_CODE = linesToString(
       "@def TEXT_COLOR blue;",
@@ -34,10 +35,12 @@ public class HandleMissingConstantDefinitionsTest
       "  color: MISSING_TEXT_COLOR",
       "}");
 
+  @Test
   public void testGoodCodeNoErrors() throws Exception {
     parseAndRun(TEST_GOOD_CODE);
   }
 
+  @Test
   public void testBadCodeThrowsErrors() throws Exception {
     parseAndRun(TEST_BAD_CODE, HandleMissingConstantDefinitions.ERROR_MESSAGE);
   }

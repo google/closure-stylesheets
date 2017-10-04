@@ -45,10 +45,6 @@ class DefaultVisitController implements MutatingVisitController {
   /** The stack of states for the controller. */
   private final StateStack stateStack = new StateStack();
 
-  /** Whether the visit was required to stop. */
-  @SuppressWarnings("unused")
-  private boolean stopVisitCalled = false;
-
   @SuppressWarnings("serial")
   private static class StopVisitRequestedException extends RuntimeException {}
 
@@ -1529,6 +1525,7 @@ class DefaultVisitController implements MutatingVisitController {
       }
 
       children.addAll(currentIndex, replacementNodes);
+      node.becomeParentForNodes(replacementNodes);
       if (!visitTheReplacementNodes) {
         currentIndex += replacementNodes.size() - 1;
       } else {
@@ -1561,6 +1558,7 @@ class DefaultVisitController implements MutatingVisitController {
 
     private final CssFunctionNode node;
 
+    private boolean shouldVisitChildren = true;
     private boolean visitedChildren = false;
 
     VisitFunctionNodeState(CssFunctionNode node) {
@@ -1570,7 +1568,7 @@ class DefaultVisitController implements MutatingVisitController {
     @Override
     public void doVisit() {
       if (!visitedChildren) {
-        visitor.enterFunctionNode(node);
+        shouldVisitChildren = visitor.enterFunctionNode(node);
       } else {
         visitor.leaveFunctionNode(node);
       }
@@ -1579,8 +1577,9 @@ class DefaultVisitController implements MutatingVisitController {
     @Override
     public void transitionToNextState() {
       if (!visitedChildren) {
-        stateStack.push(
-            new VisitFunctionArgumentsNodeState(node.getArguments()));
+        if (shouldVisitChildren) {
+          stateStack.push(new VisitFunctionArgumentsNodeState(node.getArguments()));
+        }
         visitedChildren = true;
       } else {
         stateStack.pop();
@@ -2037,7 +2036,6 @@ class DefaultVisitController implements MutatingVisitController {
 
   @Override
   public void stopVisit() {
-    stopVisitCalled = true;
     stateStack.getTop().stopVisitCalled();
     throw new StopVisitRequestedException();
   }

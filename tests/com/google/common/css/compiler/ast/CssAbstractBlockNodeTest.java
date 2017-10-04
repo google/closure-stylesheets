@@ -18,20 +18,23 @@ package com.google.common.css.compiler.ast;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
-import junit.framework.TestCase;
-
 import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link CssAbstractBlockNode}.
  *
  * @author fbenz@google.com (Florian Benz)
  */
-public class CssAbstractBlockNodeTest extends TestCase {
+@RunWith(JUnit4.class)
+public class CssAbstractBlockNodeTest {
   private ImmutableList<Class<? extends CssNode>> validSuperclasses =
       ImmutableList.<Class<? extends CssNode>>of(CssValueNode.class);
 
+  @Test
   public void testConstructor() {
     List<CssNode> children = Lists.newArrayList();
     children.add(new CssLiteralNode("a"));
@@ -39,10 +42,11 @@ public class CssAbstractBlockNodeTest extends TestCase {
     try {
       new TestBlock(children, validSuperclasses);
     } catch (IllegalStateException e) {
-      fail(e.getMessage());
+      Assert.fail(e.getMessage());
     }
   }
 
+  @Test
   public void testDeepCopy() {
     List<CssNode> children = Lists.newArrayList();
     children.add(new CssLiteralNode("a"));
@@ -51,19 +55,21 @@ public class CssAbstractBlockNodeTest extends TestCase {
       TestBlock testBlock = new TestBlock(children, validSuperclasses);
       testBlock.deepCopy();
     } catch (IllegalStateException e) {
-      fail(e.getMessage());
+      Assert.fail(e.getMessage());
     }
   }
 
+  @Test
   public void testAddChild() {
     TestBlock testBlock = new TestBlock(validSuperclasses);
     try {
       testBlock.addChildToBack(new CssLiteralNode("a"));
     } catch (IllegalStateException e) {
-      fail(e.getMessage());
+      Assert.fail(e.getMessage());
     }
   }
 
+  @Test
   public void testAddChildren() {
     TestBlock testBlock = new TestBlock(validSuperclasses);
     List<CssNode> children = Lists.newArrayList();
@@ -72,20 +78,22 @@ public class CssAbstractBlockNodeTest extends TestCase {
     try {
       testBlock.setChildren(children);
     } catch (IllegalStateException e) {
-      fail(e.getMessage());
+      Assert.fail(e.getMessage());
     }
   }
 
+  @Test
   public void testAddChildError() {
     TestBlock testBlock = new TestBlock(validSuperclasses);
     try {
       testBlock.addChildToBack(new CssBlockNode());
-      fail("An IllegalStateException should have been thrown.");
+      Assert.fail("An IllegalStateException should have been thrown.");
     } catch (IllegalStateException e) {
       // expected exception
     }
   }
 
+  @Test
   public void testAddChildrenError() {
     TestBlock testBlock = new TestBlock(validSuperclasses);
     List<CssNode> children = Lists.newArrayList();
@@ -94,7 +102,7 @@ public class CssAbstractBlockNodeTest extends TestCase {
     children.add(new CssBlockNode());
     try {
       testBlock.setChildren(children);
-      fail("An IllegalStateException should have been thrown.");
+      Assert.fail("An IllegalStateException should have been thrown.");
     } catch (IllegalStateException e) {
       // expected exception
     }

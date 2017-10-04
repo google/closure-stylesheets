@@ -17,21 +17,26 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.css.compiler.ast.FunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Functional tests for {@link EliminateEmptyRulesetNodes}.
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class EliminateEmptyRulesetNodesFunctionalTest
-    extends FunctionalTestBase {
+@RunWith(JUnit4.class)
+public class EliminateEmptyRulesetNodesFunctionalTest extends FunctionalTestBase {
 
+  @Test
   public void testSimple1() {
     testTreeConstruction(
         "foo {}",
         "[]");
   }
 
+  @Test
   public void testSimple2() {
     testTreeConstruction(
         "foo {"
@@ -41,6 +46,7 @@ public class EliminateEmptyRulesetNodesFunctionalTest
         "[[foo]{[border:[2px]]}]");
   }
 
+  @Test
   public void testSimple3() {
     testTreeConstruction(
         "foo {"
@@ -53,6 +59,7 @@ public class EliminateEmptyRulesetNodesFunctionalTest
         "[[foo]{[border:[2px]]}, [foobar]{[color:[red]]}]");
   }
 
+  @Test
   public void testComplex1() {
     testTreeConstruction(
         "@if COND1 {"
@@ -68,6 +75,7 @@ public class EliminateEmptyRulesetNodesFunctionalTest
         + "@elseif[COND2]{[]}, @else[]{[]}]]");
   }
 
+  @Test
   public void testComplex2() {
     testTreeConstruction(
         "@media print {"

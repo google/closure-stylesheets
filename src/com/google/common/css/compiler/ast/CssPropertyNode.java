@@ -41,8 +41,7 @@ public class CssPropertyNode extends CssValueNode {
   public CssPropertyNode(
       String value, @Nullable SourceCodeLocation sourceCodeLocation) {
     super(value, sourceCodeLocation);
-    String propertyName = value.toLowerCase();
-    this.property = Property.byName(propertyName);
+    this.property = Property.byName(value);
   }
 
   /**
@@ -65,6 +64,11 @@ public class CssPropertyNode extends CssValueNode {
   public String getPropertyName() {
     return property.getName();
   }
+
+  /**
+   * @return whether this is a CSS custom property.
+   */
+  public boolean isCustom() { return property.isCustom(); }
 
   /**
    * Gets the partition of this property. All properties with the same partition

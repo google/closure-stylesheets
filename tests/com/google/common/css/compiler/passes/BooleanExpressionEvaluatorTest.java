@@ -16,19 +16,25 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.css.compiler.ast.CssBooleanExpressionNode;
 import com.google.common.css.compiler.ast.CssBooleanExpressionNode.Type;
 import com.google.common.css.testing.UtilityTestCase;
-
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link BooleanExpressionEvaluator}.
  *
  */
+@RunWith(JUnit4.class)
 public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
+  @Test
   public void testOrWithTrueValues() {
     CssBooleanExpressionNode input = new CssBooleanExpressionNode(Type.OR, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"),
@@ -40,10 +46,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
         new BooleanExpressionEvaluator(input, truths);
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.CONSTANT, output.getType());
-    assertEquals("TRUE", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.CONSTANT);
+    assertThat(output.getValue()).isEqualTo("TRUE");
   }
 
+  @Test
   public void testNotWithTrueValue() {
     CssBooleanExpressionNode input = new CssBooleanExpressionNode(Type.NOT, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"), null, null);
@@ -54,10 +61,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
         new BooleanExpressionEvaluator(input, truths);
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.CONSTANT, output.getType());
-    assertEquals("FALSE", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.CONSTANT);
+    assertThat(output.getValue()).isEqualTo("FALSE");
   }
 
+  @Test
   public void testNotWithUnknown() {
     CssBooleanExpressionNode input = new CssBooleanExpressionNode(Type.NOT, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"), null, null);
@@ -69,10 +77,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
         new BooleanExpressionEvaluator(input, truths, falses);
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.NOT, output.getType());
-    assertEquals("", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.NOT);
+    assertThat(output.getValue()).isEmpty();
   }
 
+  @Test
   public void testWithSimpleTrue() {
     CssBooleanExpressionNode input =
         new CssBooleanExpressionNode(Type.CONSTANT, "TRUE");
@@ -83,10 +92,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
         new BooleanExpressionEvaluator(input, truths);
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.CONSTANT, output.getType());
-    assertEquals("TRUE", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.CONSTANT);
+    assertThat(output.getValue()).isEqualTo("TRUE");
   }
 
+  @Test
   public void testAndWithTrueValues() {
     CssBooleanExpressionNode input = new CssBooleanExpressionNode(Type.AND, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"),
@@ -99,10 +109,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
 
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.CONSTANT, output.getType());
-    assertEquals("TRUE", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.CONSTANT);
+    assertThat(output.getValue()).isEqualTo("TRUE");
   }
 
+  @Test
   public void testAndWithOneUnknown() {
     CssBooleanExpressionNode input = new CssBooleanExpressionNode(Type.AND, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"),
@@ -115,10 +126,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
 
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.CONSTANT, output.getType());
-    assertEquals("FALSE", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.CONSTANT);
+    assertThat(output.getValue()).isEqualTo("FALSE");
   }
 
+  @Test
   public void testAndWithTwoUnknowns() {
     CssBooleanExpressionNode input = new CssBooleanExpressionNode(Type.AND, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"),
@@ -131,10 +143,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
 
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.CONSTANT, output.getType());
-    assertEquals("FALSE", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.CONSTANT);
+    assertThat(output.getValue()).isEqualTo("FALSE");
   }
 
+  @Test
   public void testNested1() {
     CssBooleanExpressionNode side1 = new CssBooleanExpressionNode(Type.AND, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"),
@@ -152,10 +165,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
         new BooleanExpressionEvaluator(input, truths, falses);
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.CONSTANT, output.getType());
-    assertEquals("b", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.CONSTANT);
+    assertThat(output.getValue()).isEqualTo("b");
   }
 
+  @Test
   public void testNested2() {
     CssBooleanExpressionNode side1 = new CssBooleanExpressionNode(Type.OR, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"),
@@ -173,10 +187,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
         new BooleanExpressionEvaluator(input, truths, falses);
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.CONSTANT, output.getType());
-    assertEquals("TRUE", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.CONSTANT);
+    assertThat(output.getValue()).isEqualTo("TRUE");
   }
 
+  @Test
   public void testNested3() {
     CssBooleanExpressionNode side1 = new CssBooleanExpressionNode(Type.AND, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"),
@@ -194,10 +209,11 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
         new BooleanExpressionEvaluator(input, truths, falses);
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.CONSTANT, output.getType());
-    assertEquals("a", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.CONSTANT);
+    assertThat(output.getValue()).isEqualTo("a");
   }
 
+  @Test
   public void testNested4() {
     CssBooleanExpressionNode side1 = new CssBooleanExpressionNode(Type.OR, "",
         new CssBooleanExpressionNode(Type.CONSTANT, "a"),
@@ -215,7 +231,7 @@ public class BooleanExpressionEvaluatorTest extends UtilityTestCase {
         new BooleanExpressionEvaluator(input, truths, falses);
     CssBooleanExpressionNode output = eval.evaluate();
 
-    assertEquals(Type.OR, output.getType());
-    assertEquals("", output.getValue());
+    assertThat(output.getType()).isEqualTo(Type.OR);
+    assertThat(output.getValue()).isEmpty();
   }
 }

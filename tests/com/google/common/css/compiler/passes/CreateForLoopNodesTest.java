@@ -16,14 +16,18 @@
 
 package com.google.common.css.compiler.passes;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.CssForLoopRuleNode;
 import com.google.common.css.compiler.ast.CssLiteralNode;
 import com.google.common.css.compiler.ast.CssLoopVariableNode;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@link CreateForLoopNodes}.
- */
+/** Unit tests for {@link CreateForLoopNodes}. */
+@RunWith(JUnit4.class)
 public class CreateForLoopNodesTest extends NewFunctionalTestBase {
 
   @Override
@@ -33,51 +37,58 @@ public class CreateForLoopNodesTest extends NewFunctionalTestBase {
     pass.runPass();
   }
 
+  @Test
   public void testCreateLoopNodeWithNumbers() throws Exception {
     parseAndRun("@for $i from 1 to 3 step 2 {}");
-    assertTrue(getFirstActualNode() instanceof CssForLoopRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssForLoopRuleNode.class);
     CssForLoopRuleNode loop = (CssForLoopRuleNode) getFirstActualNode();
-    assertEquals("1", loop.getFrom().toString());
-    assertEquals("3", loop.getTo().toString());
-    assertEquals("2", loop.getStep().toString());
+    assertThat(loop.getFrom().toString()).isEqualTo("1");
+    assertThat(loop.getTo().toString()).isEqualTo("3");
+    assertThat(loop.getStep().toString()).isEqualTo("2");
   }
 
+  @Test
   public void testCreateLoopNodeWithVariables() throws Exception {
     parseAndRun("@for $i from $x to $y step $z {}");
-    assertTrue(getFirstActualNode() instanceof CssForLoopRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssForLoopRuleNode.class);
     CssForLoopRuleNode loop = (CssForLoopRuleNode) getFirstActualNode();
-    assertTrue(loop.getFrom() instanceof CssLoopVariableNode);
-    assertEquals("$x", loop.getFrom().getValue());
-    assertTrue(loop.getTo() instanceof CssLoopVariableNode);
-    assertEquals("$y", loop.getTo().getValue());
-    assertTrue(loop.getStep() instanceof CssLoopVariableNode);
-    assertEquals("$z", loop.getStep().getValue());
+    assertThat(loop.getFrom()).isInstanceOf(CssLoopVariableNode.class);
+    assertThat(loop.getFrom().getValue()).isEqualTo("$x");
+    assertThat(loop.getTo()).isInstanceOf(CssLoopVariableNode.class);
+    assertThat(loop.getTo().getValue()).isEqualTo("$y");
+    assertThat(loop.getStep()).isInstanceOf(CssLoopVariableNode.class);
+    assertThat(loop.getStep().getValue()).isEqualTo("$z");
   }
 
+  @Test
   public void testCreateLoopNodeWithConstants() throws Exception {
     parseAndRun("@for $i from X to Y step Z {}");
-    assertTrue(getFirstActualNode() instanceof CssForLoopRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssForLoopRuleNode.class);
     CssForLoopRuleNode loop = (CssForLoopRuleNode) getFirstActualNode();
-    assertTrue(loop.getFrom() instanceof CssLiteralNode);
-    assertEquals("X", loop.getFrom().getValue());
-    assertTrue(loop.getTo() instanceof CssLiteralNode);
-    assertEquals("Y", loop.getTo().getValue());
-    assertTrue(loop.getStep() instanceof CssLiteralNode);
-    assertEquals("Z", loop.getStep().getValue());
+    assertThat(loop.getFrom()).isInstanceOf(CssLiteralNode.class);
+    assertThat(loop.getFrom().getValue()).isEqualTo("X");
+    assertThat(loop.getTo()).isInstanceOf(CssLiteralNode.class);
+    assertThat(loop.getTo().getValue()).isEqualTo("Y");
+    assertThat(loop.getStep()).isInstanceOf(CssLiteralNode.class);
+    assertThat(loop.getStep().getValue()).isEqualTo("Z");
   }
 
+  @Test
   public void testLoopWithoutBlock() throws Exception {
     parseAndRun("@for $i from 1 to 2;", "@for with no block");
   }
 
+  @Test
   public void testLoopWithoutAllParameters() throws Exception {
     parseAndRun("@for $i from 1 to {}", CreateForLoopNodes.SYNTAX_ERROR);
   }
 
+  @Test
   public void testLoopWithoutBadVariablePattern() throws Exception {
     parseAndRun("@for i from 1 to 2 {}", CreateForLoopNodes.SYNTAX_ERROR);
   }
 
+  @Test
   public void testLoopThatOverridesVariable() throws Exception {
     parseAndRun(linesToString(
         "@for $i from 1 to 2 {",

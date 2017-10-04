@@ -16,16 +16,22 @@
 
 package com.google.common.css.compiler.ast;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.css.compiler.passes.CreateConditionalNodes;
 import com.google.common.css.compiler.passes.CreateDefinitionNodes;
 import com.google.common.css.compiler.passes.MarkDefaultDefinitions;
 import com.google.common.css.compiler.passes.MarkNonFlippableNodes;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests the handling of GSS comments.
  *
  */
+@RunWith(JUnit4.class)
 public class GssCommentsTest extends NewFunctionalTestBase {
 
   @Override
@@ -62,73 +68,81 @@ public class GssCommentsTest extends NewFunctionalTestBase {
     pass.runPass();
   }
 
+  @Test
   public void testCreateDefinitionComments() throws Exception {
     parseAndRun("/* comment0 */ @def /* comment-x */ X /* comment-y */Y " +
         "/* comment1 */  /* comment2 */   ;");
-    assertTrue(getFirstActualNode() instanceof CssUnknownAtRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssUnknownAtRuleNode.class);
     CssUnknownAtRuleNode def = (CssUnknownAtRuleNode) getFirstActualNode();
-    assertEquals("def", def.getName().getValue());
+    assertThat(def.getName().getValue()).isEqualTo("def");
     CssCommentNode comment0 = def.getComments().get(0);
-    assertEquals("/* comment0 */", comment0.getValue());
+    assertThat(comment0.getValue()).isEqualTo("/* comment0 */");
     CssCommentNode comment1 = def.getComments().get(1);
-    assertEquals("/* comment1 */", comment1.getValue());
+    assertThat(comment1.getValue()).isEqualTo("/* comment1 */");
     CssCommentNode comment2 = def.getComments().get(2);
-    assertEquals("/* comment2 */", comment2.getValue());
-    assertEquals("/* comment-x */",def.getParameters().get(0).getComments().get(0).getValue());
-    assertEquals("/* comment-y */",def.getParameters().get(1).getComments().get(0).getValue());
+    assertThat(comment2.getValue()).isEqualTo("/* comment2 */");
+    assertThat(def.getParameters().get(0).getComments().get(0).getValue())
+        .isEqualTo("/* comment-x */");
+    assertThat(def.getParameters().get(1).getComments().get(0).getValue())
+        .isEqualTo("/* comment-y */");
   }
 
+  @Test
   public void testCreateFunctionComments() throws Exception {
     parseAndRun("@def /*comment0*/func(x, y/*comment1*/);");
-    assertTrue(getFirstActualNode() instanceof CssUnknownAtRuleNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssUnknownAtRuleNode.class);
     CssUnknownAtRuleNode def = (CssUnknownAtRuleNode) getFirstActualNode();
     int defComments = def.getComments().size();
-    assertEquals(0, defComments);
+    assertThat(defComments).isEqualTo(0);
     CssValueNode valueNode = def.getParameters().get(0);
-    assertTrue(valueNode instanceof CssFunctionNode);
+    assertThat(valueNode).isInstanceOf(CssFunctionNode.class);
     CssFunctionNode functionNode = (CssFunctionNode) valueNode;
     CssCommentNode comment0 = functionNode.getComments().get(0);
-    assertEquals("/*comment0*/", comment0.getValue());
+    assertThat(comment0.getValue()).isEqualTo("/*comment0*/");
     CssCommentNode comment1 = functionNode.getComments().get(1);
-    assertEquals("/*comment1*/", comment1.getValue());
+    assertThat(comment1.getValue()).isEqualTo("/*comment1*/");
   }
 
+  @Test
   public void testCreateDefinitionCommentsAfterRelocation() throws Exception {
     parseAndRun("@def A /* @default */#fff;");
     createDefinintions();
     relocateDefinintionsComments();
-    assertTrue(getFirstActualNode() instanceof CssDefinitionNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssDefinitionNode.class);
     CssDefinitionNode def = (CssDefinitionNode) getFirstActualNode();
     CssCommentNode comment0 = def.getComments().get(0);
-    assertEquals("/* @default */", comment0.getValue());
+    assertThat(comment0.getValue()).isEqualTo("/* @default */");
   }
 
   // We don't test for comments between '!' and 'important'. See the comment on
   // the IMPORTANT_SYM in the grammar for the reason.
+  @Test
   public void testCreateRulesetComments() throws Exception {
     parseAndRun("A {/* comment-d */b:c /*comment0*/!important }");
-    assertTrue(getFirstActualNode() instanceof CssRulesetNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssRulesetNode.class);
     CssRulesetNode ruleset = (CssRulesetNode)getFirstActualNode();
     CssDeclarationNode declNode =
         (CssDeclarationNode) ruleset.getDeclarations().getChildren().get(0);
     CssCommentNode commentDecl = declNode.getComments().get(0);
-    assertEquals("/* comment-d */", commentDecl.getValue());
+    assertThat(commentDecl.getValue()).isEqualTo("/* comment-d */");
     CssPropertyValueNode propValue = declNode.getPropertyValue();
     CssValueNode prioNode = propValue.getChildren().get(1);
     CssCommentNode comment0 = prioNode.getComments().get(0);
-    assertEquals("/*comment0*/", comment0.getValue());
+    assertThat(comment0.getValue()).isEqualTo("/*comment0*/");
   }
 
+  @Test
   public void testNoflip() throws Exception {
     parseAndRun(".a .b { \n /* @noflip */\n float: left;\n}");
-    assertTrue(getFirstActualNode() instanceof CssRulesetNode);
+    assertThat(getFirstActualNode()).isInstanceOf(CssRulesetNode.class);
     CssRulesetNode ruleset = (CssRulesetNode)getFirstActualNode();
     CssDeclarationNode declNode =
         (CssDeclarationNode) ruleset.getDeclarations().getChildren().get(0);
     CssCommentNode commentDecl = declNode.getComments().get(0);
-    assertEquals("/* @noflip */", commentDecl.getValue());
+    assertThat(commentDecl.getValue()).isEqualTo("/* @noflip */");
   }
 
+  @Test
   public void testMarkNonFlippable() throws Exception {
     parseAndRun(linesToString("/* @noflip */ @if COND {",
         "  foo { top : expression('cond') }",
@@ -141,11 +155,12 @@ public class GssCommentsTest extends NewFunctionalTestBase {
 
     CssConditionalBlockNode block =
         (CssConditionalBlockNode) getFirstActualNode();
-    assertFalse(block.getShouldBeFlipped());
+    assertThat(block.getShouldBeFlipped()).isFalse();
     CssConditionalRuleNode condRule1 = block.getChildren().get(0);
-    assertFalse(condRule1.getShouldBeFlipped());
+    assertThat(condRule1.getShouldBeFlipped()).isFalse();
   }
 
+  @Test
   public void testMarkDefaultDefinitions1() throws Exception {
     parseAndRun("/* @default */ @def PADDING 2px 3px 5px 1px;");
     createDefinintions();
@@ -153,10 +168,11 @@ public class GssCommentsTest extends NewFunctionalTestBase {
     markDefaultDefinitions();
     CssDefinitionNode definition = (CssDefinitionNode) getFirstActualNode();
     for (CssValueNode node : definition.getParameters()) {
-      assertTrue(node.getIsDefault());
+      assertThat(node.getIsDefault()).isTrue();
     }
   }
 
+  @Test
   public void testMarkDefaultDefinitions2() throws Exception {
     parseAndRun("@def PADDING /* @default */ 2px 3px 5px 1px;");
     createDefinintions();
@@ -164,27 +180,28 @@ public class GssCommentsTest extends NewFunctionalTestBase {
     markDefaultDefinitions();
     CssDefinitionNode definition = (CssDefinitionNode) getFirstActualNode();
     for (CssValueNode node : definition.getParameters()) {
-      assertTrue(node.getIsDefault());
+      assertThat(node.getIsDefault()).isTrue();
     }
   }
 
+  @Test
   public void testSelectorList() throws Exception {
     parseAndRun("foo/*foo*/, /*bar1*/ /*bar2*/ bar /*bar3*/ , zoo /*zoo*/ { a:b }");
     CssRulesetNode ruleset = (CssRulesetNode) getFirstActualNode();
     CssSelectorListNode selectors = ruleset.getSelectors();
     CssSelectorNode fooSelector = selectors.getChildren().get(0);
     CssCommentNode fooComment = fooSelector.getComments().get(0);
-    assertEquals("/*foo*/", fooComment.getValue());
+    assertThat(fooComment.getValue()).isEqualTo("/*foo*/");
     CssSelectorNode barSelector = selectors.getChildren().get(1);
     CssCommentNode barComment1 = barSelector.getComments().get(0);
-    assertEquals("/*bar1*/", barComment1.getValue());
+    assertThat(barComment1.getValue()).isEqualTo("/*bar1*/");
     CssCommentNode barComment2 = barSelector.getComments().get(1);
-    assertEquals("/*bar2*/", barComment2.getValue());
+    assertThat(barComment2.getValue()).isEqualTo("/*bar2*/");
     CssCommentNode barComment3 = barSelector.getComments().get(2);
-    assertEquals("/*bar3*/", barComment3.getValue());
+    assertThat(barComment3.getValue()).isEqualTo("/*bar3*/");
     CssSelectorNode zooSelector = selectors.getChildren().get(2);
     // The comment after the last selector goes to the rulesetNode.
     CssCommentNode zooComment = ruleset.getComments().get(0);
-    assertEquals("/*zoo*/", zooComment.getValue());
+    assertThat(zooComment.getValue()).isEqualTo("/*zoo*/");
   }
 }

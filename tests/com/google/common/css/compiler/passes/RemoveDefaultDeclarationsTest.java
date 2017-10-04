@@ -23,56 +23,41 @@ import com.google.common.css.compiler.ast.CssPriorityNode;
 import com.google.common.css.compiler.ast.CssPropertyNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import junit.framework.TestCase;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Unit tests for {@link RemoveDefaultDeclarations}.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
-public class RemoveDefaultDeclarationsTest extends TestCase {
+@RunWith(MockitoJUnitRunner.class)
+public class RemoveDefaultDeclarationsTest {
 
+  @Mock MutatingVisitController visitController;
+
+  @Test
   public void testRunPass() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-
     RemoveDefaultDeclarations pass
         = new RemoveDefaultDeclarations(visitController);
     visitController.startVisit(pass);
-    controller.replay();
 
     pass.runPass();
-    controller.verify();
   }
 
+  @Test
   public void testEnterDeclaration1() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    visitController.removeCurrentNode();
-    controller.replay();
-
     RemoveDefaultDeclarations pass
         = new RemoveDefaultDeclarations(visitController);
 
     CssDeclarationNode node = new CssDeclarationNode(new CssPropertyNode("foo"));
     pass.enterDeclaration(node);
-
-    controller.verify();
   }
 
+  @Test
   public void testEnterDeclaration2() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    visitController.removeCurrentNode();
-    controller.replay();
-
     RemoveDefaultDeclarations pass
         = new RemoveDefaultDeclarations(visitController);
 
@@ -84,19 +69,11 @@ public class RemoveDefaultDeclarationsTest extends TestCase {
     BackDoorNodeMutation.addPropertyValueToDeclaration(declaration, value);
 
     pass.enterDeclaration(declaration);
-    controller.verify();
   }
 
-  /**
-   * Two default values: remove entire declaration 
-   */
+  /** Two default values: remove entire declaration */
+  @Test
   public void testEnterDeclaration3() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    visitController.removeCurrentNode();
-    controller.replay();
-
     RemoveDefaultDeclarations pass
         = new RemoveDefaultDeclarations(visitController);
 
@@ -111,19 +88,11 @@ public class RemoveDefaultDeclarationsTest extends TestCase {
     BackDoorNodeMutation.addPropertyValueToDeclaration(declaration, value1);
 
     pass.enterDeclaration(declaration);
-    controller.verify();
   }
 
-  /**
-   * One default value, one non-default value: remove the default value 
-   */
+  /** One default value, one non-default value: remove the default value */
+  @Test
   public void testEnterDeclaration4() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    visitController.removeCurrentNode();
-    controller.replay();
-
     RemoveDefaultDeclarations pass
         = new RemoveDefaultDeclarations(visitController);
 
@@ -140,19 +109,14 @@ public class RemoveDefaultDeclarationsTest extends TestCase {
     pass.enterDeclaration(declaration);
     pass.enterValueNode(value);
     pass.enterValueNode(value1);
-    controller.verify();
   }
 
   /**
-   * One default value, one non-default value, but property has position
-   * dependent values: remove no values.
+   * One default value, one non-default value, but property has position dependent values: remove no
+   * values.
    */
+  @Test
   public void testEnterDeclaration5() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    controller.replay();
-
     RemoveDefaultDeclarations pass
         = new RemoveDefaultDeclarations(visitController);
 
@@ -170,15 +134,10 @@ public class RemoveDefaultDeclarationsTest extends TestCase {
     pass.enterValueNode(value);
     pass.enterValueNode(value1);
     pass.leaveDeclaration(declaration);
-    controller.verify();
   }
 
+  @Test
   public void testEnterValueNotDefault() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    controller.replay();
-
     RemoveDefaultDeclarations pass
         = new RemoveDefaultDeclarations(visitController);
 
@@ -186,15 +145,10 @@ public class RemoveDefaultDeclarationsTest extends TestCase {
     value.setIsDefault(false);
 
     pass.enterValueNode(value);
-    controller.verify();
   }
 
+  @Test
   public void testEnterValueDefault() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    controller.replay();
-
     RemoveDefaultDeclarations pass
         = new RemoveDefaultDeclarations(visitController);
 
@@ -202,18 +156,11 @@ public class RemoveDefaultDeclarationsTest extends TestCase {
     value.setIsDefault(true);
 
     pass.enterValueNode(value);
-    controller.verify();
   }
 
-  /**
-   * Two default values and !important flag: don't delete them. 
-   */
+  /** Two default values and !important flag: don't delete them. */
+  @Test
   public void testImportantDefault() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    controller.replay();
-
     RemoveDefaultDeclarations pass
         = new RemoveDefaultDeclarations(visitController);
 
@@ -231,6 +178,5 @@ public class RemoveDefaultDeclarationsTest extends TestCase {
 
     pass.enterDeclaration(declaration);
     pass.leaveDeclaration(declaration);
-    controller.verify();
   }
 }

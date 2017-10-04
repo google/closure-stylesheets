@@ -16,43 +16,53 @@
 
 package com.google.common.css.compiler.passes;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * Tests the compact printer visitor.
- * TODO(oana): Remove definitions from these tests.
+ * Tests the compact printer visitor. TODO(oana): Remove definitions from these tests.
  *
  * @author oana@google.com (Oana Florescu)
  * @author fbenz@google.com (Florian Benz)
  */
 
+@RunWith(JUnit4.class)
 public class CompactPrinterTest extends AbstractCompactPrinterTest {
 
+  @Test
   public void testEmptyRuleset1() throws Exception {
     assertCompactPrintedResult("foo{}", "foo {}");
   }
 
+  @Test
   public void testEmptyRuleset2() throws Exception {
     assertCompactPrintedResult("bar{}", "bar {}");
   }
 
+  @Test
   public void testEmptyRuleset3() {
     assertCompactPrintedResult("foo,bar{}", "foo, bar {\n}\n");
   }
 
+  @Test
   public void testEmptyRuleset4() {
     assertCompactPrintedResult("foo,.bar{}", "foo, .bar {}");
     assertCompactPrintedResult("foo,.bar:hover{}", "foo, .bar:hover {}");
   }
 
+  @Test
   public void testEmptyRulesetFancyRefiner() {
     assertCompactPrintedResult("foo,.bar:hover{}", "foo, .bar:hover {}");
   }
 
+  @Test
   public void testRuleset1() {
     assertCompactPrintedResult(
         "foo,.bar{color:red}", "foo, .bar {color: red;}");
   }
 
+  @Test
   public void testRuleset2() {
     assertCompactPrintedResult(
         "foo,.bar{color:red;background-image:url('http://s')}",
@@ -62,6 +72,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
               "}"));
   }
 
+  @Test
   public void testRuleset3() {
     assertCompactPrintedResult(
         ".foo .bar{color:red;background-image:url('http://s')}",
@@ -71,6 +82,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
               "}"));
   }
 
+  @Test
   public void testRuleset4() {
     assertCompactPrintedResult(
         ".foo .bar .foobar{color:red;background-image:url('http://s')}",
@@ -81,6 +93,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
               ""));
   }
 
+  @Test
   public void testRuleset5() {
     assertCompactPrintedResult(
         ".foo:hover .bar+.foobar{color:red;background-image:url('http://s')}",
@@ -90,7 +103,8 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
               "}"));
   }
 
-  public  void testRuleset6() {
+  @Test
+  public void testRuleset6() {
     assertCompactPrintedResult(
         ".CSS_RULE{background:generate(COLOR,2px);border:BORDER}",
         lines("@def COLOR red;",
@@ -101,6 +115,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
               "}"));
   }
 
+  @Test
   public void testConditionalBlock() {
     assertCompactPrintedResult(
         "",
@@ -112,6 +127,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
               "}"));
   }
 
+  @Test
   public void testDefinitions1() {
     assertCompactPrintedResult(
         lines(""),
@@ -119,6 +135,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
               "@def BORDER 2px;"));
   }
 
+  @Test
   public void testDefinitions2() {
     assertCompactPrintedResult(
         "body,td,input,textarea,select{margin:0;" +
@@ -139,6 +156,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
               "}"));
   }
 
+  @Test
   public void testDefinitions3() {
     assertCompactPrintedResult(
         ".CSS_RULE{background:CORNER_BG;filter:alpha(opacity=70)}",
@@ -153,6 +171,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testImport() {
     assertNewCompactPrintedResult(
         "@import 'a.css';.CSS_RULE{foo:bar}",
@@ -164,6 +183,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "@def COLOR blue;"));
   }
 
+  @Test
   public void testMedia() {
     assertCompactPrintedResult(
         "@media print{.CSS_RULE{foo:bar}}",
@@ -176,6 +196,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "@def COLOR blue;"));
   }
 
+  @Test
   public void testStarPropertyHack() {
     assertCompactPrintedResult(
         ".myClass{*height:14px}",
@@ -185,6 +206,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testIeRect() {
     // Non-standard IE workaround.
     assertCompactPrintedResult(
@@ -195,6 +217,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testFont() {
     assertCompactPrintedResult(
         ".a{font:9px verdana,helvetica,arial,san-serif}",
@@ -204,6 +227,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testMediaQuery() {
     assertNewCompactPrintedResult(
         "@media screen,print{}",
@@ -234,6 +258,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
         + "handheld and (grid) and (max-width: 15em) {}");
   }
 
+  @Test
   public void testMediaQueryPage() {
     assertNewCompactPrintedResult(
         "@media print{.CLASS{width:50%}@page{size:8.5in 11in}}",
@@ -248,6 +273,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testWebkitKeyframes1() {
     assertNewCompactPrintedResult(
         "@-webkit-keyframes bounce{from{left:0px}to{left:200px}}",
@@ -256,6 +282,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "to { left: 200px; } }"));
   }
 
+  @Test
   public void testWebkitKeyframes2() {
     assertNewCompactPrintedResult(
         "@-webkit-keyframes pulse{0%{}33.33%{}100%{}}",
@@ -266,6 +293,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testRefiners() {
     assertNewCompactPrintedResult("foo:bar{}", "foo:bar {}");
     assertNewCompactPrintedResult("foo::bar{}", "foo::bar {}");
@@ -277,36 +305,42 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
          "*:not( :link ):not( :visited ) {}");
   }
 
+  @Test
   public void testPageRule() {
     assertNewCompactPrintedResult(
         "@page{a:b}",
         "@page{a:b}");
   }
 
+  @Test
   public void testPagePseudoClass1() {
     assertNewCompactPrintedResult(
         "@page :left{a:b}",
         "@page :left { a:b }");
   }
 
+  @Test
   public void testPagePseudoClass2() {
     assertNewCompactPrintedResult(
         "@page CompanyLetterHead:first{a:b}",
         "@page CompanyLetterHead:first { a:b }");
   }
 
+  @Test
   public void testPageInMedia() {
     assertNewCompactPrintedResult(
         "@media print{@page{a:b}}",
         "@media print { @page{ a:b } }");
   }
 
+  @Test
   public void testPageSelector() {
     assertNewCompactPrintedResult(
         "@media print{@page{@bottom-right-corner{a:b}}}",
         "@media print { @page { @bottom-right-corner { a:b } } }");
   }
 
+  @Test
   public void testFontFace1() {
     // Example taken from http://www.w3.org/TR/css3-fonts/#src-desc.
     assertNewCompactPrintedResult(
@@ -319,6 +353,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testFontFace2() {
     // Example taken from http://www.w3.org/TR/css3-fonts/#src-desc.
     assertNewCompactPrintedResult(
@@ -333,6 +368,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testAlphaImageLoader() throws Exception {
     assertNewCompactPrintedResult(
         ".CSS_CW_MUC_BUBBLE_BOTTOM_LEFT_ANCHOR{filter:"
@@ -347,6 +383,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             ""));
   }
 
+  @Test
   public void testYouTube() throws Exception {
     assertNewCompactPrintedResult(
         ".test{"
@@ -362,6 +399,13 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
+  public void testCalc() {
+    assertNewCompactPrintedResult(
+        ".test{width:calc((100% - 24px)*0.375)}", ".test { width:calc((100% - 24px)*0.375);}");
+  }
+
+  @Test
   public void testRemovesComments() throws Exception {
     assertNewCompactPrintedResult(
         ".foo{}.bar{color:red}",
@@ -375,6 +419,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testPreservesImportantCommentsWhenSet() throws Exception {
     preserveMarkedComments = true;
     assertNewCompactPrintedResult(
@@ -389,6 +434,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testPreservesImportantCommentsWhenSet2() throws Exception {
     preserveMarkedComments = true;
     assertNewCompactPrintedResult(
@@ -403,6 +449,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testPreservesImportantCommentsWhenSet3() throws Exception {
     preserveMarkedComments = true;
     assertNewCompactPrintedResult(
@@ -417,6 +464,7 @@ public class CompactPrinterTest extends AbstractCompactPrinterTest {
             "}"));
   }
 
+  @Test
   public void testPreservesMultipleImportantCommentsWhenSet() throws Exception {
     preserveMarkedComments = true;
     assertNewCompactPrintedResult(

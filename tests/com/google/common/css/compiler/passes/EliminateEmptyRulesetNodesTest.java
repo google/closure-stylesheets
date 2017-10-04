@@ -23,57 +23,40 @@ import com.google.common.css.compiler.ast.CssPropertyNode;
 import com.google.common.css.compiler.ast.CssPropertyValueNode;
 import com.google.common.css.compiler.ast.CssRulesetNode;
 import com.google.common.css.compiler.ast.MutatingVisitController;
-
-import junit.framework.TestCase;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Unit tests for {@link EliminateEmptyRulesetNodes}.
  *
  * @author oana@google.com (Oana Florescu)
  */
-public class EliminateEmptyRulesetNodesTest extends TestCase {
+@RunWith(MockitoJUnitRunner.class)
+public class EliminateEmptyRulesetNodesTest {
 
+  @Mock MutatingVisitController mockVisitController;
+
+  @Test
   public void testRunPass() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-
-    EliminateEmptyRulesetNodes pass
-        = new EliminateEmptyRulesetNodes(visitController);
-    visitController.startVisit(pass);
-    controller.replay();
+    EliminateEmptyRulesetNodes pass = new EliminateEmptyRulesetNodes(mockVisitController);
+    mockVisitController.startVisit(pass);
 
     pass.runPass();
-    controller.verify();
   }
 
+  @Test
   public void testEnterRuleset1() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    visitController.removeCurrentNode();
-    controller.replay();
-
-    EliminateEmptyRulesetNodes pass
-        = new EliminateEmptyRulesetNodes(visitController);
+    EliminateEmptyRulesetNodes pass = new EliminateEmptyRulesetNodes(mockVisitController);
 
     CssRulesetNode node = new CssRulesetNode();
     pass.enterRuleset(node);
-
-    controller.verify();
   }
 
+  @Test
   public void testEnterRuleset2() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    controller.replay();
-
-    EliminateEmptyRulesetNodes pass
-        = new EliminateEmptyRulesetNodes(visitController);
+    EliminateEmptyRulesetNodes pass = new EliminateEmptyRulesetNodes(mockVisitController);
 
     CssRulesetNode node = new CssRulesetNode();
     CssDeclarationNode declaration = new CssDeclarationNode(
@@ -84,6 +67,5 @@ public class EliminateEmptyRulesetNodesTest extends TestCase {
     BackDoorNodeMutation.addDeclarationToRuleset(node,declaration);
 
     pass.enterRuleset(node);
-    controller.verify();
   }
 }

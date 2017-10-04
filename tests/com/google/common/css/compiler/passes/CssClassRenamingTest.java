@@ -16,7 +16,9 @@
 
 package com.google.common.css.compiler.passes;
 
-import static org.easymock.EasyMock.expect;
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.google.common.css.SubstitutionMap;
 import com.google.common.css.compiler.ast.BackDoorNodeMutation;
@@ -30,63 +32,58 @@ import com.google.common.css.compiler.ast.CssSelectorNode;
 import com.google.common.css.compiler.ast.CssTree;
 import com.google.common.css.compiler.ast.MutatingVisitController;
 import com.google.common.css.compiler.passes.testing.AstPrinter;
-
-import junit.framework.TestCase;
-
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests the {@link CssClassRenaming} compiler pass.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
-public class CssClassRenamingTest extends TestCase {
+@RunWith(JUnit4.class)
+public class CssClassRenamingTest {
 
+  @Test
   public void testRunPass() {
-    IMocksControl controller = EasyMock.createStrictControl();
-    MutatingVisitController visitController = controller.createMock(
-        MutatingVisitController.class);
-    
-    CssClassRenaming pass = 
-        new CssClassRenaming(visitController, null, null);
-    visitController.startVisit(pass);
-    controller.replay();
+    MutatingVisitController visitController = mock(MutatingVisitController.class);
 
+    CssClassRenaming pass = new CssClassRenaming(visitController, null, null);
+    visitController.startVisit(pass);
     pass.runPass();
-    controller.verify();
   }
 
+  @Test
   public void testNoSubstitutionWithNullMap() {
     CssClassSelectorNode node = new CssClassSelectorNode("FOO", null);
     CssClassRenaming pass = new CssClassRenaming(null, null, null);
     pass.enterClassSelector(node);
   }
 
+  @Test
   public void testNoClassSubstitutionWhenClassNotFoundInMap() {
     CssClassSelectorNode refinerNode = new CssClassSelectorNode("FOO", null);
-    IMocksControl controller = EasyMock.createStrictControl();
-    SubstitutionMap cssClassRenamingMap = controller.createMock(
-        SubstitutionMap.class);
-    expect(cssClassRenamingMap.get("FOO")).andReturn(null).anyTimes();
-    controller.replay();
-    
+    SubstitutionMap cssClassRenamingMap = mock(SubstitutionMap.class);
+
     CssClassRenaming pass
         = new CssClassRenaming(null, cssClassRenamingMap, null);
     pass.enterClassSelector(refinerNode);
+
+    verify(cssClassRenamingMap).get("FOO");
   }
 
+  @Test
   public void testNoIdSubstitutionWhenIdNotFoundInMap() {
     CssIdSelectorNode refinerNode = new CssIdSelectorNode("ID", null);
-    IMocksControl controller = EasyMock.createStrictControl();
-    SubstitutionMap idRenamingMap = controller.createMock(
-        SubstitutionMap.class);
-    expect(idRenamingMap.get("ID")).andReturn(null).anyTimes();
-    controller.replay();
+    SubstitutionMap idRenamingMap = mock(SubstitutionMap.class);
+
     CssClassRenaming pass = new CssClassRenaming(null, null, idRenamingMap);
     pass.enterIdSelector(refinerNode);
+
+    verify(idRenamingMap).get("ID");
   }
   
+  @Test
   public void testEnterClassRefiner() {
     CssClassSelectorNode refinerNode = new CssClassSelectorNode("CSS_FOO",
         null);
@@ -114,9 +111,10 @@ public class CssClassRenamingTest extends TestCase {
     CssClassRenaming pass = new CssClassRenaming(
         tree.getMutatingVisitController(), classMap, null);
     pass.runPass();
-    assertEquals("[[.CSS_FOO_]{[]}]", AstPrinter.print(tree));
+    assertThat(AstPrinter.print(tree)).isEqualTo("[[.CSS_FOO_]{[]}]");
   }
 
+  @Test
   public void testEnterIdRefiner() {
     CssIdSelectorNode refinerNode = new CssIdSelectorNode("ID_FOO", null);
     CssRefinerListNode refiners = new CssRefinerListNode();
@@ -143,6 +141,6 @@ public class CssClassRenamingTest extends TestCase {
     CssClassRenaming pass
         = new CssClassRenaming(tree.getMutatingVisitController(), null, idMap);
     pass.runPass();
-    assertEquals("[[#ID_FOO_]{[]}]", AstPrinter.print(tree));
+    assertThat(AstPrinter.print(tree)).isEqualTo("[[#ID_FOO_]{[]}]");
   }
 }

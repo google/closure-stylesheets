@@ -20,16 +20,20 @@ import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
 import com.google.common.css.compiler.ast.CssCombinatorNode.Combinator;
 import com.google.common.css.compiler.ast.testing.AstUtilityTestCase;
-
-import junit.framework.AssertionFailedError;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Unit tests for {@link AstUtilityTestCase}.
- * 
+ *
  * @author oana@google.com (Oana Florescu)
  */
+@RunWith(JUnit4.class)
 public class AstUtilityTestCaseTest extends AstUtilityTestCase {
 
+  @Test
   public void testDeepEquals1() throws Exception {
     CssLiteralNode node1 = new CssLiteralNode("");
     CssLiteralNode node2 = new CssLiteralNode("");
@@ -37,6 +41,7 @@ public class AstUtilityTestCaseTest extends AstUtilityTestCase {
     deepEquals(node1, node2);
   }
 
+  @Test
   public void testDeepEquals2() throws Exception {
     CssLiteralNode node1 = new CssLiteralNode("node");
     CssLiteralNode node2 = new CssLiteralNode("node");
@@ -44,20 +49,22 @@ public class AstUtilityTestCaseTest extends AstUtilityTestCase {
     deepEquals(node1, node2);
   }
 
+  @Test
   public void testDeepEquals3() throws Exception {
     CssLiteralNode node1 = new CssLiteralNode("node1");
     CssLiteralNode node2 = new CssLiteralNode("node2");
     
     try {
       deepEquals(node1, node2);
-      fail("FAIL: Node1 and Node2 should not be equal.");
-    } catch (AssertionFailedError e) {
+      Assert.fail("FAIL: Node1 and Node2 should not be equal.");
+    } catch (AssertionError e) {
       if (e.getMessage().startsWith("FAIL")) {
         throw e;
       }
     }
   }
 
+  @Test
   public void testDeepEquals4() throws Exception {
     CssCombinatorNode parent1 = new CssCombinatorNode(
         Combinator.DESCENDANT,
@@ -74,14 +81,15 @@ public class AstUtilityTestCaseTest extends AstUtilityTestCase {
     
     try {
       deepEquals(parent1, parent2);
-      fail("FAIL: Parent1 and Parent2 should not be equal.");
-    } catch (AssertionFailedError e) {
+      Assert.fail("FAIL: Parent1 and Parent2 should not be equal.");
+    } catch (AssertionError e) {
       if (e.getMessage().startsWith("FAIL")) {
         throw e;
       }
     }
   }
 
+  @Test
   public void testDeepEquals5() throws Exception {
     CssPropertyValueNode parent1 = new CssPropertyValueNode();
     CssPropertyValueNode parent2 = new CssPropertyValueNode();

@@ -21,18 +21,20 @@ import com.google.common.css.compiler.ast.GssFunction;
 import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.css.compiler.passes.ResolveCustomFunctionNodes;
-
 import java.util.Map;
 import java.util.Set;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * {@link DefaultGssFunctionMapProviderTest} is a unit test for
- * {@link DefaultGssFunctionMapProvider}, which is used to provide the default
- * functions for <a href="http://code.google.com/p/closure-stylesheets/">Closure
- * Stylesheets</a>.
+ * {@link DefaultGssFunctionMapProviderTest} is a unit test for {@link
+ * DefaultGssFunctionMapProvider}, which is used to provide the default functions for <a
+ * href="http://code.google.com/p/closure-stylesheets/">Closure Stylesheets</a>.
  *
  * @author bolinfest@google.com (Michael Bolin)
  */
+@RunWith(JUnit4.class)
 public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
 
   @Override
@@ -46,11 +48,13 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         allowUnknownFunctions, allowedNonStandardFunctions).runPass();
   }
 
+  @Test
   public void testAddPercentagesMissingUnit() throws GssParserException {
     parseAndRun("A { width: add(5%, 10); }",
         "Parameters' units don't match (\"%\" vs \"\")");
   }
 
+  @Test
   public void testAddPercentagesZeroSize() throws GssParserException {
     test("A { width: add(5%, 0, 10%); }",
         " A { width: 15%; }");
@@ -62,16 +66,19 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         " A { width: 15%; }");
   }
 
+  @Test
   public void testAddPercentagesImplicitUnit() throws GssParserException {
     test("A { width: add(5%, 10%); }",
         " A { width: 15%; }");
   }
 
+  @Test
   public void testAddNegativeValues() throws GssParserException {
     test("A { width: add(5%, 10%, -25%, 50%); }",
         " A { width: 40%; }");
   }
 
+  @Test
   public void testMult() throws GssParserException {
     test("A { width: mult(5, 6); }",
         " A { width: 30; }");
@@ -83,6 +90,7 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         " A { width: -24px; }");
   }
 
+  @Test
   public void testMultUnitNotFirst() throws GssParserException {
     parseAndRun("A { width: mult(5, 10%, 15ex); }",
         "Only the first argument may have a unit associated with it, "
@@ -92,6 +100,7 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         + " but has unit: ex");
   }
 
+  @Test
   public void testDivide() throws GssParserException {
     test("A { width: divide(30, 6); }",
         " A { width: 5; }");
@@ -103,6 +112,7 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         " A { width: -32px; }");
   }
 
+  @Test
   public void testDivUnitNotFirst() throws GssParserException {
     parseAndRun("A { width: divide(100px, 10px); }",
         "Only the first argument may have a unit associated with it, "
@@ -112,6 +122,7 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         + " but has unit: ex");
   }
 
+  @Test
   public void testMax() throws GssParserException {
     test("A { width: max(5%, 10%); }",
         " A { width: 10%; }");
@@ -129,16 +140,19 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         " A { width: -0%; }");
   }
 
+  @Test
   public void testMaxUnspecifiedUnit() throws GssParserException {
     parseAndRun("A { width: max(5%, 10); }",
         "Parameters' units don't match (\"%\" vs \"\")");
   }
 
+  @Test
   public void testMaxMismatchedUnits() throws GssParserException {
     parseAndRun("A { width: max(5%, 10px, 20%); }",
         "Parameters' units don't match (\"%\" vs \"px\")");
   }
 
+  @Test
   public void testMin() throws GssParserException {
     test("A { width: min(5%, 10%); }",
         " A { width: 5%; }");
@@ -156,16 +170,19 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         " A { width: -0%; }");
   }
 
+  @Test
   public void testMinUnspecifiedUnit() throws GssParserException {
     parseAndRun("A { width: min(5%, 10); }",
         "Parameters' units don't match (\"%\" vs \"\")");
   }
 
+  @Test
   public void testMinMismatchedUnits() throws GssParserException {
     parseAndRun("A { width: min(5%, 10px, 20%); }",
         "Parameters' units don't match (\"%\" vs \"px\")");
   }
 
+  @Test
   public void testScalars() throws GssParserException {
     // This is an example of why add() and sub() should be able to take
     // arguments without any units.
@@ -186,6 +203,7 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
         "A { width: 60px; }");
   }
 
+  @Test
   public void testConcat() throws GssParserException {
     test("A { background-image:url(concat('http://', www, '.google.com', \"/example.gif\")); }",
          "A { background-image:url('http://www.google.com/example.gif'); }");

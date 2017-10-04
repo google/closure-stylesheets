@@ -29,18 +29,13 @@ import com.google.common.collect.ImmutableList;
  *    Eg. background-image: linear-gradient(ARGS);
  *
  */
-final class BrowserPrefixGenerator {
+public final class BrowserPrefixGenerator {
 
-  private static ImmutableList<BrowserPrefixRule> expansionRules = null;
+  private static final ImmutableList<BrowserPrefixRule> EXPANSION_RULES = buildExpansionRules();
 
-  /**
-   * Builds and returns the rules for automatic expansion of mixins.
-   */
-  static ImmutableList<BrowserPrefixRule> getExpansionRules() {
-    if (expansionRules == null) {
-      expansionRules = buildExpansionRules();
-    }
-    return expansionRules;
+  /** Returns the rules for automatic expansion of mixins. */
+  public static ImmutableList<BrowserPrefixRule> getExpansionRules() {
+    return EXPANSION_RULES;
   }
 
   private static ImmutableList<BrowserPrefixRule> buildExpansionRules() {
@@ -165,6 +160,15 @@ final class BrowserPrefixGenerator {
         .isFunction(false)
         .addExpandPropertyName("-webkit-justify-content")
         .addExpandPropertyName("justify-content")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("text-size-adjust")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-text-size-adjust")
+        .addExpandPropertyName("-moz-text-size-adjust")
+        .addExpandPropertyName("-ms-text-size-adjust")
+        .addExpandPropertyName("text-size-adjust")
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
@@ -295,6 +299,16 @@ final class BrowserPrefixGenerator {
         .isFunction(false)
         .addExpandPropertyValue("-moz-grab")
         .addExpandPropertyValue("-webkit-grab")
+        .addExpandPropertyValue("grab")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("cursor")
+        .matchPropertyValue("grabbing")
+        .isFunction(false)
+        .addExpandPropertyValue("-moz-grabbing")
+        .addExpandPropertyValue("-webkit-grabbing")
+        .addExpandPropertyValue("grabbing")
         .build());
 
     // Needed for Firefox 15, Chrome 25, Safari 6, iOS Safari 6.1 or less

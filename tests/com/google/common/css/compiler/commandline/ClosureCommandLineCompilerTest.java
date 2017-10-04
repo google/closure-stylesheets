@@ -15,6 +15,9 @@
  */
 package com.google.common.css.compiler.commandline;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
+
 import com.google.common.css.ExitCodeHandler;
 import com.google.common.css.JobDescription;
 import com.google.common.css.JobDescriptionBuilder;
@@ -22,12 +25,13 @@ import com.google.common.css.SourceCode;
 import com.google.common.css.compiler.ast.ErrorManager;
 import com.google.common.css.compiler.ast.testing.NewFunctionalTestBase;
 import com.google.common.io.Files;
-
-import junit.framework.TestCase;
-
 import java.io.File;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-public class ClosureCommandLineCompilerTest extends TestCase {
+@RunWith(JUnit4.class)
+public class ClosureCommandLineCompilerTest {
 
   static final ExitCodeHandler EXIT_CODE_HANDLER =
       new ExitCodeHandler() {
@@ -37,6 +41,7 @@ public class ClosureCommandLineCompilerTest extends TestCase {
         }
       };
 
+  @Test
   public void testMixinPropagation() throws Exception {
     ErrorManager errorManager = new NewFunctionalTestBase.TestErrorManager(new String[0]);
 
@@ -57,17 +62,19 @@ public class ClosureCommandLineCompilerTest extends TestCase {
 
     String output = compiler.execute(null /* renameFile */, null /* sourcemapFile */);
 
-    assertEquals(".example{background:url('sprite.png') no-repeat}", output);
+    assertThat(output).isEqualTo(".example{background:url('sprite.png') no-repeat}");
   }
 
+  @Test
 
   public void testAllowDefPropagationDefaultsToTrue() throws Exception {
     ClosureCommandLineCompiler.Flags flags =
         ClosureCommandLineCompiler.parseArgs(new String[] {"/dev/null"}, EXIT_CODE_HANDLER);
     JobDescription jobDescription = flags.createJobDescription();
-    assertTrue(jobDescription.allowDefPropagation);
+    assertThat(jobDescription.allowDefPropagation).isTrue();
   }
 
+  @Test
 
   public void testEmptyImportBlocks() throws Exception {
     // See b/29995881
@@ -91,6 +98,6 @@ public class ClosureCommandLineCompilerTest extends TestCase {
     // resulted in the exit handler being called which causes fail(...),
     // so if control reaches here, we're ok.
 
-    assertNotNull(compiledCss);
+    assertThat(compiledCss).isNotNull();
   }
 }
