@@ -76,6 +76,15 @@ public class ClosureCommandLineCompilerTest {
 
   @Test
 
+  public void testAllowDuplicateDeclarationsDefaultsToFalse() throws Exception {
+    ClosureCommandLineCompiler.Flags flags =
+            ClosureCommandLineCompiler.parseArgs(new String[] {"/dev/null"}, EXIT_CODE_HANDLER);
+    JobDescription jobDescription = flags.createJobDescription();
+    assertThat(jobDescription.allowDuplicateDeclarations).isFalse();
+  }
+
+  @Test
+
   public void testEmptyImportBlocks() throws Exception {
     // See b/29995881
     ErrorManager errorManager = new NewFunctionalTestBase.TestErrorManager(new String[0]);
