@@ -136,6 +136,7 @@ public final class Property {
         builder("break-before"),
         builder("break-inside"),
         builder("caption-side"),
+        builder("caret-color"),
         builder("clear"),
         builder("clip"),
         builder("clip-path").isSvgOnly(),
