@@ -344,6 +344,15 @@ public final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("hyphens")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-hyphens")
+        .addExpandPropertyName("-moz-hyphens")
+        .addExpandPropertyName("-ms-hyphens")
+        .addExpandPropertyName("hyphens")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("perspective-origin")
         .isFunction(false)
         .addExpandPropertyName("-webkit-perspective-origin")
