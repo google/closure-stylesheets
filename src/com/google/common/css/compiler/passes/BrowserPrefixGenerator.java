@@ -370,14 +370,6 @@ public final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
-        .matchPropertyName("position")
-        .matchPropertyValue("sticky")
-        .isFunction(false)
-        .addExpandPropertyValue("-webkit-sticky")
-        .addExpandPropertyValue("sticky")
-        .build());
-
-    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("transform")
         .isFunction(false)
         .addExpandPropertyName("-webkit-transform")
