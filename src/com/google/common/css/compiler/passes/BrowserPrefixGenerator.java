@@ -353,6 +353,15 @@ public final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("min-width")
+        .matchPropertyValue("min-content")
+        .isFunction(false)
+        .addExpandPropertyValue("-webkit-min-content")
+        .addExpandPropertyValue("-moz-min-content")
+        .addExpandPropertyValue("min-content")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("perspective-origin")
         .isFunction(false)
         .addExpandPropertyName("-webkit-perspective-origin")
