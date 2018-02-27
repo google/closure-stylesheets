@@ -219,7 +219,9 @@ public class AutoExpandBrowserPrefix extends DefaultTreeVisitor implements CssCo
       CssPropertyValueNode expansionValues = new CssPropertyValueNode(expansionNodeValues);
       CssDeclarationNode expansionNode =
           new CssDeclarationNode(
-              declaration.getPropertyName(), expansionValues, declaration.getSourceCodeLocation());
+              declaration.getPropertyName(), expansionValues, declaration.getComments(),
+          declaration.getSourceCodeLocation());
+
       expansionNode.appendComment(new CssCommentNode("/* @alternate */", null));
       expansionNodes.add(expansionNode);
     }
