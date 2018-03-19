@@ -70,9 +70,7 @@ public class GssFunctions {
         .put("mult", new GssFunctions.Mult())
         // Not named "div" so it will not be confused with the HTML element.
         .put("divide", new GssFunctions.Div())
-        .put("min", new GssFunctions.MinValue())
         .put("minimum", new GssFunctions.MinValue())
-        .put("max", new GssFunctions.MaxValue())
         .put("maximum", new GssFunctions.MaxValue())
 
         // Color functions.

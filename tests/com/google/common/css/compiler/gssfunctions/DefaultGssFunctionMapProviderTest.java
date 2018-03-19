@@ -123,62 +123,62 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
   }
 
   @Test
-  public void testMax() throws GssParserException {
-    test("A { width: max(5%, 10%); }",
+  public void testMaximum() throws GssParserException {
+    test("A { width: maximum(5%, 10%); }",
         " A { width: 10%; }");
-    test("A { width: max(5%, 50%, -25%, 10%); }",
+    test("A { width: maximum(5%, 50%, -25%, 10%); }",
         " A { width: 50%; }");
 
     // Test various zero values.
-    parseAndRun("A { width: max(-5%, 0, -10%); }",
+    parseAndRun("A { width: maximum(-5%, 0, -10%); }",
         "Parameters' units don't match (\"%\" vs \"\")");
-    test("A { width: max(-5%, 0%, -10%); }",
+    test("A { width: maximum(-5%, 0%, -10%); }",
         " A { width: 0%; }");
-    parseAndRun("A { width: max(-5%, -0, -10%); }",
+    parseAndRun("A { width: maximum(-5%, -0, -10%); }",
         "Parameters' units don't match (\"%\" vs \"\")");
-    test("A { width: max(-5%, -0%, -10%); }",
+    test("A { width: maximum(-5%, -0%, -10%); }",
         " A { width: -0%; }");
   }
 
   @Test
   public void testMaxUnspecifiedUnit() throws GssParserException {
-    parseAndRun("A { width: max(5%, 10); }",
+    parseAndRun("A { width: maximum(5%, 10); }",
         "Parameters' units don't match (\"%\" vs \"\")");
   }
 
   @Test
   public void testMaxMismatchedUnits() throws GssParserException {
-    parseAndRun("A { width: max(5%, 10px, 20%); }",
+    parseAndRun("A { width: maximum(5%, 10px, 20%); }",
         "Parameters' units don't match (\"%\" vs \"px\")");
   }
 
   @Test
-  public void testMin() throws GssParserException {
-    test("A { width: min(5%, 10%); }",
+  public void testMinimum() throws GssParserException {
+    test("A { width: minimum(5%, 10%); }",
         " A { width: 5%; }");
-    test("A { width: min(5%, 50%, -25%, 10%); }",
+    test("A { width: minimum(5%, 50%, -25%, 10%); }",
         " A { width: -25%; }");
 
     // Test various zero values.
-    parseAndRun("A { width: min(5%, 0, 10%); }",
+    parseAndRun("A { width: minimum(5%, 0, 10%); }",
         "Parameters' units don't match (\"%\" vs \"\")");
-    test("A { width: min(5%, 0%, 10%); }",
+    test("A { width: minimum(5%, 0%, 10%); }",
         " A { width: 0%; }");
-    parseAndRun("A { width: min(5%, -0, 10%); }",
+    parseAndRun("A { width: minimum(5%, -0, 10%); }",
         "Parameters' units don't match (\"%\" vs \"\")");
-    test("A { width: min(5%, -0%, 10%); }",
+    test("A { width: minimum(5%, -0%, 10%); }",
         " A { width: -0%; }");
   }
 
   @Test
   public void testMinUnspecifiedUnit() throws GssParserException {
-    parseAndRun("A { width: min(5%, 10); }",
+    parseAndRun("A { width: minimum(5%, 10); }",
         "Parameters' units don't match (\"%\" vs \"\")");
   }
 
   @Test
   public void testMinMismatchedUnits() throws GssParserException {
-    parseAndRun("A { width: min(5%, 10px, 20%); }",
+    parseAndRun("A { width: minimum(5%, 10px, 20%); }",
         "Parameters' units don't match (\"%\" vs \"px\")");
   }
 
@@ -187,18 +187,18 @@ public class DefaultGssFunctionMapProviderTest extends NewFunctionalTestBase {
     // This is an example of why add() and sub() should be able to take
     // arguments without any units.
     test("A {"
-        + "width: max("
+        + "width: maximum("
         + "  mult(add(35px, -15px), add(2, 3)), " // 100px
         + "  divide(sub(500px, 100px), sub(10, 2))"  //  50px
         + "); }",
         "A { width: 100px; }");
 
-    // This is an example of why max() and min() should be able to take
+    // This is an example of why maximum() and minimum() should be able to take
     // arguments without any units.
     test("A {"
-        + "width: min("
-        + "  mult(add(35px, -15px), max(2, 3)), " //  60px
-        + "  divide(sub(500px, 100px), min(10, 2))"  // 200px
+        + "width: minimum("
+        + "  mult(add(35px, -15px), maximum(2, 3)), " //  60px
+        + "  divide(sub(500px, 100px), minimum(10, 2))"  // 200px
         + "); }",
         "A { width: 60px; }");
   }
