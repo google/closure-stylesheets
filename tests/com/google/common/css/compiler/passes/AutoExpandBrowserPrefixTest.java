@@ -120,17 +120,6 @@ public class AutoExpandBrowserPrefixTest extends PassesTestBase {
             + "[/* @noflip */][/* @alternate */]left:[calc([[100%] - [24px]])];]}]");
   }
 
-  @Test
-  public void testCommentsArePreservedAfterExpansion() {
-    testTreeConstruction(
-        "p { /* @noflip */ transform-origin: left top; }",
-        ""
-            + "[[p]{[[/* @noflip */][/* @alternate */]-webkit-transform-origin:[[left][top]];"
-            + "[/* @noflip */][/* @alternate */]-ms-transform-origin:[[left][top]];"
-            + "[/* @noflip */][/* @alternate */]-o-transform-origin:[[left][top]];"
-            + "[/* @noflip */][/* @alternate */]transform-origin:[[left][top]];]}]");
-  }
-
   @Override
   protected void runPass() {
     // These passes have to run before.
