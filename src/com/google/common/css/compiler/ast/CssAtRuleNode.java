@@ -17,7 +17,6 @@
 package com.google.common.css.compiler.ast;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import java.util.List;
 
@@ -196,19 +195,9 @@ public abstract class CssAtRuleNode extends CssNodesListNode<CssValueNode> {
   CssAtRuleNode(CssAtRuleNode node) {
     this(node.getType(), node.getName().deepCopy(),
         node.getBlock() != null ? node.getBlock().deepCopy() : null,
-        copyNodes(node.getComments()));
-    setParameters(copyNodes(node.getParameters()));
+        deepCopyNodes(node.getComments()));
+    setParameters(deepCopyNodes(node.getParameters()));
     setSourceCodeLocation(node.getSourceCodeLocation());
-  }
-
-  public static <N extends CssNode> List<N> copyNodes(List<N> nodes) {
-    List<N> list = Lists.newArrayList();
-    for (N node : nodes) {
-      @SuppressWarnings("unchecked")
-      N copy = (N) node.deepCopy();
-      list.add(copy);
-    }
-    return list;
   }
 
   public Type getType() {
