@@ -152,6 +152,7 @@ public final class BrowserPrefixGenerator {
         .matchPropertyName("align-self")
         .isFunction(false)
         .addExpandPropertyName("-webkit-align-self")
+        .addExpandPropertyName("-ms-grid-row-align")
         .addExpandPropertyName("align-self")
         .build());
 
@@ -344,6 +345,24 @@ public final class BrowserPrefixGenerator {
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("hyphens")
+        .isFunction(false)
+        .addExpandPropertyName("-webkit-hyphens")
+        .addExpandPropertyName("-moz-hyphens")
+        .addExpandPropertyName("-ms-hyphens")
+        .addExpandPropertyName("hyphens")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("min-width")
+        .matchPropertyValue("min-content")
+        .isFunction(false)
+        .addExpandPropertyValue("-webkit-min-content")
+        .addExpandPropertyValue("-moz-min-content")
+        .addExpandPropertyValue("min-content")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
         .matchPropertyName("perspective-origin")
         .isFunction(false)
         .addExpandPropertyName("-webkit-perspective-origin")
@@ -358,6 +377,14 @@ public final class BrowserPrefixGenerator {
         .addExpandPropertyValue("-moz-radial-gradient")
         .addExpandPropertyValue("-o-radial-gradient")
         .addExpandPropertyValue("radial-gradient")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("position")
+        .matchPropertyValue("sticky")
+        .isFunction(false)
+        .addExpandPropertyValue("-webkit-sticky")
+        .addExpandPropertyValue("sticky")
         .build());
 
     builder.add(new BrowserPrefixRule.Builder()
@@ -432,6 +459,49 @@ public final class BrowserPrefixGenerator {
         .addExpandPropertyName("-webkit-user-select")
         .addExpandPropertyName("-moz-user-select")
         .addExpandPropertyName("-ms-user-select")
+        .build());
+
+    // Grid support for IE:
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout/CSS_Grid_and_Progressive_Enhancement
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("display")
+        .matchPropertyValue("grid")
+        .isFunction(false)
+        .addExpandPropertyValue("-ms-grid")
+        .addExpandPropertyValue("grid")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("grid-template-columns")
+        .isFunction(false)
+        .addExpandPropertyName("-ms-grid-columns")
+        .addExpandPropertyName("grid-template-columns")
+        .build());
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("grid-template-rows")
+        .isFunction(false)
+        .addExpandPropertyName("-ms-grid-rows")
+        .addExpandPropertyName("grid-template-rows")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("grid-row-start")
+        .isFunction(false)
+        .addExpandPropertyName("-ms-grid-row")
+        .addExpandPropertyName("grid-row-start")
+        .build());
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("grid-column-start")
+        .isFunction(false)
+        .addExpandPropertyName("-ms-grid-column")
+        .addExpandPropertyName("grid-column-start")
+        .build());
+
+    builder.add(new BrowserPrefixRule.Builder()
+        .matchPropertyName("justify-self")
+        .isFunction(false)
+        .addExpandPropertyName("-grid-column-align")
+        .addExpandPropertyName("justify-self")
         .build());
 
     return builder.build();

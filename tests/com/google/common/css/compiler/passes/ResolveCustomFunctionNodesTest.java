@@ -43,8 +43,8 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
         .put("minus", new GssFunctions.SubtractFromNumericValue())
         .put("mult", new GssFunctions.Mult())
         .put("div", new GssFunctions.Div())
-        .put("min", new GssFunctions.MinValue())
-        .put("max", new GssFunctions.MaxValue())
+        .put("minimum", new GssFunctions.MinValue())
+        .put("maximum", new GssFunctions.MaxValue())
         .build();
   }
 
@@ -81,7 +81,7 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
 
   @Test
   public void testWrongArgumentError1() throws Exception {
-    parseAndRun("A { width: max(2,bar,foo) }",
+    parseAndRun("A { width: maximum(2,bar,foo) }",
         "Size must be a CssNumericNode with a unit or 0; was: bar");
   }
 
@@ -99,7 +99,7 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
 
   @Test
   public void testMax() throws Exception {
-    parseAndRun("A { width: max(-2%, -5%) }");
+    parseAndRun("A { width: maximum(-2%, -5%) }");
     assertThat(getFirstPropertyValue().toString()).isEqualTo("[-2%]");
   }
 
@@ -111,7 +111,7 @@ public class ResolveCustomFunctionNodesTest extends NewFunctionalTestBase {
 
   @Test
   public void testFunctionWithinFunction() throws Exception {
-    parseAndRun("A { width: max(10px, max(2px, 30px)) }");
+    parseAndRun("A { width: maximum(10px, maximum(2px, 30px)) }");
     assertThat(getFirstPropertyValue().toString()).isEqualTo("[30px]");
   }
 }

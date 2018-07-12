@@ -97,10 +97,6 @@ public final class CollectProvideNamespaces extends DefaultTreeVisitor implement
     }
     String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
     String provideNamespace = filenameProvideMap.get(filename);
-    // Remove this after switching to the new syntax.
-    if (provideNamespace == null) {  // ignore old format @provide
-      return true;
-    }
     defProvideMap.put(node.getName().getValue(), provideNamespace);
     return true;
   }
@@ -113,10 +109,6 @@ public final class CollectProvideNamespaces extends DefaultTreeVisitor implement
     }
     String filename = node.getSourceCodeLocation().getSourceCode().getFileName();
     String provideNamespace = filenameProvideMap.get(filename);
-    // Remove this after switching to the new syntax.
-    if (provideNamespace == null) {  // ignore old format @provide
-      return true;
-    }
     Preconditions.checkArgument(provideNamespace != null);
     defmixinProvideMap.put(node.getDefinitionName(), provideNamespace);
     return true;

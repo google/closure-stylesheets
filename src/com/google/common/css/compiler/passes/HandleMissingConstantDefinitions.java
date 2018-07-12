@@ -17,7 +17,13 @@
 package com.google.common.css.compiler.passes;
 
 import com.google.common.base.Preconditions;
-import com.google.common.css.compiler.ast.*;
+import com.google.common.css.compiler.ast.CssCompilerPass;
+import com.google.common.css.compiler.ast.CssConstantReferenceNode;
+import com.google.common.css.compiler.ast.CssValueNode;
+import com.google.common.css.compiler.ast.DefaultTreeVisitor;
+import com.google.common.css.compiler.ast.ErrorManager;
+import com.google.common.css.compiler.ast.GssError;
+import com.google.common.css.compiler.ast.VisitController;
 
 /**
  * Compiler pass that throws an error for any {@link CssConstantReferenceNode}
@@ -45,6 +51,15 @@ public final class HandleMissingConstantDefinitions extends DefaultTreeVisitor
 
   @Override
   public void leaveValueNode(CssValueNode node) {
+    checkValueNode(node);
+  }
+
+  @Override
+  public void leaveArgumentNode(CssValueNode node) {
+    checkValueNode(node);
+  }
+
+  private void checkValueNode(CssValueNode node) {
     if (node instanceof CssConstantReferenceNode
         && !definitions.getConstants().keySet().contains(node.getValue())) {
       errorManager.report(new GssError(

@@ -19,9 +19,8 @@ package com.google.common.css.compiler.ast.testing;
 import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.css.SourceCodeLocation;
-import com.google.common.truth.FailureStrategy;
+import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
-import com.google.common.truth.SubjectFactory;
 import javax.annotation.CheckReturnValue;
 
 /**
@@ -30,11 +29,12 @@ import javax.annotation.CheckReturnValue;
 public class SourceCodeLocationSubject
     extends Subject<SourceCodeLocationSubject, SourceCodeLocation> {
 
-  static final SubjectFactory<SourceCodeLocationSubject, SourceCodeLocation> LOCATION =
-      new SubjectFactory<SourceCodeLocationSubject, SourceCodeLocation>() {
+  static final Subject.Factory<SourceCodeLocationSubject, SourceCodeLocation> LOCATION =
+      new Subject.Factory<SourceCodeLocationSubject, SourceCodeLocation>() {
         @Override
-        public SourceCodeLocationSubject getSubject(FailureStrategy fs, SourceCodeLocation that) {
-          return new SourceCodeLocationSubject(fs, that);
+        public SourceCodeLocationSubject createSubject(
+            FailureMetadata fm, SourceCodeLocation that) {
+          return new SourceCodeLocationSubject(fm, that);
         }
       };
 
@@ -43,8 +43,8 @@ public class SourceCodeLocationSubject
     return assertAbout(LOCATION).that(target);
   }
 
-  public SourceCodeLocationSubject(FailureStrategy failureStrategy, SourceCodeLocation subject) {
-    super(failureStrategy, subject);
+  public SourceCodeLocationSubject(FailureMetadata failureMetadata, SourceCodeLocation subject) {
+    super(failureMetadata, subject);
   }
 
   public void hasSpan(int beginLine, int beginIndex, int endLine, int endIndex) {

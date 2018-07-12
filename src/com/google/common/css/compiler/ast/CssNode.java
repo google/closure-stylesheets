@@ -323,4 +323,14 @@ public abstract class CssNode implements Locatable {
   public VisitController getVisitController() {
     return new DefaultVisitController(this, false /* allowMutating */);
   }
+
+  public static <N extends CssNode> List<N> deepCopyNodes(List<N> nodes) {
+    List<N> list = Lists.newArrayList();
+    for (N node : nodes) {
+      @SuppressWarnings("unchecked")
+      N copy = (N) node.deepCopy();
+      list.add(copy);
+    }
+    return list;
+  }
 }

@@ -101,7 +101,7 @@ public class CssDeclarationNode extends CssNode {
     this(
         node.getPropertyName().deepCopy(),
         node.getPropertyValue().deepCopy(),
-        node.getComments(),
+        deepCopyNodes(node.getComments()),
         node.getSourceCodeLocation(),
         node.hasStarHack());
   }

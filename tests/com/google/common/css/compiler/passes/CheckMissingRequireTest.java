@@ -42,6 +42,9 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
     l.add(new CreateConstantReferences(tree.getMutatingVisitController()));
     l.add(new CheckDependencyNodes(tree.getMutatingVisitController(), errorMgr));
     l.add(new CreateComponentNodes(tree.getMutatingVisitController(), errorMgr));
+    CollectMixinDefinitions collectMixins =
+        new CollectMixinDefinitions(tree.getMutatingVisitController(), errorMgr);
+    l.add(collectMixins);
     l.add(new ProcessComponents<Object>(tree.getMutatingVisitController(), errorMgr, null));
     for (CssCompilerPass pass : l) {
       pass.runPass();
@@ -135,6 +138,33 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
   }
 
   @Test
+  public void testMissingRequire_overrideSelector() throws GssParserException {
+    String base = ""
+        + "@provide 'foo.base';\n"
+        + ".nav { color: blue; }\n";
+    String streamitem = ""
+        + "@provide 'foo.streamitem';\n"
+        + "/** @overrideSelector {foo.base} */\n"
+        + ".nav { color: red; }\n";
+    ImmutableMap<String, String> fileNameToGss =
+        ImmutableMap.of(
+            "base.gss", base,
+            "streamitem.gss", streamitem);
+
+    parseAndBuildTree(fileNameToGss);
+    String[] expectedMessages = {
+      "Missing @require for @overrideSelector {foo.base}. Please @require this namespace in "
+          + "file: streamitem.gss."
+    };
+    TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
+    runPasses(errorManager);
+    errorManager.generateReport();
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
+  }
+
+  @Test
   public void testMissingRequireFromComponent() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -213,18 +243,19 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
   @Test
   public void testMissingRequireDefMixin() throws GssParserException {
     String base =  ""
-        + "@provide 'foo.base';"
-        + "@def FOO_BASE_COLOR     #fff;"
-        + "@defmixin background_color(FALLBACK_BG_COLOR) {"
-        + "  background-color: FALLBACK_BG_COLOR;"
-        + "}";
+        + "@provide 'foo.base';\n"
+        + "/**\n"
+        + " * @param FALLBACK_BG_COLOR The background color to use.\n"
+        + " */\n"
+        + "@defmixin background_color(FALLBACK_BG_COLOR) {\n"
+        + "  background-color: FALLBACK_BG_COLOR;\n"
+        + "}\n";
     String streamitem =  ""
-        + "@provide 'foo.streamitem';"
-        + "@def FOO_OVERLAY_BG_COLOR  #fff;"
-        + "@def FOO_OVERLAY_OPAQUE_BG_COLOR  #fee;"
-        + ".fooStreamOverlay {"
-        + "@mixin background_color(FOO_OVERLAY_BG_COLOR, FOO_OVERLAY_OPAQUE_BG_COLOR);"
-        + "}";
+        + "@provide 'foo.streamitem';\n"
+        + "@def FOO_OVERLAY_BG_COLOR  #fff;\n"
+        + ".fooStreamOverlay {\n"
+        + "@mixin background_color(FOO_OVERLAY_BG_COLOR);\n"
+        + "}\n";
 
     ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
         "base.gss", base,
@@ -266,6 +297,34 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
   }
 
   @Test
+  public void testMissingOverrideSelectorNamespace_multilineComment() throws GssParserException {
+    String base =  ""
+        + "@provide 'foo.base';\n"
+        + "@def FOO_BASE_COLOR     #fff;\n";
+    String streamitem =  ""
+        + "@provide 'foo.streamitem';\n"
+        + "@require 'foo.base';\n"
+        + "/**\n"
+        + " * @overrideSelector {foo.foo}\n"
+        + " */\n"
+        + ".nav {\n"
+        + "  color: FOO_BASE_COLOR;\n"
+        + "}\n";
+
+    ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
+        "base.gss", base,
+        "streamitem.gss", streamitem);
+    parseAndBuildTree(fileNameToGss);
+    String[] expectedMessages = {"Missing @require for @overrideSelector"};
+    TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
+    runPasses(errorManager);
+    errorManager.generateReport();
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
+  }
+
+  @Test
   public void testMissingOverrideDefNamespace() throws GssParserException {
     String base =  ""
         + "@provide 'foo.base';"
@@ -288,4 +347,29 @@ public class CheckMissingRequireTest extends NewFunctionalTestBase {
         .isTrue();
   }
 
+  @Test
+  public void testMissingOverrideDefNamespace_multilineComment() throws GssParserException {
+    String base =  ""
+        + "@provide 'foo.base';\n"
+        + "@def FOO_BASE_COLOR     #fff;\n";
+    String streamitem =  ""
+        + "@provide 'foo.streamitem';\n"
+        + "@require 'foo.bar';\n"
+        + "/**\n"
+        + " * @overrideDef {foo.base}\n"
+        + " */\n"
+        + "@def FOO_BASE_COLOR  #ffe;\n";
+
+    ImmutableMap<String, String> fileNameToGss = ImmutableMap.of(
+        "base.gss", base,
+        "streamitem.gss", streamitem);
+    parseAndBuildTree(fileNameToGss);
+    String[] expectedMessages = {"Missing @require for @overrideDef"};
+    TestErrorManager errorManager = new TestErrorManager(false, expectedMessages);
+    runPasses(errorManager);
+    errorManager.generateReport();
+    assertWithMessage("Encountered all errors.")
+        .that(errorManager.hasEncounteredAllErrors())
+        .isTrue();
+  }
 }

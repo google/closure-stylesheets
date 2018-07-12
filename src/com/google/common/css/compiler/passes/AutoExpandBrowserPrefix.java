@@ -91,6 +91,8 @@ public class AutoExpandBrowserPrefix extends DefaultTreeVisitor implements CssCo
           CssDeclarationNode expansionNode = ruleExpansionNode.deepCopy();
           expansionNode.setPropertyValue(declaration.getPropertyValue().deepCopy());
           expansionNode.setSourceCodeLocation(declaration.getSourceCodeLocation());
+          expansionNode.setComments(declaration.getComments());
+          expansionNode.appendComment(new CssCommentNode("/* @alternate */", null));
           expansionNodes.add(expansionNode);
         }
       } else if (!rule.isFunction()) {
@@ -219,7 +221,9 @@ public class AutoExpandBrowserPrefix extends DefaultTreeVisitor implements CssCo
       CssPropertyValueNode expansionValues = new CssPropertyValueNode(expansionNodeValues);
       CssDeclarationNode expansionNode =
           new CssDeclarationNode(
-              declaration.getPropertyName(), expansionValues, declaration.getSourceCodeLocation());
+              declaration.getPropertyName(), expansionValues, declaration.getComments(),
+          declaration.getSourceCodeLocation());
+
       expansionNode.appendComment(new CssCommentNode("/* @alternate */", null));
       expansionNodes.add(expansionNode);
     }

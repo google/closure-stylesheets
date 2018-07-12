@@ -25,7 +25,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.css.SourceCode;
 import com.google.common.css.SourceCodeLocation;
-import com.google.common.css.compiler.ast.CssAtRuleNode;
 import com.google.common.css.compiler.ast.CssBlockNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode;
 import com.google.common.css.compiler.ast.CssClassSelectorNode.ComponentScoping;
@@ -379,6 +378,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
         CssClassSelectorNode newNode = new CssClassSelectorNode(
             classPrefix + node.getRefinerName(),
             inAncestorBlock ? sourceCodeLocation : node.getSourceCodeLocation());
+        newNode.setComments(node.getComments());
         visitController.replaceCurrentBlockChildWith(ImmutableList.of(newNode), false);
       }
       firstClassSelector = false;
@@ -413,7 +413,7 @@ public class ProcessComponents<T> extends DefaultTreeVisitor
         newNode = new CssDefinitionNode(ImmutableList.<CssValueNode>of(parentRefNode),
             newDefLit, sourceCodeLocation);
       } else {
-        newNode = new CssDefinitionNode(CssAtRuleNode.copyNodes(node.getParameters()),
+        newNode = new CssDefinitionNode(CssNode.deepCopyNodes(node.getParameters()),
             newDefLit, sourceCodeLocation);
       }
       componentConstants.add(defName);

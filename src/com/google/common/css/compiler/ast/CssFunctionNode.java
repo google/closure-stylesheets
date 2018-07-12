@@ -90,6 +90,11 @@ public class CssFunctionNode extends CssValueNode implements ChunkAware {
           "translateZ",
           "translate3d",
 
+          // CSS 3+ mathematical expressions
+          // https://drafts.csswg.org/css-values/#calc-notation
+          "min",
+          "max",
+
           // Filter
           // w3.org/TR/filter-effects-1/#FilterProperty
           // "url" already in list
