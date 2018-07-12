@@ -565,6 +565,7 @@ public final class Property {
         builder("transition"),
         builder("unicode-bidi"),
         builder("unicode-range"),
+        builder("user-select"),
         builder("vector-effect").isSvgOnly(),
         builder("vertical-align"),
         builder("visibility"),
