@@ -88,7 +88,9 @@ public class RecordingSubstitutionMap implements SubstitutionMap.Initializable {
     Preconditions.checkState(mappings.isEmpty());
     if (!newMappings.isEmpty()) {
       mappings.putAll(newMappings);
-      ((SubstitutionMap.Initializable) delegate).initializeWithMappings(newMappings);
+      if (delegate instanceof SubstitutionMap.Initializable) {
+        ((SubstitutionMap.Initializable) delegate).initializeWithMappings(newMappings);
+      }
     }
   }
 
