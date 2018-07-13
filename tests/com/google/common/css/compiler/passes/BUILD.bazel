@@ -1,0 +1,1122 @@
+## Copyright 2018 The Closure Stylesheets Authors.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+
+licenses(["notice"])  # Apache 2.0
+
+java_test(
+    name = "AbbreviatePositionalValuesFunctionalTest",
+    size = "small",
+    srcs = [
+        "AbbreviatePositionalValuesFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.AbbreviatePositionalValuesFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+    ],
+)
+
+java_test(
+    name = "AbbreviatePositionalValuesTest",
+    size = "small",
+    srcs = [
+        "AbbreviatePositionalValuesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.AbbreviatePositionalValuesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "AutoExpandBrowserPrefixTest",
+    size = "small",
+    srcs = [
+        "AutoExpandBrowserPrefixTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.AutoExpandBrowserPrefixTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+    ],
+)
+
+java_test(
+    name = "BiDiFlipperFunctionalTest",
+    size = "small",
+    srcs = [
+        "BiDiFlipperFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.BiDiFlipperFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "BiDiFlipperTest",
+    size = "small",
+    srcs = [
+        "BiDiFlipperTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.BiDiFlipperTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "BooleanExpressionEvaluatorTest",
+    size = "small",
+    srcs = [
+        "BooleanExpressionEvaluatorTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.BooleanExpressionEvaluatorTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CheckDependencyNodesTest",
+    size = "small",
+    srcs = [
+        "CheckDependencyNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CheckDependencyNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CheckMissingRequireTest",
+    size = "small",
+    srcs = [
+        "CheckMissingRequireTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CheckMissingRequireTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CodeBufferTest",
+    size = "small",
+    srcs = [
+        "CodeBufferTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CodeBufferTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CollectConstantDefinitionsTest",
+    size = "small",
+    srcs = [
+        "CollectConstantDefinitionsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CollectConstantDefinitionsTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CollectMixinDefinitionsTest",
+    size = "small",
+    srcs = [
+        "CollectMixinDefinitionsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CollectMixinDefinitionsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "ColorValueOptimizerTest",
+    size = "small",
+    srcs = [
+        "ColorValueOptimizerTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ColorValueOptimizerTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "CompactPrinterTest",
+    size = "small",
+    srcs = [
+        "AbstractCompactPrinterTest.java",
+        "CompactPrinterTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CompactPrinterTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CreateComponentNodesTest",
+    size = "small",
+    srcs = [
+        "CreateComponentNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CreateComponentNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CreateConditionalNodesTest",
+    size = "small",
+    srcs = [
+        "CreateConditionalNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CreateConditionalNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CreateConstantReferencesTest",
+    size = "small",
+    srcs = [
+        "CreateConstantReferencesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CreateConstantReferencesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CreateDefinitionNodesTest",
+    size = "small",
+    srcs = [
+        "CreateDefinitionNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CreateDefinitionNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CreateForLoopNodesTest",
+    size = "small",
+    srcs = [
+        "CreateForLoopNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CreateForLoopNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CreateMixinsTest",
+    size = "small",
+    srcs = [
+        "CreateMixinsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CreateMixinsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CreateStandardAtRuleNodesTest",
+    size = "small",
+    srcs = [
+        "CreateStandardAtRuleNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CreateStandardAtRuleNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CreateVendorPrefixedKeyframesTest",
+    size = "small",
+    srcs = [
+        "CreateVendorPrefixedKeyframesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CreateVendorPrefixedKeyframesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssClassRenamingFunctionalTest",
+    size = "small",
+    srcs = [
+        "CssClassRenamingFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CssClassRenamingFunctionalTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssClassRenamingTest",
+    size = "small",
+    srcs = [
+        "CssClassRenamingTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.CssClassRenamingTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "DelegatingVisitorTest",
+    size = "small",
+    srcs = [
+        "DelegatingVisitorTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.DelegatingVisitorTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "EliminateConditionalNodesTest",
+    size = "small",
+    srcs = [
+        "EliminateConditionalNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.EliminateConditionalNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "EliminateEmptyRulesetNodesFunctionalTest",
+    size = "small",
+    srcs = [
+        "EliminateEmptyRulesetNodesFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.EliminateEmptyRulesetNodesFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "EliminateEmptyRulesetNodesTest",
+    size = "small",
+    srcs = [
+        "EliminateEmptyRulesetNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.EliminateEmptyRulesetNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "EliminateUnitsFromZeroNumericValuesFunctionalTest",
+    size = "small",
+    srcs = [
+        "EliminateUnitsFromZeroNumericValuesFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.EliminateUnitsFromZeroNumericValuesFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "EliminateUnitsFromZeroNumericValuesTest",
+    size = "small",
+    srcs = [
+        "EliminateUnitsFromZeroNumericValuesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.EliminateUnitsFromZeroNumericValuesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "EliminateUselessRulesetNodesFunctionalTest",
+    size = "small",
+    srcs = [
+        "EliminateUselessRulesetNodesFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.EliminateUselessRulesetNodesFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "EliminateUselessRulesetNodesTest",
+    size = "small",
+    srcs = [
+        "EliminateUselessRulesetNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.EliminateUselessRulesetNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "EvaluateCompileConstantsTest",
+    size = "small",
+    srcs = [
+        "EvaluateCompileConstantsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.EvaluateCompileConstantsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "FixupFontDeclarationsTest",
+    size = "small",
+    srcs = [
+        "FixupFontDeclarationsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.FixupFontDeclarationsTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "HandleMissingConstantDefinitionsTest",
+    size = "small",
+    srcs = [
+        "HandleMissingConstantDefinitionsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.HandleMissingConstantDefinitionsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "HandleUnknownAtRuleNodesTest",
+    size = "small",
+    srcs = [
+        "HandleUnknownAtRuleNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.HandleUnknownAtRuleNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "HasConditionalNodesFunctionalTest",
+    size = "small",
+    srcs = [
+        "HasConditionalNodesFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.HasConditionalNodesFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "HasConditionalNodesTest",
+    size = "small",
+    srcs = [
+        "HasConditionalNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.HasConditionalNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "LocationBoundingVisitorTest",
+    size = "small",
+    srcs = [
+        "LocationBoundingVisitorTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.LocationBoundingVisitorTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "LoopVariableReplacementPassTest",
+    size = "small",
+    srcs = [
+        "LoopVariableReplacementPassTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.LoopVariableReplacementPassTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "MapChunkAwareNodesToChunkTest",
+    size = "small",
+    srcs = [
+        "MapChunkAwareNodesToChunkTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.MapChunkAwareNodesToChunkTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "MarkDefaultDefinitionsTest",
+    size = "small",
+    srcs = [
+        "MarkDefaultDefinitionsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.MarkDefaultDefinitionsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "MarkNonFlippableNodesTest",
+    size = "small",
+    srcs = [
+        "MarkNonFlippableNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.MarkNonFlippableNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "MarkRemovableRulesetNodesForChunkTest",
+    size = "small",
+    srcs = [
+        "MarkRemovableRulesetNodesForChunkTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.MarkRemovableRulesetNodesForChunkTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "MarkRemovableRulesetNodesTest",
+    size = "small",
+    srcs = [
+        "MarkRemovableRulesetNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.MarkRemovableRulesetNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "MergeAdjacentRulesetNodesWithSameDeclarationsTest",
+    size = "small",
+    srcs = [
+        "MergeAdjacentRulesetNodesWithSameDeclarationsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.MergeAdjacentRulesetNodesWithSameDeclarationsTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "MergeAdjacentRulesetNodesWithSameSelectorTest",
+    size = "small",
+    srcs = [
+        "MergeAdjacentRulesetNodesWithSameSelectorTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.MergeAdjacentRulesetNodesWithSameSelectorTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "ProcessComponentsTest",
+    size = "small",
+    srcs = [
+        "ProcessComponentsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ProcessComponentsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "ProcessKeyframesTest",
+    size = "small",
+    srcs = [
+        "ProcessKeyframesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ProcessKeyframesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "ProcessRefinersTest",
+    size = "small",
+    srcs = [
+        "ProcessRefinersTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ProcessRefinersTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "RecordingSubstitutionMapTest",
+    size = "small",
+    srcs = [
+        "RecordingSubstitutionMapTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.RecordingSubstitutionMapTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "RemoveDefaultDeclarationsFunctionalTest",
+    size = "small",
+    srcs = [
+        "RemoveDefaultDeclarationsFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.RemoveDefaultDeclarationsFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "RemoveDefaultDeclarationsTest",
+    size = "small",
+    srcs = [
+        "RemoveDefaultDeclarationsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.RemoveDefaultDeclarationsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "RemoveEmptyValuesFunctionalTest",
+    size = "small",
+    srcs = [
+        "RemoveEmptyValuesFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.RemoveEmptyValuesFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "RemoveVendorSpecificPropertiesTest",
+    size = "small",
+    srcs = [
+        "RemoveVendorSpecificPropertiesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.RemoveVendorSpecificPropertiesTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "ReplaceConstantReferencesFunctionalTest",
+    size = "small",
+    srcs = [
+        "ReplaceConstantReferencesFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ReplaceConstantReferencesFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "ReplaceConstantReferencesTest",
+    size = "small",
+    srcs = [
+        "ReplaceConstantReferencesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ReplaceConstantReferencesTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "ReplaceMixinsTest",
+    size = "small",
+    srcs = [
+        "ReplaceMixinsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ReplaceMixinsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "ResolveCustomFunctionNodesForChunksTest",
+    size = "small",
+    srcs = [
+        "ResolveCustomFunctionNodesForChunksTest.java",
+        "ResolveCustomFunctionNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ResolveCustomFunctionNodesForChunksTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/gssfunctions",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "ResolveCustomFunctionNodesTest",
+    size = "small",
+    srcs = [
+        "ResolveCustomFunctionNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ResolveCustomFunctionNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/gssfunctions",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "ResolveCustomFunctionNodesWithDefsTest",
+    size = "small",
+    srcs = [
+        "ResolveCustomFunctionNodesWithDefsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ResolveCustomFunctionNodesWithDefsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "SplitRulesetNodesFunctionalTest",
+    size = "small",
+    srcs = [
+        "SplitRulesetNodesFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.SplitRulesetNodesFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "SplitRulesetNodesTest",
+    size = "small",
+    srcs = [
+        "SplitRulesetNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.SplitRulesetNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "StrictCss2Test",
+    size = "small",
+    srcs = [
+        "StrictCss2Test.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.StrictCss2Test",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "StrictCss3Test",
+    size = "small",
+    srcs = [
+        "StrictCss3Test.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.StrictCss3Test",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "TemplateCompactPrinterTest",
+    size = "small",
+    srcs = [
+        "AbstractCompactPrinterTest.java",
+        "TemplateCompactPrinterTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.TemplateCompactPrinterTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "UniformVisitorAdaptersTest",
+    size = "small",
+    srcs = [
+        "UniformVisitorAdaptersTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.UniformVisitorAdaptersTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "UnrollLoopsTest",
+    size = "small",
+    srcs = [
+        "UnrollLoopsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.UnrollLoopsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "UnsafeMergeRulesetNodesFunctionalTest",
+    size = "small",
+    srcs = [
+        "UnsafeMergeRulesetNodesFunctionalTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.UnsafeMergeRulesetNodesFunctionalTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast:base",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "UnsafeMergeRulesetNodesTest",
+    size = "small",
+    srcs = [
+        "UnsafeMergeRulesetNodesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.UnsafeMergeRulesetNodesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "ValidatePropertyValuesTest",
+    size = "small",
+    srcs = [
+        "ValidatePropertyValuesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.ValidatePropertyValuesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "VerifyRecognizedPropertiesTest",
+    size = "small",
+    srcs = [
+        "VerifyRecognizedPropertiesTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.VerifyRecognizedPropertiesTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "WarnOnCustomPropertyTest",
+    size = "small",
+    srcs = [
+        "WarnOnCustomPropertyTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.passes.WarnOnCustomPropertyTest",
+    deps = [
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)

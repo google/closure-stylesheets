@@ -1,0 +1,317 @@
+## Copyright 2018 The Closure Stylesheets Authors.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+
+licenses(["notice"])  # Apache 2.0
+
+java_library(
+    name = "base",
+    testonly = 1,
+    srcs = [
+        "BackDoorNodeMutation.java",
+        "FunctionalTestBase.java",
+    ],
+    visibility = [
+        "//tests/com/google/common/css/compiler/passes:__pkg__",
+    ],
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+    ],
+)
+
+java_test(
+    name = "AstUtilityTestCaseTest",
+    size = "small",
+    srcs = [
+        "AstUtilityTestCaseTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.AstUtilityTestCaseTest",
+    deps = [
+        ":base",
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//tests/com/google/common/css/compiler/ast/testing",
+    ],
+)
+
+java_test(
+    name = "CssAbstractBlockNodeTest",
+    size = "small",
+    srcs = [
+        "CssAbstractBlockNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssAbstractBlockNodeTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_guava//jar",
+    ],
+)
+
+java_test(
+    name = "CssCompositeValueNodeTest",
+    size = "small",
+    srcs = [
+        "CssCompositeValueNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssCompositeValueNodeTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssCustomFunctionNodeTest",
+    size = "small",
+    srcs = [
+        "CssCustomFunctionNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssCustomFunctionNodeTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssDeclarationNodeTest",
+    size = "small",
+    srcs = [
+        "CssDeclarationNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssDeclarationNodeTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssDefinitionNodeTest",
+    size = "small",
+    srcs = [
+        "CssDefinitionNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssDefinitionNodeTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssFunctionNodeTest",
+    size = "small",
+    srcs = [
+        "CssFunctionNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssFunctionNodeTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssNodeTest",
+    size = "small",
+    srcs = [
+        "CssNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssNodeTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssPropertyNodeTest",
+    size = "small",
+    srcs = [
+        "CssPropertyNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssPropertyNodeTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssPseudoClassNodeTest",
+    size = "small",
+    srcs = [
+        "CssPseudoClassNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssPseudoClassNodeTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssSelectorNodeTest",
+    size = "small",
+    srcs = [
+        "CssSelectorNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssSelectorNodeTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssStringNodeTest",
+    size = "small",
+    srcs = [
+        "CssStringNodeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssStringNodeTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "CssTreeTest",
+    size = "small",
+    srcs = [
+        "CssTreeTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.CssTreeTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "DefaultVisitControllerTest",
+    size = "small",
+    srcs = [
+        "DefaultVisitControllerTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.DefaultVisitControllerTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+        "@org_mockito_all//jar",
+    ],
+)
+
+java_test(
+    name = "GssCommentsTest",
+    size = "small",
+    srcs = [
+        "GssCommentsTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.GssCommentsTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "GssParserErrorTest",
+    size = "small",
+    srcs = [
+        "GssParserErrorTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.GssParserErrorTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "GssParserTest",
+    size = "small",
+    srcs = [
+        "GssParserTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.GssParserTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//src/com/google/common/css/compiler/passes",
+        "//tests/com/google/common/css/compiler/passes/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "PropertyTest",
+    size = "small",
+    srcs = [
+        "PropertyTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.PropertyTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "SourceCodeLocationTest",
+    size = "small",
+    srcs = [
+        "SourceCodeLocationTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.SourceCodeLocationTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//src/com/google/common/css/compiler/ast",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "StringCharStreamTest",
+    size = "small",
+    srcs = [
+        "StringCharStreamTest.java",
+    ],
+    test_class = "com.google.common.css.compiler.ast.StringCharStreamTest",
+    deps = [
+        "//src/com/google/common/css/compiler/ast",
+        "@com_google_truth//jar",
+    ],
+)

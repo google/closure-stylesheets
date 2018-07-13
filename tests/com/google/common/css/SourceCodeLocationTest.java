@@ -65,6 +65,7 @@ public class SourceCodeLocationTest {
   }
 
   @Test
+  @SuppressWarnings("SelfComparison")
   public void testComparisonOfEqualLocations1() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 =
@@ -83,6 +84,7 @@ public class SourceCodeLocationTest {
   }
 
   @Test
+  @SuppressWarnings("SelfComparison")
   public void testComparisonOfEqualLocations2() {
     SourceCode sourceCode = new SourceCode("testfile", "abcdef");
     SourceCodeLocation loc1 =

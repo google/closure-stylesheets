@@ -1,0 +1,129 @@
+## Copyright 2018 The Closure Stylesheets Authors.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+
+licenses(["notice"])  # Apache 2.0
+
+load("//tools:javacc.bzl", "javacc")
+
+javacc(
+    name = "GssParserCC",
+    src = "GssParserCC.jj",
+    outs = [
+        "CharStream.java",
+        "GssParserCC.java",
+        "GssParserCCConstants.java",
+        "GssParserCCTokenManager.java",
+        "ParseException.java",
+        "Token.java",
+        "TokenMgrError.java",
+    ],
+)
+
+java_library(
+    name = "ast",
+    srcs = [
+        "AbstractGssParser.java",
+        "AccessibleErrorManager.java",
+        "AtRuleHandler.java",
+        "BasicErrorManager.java",
+        "ChunkAware.java",
+        "CssAbstractBlockNode.java",
+        "CssAtRuleNode.java",
+        "CssAttributeSelectorNode.java",
+        "CssBlockNode.java",
+        "CssBooleanExpressionNode.java",
+        "CssClassSelectorNode.java",
+        "CssCombinatorNode.java",
+        "CssCommentNode.java",
+        "CssCompilerPass.java",
+        "CssComponentNode.java",
+        "CssCompositeValueNode.java",
+        "CssConditionalBlockNode.java",
+        "CssConditionalRuleNode.java",
+        "CssConstantReferenceNode.java",
+        "CssCustomFunctionNode.java",
+        "CssDeclarationBlockNode.java",
+        "CssDeclarationNode.java",
+        "CssDefinitionNode.java",
+        "CssFontFaceNode.java",
+        "CssForLoopRuleNode.java",
+        "CssFunctionArgumentsNode.java",
+        "CssFunctionNode.java",
+        "CssHexColorNode.java",
+        "CssIdSelectorNode.java",
+        "CssImportBlockNode.java",
+        "CssImportRuleNode.java",
+        "CssKeyListNode.java",
+        "CssKeyNode.java",
+        "CssKeyframeRulesetNode.java",
+        "CssKeyframesNode.java",
+        "CssLiteralNode.java",
+        "CssLoopVariableNode.java",
+        "CssMathNode.java",
+        "CssMediaRuleNode.java",
+        "CssMixinDefinitionNode.java",
+        "CssMixinNode.java",
+        "CssNode.java",
+        "CssNodesListNode.java",
+        "CssNumericNode.java",
+        "CssPageRuleNode.java",
+        "CssPageSelectorNode.java",
+        "CssParserEventHandler.java",
+        "CssPriorityNode.java",
+        "CssPropertyNode.java",
+        "CssPropertyValueNode.java",
+        "CssProvideNode.java",
+        "CssPseudoClassNode.java",
+        "CssPseudoElementNode.java",
+        "CssRefinerListNode.java",
+        "CssRefinerNode.java",
+        "CssRequireNode.java",
+        "CssRootNode.java",
+        "CssRulesetNode.java",
+        "CssSelectorListNode.java",
+        "CssSelectorNode.java",
+        "CssSpecification.java",
+        "CssStringNode.java",
+        "CssTree.java",
+        "CssTreeBuilder.java",
+        "CssTreeVisitor.java",
+        "CssUnicodeRangeNode.java",
+        "CssUnknownAtRuleNode.java",
+        "CssValueNode.java",
+        "DefaultTreeVisitor.java",
+        "DefaultVisitController.java",
+        "ErrorManager.java",
+        "GssError.java",
+        "GssFunction.java",
+        "GssFunctionException.java",
+        "GssParser.java",
+        "GssParserException.java",
+        "MutatingVisitController.java",
+        "ParserToken.java",
+        "PrintStreamErrorManager.java",
+        "Property.java",
+        "Proxiable.java",
+        "RelocateDefaultComments.java",
+        "SkippingTreeVisitor.java",
+        "StringCharStream.java",
+        "VisitController.java",
+        ":GssParserCC",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//src/com/google/common/css",
+        "@com_google_code_findbugs_jsr305//jar",
+        "@com_google_guava//jar",
+    ],
+)

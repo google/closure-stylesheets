@@ -16,6 +16,7 @@
 
 package com.google.common.css.compiler.ast.testing;
 
+import static com.google.common.truth.Truth.assert_;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -31,7 +32,6 @@ import com.google.common.css.compiler.ast.GssParserException;
 import com.google.common.css.compiler.passes.PrettyPrinter;
 import java.util.List;
 import java.util.Map;
-import org.junit.Assert;
 
 /**
  * Base class for testing the passes which use an {@link ErrorManager}.
@@ -57,7 +57,7 @@ public class NewFunctionalTestBase extends FunctionalTestCommonBase {
     try {
       parseAndRun(fileNameToGss);
     } catch (GssParserException e) {
-      Assert.fail(e.getMessage());
+      assert_().fail(e.getMessage());
     }
   }
 

@@ -1,0 +1,111 @@
+## Copyright 2018 The Closure Stylesheets Authors.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
+
+licenses(["notice"])  # Apache 2.0
+
+java_test(
+    name = "IdentitySubstitutionMapTest",
+    size = "small",
+    srcs = [
+        "IdentitySubstitutionMapTest.java",
+    ],
+    test_class = "com.google.common.css.IdentitySubstitutionMapTest",
+    deps = [
+        "//src/com/google/common/css",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "JobDescriptionBuilderTest",
+    size = "small",
+    srcs = [
+        "JobDescriptionBuilderTest.java",
+    ],
+    test_class = "com.google.common.css.JobDescriptionBuilderTest",
+    deps = [
+        "//src/com/google/common/css",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "MinimalSubstitutionMapTest",
+    size = "small",
+    srcs = [
+        "MinimalSubstitutionMapTest.java",
+    ],
+    test_class = "com.google.common.css.MinimalSubstitutionMapTest",
+    deps = [
+        "//src/com/google/common/css",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "PrefixingSubstitutionMapTest",
+    size = "small",
+    srcs = [
+        "PrefixingSubstitutionMapTest.java",
+    ],
+    test_class = "com.google.common.css.PrefixingSubstitutionMapTest",
+    deps = [
+        "//src/com/google/common/css",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "RecordingSubstitutionMapTest",
+    size = "small",
+    srcs = [
+        "RecordingSubstitutionMapTest.java",
+    ],
+    test_class = "com.google.common.css.RecordingSubstitutionMapTest",
+    deps = [
+        "//src/com/google/common/css",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "SourceCodeLocationTest",
+    size = "small",
+    srcs = [
+        "SourceCodeLocationTest.java",
+    ],
+    test_class = "com.google.common.css.SourceCodeLocationTest",
+    deps = [
+        "//src/com/google/common/css",
+        "//tests/com/google/common/css/compiler/ast/testing",
+        "@com_google_guava//jar",
+        "@com_google_truth//jar",
+    ],
+)
+
+java_test(
+    name = "SplittingSubstitutionMapTest",
+    size = "small",
+    srcs = [
+        "SplittingSubstitutionMapTest.java",
+    ],
+    test_class = "com.google.common.css.SplittingSubstitutionMapTest",
+    deps = [
+        "//src/com/google/common/css",
+        "@com_google_truth//jar",
+    ],
+)
