@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  * Provides inputs and options to Closure Stylesheets.
  * To construct an instance, use a {@link JobDescriptionBuilder}.
@@ -69,6 +68,7 @@ public class JobDescription {
   public final Map<String, Integer> compileConstants;
   public final boolean createSourceMap;
   public final SourceMapDetailLevel sourceMapLevel;
+  public final boolean sourceMapIncludeContent;
   public final boolean preserveImportantComments;
 
   static final String CONDITION_FOR_LTR = "GSS_LTR";
@@ -142,6 +142,7 @@ public class JobDescription {
       boolean suppressDependencyCheck, Map<String, Integer> compileConstants,
       boolean createSourceMap,
       SourceMapDetailLevel sourceMapLevel,
+      boolean sourceMapIncludeContent,
       boolean preserveImportantComments) {
     this.allowUndefinedConstants = allowUndefinedConstants;
     Preconditions.checkArgument(!inputs.contains(null));
@@ -190,6 +191,7 @@ public class JobDescription {
     this.compileConstants = ImmutableMap.copyOf(compileConstants);
     this.createSourceMap = createSourceMap;
     this.sourceMapLevel = sourceMapLevel;
+    this.sourceMapIncludeContent = sourceMapIncludeContent;
     this.preserveImportantComments = preserveImportantComments;
   }
 

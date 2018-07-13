@@ -81,7 +81,7 @@ public class DefaultCommandLineCompiler extends AbstractCommandLineCompiler<JobD
     if (!job.createSourceMap) {
       return new NullGssSourceMapGenerator();
     }
-    return new DefaultGssSourceMapGenerator(job.sourceMapLevel);
+    return new DefaultGssSourceMapGenerator(job.sourceMapLevel, job.sourceMapIncludeContent);
   }
 
   /**

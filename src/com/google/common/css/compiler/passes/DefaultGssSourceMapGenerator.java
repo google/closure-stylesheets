@@ -89,6 +89,8 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
 
   private SourceMapDetailLevel sourceMapDetailLevel;
 
+  private boolean sourceMapIncludeContent;
+
   /** Predicate to determine whether to include current node under visit into {@code mappings}. **/
   private Predicate<CssNode> detailLevelPredicate;
 
@@ -96,13 +98,16 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
    * Constructor to get source map class to use.
    *
    * @param sourceMapDetailLevel used to control the output details of source map
+   * @param sourceMapIncludeContent used to include content in source map
    */
-  public DefaultGssSourceMapGenerator(SourceMapDetailLevel sourceMapDetailLevel) {
+  public DefaultGssSourceMapGenerator(SourceMapDetailLevel sourceMapDetailLevel,
+      boolean sourceMapIncludeContent) {
     Preconditions.checkState(sourceMapDetailLevel != null);
     this.mappings = new ArrayDeque<>();
     this.generator = SourceMapGeneratorFactory.getInstance(SourceMapFormat.V3);
     this.allMappings = new ArrayList<>();
     this.sourceMapDetailLevel = sourceMapDetailLevel;
+    this.sourceMapIncludeContent = sourceMapIncludeContent;
     this.detailLevelPredicate = DETAIL_LEVEL_PREDICATES.get(this.sourceMapDetailLevel);
   }
 
@@ -202,12 +207,18 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
           completeMapping.sourceFile, null,
           completeMapping.inputStart,
           completeMapping.outputStart, completeMapping.outputEnd);
+
+      if (sourceMapIncludeContent) {
+        generator.addSourcesContent(
+            completeMapping.sourceFile, completeMapping.sourceContents);
+      }
     }
   }
 
 
   private static final class CompleteMapping implements Comparable<CompleteMapping> {
     final String sourceFile;
+    final String sourceContents;
     final FilePosition inputStart;
     final FilePosition outputStart;
     final FilePosition outputEnd;
@@ -215,6 +226,7 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
     CompleteMapping(Mapping mapping) {
       CssNode node = mapping.node;
       this.sourceFile = getSourceFileName(node);
+      this.sourceContents = getSourceFileContents(node);
       this.inputStart = new FilePosition(
           getStartLineno(node), getStartCharIndex(node));
       this.outputStart = mapping.start;
@@ -235,6 +247,13 @@ public final class DefaultGssSourceMapGenerator implements GssSourceMapGenerator
      */
     private static String getSourceFileName(CssNode node) {
       return node.getSourceCodeLocation().getSourceCode().getFileName();
+    }
+
+    /**
+     * Gets the source file contents for current node.
+     */
+    private static String getSourceFileContents(CssNode node) {
+      return node.getSourceCodeLocation().getSourceCode().getFileContents();
     }
 
     /**

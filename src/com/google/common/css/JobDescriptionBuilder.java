@@ -75,6 +75,7 @@ public class JobDescriptionBuilder {
   JobDescription job = null;
   boolean createSourceMap;
   SourceMapDetailLevel sourceMapLevel;
+  boolean sourceMapIncludeContent;
 
   public JobDescriptionBuilder() {
     this.inputs = Lists.newArrayList();
@@ -111,6 +112,7 @@ public class JobDescriptionBuilder {
     this.compileConstants = new HashMap<>();
     this.createSourceMap = false;
     this.sourceMapLevel = SourceMapDetailLevel.DEFAULT;
+    this.sourceMapIncludeContent = false;
     this.preserveImportantComments = false;
   }
 
@@ -151,6 +153,7 @@ public class JobDescriptionBuilder {
     setCompileConstants(jobToCopy.compileConstants);
     this.createSourceMap = jobToCopy.createSourceMap;
     this.sourceMapLevel = jobToCopy.sourceMapLevel;
+    this.sourceMapIncludeContent = jobToCopy.sourceMapIncludeContent;
     this.preserveImportantComments = jobToCopy.preserveImportantComments;
     return this;
   }
@@ -495,7 +498,8 @@ public class JobDescriptionBuilder {
         gssFunctionMapProvider, cssSubstitutionMapProvider,
         outputRenamingMapFormat, inputRenamingMap, preserveComments,
         suppressDependencyCheck, compileConstants,
-        createSourceMap, sourceMapLevel, preserveImportantComments);
+        createSourceMap, sourceMapLevel, sourceMapIncludeContent,
+        preserveImportantComments);
     return job;
   }
 
@@ -509,4 +513,8 @@ public class JobDescriptionBuilder {
     return this;
   }
 
+  public JobDescriptionBuilder setSourceMapIncludeContent(boolean sourceMapIncludeContent) {
+    this.sourceMapIncludeContent = sourceMapIncludeContent;
+    return this;
+  }
 }
