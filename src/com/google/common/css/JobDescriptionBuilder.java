@@ -52,6 +52,7 @@ public class JobDescriptionBuilder {
   boolean eliminateDeadStyles;
   boolean allowDefPropagation;
   boolean allowUnrecognizedFunctions;
+  boolean allowDuplicateDeclarations;
   Set<String> allowedNonStandardFunctions;
   boolean allowUnrecognizedProperties;
   Set<String> allowedUnrecognizedProperties;
@@ -91,6 +92,7 @@ public class JobDescriptionBuilder {
     this.eliminateDeadStyles = false;
     this.allowDefPropagation = false;
     this.allowUnrecognizedFunctions = false;
+    this.allowDuplicateDeclarations = false;
     this.allowedNonStandardFunctions = Sets.newHashSet();
     this.allowUnrecognizedProperties = false;
     this.allowedUnrecognizedProperties = Sets.newHashSet();
@@ -129,6 +131,7 @@ public class JobDescriptionBuilder {
     this.eliminateDeadStyles = jobToCopy.eliminateDeadStyles;
     this.allowDefPropagation = jobToCopy.allowDefPropagation;
     this.allowUnrecognizedFunctions = jobToCopy.allowUnrecognizedFunctions;
+    this.allowDuplicateDeclarations = jobToCopy.allowDuplicateDeclarations;
     this.allowedNonStandardFunctions =
         ImmutableSet.copyOf(jobToCopy.allowedNonStandardFunctions);
     this.allowUnrecognizedProperties = jobToCopy.allowUnrecognizedProperties;
@@ -341,6 +344,16 @@ public class JobDescriptionBuilder {
     return this;
   }
 
+  public JobDescriptionBuilder setAllowDuplicateDeclarations(boolean allow) {
+      checkJobIsNotAlreadyCreated();
+      this.allowDuplicateDeclarations = allow;
+      return this;
+  }
+
+  public JobDescriptionBuilder allowDuplicateDeclarations() {
+    return setAllowDuplicateDeclarations(true);
+  }
+
   public JobDescriptionBuilder setAllowUnrecognizedProperties(boolean allow) {
     checkJobIsNotAlreadyCreated();
     this.allowUnrecognizedProperties = allow;
@@ -487,8 +500,9 @@ public class JobDescriptionBuilder {
         copyrightNotice, outputFormat, inputOrientation, outputOrientation,
         optimize, trueConditionNames, useInternalBidiFlipper, swapLtrRtlInUrl,
         swapLeftRightInUrl, simplifyCss, eliminateDeadStyles,
-        allowDefPropagation, allowUnrecognizedFunctions, allowedNonStandardFunctions,
-        allowUnrecognizedProperties, allowedUnrecognizedProperties, allowUndefinedConstants,
+        allowDefPropagation, allowUnrecognizedFunctions, allowDuplicateDeclarations,
+        allowedNonStandardFunctions, allowUnrecognizedProperties,
+        allowedUnrecognizedProperties, allowUndefinedConstants,
         allowMozDocument, vendor,
         allowKeyframes, allowWebkitKeyframes, processDependencies,
         allowedAtRules, cssRenamingPrefix, excludedClassesFromRenaming,
