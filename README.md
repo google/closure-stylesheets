@@ -359,7 +359,7 @@ style declarations. For example, if you ran Closure Stylesheets on
 Then you would get the following output:
 
 ```
-Unknown function \"urel\" in linting-example.gss at line 4 column 21:
+Unknown function "urel" in linting-example.gss at line 4 column 21:
   background-image: urel('http://www.google.com/images/logo_sm.gif');
                     ^
 
@@ -448,7 +448,7 @@ You can whitelist `-webkit-amp-volume` with the
 **`--allowed-unrecognized-property`** flag as follows:
 
 ```
-java -jar closure-stylesheets.jar \\
+java -jar closure-stylesheets.jar \
     --allowed-unrecognized-property -webkit-amp-volume bleeding-edge.gss
 ```
 
@@ -544,9 +544,9 @@ the
  * @param title
  */
 {template .dialog}
-<div class=\"{css('dialog-content')}\">
-  <div class=\"{css('dialog-title')}\">{$title}</title>
-  {call .content data=\"all\" /}
+<div class="{css('dialog-content')}">
+  <div class="{css('dialog-title')}">{$title}</title>
+  {call .content data="all" /}
 </div>
 {/template}
 ```
@@ -558,11 +558,11 @@ the above were named **`dialog.soy`**, then the following command would be used
 to create **`dialog.soy.js`**:
 
 ```
-java -jar SoyToJsSrcCompiler.jar \\
-    --shouldProvideRequireSoyNamespaces \\
-    --codeStyle concat \\
-    --cssHandlingScheme GOOG \\
-    --outputPathFormat '{INPUT_FILE_NAME_NO_EXT}.soy.js' \\
+java -jar SoyToJsSrcCompiler.jar \
+    --shouldProvideRequireSoyNamespaces \
+    --codeStyle concat \
+    --cssHandlingScheme GOOG \
+    --outputPathFormat '{INPUT_FILE_NAME_NO_EXT}.soy.js' \
     dialog.soy
 ```
 
@@ -579,8 +579,8 @@ goog.require('example');
 
 
 example.dialog = function(opt_data) {
-  return '<div class=\"' + goog.getCssName('dialog-content') + '\"><div class=\"' +
-      goog.getCssName('dialog-title') + '\">' + soy.$$escapeHtml(opt_data.title) +
+  return '<div class="' + goog.getCssName('dialog-content') + '"><div class="' +
+      goog.getCssName('dialog-title') + '">' + soy.$$escapeHtml(opt_data.title) +
       '</title>' + example.content(opt_data) + '</div>';
 };
 ```
@@ -613,12 +613,12 @@ Then you would run the following command to generate a stylesheet
 JavaScript file (**`renaming_map.js`**):
 
 ```
-java -jar closure-stylesheets.jar \\
-    --pretty-print \\
-    --output-file dialog.css \\
-    --output-renaming-map-format CLOSURE_UNCOMPILED \\
-    --rename CLOSURE \\
-    --output-renaming-map renaming_map.js \\
+java -jar closure-stylesheets.jar \
+    --pretty-print \
+    --output-file dialog.css \
+    --output-renaming-map-format CLOSURE_UNCOMPILED \
+    --rename CLOSURE \
+    --output-renaming-map renaming_map.js \
     dialog.gss
 ```
 
@@ -637,9 +637,9 @@ while the generated **`renaming_map.js`** would be:
 
 ```javascript
 CLOSURE_CSS_NAME_MAPPING = {
-  \"dialog\": \"a\",
-  \"content\": \"b\",
-  \"title\": \"c\"
+  "dialog": "a",
+  "content": "b",
+  "title": "c"
 };
 ```
 
@@ -650,12 +650,12 @@ generated stylesheet with renamed class names as well as the renaming map:
 <!doctype html>
 <html>
 <head>
-  <link rel=\"stylesheet\" href=\"dialog.css\" type=\"text/css\">
+  <link rel="stylesheet" href="dialog.css" type="text/css">
 </head>
 <body>
 
-  <script src=\"renaming_map.js\"></script>
-  <script src=\"path/to/base.js\"></script>
+  <script src="renaming_map.js"></script>
+  <script src="path/to/base.js"></script>
   <script>
     goog.require('example');
   </script>
@@ -684,12 +684,12 @@ appropriate renaming map with Closure Stylesheets, use **`CLOSURE_COMPILED`** as
 the argument to **`--output-renaming-map-format`**:
 
 ```
-java -jar closure-stylesheets.jar \\
-    --pretty-print \\
-    --output-file dialog.css \\
-    --output-renaming-map-format CLOSURE_COMPILED \\
-    --rename CLOSURE \\
-    --output-renaming-map renaming_map.js \\
+java -jar closure-stylesheets.jar \
+    --pretty-print \
+    --output-file dialog.css \
+    --output-renaming-map-format CLOSURE_COMPILED \
+    --rename CLOSURE \
+    --output-renaming-map renaming_map.js \
     dialog.gss
 ```
 
@@ -697,9 +697,9 @@ This yields the following content for **`renaming_map.js`**:
 
 ```javascript
 goog.setCssNameMapping({
-  \"dialog\": \"a\",
-  \"content\": \"b\",
-  \"title\": \"c\"
+  "dialog": "a",
+  "content": "b",
+  "title": "c"
 });
 ```
 
@@ -715,7 +715,7 @@ If passed to the Closure Compiler in SIMPLE mode along with
 compilation:
 
 ```javascript
-var element = goog.dom.getElementByClass(\"a-b\");
+var element = goog.dom.getElementByClass("a-b");
 ```
 
 This achieves the goal of reducing both CSS and JS file sizes without changing
