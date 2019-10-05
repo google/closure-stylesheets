@@ -72,6 +72,7 @@ public class GssFunctions {
         .put("divide", new GssFunctions.Div())
         .put("minimum", new GssFunctions.MinValue())
         .put("maximum", new GssFunctions.MaxValue())
+        .put("pow", new Pow())
 
         // Color functions.
         .put("blendColorsHsb", new BlendColorsHsb())
@@ -1693,5 +1694,13 @@ public class GssFunctions {
     checkSize(size, units, null /* errorManager */, null /* location */,
         isUnitOptional);
     return new Size(size, units);
+  }
+
+  public static class Pow extends ScalarLeftAssociativeOperator {
+
+    @Override
+    protected double performOperation(double left, double right) {
+      return Math.pow(left, right);
+    }
   }
 }

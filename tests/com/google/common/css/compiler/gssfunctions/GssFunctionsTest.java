@@ -112,6 +112,38 @@ public class GssFunctionsTest {
         .isEqualTo("103.06748466");
   }
 
+    @Test
+    public void testPowGetCallResultString() throws GssFunctionException {
+        GssFunctions.Pow funct = new GssFunctions.Pow();
+        assertThat(funct.getCallResultString(ImmutableList.of("60px", "2"))).isEqualTo("3600px");
+        assertThat(funct.getCallResultString(ImmutableList.of("60px", "-2"))).isEqualTo("0.00027778px");
+        assertThat(funct.getCallResultString(ImmutableList.of("83px", "6.4")))
+                .isEqualTo("1914695828969.711px");
+        assertThat(funct.getCallResultString(ImmutableList.of("30%", "2"))).isEqualTo("900%");
+    }
+
+    @Test
+    public void testPowGetCallResultString_otherLocale() throws GssFunctionException {
+        Locale.setDefault(Locale.FRANCE);
+        try {
+            GssFunctions.Pow funct = new GssFunctions.Pow();
+          assertThat(funct.getCallResultString(ImmutableList.of("83px", "6.4")))
+                  .isEqualTo("1914695828969.711px");
+        } finally {
+            Locale.setDefault(Locale.US);
+        }
+    }
+
+    @Test
+    public void testPowGetCallResultString_noUnits() throws GssFunctionException {
+      GssFunctions.Pow funct = new GssFunctions.Pow();
+      assertThat(funct.getCallResultString(ImmutableList.of("60", "2"))).isEqualTo("3600");
+      assertThat(funct.getCallResultString(ImmutableList.of("60", "-2"))).isEqualTo("0.00027778");
+      assertThat(funct.getCallResultString(ImmutableList.of("83", "6.4")))
+              .isEqualTo("1914695828969.711");
+      assertThat(funct.getCallResultString(ImmutableList.of("30", "2"))).isEqualTo("900");
+    }
+
   @Test
   public void testMaxGetCallResultString() throws GssFunctionException {
     GssFunctions.MaxValue funct = new GssFunctions.MaxValue();
@@ -151,6 +183,11 @@ public class GssFunctionsTest {
     testFunctionCallFail(div, ImmutableList.of("42", "2px"));
     testFunctionCallFail(div, ImmutableList.of("42px", "2px"));
     testFunctionCallFail(div, ImmutableList.of("42px", "2em"));
+
+    GssFunctions.Pow pow = new GssFunctions.Pow();
+    testFunctionCallFail(pow, ImmutableList.of("42", "2px"));
+    testFunctionCallFail(pow, ImmutableList.of("42px", "2px"));
+    testFunctionCallFail(pow, ImmutableList.of("42px", "2em"));
   }
 
   @Test
