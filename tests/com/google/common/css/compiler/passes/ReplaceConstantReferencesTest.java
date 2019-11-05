@@ -172,7 +172,6 @@ public class ReplaceConstantReferencesTest {
   @Test
   public void testAllowUndefinedConstants() {
     when(mockRefNode.getValue()).thenReturn("Foo");
-    when(mockRefNode.getSourceCodeLocation()).thenReturn(mockLoc);
 
     ReplaceConstantReferences allowingPass =
         new ReplaceConstantReferences(
