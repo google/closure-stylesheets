@@ -60,6 +60,7 @@ public final class Property {
         builder("align-items"),
         builder("align-self"),
         builder("alignment-baseline").isSvgOnly(),
+        builder("all"),
         builder("animation"),
         builder("animation-delay"),
         builder("animation-direction"),
