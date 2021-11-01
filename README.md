@@ -1,3 +1,25 @@
+This project is officially end-of-life. Users are welcome to maintain it in a
+fork, but there will be no more Google-authored changes published. While Closure
+Stylesheets was ahead of its time when it was first released in 2011, it has
+since been outpaced by much more active projects with wider community support.
+Even within Google, we're working on moving all CSS compilation infrastructure
+to a combination of [Sass] and [PostCSS] plugins, including [Autoprefixer],
+[RTLCSS], [cssnano], [postcss-rename], [Stylelint], and a few internal plugins
+that we hope to one day share with the world. [Custom properties] and [`calc()`]
+are excellent standard CSS options that are widely supported in modern browsers.
+
+[Sass]: https://sass-lang.com
+[PostCSS]: https://postcss.org
+[Autoprefixer]: https://autoprefixer.github.io/
+[RTLCSS]: https://rtlcss.com
+[cssnano]: https://cssnano.co/
+[postcss-rename]: https://github.com/google/postcss-rename
+[stylelint]: https://stylelint.io/
+[Custom properties]: https://developer.mozilla.org/en-US/docs/Web/CSS/--*
+[`calc()`]: https://developer.mozilla.org/en-US/docs/Web/CSS/calc()
+
+---
+
 # Closure Stylesheets
 
 Closure Stylesheets is an extension to CSS that adds
