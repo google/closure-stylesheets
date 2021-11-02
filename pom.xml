@@ -180,7 +180,7 @@
     <dependency>  <!-- For com.google.debugging.sourcemap -->
       <groupId>com.google.javascript</groupId>
       <artifactId>closure-compiler-unshaded</artifactId>
-      <version>v20160713</version>
+      <version>v20170218</version>
     </dependency>
 
     <dependency>

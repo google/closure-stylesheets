@@ -145,6 +145,11 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
         + "mappings, and ALL, which outputs mappings for all elements.")
     private SourceMapDetailLevel sourceMapLevel = SourceMapDetailLevel.DEFAULT;
 
+    @Option(name = "--source_map_include_content", usage = "Includes sources "
+        + "content into source map. Greatly increases the size of source maps "
+        + "but offers greater portability (default: false)")
+    private boolean sourceMapIncludeContent = false;
+
     @Option(name = "--copyright-notice",
         usage = "Copyright notice to prepend to the output")
     private String copyrightNotice = null;
@@ -259,6 +264,7 @@ public class ClosureCommandLineCompiler extends DefaultCommandLineCompiler {
           getGssFunctionMapProviderForName(gssFunctionMapProviderClassName);
       builder.setGssFunctionMapProvider(gssFunctionMapProvider);
       builder.setSourceMapLevel(sourceMapLevel);
+      builder.setSourceMapIncludeContent(sourceMapIncludeContent);
       builder.setCreateSourceMap(!Strings.isNullOrEmpty(sourceMapFile));
 
       if (inputRenamingMapFileName != null) {
